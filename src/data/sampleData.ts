@@ -1,10 +1,10 @@
 import type {Buff,Character,Echo,Enemy,PartyTemplate,Weapon} from "../types/game"; import {emptyStats} from "../types/stats";
 const base=emptyStats(); base.hp=12000;base.atk=350;base.def=1200;
-const basic=[1,2,3,4,5].map(n=>({id:`basic_${n}`,name:`일반 공격 ${n}단`,type:"Basic" as const,element:"Aero" as const,scalingStat:"ATK" as const,multipliers:[0.6+n*0.08],skillLevel:10}));
+const basic=[1,2,3,4,5].map(n=>({id:`basic_${n}`,name:`일반 공격 ${n}단`,type:"Basic" as const,element:"Aero" as const,scalingStat:"ATK" as const,hits:[[0.6+n*0.08]],skillLevel:10}));
 export const characters:Character[]=[
-{id:"main-dps",name:"메인 딜러 예시",element:"Aero",weaponType:"Sword",baseStats:base,skills:[{id:"basic",name:"일반 공격",attacks:basic},{id:"skill",name:"공명 스킬",attacks:[{id:"skill_1",name:"공명 스킬",type:"Skill",element:"Aero",scalingStat:"ATK",multipliers:[1.5905],skillLevel:10}]},{id:"intro",name:"변주 스킬",attacks:[{id:"intro_1",name:"변주 스킬",type:"Intro",element:"Aero",scalingStat:"ATK",multipliers:[1],skillLevel:10}]}]},
-{id:"sub-dps",name:"서브 딜러 예시",element:"Glacio",weaponType:"Rectifier",baseStats:{...base,atk:300},skills:[]},
-{id:"support",name:"서포터 예시",element:"Spectro",weaponType:"Rectifier",baseStats:{...base,atk:250},skills:[]}];
+{id:"main-dps",name:"메인 딜러 예시",level:90,element:"Aero",weaponType:"Sword",baseStats:base,skills:[{id:"basic",name:"일반 공격",attacks:basic},{id:"skill",name:"공명 스킬",attacks:[{id:"skill_1",name:"공명 스킬",type:"Skill",element:"Aero",scalingStat:"ATK",hits:[[1.5905]],skillLevel:10}]},{id:"intro",name:"변주 스킬",attacks:[{id:"intro_1",name:"변주 스킬",type:"Intro",element:"Aero",scalingStat:"ATK",hits:[[1]],skillLevel:10}]}]},
+{id:"sub-dps",name:"서브 딜러 예시",level:90,element:"Glacio",weaponType:"Rectifier",baseStats:{...base,atk:300},skills:[]},
+{id:"support",name:"서포터 예시",level:90,element:"Spectro",weaponType:"Rectifier",baseStats:{...base,atk:250},skills:[]}];
 export const weapons:Weapon[]=[{id:"weapon-a",name:"무기 예시 A",baseAtk:500,stats:{critRate:.08}},{id:"weapon-b",name:"무기 예시 B",baseAtk:400,stats:{atkPercent:.12}}];
 export const echoes:Echo[]=[{id:"echo-a",name:"에코 A",cost:4,stats:{atk:80,critRate:.1},effects:[]},{id:"echo-b",name:"에코 B",cost:3,stats:{atk:50,atkPercent:.1},effects:[]},{id:"echo-c",name:"에코 C",cost:3,stats:{critDamage:.2},effects:[]},{id:"echo-d",name:"에코 D",cost:1,stats:{atk:30},effects:[]}];
 export const buffs:Buff[]=[{id:"buff-atk",name:"공격력 증가",source:"서포터",description:"메인 딜러 ATK +20%",stats:{atkPercent:.2}},{id:"buff-all",name:"전체 피해 증가",source:"서브 딜러",description:"모든 피해 +15%",stats:{allDamageBonus:.15}},{id:"buff-skill",name:"공명 스킬 피해 증가",source:"서포터",description:"공명 스킬 피해 +25%",stats:{skillDamageBonus:.25}}];

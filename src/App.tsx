@@ -48,6 +48,7 @@ export default function App() {
         weapon,
         mainEchoes,
         activeBuffs,
+        config.mainDps.resonanceChain ?? 0,
       );
 
       output.push({
@@ -55,7 +56,7 @@ export default function App() {
         attack,
         activeBuffs,
         stats,
-        damage: calculateDamage(attack, stats, activeBuffs, enemy),
+        damage: calculateDamage(attack, mainCharacter, stats, activeBuffs, enemy),
       });
     }
 
@@ -112,6 +113,13 @@ export default function App() {
     }
   }
 
+  function setMainResonanceChain(chain: number) {
+    setConfig((current) => ({
+      ...current,
+      mainDps: { ...current.mainDps, resonanceChain: chain },
+    }));
+  }
+
   function loadTemplate(id: string) {
     const template = templates.find((t) => t.id === id);
     if (!template) return;
@@ -144,20 +152,46 @@ export default function App() {
 
       <section className="party">
         {[
-          ["메인 딜러", config.mainDps.characterId],
-          ["서브 딜러", config.subDps.characterId],
-          ["서포터", config.support.characterId],
-        ].map(([role, id]) => {
+          ["메인 딜러", config.mainDps.characterId, true],
+          ["서브 딜러", config.subDps.characterId, false],
+          ["서포터", config.support.characterId, false],
+        ].map(([role, id, isMain]) => {
           const character = characters.find((c) => c.id === id);
           if (!character) return null;
 
           return (
-            <article key={role}>
+            <article key={role as string}>
               <small>{role}</small>
+              {character.iconUrl && (
+                <img
+                  src={character.iconUrl}
+                  alt={character.name}
+                  width={56}
+                  height={56}
+                  style={{ borderRadius: "50%" }}
+                />
+              )}
               <strong>{character.name}</strong>
               <span>
                 {character.element} · {character.weaponType}
               </span>
+              {isMain && (
+                <label>
+                  <small>공명체인</small>
+                  <select
+                    value={config.mainDps.resonanceChain ?? 0}
+                    onChange={(e) =>
+                      setMainResonanceChain(Number(e.target.value))
+                    }
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                      <option key={n} value={n}>
+                        {n === 0 ? "미보유" : `${n}체인`}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
             </article>
           );
         })}
@@ -237,12 +271,17 @@ export default function App() {
 
             <div className="stats">
               <div>
-                <small>스킬 계수</small>
+                <small>스킬 계수 (합산 · {selected.attack.hits.length}히트)</small>
                 <b>
                   {(
-                    (selected.attack.multipliers[
-                      selected.attack.skillLevel - 1
-                    ] ?? 0) * 100
+                    selected.attack.hits.reduce(
+                      (sum, levels) =>
+                        sum +
+                        (levels[selected.attack.skillLevel - 1] ??
+                          levels.at(-1) ??
+                          0),
+                      0,
+                    ) * 100
                   ).toFixed(2)}
                   %
                 </b>
