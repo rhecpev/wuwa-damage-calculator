@@ -1343,9 +1343,17 @@ export function EchoesPage() {
               </div>
               <div style={{ flex: 10, minWidth: 0 }}>
                 <strong style={{ color: "#4a9eff", fontSize: "14px", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.name}</strong>
-                {echo.options?.mainOption && (
+                {echo.options?.mainOption?.type && (
                   <div style={{ fontSize: "12px", color: "#9a9a9a", marginTop: "4px" }}>
                     {echo.options.mainOption.type}: <span style={{ color: "#7fc3ff" }}>{echo.options.mainOption.value}</span>
+                  </div>
+                )}
+                {/* 메인 서브 옵션 — 코스트로 정해지는 고정 옵션(4코스트 공격력 150 · 1코스트 HP 2280).
+                    스탯에 그대로 더해지는 값이라 목록에서도 보여야 어떤 에코인지 가늠할 수 있다. */}
+                {echo.options?.mainSubOption?.type && (
+                  <div style={{ fontSize: "12px", color: "#9a9a9a", marginTop: "2px" }}>
+                    {echo.options.mainSubOption.type}:{" "}
+                    <span style={{ color: "#7fc3ff" }}>{echo.options.mainSubOption.value}</span>
                   </div>
                 )}
               </div>
