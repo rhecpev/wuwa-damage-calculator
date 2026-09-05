@@ -1,0 +1,25 @@
+# 내려받은 것 — package-lock.json만 있으면 언제든 다시 만든다.
+node_modules/
+
+# 빌드 결과물.
+dist/
+*.tsbuildinfo
+
+# 아이콘 서명을 만들 때 쓰는 중간 파일(내려받은 원본 그림·raw 덤프).
+# 결과물인 src/data/iconSignatures.json만 저장소에 남긴다.
+tmp/
+
+# 개인 저장 자료 — 이 컴퓨터에만 두고 저장소에는 올리지 않는다.
+# 기기마다 다르고 백업이 쌓이는 자리라 리포지토리에 넣지 않는다.
+data/userdata.json
+data/backups/
+
+# 도구 설정 중 이 컴퓨터에만 해당하는 것.
+.claude/settings.local.json
+.claude/scheduled_tasks.lock
+
+# 작업하다 남은 부스러기 — 패치 조각, 붙여넣기 덤프, OCR 학습 파일.
+*.patch
+left.txt
+cartethyia_wiki_skills.json
+*.traineddata
