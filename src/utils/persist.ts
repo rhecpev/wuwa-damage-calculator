@@ -38,6 +38,11 @@ export type StorageMode = "file" | "browser" | "none";
 let mode: StorageMode = "none";
 /** 파일에 올릴 것이 남았는지. 화면에 「저장 중」을 띄우는 데 쓴다. */
 let dirty = false;
+/**
+ * hydrate()가 끝났는지. 그 전에 읽으면 저장값이 아니라 기본값이 돌아간다 —
+ * 그렇게 읽힌 값을 그대로 되저장하면 원래 자료를 덮어쓰므로, 개발 중에 바로 알아채게 한다.
+ */
+let hydrated = false;
 
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((fn) => fn());
@@ -54,6 +59,12 @@ export const isFileBacked = (): boolean => mode === "file";
 export const persistPending = (): boolean => dirty;
 
 export function loadPersisted<T>(name: string, fallback: T): T {
+  if (!hydrated && import.meta.env.DEV) {
+    // 모듈이 뜨는 자리에서 읽는 스토어가 새로 생겼다는 뜻이다(main.tsx의 설명 참고).
+    console.warn(
+      `[persist] hydrate() 전에 "${name}"을 읽었습니다 — 저장값 대신 기본값이 돌아갑니다.`,
+    );
+  }
   const raw = memory.get(keyOf(name));
   if (raw === undefined) return fallback;
   try {
@@ -181,6 +192,7 @@ export async function hydrate(): Promise<void> {
     mode = "none";
   }
 
+  hydrated = true;
   window.addEventListener("pagehide", flushToFile);
 }
 
