@@ -34,7 +34,7 @@ export function asBuffPercent(s: Partial<Stats>): Partial<Stats> {
  * 공격력·HP·방어력은 게임과 같은 두 단계로 구한다.
  *
  *   기초   = ⌊캐릭터 기초⌋ + ⌊무기 공격력⌋
- *   스탯창 = ⌊기초 × (1 + Σ패널%)⌋            ← 여기서 한 번 버린다
+ *   스탯창 = ⌊기초 × (1 + Σ캐릭터측 패널%)⌋ + ⌊기초 × Σ에코 옵션%⌋   ← 갈라서 각각 버린다
  *   최종   = ⌊스탯창 + 기초 × Σ버프% + Σ깡수치⌋
  *
  * 퍼센트는 어디서 왔느냐로 두 묶음이 갈린다.
@@ -46,6 +46,18 @@ export function asBuffPercent(s: Partial<Stats>): Partial<Stats> {
  *   기초 ⌊262.5⌋+⌊587.5⌋=849, 패널 30%(트리 12+무기효과 18), 버프 50%(1체인 30+6체인 20)
  *   → ⌊849×1.30⌋=1103, +849×0.50=424.5 → 1527.5 → 1527 (게임 표시와 일치)
  * 두 묶음을 한 Σ로 합치면 ⌊849×1.80⌋=1528이 되어 1이 어긋난다 — 스탯창 단계의 버림이 빠져서다.
+ *
+ * ── 스탯창 단계의 버림은 두 번이다 ───────────────────────────
+ * 위 단근 예는 에코 옵션이 없어서 한 번 버리는 것과 구별되지 않았다. 에코를 낀 경우가 갈랐다.
+ *   치사 Lv.90 · 쿠모키리 Lv.90(정련 1) · 에코 5개
+ *   기초 ⌊437.5⌋+500=937, 캐릭터측 24%(트리 12+무기효과 12), 에코 87.8%,
+ *   버프 30%(1체인), 깡 300(4코스트 에코 2개)
+ *   → ⌊937×1.24⌋=1161, ⌊937×0.878⌋=822 → 스탯창 1983
+ *     +937×0.30=281.1 +300 → 2564.1 → 2564 (게임 표시와 일치)
+ * 한 Σ로 합치면 ⌊937×2.118⌋=1984가 되어 2565로 1이 어긋난다.
+ * 반대로 출처를 전부 따로 버리면(트리·무기를 갈라 놓으면) 위 단근 예가 1526이 되어 어긋난다.
+ * 두 실측을 동시에 맞추는 모양은 「캐릭터측 한 덩어리 + 에코 한 덩어리」뿐이다.
+ * 실측이 더 모이면 이 묶음 단위를 다시 확인할 것.
  *
  * 기초 스탯은 출처별로 정수까지만 들고 간다. 게임도 캐릭터 기초값과 무기 공격력을
  * 각각 버린 뒤 더한다 — 단근 Lv90(262.5) + 천년의 회류 Lv90(587.5)이 262+587=849로 잡혀야
@@ -91,7 +103,14 @@ export function calculateFinalStats(
     contributions.push({ source: `무기 · ${w.name} 공격력`, stats: { atk: Math.floor(w.baseAtk) } });
   // 무기 부옵션과 에코 옵션은 스탯창에 그대로 찍히는 값이라 패널 묶음이다.
   take(w.name ? `무기 · ${w.name} 부옵션` : "무기 부옵션", w.stats);
-  e.forEach((x) => take(`에코 · ${x.name}`, x.stats));
+  // 에코에서 온 패널%는 따로도 세어 둔다 — 스탯창 단계에서 캐릭터 쪽과 갈라 버림한다.
+  const echoPercent = { atk: 0, hp: 0, def: 0 };
+  e.forEach((x) => {
+    take(`에코 · ${x.name}`, x.stats);
+    echoPercent.atk += x.stats.atkPercent ?? 0;
+    echoPercent.hp += x.stats.hpPercent ?? 0;
+    echoPercent.def += x.stats.defPercent ?? 0;
+  });
   b.forEach((x) => take(x.source ? `${x.source} · ${x.name}` : x.name, x.stats));
   // 공명체인은 전투 중에 붙는 값이라 버프 묶음으로 옮겨 담는다.
   (c.chainEffects ?? []).forEach((x) => {
@@ -104,16 +123,29 @@ export function calculateFinalStats(
     if (Object.keys(kept).length) contributions.push({ source: item.source, stats: kept });
   }
 
-  /** 두 단계 계산을 세 스탯에 똑같이 적용한다. */
-  const resolve = (base: number, percent: number, buffPercent: number, plus: number) => {
-    const panel = Math.floor(base * (1 + percent));
+  /**
+   * 두 단계 계산을 세 스탯에 똑같이 적용한다.
+   *
+   * 스탯창 단계의 버림은 **한 번이 아니라 두 번**이다. 캐릭터 쪽 패널%(스킬 트리 · 무기)와
+   * 에코 옵션%를 각각 버린 뒤 더한다. 실측 두 건이 이 모양만 맞춘다 —
+   * 위 주석의 단근 예(에코 없음)와 치사 예(에코 87.8%)를 함께 보면 다른 모양은 전부 어긋난다.
+   */
+  const resolve = (
+    base: number,
+    percent: number,
+    echoPct: number,
+    buffPercent: number,
+    plus: number,
+  ) => {
+    const charPercent = percent - echoPct;
+    const panel = Math.floor(base * (1 + charPercent)) + Math.floor(base * echoPct);
     const buffAmount = base * buffPercent;
     return { percent, buffPercent, panel, buffAmount, plus, raw: panel + buffAmount + plus };
   };
 
-  const atk = resolve(baseAtk, r.atkPercent, r.atkPercentBuff, r.atk);
-  const hp = resolve(baseHp, r.hpPercent, r.hpPercentBuff, r.hp);
-  const def = resolve(baseDef, r.defPercent, r.defPercentBuff, r.def);
+  const atk = resolve(baseAtk, r.atkPercent, echoPercent.atk, r.atkPercentBuff, r.atk);
+  const hp = resolve(baseHp, r.hpPercent, echoPercent.hp, r.hpPercentBuff, r.hp);
+  const def = resolve(baseDef, r.defPercent, echoPercent.def, r.defPercentBuff, r.def);
 
   const sources = {
     atk: { base: Math.floor(c.baseStats.atk), weapon: Math.floor(w.baseAtk), ...atk },
