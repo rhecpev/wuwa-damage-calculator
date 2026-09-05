@@ -1,0 +1,132 @@
+{
+  "nextId": 20,
+  "echoes": [
+    {
+      "pk": 17,
+      "id": "6000106",
+      "name": "공명의 메아리 · 플뢰르 드 리스",
+      "iconUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconMonsterHead/T_IconMonsterHead_34012_1_UI.webp",
+      "fetterGroups": [
+        {
+          "name": "끝없는 하늘",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriWindError.webp"
+        },
+        {
+          "name": "영광이 깃든 바람",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriWindErrorA.webp"
+        }
+      ],
+      "options": {
+        "mainOption": {
+          "type": "크리티컬 피해(%)",
+          "value": "44.0",
+          "isMatched": true
+        },
+        "mainSubOption": {
+          "type": "공격력",
+          "value": "100",
+          "isMatched": true
+        },
+        "mainSelects": [
+          "크리티컬(%)",
+          "공명효율(%)",
+          "크리티컬 피해(%)",
+          "공명해방 피해 보너스(%)",
+          "일반공격 피해 보너스(%)"
+        ],
+        "subSelects": [
+          "9.3",
+          "9.2",
+          "12.6",
+          "8.6",
+          "8.6"
+        ],
+        "selectedFetter": "영광이 깃든 바람"
+      }
+    },
+    {
+      "pk": 18,
+      "id": "390080005",
+      "name": "타종 거북이",
+      "iconUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_992_UI.webp",
+      "fetterGroups": [
+        {
+          "name": "떠오르는 구름",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriCloud.webp"
+        },
+        {
+          "name": "찬란한 광휘",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriCure.webp"
+        }
+      ],
+      "options": {
+        "mainOption": {
+          "type": "치료효과 보너스(%)",
+          "value": "26.4",
+          "isMatched": true
+        },
+        "mainSubOption": {
+          "type": "공격력",
+          "value": "150",
+          "isMatched": true
+        },
+        "mainSelects": [
+          "방어력(%)",
+          "공명스킬 피해 보너스(%)",
+          "크리티컬 피해(%)",
+          "HP(%)",
+          "크리티컬(%)"
+        ],
+        "subSelects": [
+          "10.0",
+          "6.4",
+          "15.0",
+          "7.9",
+          "6.9"
+        ],
+        "selectedFetter": "찬란한 광휘"
+      }
+    },
+    {
+      "pk": 19,
+      "id": "6000038",
+      "name": "어린 원숭이",
+      "iconUrl": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconMonsterGoods/T_IconMonsterGoods_988_UI.webp",
+      "fetterGroups": [
+        {
+          "name": "끊임없는 잔향",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriAttack.webp"
+        },
+        {
+          "name": "상쾌한 바람",
+          "icon": "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconElementAttri/T_IconElementAttriWind.webp"
+        }
+      ],
+      "options": {
+        "mainOption": {
+          "type": "크리티컬 피해(%)",
+          "value": "22.0"
+        },
+        "mainSubOption": {
+          "type": "HP",
+          "value": "2280.0"
+        },
+        "mainSelects": [
+          "공격력",
+          "공격력(%)",
+          "방어력",
+          "HP",
+          "강격 피해 보너스(%)"
+        ],
+        "subSelects": [
+          "30.0",
+          "7.1",
+          "30.0",
+          "320.0",
+          "6.4"
+        ],
+        "selectedFetter": "끊임없는 잔향"
+      }
+    }
+  ]
+}

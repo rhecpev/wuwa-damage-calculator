@@ -1,1 +1,1141 @@
-*{box-sizing:border-box}body{margin:0;background:#0c0e13;color:#e9edf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}.app{width:min(1500px,calc(100% - 40px));margin:auto;padding:40px 0 70px}header{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}header h1{margin:6px 0;font-size:36px}header p,article span{color:#80899a}small{color:#7b8495;font-size:11px;font-weight:800;letter-spacing:1.4px}select,button{font:inherit;color:#e9edf5;background:#151923;border:1px solid #2a3040;border-radius:10px}select{padding:11px 14px}.party{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.party article,.panel{background:#12151d;border:1px solid #252b38;border-radius:15px}.party article{padding:18px;display:flex;flex-direction:column;gap:6px}.party strong{font-size:19px}.panel{padding:20px;margin-top:12px}.panel h2{margin:5px 0 18px;font-size:20px}.palette{display:flex;gap:8px;flex-wrap:wrap}.palette button{padding:9px 12px;cursor:pointer}.row{display:flex;justify-content:space-between;align-items:end}.scroll{overflow-x:auto}.rotation{display:flex;gap:8px;align-items:center;min-height:150px;width:max-content}.item{display:flex;align-items:center;gap:8px;position:relative}.card{width:165px;min-height:105px;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:7px;cursor:pointer}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#737d90}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}.x{position:absolute;right:-4px;top:-8px;width:22px;height:22px;border-radius:50%;padding:0;z-index:2}.item em{font-style:normal;color:#59647a;font-size:20px}.details{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.details .panel{margin-top:12px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stats div{padding:13px;background:#191d27;border:1px solid #282e3b;border-radius:9px}.stats b{display:block;font-size:18px;margin-top:5px}.buffs{display:grid;gap:8px}.buffs label{display:flex;gap:10px;padding:11px;border:1px solid #292f3c;border-radius:9px;background:#171a23;cursor:pointer}.buffs label.on{border-color:#667287}.buffs span{display:flex;flex-direction:column;gap:3px}.buffs small{letter-spacing:0}footer{margin-top:20px;color:#626c7e;font-size:12px}@media(max-width:900px){.app{width:calc(100% - 24px)}header,.row{align-items:stretch;flex-direction:column}.party,.details{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.stats{grid-template-columns:1fr}}
+*{box-sizing:border-box}::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-track{background:#242a39}::-webkit-scrollbar-thumb{background:#4a5266;border-radius:4px}::-webkit-scrollbar-thumb:hover{background:#585f72}body{margin:0;background:#242a39;color:#e9edf5;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}header{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}header h1{margin:6px 0;font-size:36px}header p,article span{color:#9ea7b7}small{color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1.4px}select,button{font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}select{padding:11px 14px}.party{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.panel{background:#282f41;border:1px solid #384155;border-radius:15px}.party article{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px 12px;text-align:center;background:#2d3345;border:1px solid #384155;border-radius:12px}.party article img{width:64px;height:64px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}.party article small{letter-spacing:1px}.party article span{font-size:12px;color:#9ea7b7}.party-empty{margin:auto 0;color:#8791a4}.party strong{font-size:16px;color:#e9edf5}.panel{padding:20px;margin-top:12px}.panel h2{margin:5px 0 18px;font-size:20px}.palette{display:flex;gap:8px;flex-wrap:wrap}.palette button{padding:9px 12px;cursor:pointer}.palette-groups{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;padding-bottom:4px}.palette-group{flex:1 1 0;min-width:180px;background:#2d3345;border:1px solid #384155;border-radius:12px;padding:12px}.palette-group-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:30px}.palette-group-head img,.palette-group-icon-blank{width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:#262d3f;border:1px solid #3c455c;padding:2px}.palette-group-head small{letter-spacing:.6px;color:#c2c9d6;font-size:12px;white-space:nowrap}.palette-group .palette{flex-direction:column;flex-wrap:nowrap;gap:6px}.palette-group .palette button{width:100%;text-align:left}.row{display:flex;justify-content:space-between;align-items:end}/* ── 사이클 ──────────────────────────────────────────────────
+   루틴은 보통 4~5사이클을 도는 단위로 읽힌다. 사이클이 바뀌는 자리에서 줄을 끊고
+   머리를 하나 세워, 카드를 눈으로 훑을 때 경계가 바로 보이게 한다.
+   flex-basis 100%로 줄 전체를 차지해 뒤 카드가 다음 줄로 넘어간다. */
+/* 「+ 사이클」로 열어 두었지만 아직 카드가 없는 자리. */
+.cycle-empty{flex:0 0 100%;padding:14px;margin-bottom:4px;text-align:center;font-size:12px;
+  color:#8b95a8;background:#2a3246;border:1px dashed #4a5266;border-radius:10px}
+.cycle-head{flex:0 0 100%;display:flex;align-items:center;gap:10px;margin:6px 0 2px}
+.cycle-head b{font-size:12px;font-weight:700;letter-spacing:.5px;color:#e8c66a;
+  padding:3px 10px;border-radius:999px;background:#3f382b;border:1px solid #66543a;white-space:nowrap}
+.cycle-head span{font-size:11px;color:#8b95a8;white-space:nowrap}
+/* 머리 오른쪽으로 가는 선 — 사이클 경계를 한 줄로 그어 준다. */
+.cycle-head::after{content:"";flex:1;height:1px;background:#384155}
+/* 첫 사이클 머리는 위 여백을 두지 않는다 — 패널 제목과 붙어 보이게. */
+.rotation>.cycle-head:first-child{margin-top:0}
+/* 카드 위 도구줄에 사이클 이동 화살표를 더한다. */
+.item-tools .cyc{color:#9aa3b3;font-size:11px}
+.item-tools .cyc:hover:not(:disabled){border-color:#e8c66a;color:#e8c66a;background:#30394a}
+.item-tools .cyc:disabled{opacity:.3;cursor:not-allowed}
+/* 제목줄의 단추 둘을 나란히. */
+.rotation-tools{display:flex;gap:8px}
+
+.rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:165px;min-height:105px;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:7px;cursor:pointer}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
+.item-card{position:relative}
+.item-tools{position:absolute;right:-6px;top:-8px;display:flex;gap:4px;z-index:2}
+.item-tools button{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;background:#2a3246}
+.item-tools .copy{color:#8fb4d9}
+.item-tools .copy:hover{border-color:#8fb4d9;background:#30394a}
+.item-tools .x{color:#c2c9d6;font-size:14px}
+.item-tools .x:hover{border-color:#e0576b;color:#e0576b;background:#30394a}/* 카드 사이를 잇는 선 — 끝에 화살촉을 붙여 진행 방향을 보여준다. 글자(→)는 감춘다. */
+.item>em{position:relative;align-self:center;width:26px;height:2px;margin:0 6px;background:linear-gradient(to right,#3c455c,#576478);font-size:0}
+.item>em::after{content:"";position:absolute;right:0;top:50%;width:6px;height:6px;border-top:2px solid #576478;border-right:2px solid #576478;transform:translate(1px,-50%) rotate(45deg)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stats div{padding:13px;background:#2e3648;border:1px solid #3b4457;border-radius:9px}.stats b{display:block;font-size:18px;margin-top:5px}.buffs{display:grid;gap:8px}.buffs label{display:flex;gap:10px;padding:11px;border:1px solid #3c4558;border-radius:9px;background:#2d3345;cursor:pointer}.buffs label.on{border-color:#8794aa}.buffs span{display:flex;flex-direction:column;gap:3px}.buffs small{letter-spacing:0}.buffs label.na{opacity:.45}.buffs label.na.on{border-color:#66543a}.buffs b{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;font-size:14px}.buff-amount{font-style:normal;color:#8fb4d9;font-size:12px;font-weight:600}.buffs small{color:#9aa3b3}.enemy-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}.enemy-field{display:flex;flex-direction:column;gap:9px}.enemy-hint{color:#949dae;font-size:12px}/* 칩이 남는 폭을 나눠 갖는다 — 속성 6개와 콘텐츠 3개가 같은 규칙을 쓴다. */
+.enemy-elements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.enemy-element{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 7px;padding:9px 12px;border:1px solid #3c455c;border-radius:14px;background:#2a3246;color:#a8b0bf;font-size:13px;cursor:pointer;user-select:none;text-align:center;min-width:0}.enemy-element:hover{border-color:#4a5266}.enemy-element input{position:absolute;opacity:0;width:0;height:0}/* 고른 콘텐츠. 배경만 살짝 바뀌던 것을 금색 테두리·글자로 바꿔 한눈에 보이게 한다.
+   테두리 두께를 늘리면 칩이 흔들리므로 안쪽 그림자로 두껍게 보이게 한다. */
+.enemy-element.on{background:#3f382b;border-color:#e8c66a;color:#e8c66a;font-weight:600;
+  box-shadow:inset 0 0 0 1px #e8c66a,0 0 10px rgba(232,198,106,.25)}.enemy-dot{width:10px;height:10px;border-radius:50%;flex:none}.enemy-level{display:flex;align-items:center;gap:12px}.enemy-level input[type=range]{flex:1;min-width:0;accent-color:#8d9ab0;cursor:pointer}.enemy-level-number{width:82px;padding:10px 12px;text-align:center;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.roster{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;margin-top:14px}.roster-card{background:#2e3648;border:1px solid #3b4457;border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}.roster-art{width:100%;border-radius:10px;object-fit:cover;aspect-ratio:1;max-height:120px}.roster-head{display:flex;align-items:center;gap:12px}.roster-head strong{display:block;font-size:17px}.roster-head span{color:#9ea7b7;font-size:12px}.roster-skills,.roster-chains{display:flex;flex-direction:column;gap:6px}.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{padding:5px 10px;border:1px solid #3c455c;border-radius:999px;font-size:12px;color:#a8b0bf}.chip-active{border-color:#8794aa;color:#e9edf5}.weapon-passive{color:#a3adbd!important;line-height:1.5}.weapon-warn{color:#e0a94d!important}.weapon-stars{color:#e8c66a;font-size:12px;letter-spacing:1px}/* 「보유한 무기만」으로 걸러 아무것도 안 남았을 때. 필터를 끄는 길을 같이 준다. */
+.weapon-empty{margin:0 0 12px;padding:12px 14px;background:#2d3345;border:1px solid #384155;border-radius:10px;color:#9ea7b7;font-size:12px;line-height:1.7}
+.weapon-empty-off{margin-left:10px;padding:4px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246}
+.weapon-empty-off:hover{border-color:#8794aa}
+.weapon-search{width:100%;padding:11px 14px;margin-bottom:14px;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.weapon-refine{display:flex;align-items:center;gap:6px;color:#9aa3b3!important;font-size:12px}.weapon-refine button{padding:3px 9px;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246}.weapon-refine button.on{border-color:#e8c66a;color:#e8c66a;background:#443c2b}.buff-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}.buff-form select:disabled{opacity:.45}.buff-form label{display:flex;flex-direction:column;gap:6px;min-width:0}.buff-form input,.buff-form select{width:100%;padding:10px 12px;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.buff-add{padding:10px 20px;cursor:pointer;white-space:nowrap}.buff-add:disabled{opacity:.45;cursor:not-allowed}.buff-table{width:100%;margin-top:16px;border-collapse:collapse;font-size:13px}.buff-table th{text-align:left;padding:8px 10px;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid #384155}.buff-table td{padding:9px 10px;border-bottom:1px solid #31394c;color:#c2c9d6}.buff-table tr.off td{opacity:.4}.buff-stack{width:62px;padding:6px 8px;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:8px}.buff-remove{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer}.chain-controls{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:16px}.chain-picker{display:flex;align-items:center;gap:6px;color:#9aa3b3;font-size:12px;font-weight:800;letter-spacing:1px}.chain-picker button{padding:5px 12px;font-size:13px;border-radius:8px;cursor:pointer;background:#2a3246;letter-spacing:0;font-weight:400}.chain-picker button.on{border-color:#8d9ab0;background:#30394a;color:#fff}.chain-table{width:100%;border-collapse:collapse;font-size:13px}.chain-table th{text-align:left;padding:8px 10px;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid #384155;white-space:nowrap}.chain-table td{padding:9px 10px;border-bottom:1px solid #31394c;color:#c2c9d6;vertical-align:top}.chain-table tr.off td{opacity:.32}.chain-no{text-align:center;color:#8d9ab0;font-weight:700}.chain-value{white-space:nowrap;color:#8fb4d9}.chain-value em{font-style:normal;color:#9aa3b3;margin-left:5px}.chain-cond{color:#9aa3b3;font-size:12px;max-width:260px}.chain-mode{margin-left:7px;padding:2px 7px;border:1px solid #4a5266;border-radius:999px;font-size:11px;color:#a8b0bf}.skill-level-table{width:100%;border-collapse:collapse;font-size:13px}.skill-level-table th{text-align:left;padding:8px 10px;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid #384155;white-space:nowrap}.skill-level-table td{padding:9px 10px;border-bottom:1px solid #31394c;color:#c2c9d6;vertical-align:middle}.skill-level-icon{width:38px}.skill-level-icon img{width:30px;height:30px;object-fit:contain;border-radius:7px;background:#262d3f;border:1px solid #3c455c;display:block}.skill-level-count{color:#9aa3b3;white-space:nowrap}.skill-level-picker{display:inline-flex;gap:4px}.skill-level-picker button{width:28px;padding:4px 0;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246}.skill-level-picker button.on{border-color:#8d9ab0;background:#30394a;color:#fff}.skill-level-rate{white-space:nowrap;color:#8fb4d9}.skill-level-rate em{display:block;font-style:normal;color:#9aa3b3;font-size:11px;margin-top:2px}.skill-level-all{display:inline-flex;align-items:center;gap:5px;color:#9aa3b3;font-size:12px}.skill-level-all button{padding:4px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246}footer{margin-top:20px;color:#8791a4;font-size:12px}@media(max-width:900px){.skill-level-table{display:block;overflow-x:auto;white-space:nowrap}.chain-table{display:block;overflow-x:auto;white-space:nowrap}.buff-form{grid-template-columns:1fr 1fr}.buff-table{display:block;overflow-x:auto}.enemy-grid{grid-template-columns:1fr}.palette-groups{flex-wrap:wrap;overflow-x:visible}.palette-group{flex:1 1 220px}header,.row{align-items:stretch;flex-direction:column}.party,.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.stats{grid-template-columns:1fr}}
+.stat-bonus{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:12px}.stat-bonus div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 12px;background:#2d3345;border:1px solid #384155;border-radius:9px}.stat-bonus span{color:#a8b0bf;font-size:12px}.stat-bonus b{color:#8fb4d9;font-size:13px;white-space:nowrap}.stat-source{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:12px;color:#9aa3b3}.stat-source b{color:#c2c9d6;font-weight:600}.stat-note{margin:10px 0 0;color:#949dae;font-size:12px;line-height:1.6}
+.stat-bonus div.zero{opacity:.45}.stat-bonus div.zero b{color:#9aa3b3}
+
+
+.weapon-level{display:flex;align-items:center;gap:8px;color:#9aa3b3!important;font-size:12px}.weapon-level input[type=range]{flex:1;min-width:0;max-width:220px;accent-color:#8d9ab0;cursor:pointer}.weapon-level b{color:#e9edf5;font-size:12px;min-width:22px;text-align:right}
+
+.card .card-detail{display:block;width:100%;margin-top:8px;padding:5px 0;text-align:center;font-size:11px;color:#8fb4d9;border:1px solid #3c455c;border-radius:7px;background:#2a3246;cursor:pointer;user-select:none}
+.card .card-detail:hover{border-color:#8794aa;background:#30394a;color:#cfe0f2}
+.formula-backdrop{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;background:rgba(22,26,36,.66);overflow-y:auto}
+.formula-modal{width:min(880px,100%);padding:24px;background:#282f41;border:1px solid #414b61;border-radius:15px;cursor:default}
+.formula-head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px}
+.formula-head h3{margin:6px 0 4px;font-size:20px}
+.formula-head span{color:#9ea7b7;font-size:12px}
+.formula-close{width:30px;height:30px;padding:0;flex:none;border-radius:50%;font-size:17px;line-height:1;cursor:pointer}
+.formula-top{margin:0 0 18px;padding:12px 14px;background:#2d3345;border:1px solid #384155;border-radius:10px;color:#c2c9d6;font-size:14px}
+.formula-top sub{font-size:10px;color:#9aa3b3}
+.formula-section{display:block;margin:18px 0 8px}
+.formula-table{width:100%;border-collapse:collapse;font-size:13px;table-layout:fixed}
+.formula-table th{text-align:left;padding:7px 10px;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid #384155;white-space:nowrap}
+.formula-table td{padding:8px 10px;border-bottom:1px solid #31394c;vertical-align:top}
+.formula-label{width:110px;color:#c2c9d6;white-space:nowrap}
+/* 누를 수 있는 줄 — 눌러 펼치면 그 수치를 올린 출처가 아래에 붙는다. */
+.formula-row-click,.formula-row-open{cursor:pointer}
+.formula-row-click:hover td,.formula-row-open td{background:#2d3546}
+.formula-caret{display:inline-block;width:14px;color:#8791a4;font-size:10px}
+.formula-row-open .formula-caret{color:#e8c66a}
+.formula-origin td{padding:0 10px 10px 34px;background:#2a3245;border-bottom:1px solid #31394c}
+.formula-origin em{font-style:normal;color:#8791a4;font-size:12px}
+.formula-origin ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.formula-origin li{display:flex;justify-content:space-between;gap:14px;font-size:12px;padding:4px 8px;background:#2e3648;border:1px solid #364054;border-radius:7px}
+.formula-origin li b{color:#c2c9d6;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.formula-origin li span{color:#8fb4d9;white-space:nowrap}
+.formula-expr{color:#9aa3b3;font-size:12px;line-height:1.6;word-break:break-word}
+.formula-value{width:130px;text-align:right;color:#8fb4d9;font-variant-numeric:tabular-nums;white-space:nowrap}
+.formula-sum td{border-bottom:none;border-top:1px solid #414b61}
+.formula-sum .formula-label,.formula-sum .formula-value{color:#e9edf5;font-weight:600}
+.formula-hits{table-layout:auto}
+.formula-hits td{color:#a8b0bf;font-variant-numeric:tabular-nums;white-space:nowrap}
+.formula-hits td:first-child{color:#9aa3b3}
+.formula-note{margin:10px 0 0;color:#949dae;font-size:12px;line-height:1.6}
+@media(max-width:700px){.formula-modal{padding:16px}.formula-backdrop{padding:16px 10px}
+.formula-table:not(.formula-hits),.formula-table:not(.formula-hits) tbody,.formula-table:not(.formula-hits) tr,.formula-table:not(.formula-hits) td{display:block;width:auto}
+.formula-table:not(.formula-hits) td{border-bottom:none;padding:2px 0}
+.formula-table:not(.formula-hits) tr{padding:8px 0;border-bottom:1px solid #31394c}
+.formula-table:not(.formula-hits) .formula-value{text-align:left}
+.formula-hits{display:block;overflow-x:auto;white-space:nowrap}}
+.char-level{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:16px;padding:12px 14px;background:#2d3345;border:1px solid #384155;border-radius:10px}
+.char-level input[type=range]{flex:1;min-width:120px;max-width:320px;accent-color:#8d9ab0;cursor:pointer}
+.char-level b{color:#e9edf5;font-size:14px;min-width:26px;text-align:right;font-variant-numeric:tabular-nums}
+.char-level-warn{flex-basis:100%;font-style:normal;color:#e0a94d;font-size:12px}
+.enemy-res{flex-basis:100%;font-style:normal;color:#9aa3b3;font-size:11px;font-variant-numeric:tabular-nums}
+.enemy-element.on .enemy-res{color:#c9ab6b}
+.card .card-dmg{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;width:100%;margin-top:2px;padding-bottom:6px;border-bottom:1px solid #364054}
+.card .card-dmg em{font-style:normal;font-size:11px;color:#8b95a8;letter-spacing:.3px}
+.card .card-dmg i{font-style:normal;font-size:12px;text-align:right;color:#a8b0bf;font-variant-numeric:tabular-nums}
+.card .card-dmg i:last-of-type{color:#8fb4d9}
+/* 공격 트리거 — 카드 아래에 「서리 1스택 추가」처럼 붙는 작은 알약.
+   추가는 푸른 쪽, 소모는 붉은 쪽으로 갈라 한눈에 방향이 보이게 한다. */
+.card .card-triggers{display:flex;flex-wrap:wrap;gap:4px;width:100%;margin-top:6px}
+.card .card-triggers em{font-style:normal;font-size:10px;line-height:1.4;padding:2px 7px;border-radius:999px;white-space:nowrap}
+/* 갈래마다 색을 가른다 — 이상 효과(초록) · 부조화 상태(보라) · 자원(파랑).
+   태우는 쪽(consume)은 어느 갈래든 붉은 기를 섞어 방향이 먼저 보이게 한다. */
+.card-triggers .trigger-anomaly-add{color:#8fd9b4;background:#2d4335;border:1px solid #3d5f47}
+.card-triggers .trigger-anomaly-consume{color:#d99a9a;background:#553e3e;border:1px solid #6b4b4b}
+.card-triggers .trigger-status-add{color:#c6a3e0;background:#3c3349;border:1px solid #523969}
+.card-triggers .trigger-status-consume{color:#d99ab4;background:#4a333f;border:1px solid #663b52}
+.card-triggers .trigger-resource-add{color:#8fb4d9;background:#293b55;border:1px solid #394f69}
+.card-triggers .trigger-resource-consume{color:#d9b48f;background:#4f412b;border:1px solid #66543a}
+.roster-card strong{font-size:13px;text-align:center;line-height:1.3;color:#e9edf5}
+.roster-card:hover .roster-art{outline:1px solid #8794aa}
+
+
+/* ── 캐릭터 관리 화면 ─────────────────────────────────────────
+   게임 내 「속성 상세정보」 화면 구성을 따랐다.
+   왼쪽 세로 탭 · 가운데 내용 · 오른쪽 세로 캐릭터 목록.
+   활성 표시는 게임과 같은 금색 계열(#e8c66a)로 통일한다. */
+.char-workspace{display:grid;grid-template-columns:158px minmax(0,1fr) 208px;gap:12px;align-items:start}
+
+.char-tabs{display:flex;flex-direction:column;gap:6px;position:sticky;top:16px;padding:10px;background:#282f41;border:1px solid #384155;border-radius:15px}
+.char-tab{position:relative;display:flex;flex-direction:column;gap:3px;padding:11px 12px 11px 16px;text-align:left;background:none;border:1px solid transparent;border-radius:10px;cursor:pointer}
+.char-tab b{font-size:13px;font-weight:600;color:#a8b0bf;line-height:1.3}
+.char-tab em{font-style:normal;font-size:11px;color:#8791a4}
+.char-tab:hover{background:#2d3345}
+.char-tab:hover b{color:#e9edf5}
+.char-tab.on{background:#30394a;border-color:#574f3a}
+.char-tab.on b{color:#e8c66a}
+.char-tab.on em{color:#978967}
+.char-tab.on::before{content:"";position:absolute;left:5px;top:11px;bottom:11px;width:3px;border-radius:2px;background:#e8c66a}
+
+.char-content{min-width:0}
+.char-content>.panel{margin-top:0}
+.char-empty{padding:60px 20px;text-align:center;color:#8791a4;background:#282f41;border:1px solid #384155;border-radius:15px}
+.char-empty p{margin:0}
+
+.char-list{position:sticky;top:16px;padding:12px 10px;background:#282f41;border:1px solid #384155;border-radius:15px}
+.char-list-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:0 4px 10px;border-bottom:1px solid #364054}
+.char-list-head span{color:#8791a4;font-size:11px}
+.char-list-scroll{display:flex;flex-direction:column;gap:4px;margin-top:8px;max-height:min(72vh,720px);overflow-y:auto;padding-right:2px}
+.char-list-item{display:flex;align-items:center;gap:4px;width:100%;padding:6px;text-align:left;background:none;border:1px solid transparent;border-radius:999px 12px 12px 999px}
+/* 줄 안에 「고르기」와 「보유 표시」 두 버튼이 들어간다 — 왼쪽 넓은 쪽이 고르기다. */
+.char-list-pick{display:flex;align-items:center;gap:10px;flex:1;min-width:0;padding:0;text-align:left;background:none;border:none;cursor:pointer}
+/* 보유 ✓ · 미보유 ✕. 두 기호가 폭이 달라 그냥 두면 줄이 흔들려 보이므로
+   같은 크기의 동그라미 안에 넣어 자리를 고정한다. 색으로도 갈라 한눈에 보이게 한다. */
+.char-list-own{flex:none;width:22px;height:22px;padding:0;display:grid;place-items:center;
+  font-size:11px;font-weight:700;line-height:1;border-radius:50%;cursor:pointer;
+  color:#8a6262;background:#3a2e2e;border:1px solid #553e3e}
+.char-list-own:hover{color:#d99a9a;border-color:#8a5a5a}
+.char-list-own.on{color:#e8c66a;background:#3f382b;border-color:#66543a}
+.char-list-own.on:hover{color:#f0d68a;border-color:#8a7551}
+.char-list-search{width:100%;margin-top:8px;padding:8px 11px;font:inherit;font-size:12px;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:9px}
+.char-list-filter{display:flex;align-items:center;gap:6px;margin-top:7px;padding:0 4px;color:#9aa3b3;font-size:12px;cursor:pointer}
+.char-list-item img,.char-list-blank{width:42px;height:42px;flex:none;border-radius:50%;object-fit:cover;background:#262d3f;border:1px solid #3c455c}
+.char-list-item:hover{background:#2d3345}
+.char-list-name{display:flex;flex-direction:column;gap:2px;min-width:0}
+.char-list-name b{font-size:13px;font-weight:600;color:#c2c9d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.char-list-name em{font-style:normal;font-size:11px;color:#8791a4}
+.char-list-item.on{background:#30394a;border-color:#574f3a}
+.char-list-item.on img,.char-list-item.on .char-list-blank{border-color:#e8c66a;box-shadow:0 0 0 2px rgba(232,198,106,.25)}
+.char-list-item.on .char-list-name b{color:#e8c66a}
+.char-list-empty{margin:12px 4px;color:#8791a4;font-size:12px}
+
+@media(max-width:1100px){
+.char-workspace{grid-template-columns:1fr}
+.char-tabs,.char-list{position:static}
+.char-tabs{flex-direction:row;flex-wrap:wrap}
+.char-tab{flex:1 1 140px}
+.char-list-scroll{flex-direction:row;flex-wrap:wrap;max-height:none}
+.char-list-item{width:auto;flex:0 1 auto}
+}
+/* 기본창 스탯은 게임 화면처럼 한 줄에 하나씩, 라벨 왼쪽 · 값 오른쪽으로.
+   계산 탭의 .stats 격자는 그대로 두고 이 화면에서만 다르게 그린다. */
+.char-content .stats{grid-template-columns:1fr;gap:0}
+.char-content .stats div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 4px;background:none;border:none;border-bottom:1px solid #31394c;border-radius:0}
+.char-content .stats div:last-child{border-bottom:none}
+.char-content .stats small{font-size:12px;font-weight:600;letter-spacing:.4px;color:#a8b0bf}
+.char-content .stats b{margin-top:0;font-size:16px;font-variant-numeric:tabular-nums}
+
+/* ── 스킬 트리 ────────────────────────────────────────────────
+   게임 스킬 트리 배치 그대로. 세로줄 다섯 개가 아래로 정렬되고,
+   각 줄은 위에서부터 스탯 노드(원) 2개 → 스킬(마름모) 순으로 세로선에 매달린다. */
+.tree{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;align-items:end;margin-top:8px;padding:24px 8px 8px;background:radial-gradient(120% 80% at 50% 0%,#2a3449 0%,#282f41 60%);border:1px solid #384155;border-radius:14px;overflow-x:auto}
+.tree-branch{display:flex;flex-direction:column;align-items:center;gap:0;min-width:150px}
+.tree-stack{display:flex;flex-direction:column;align-items:center;gap:0}
+
+/* 노드·스킬을 잇는 세로선. 요소마다 위쪽으로 한 줄씩 그린다. */
+.tree-node,.tree-stack+.tree-skill{position:relative}
+.tree-node:not(:first-child)::before,.tree-stack:not(:empty)+.tree-skill::before{content:"";position:absolute;left:50%;top:-26px;width:1px;height:26px;background:linear-gradient(#4a5266,#576478);transform:translateX(-.5px)}
+
+.tree-node{display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:26px;padding:0;background:none;border:none;cursor:pointer}
+.tree-plate{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#30394a;border:1px solid #444e64}
+.tree-plate img,.tree-plate em{width:30px;height:30px;object-fit:contain;font-style:normal;color:#9aa3b3;display:grid;place-items:center}
+.tree-node-value{font-size:11px;color:#8791a4;white-space:nowrap;font-variant-numeric:tabular-nums}
+.tree-node:hover .tree-plate,.tree-inherent:hover .tree-plate{border-color:#8794aa}
+/* 활성 노드 = 아래 스킬 마름모와 같은 판. 아이콘만 검게 눌러 흰 판 위에 보이게 한다. */
+.tree-node.on .tree-plate,.tree-inherent.on .tree-plate{background:#f0f2f6;border-color:#e9edf5;box-shadow:0 0 14px rgba(200,215,240,.18)}
+.tree-node.on .tree-plate em,.tree-inherent.on .tree-plate em{color:#282f41}
+.tree-node.on .tree-node-value,.tree-inherent.on .tree-inherent-name{color:#e8c66a}
+.tree-node:not(.on),.tree-inherent:not(.on){opacity:.5}
+
+/* 스킬은 마름모. 안쪽 아이콘은 다시 돌려서 똑바로 세운다. */
+.tree-skill{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%}
+.tree-diamond{width:66px;height:66px;display:grid;place-items:center}
+.tree-diamond-inner{width:52px;height:52px;display:grid;place-items:center;transform:rotate(45deg);border-radius:10px;background:#f0f2f6;border:1px solid #e9edf5;box-shadow:0 0 14px rgba(200,215,240,.18)}
+.tree-diamond-inner img,.tree-diamond-inner em{width:30px;height:30px;object-fit:contain;transform:rotate(-45deg);font-style:normal;color:#282f41;display:grid;place-items:center;font-weight:700}
+
+.tree-level{font-size:13px;color:#a8b0bf;font-variant-numeric:tabular-nums}
+.tree-level b{font-size:17px;color:#e9edf5;font-weight:600}
+.tree-label{padding:3px 10px;font-size:12px;color:#c2c9d6;background:#30394a;border:1px solid #3c455c;border-radius:6px;white-space:nowrap}
+.tree-missing{padding:3px 10px;font-size:12px;color:#78829a}
+
+/* 레벨 조절은 Lv 표기와 이름 사이에 항상 펼쳐 둔다. */
+.tree-picker{display:flex;align-items:center;gap:6px;width:100%;max-width:150px}
+.tree-picker input[type=range]{flex:1;min-width:0;accent-color:#e8c66a;cursor:pointer}
+.tree-picker-number{width:44px;padding:4px 2px;text-align:center;font:inherit;font-size:12px;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:7px;font-variant-numeric:tabular-nums}
+
+.tree-footer{display:flex;justify-content:center;gap:40px;margin-top:14px}
+.tree-footer .tree-branch{min-width:0}
+/* 아래 둘은 게임에서도 원형이라 마름모를 원으로 되돌린다. */
+.tree-footer .tree-diamond-inner{transform:none;border-radius:50%;width:46px;height:46px}
+.tree-footer .tree-diamond-inner img,.tree-footer .tree-diamond-inner em{transform:none;width:26px;height:26px}
+.tree-footer .tree-diamond{width:52px;height:52px}
+
+.tree-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.tree-note{margin:12px 0 0;color:#e0a94d;font-size:12px}
+
+@media(max-width:900px){
+.tree{grid-template-columns:repeat(5,minmax(150px,1fr));min-width:790px}
+}
+/* 공명 회로 줄 위의 고유 스킬 — 레벨이 없는 작은 마름모. */
+.tree-inherent{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;margin-bottom:26px}
+.tree-inherent:not(:first-child)::before{content:"";position:absolute;left:50%;top:-26px;width:1px;height:26px;background:linear-gradient(#4a5266,#576478);transform:translateX(-.5px)}
+.tree-inherent{padding:0;background:none;border:none;cursor:pointer}
+.tree-inherent-name{font-size:11px;color:#8791a4;white-space:nowrap;max-width:110px;overflow:hidden;text-overflow:ellipsis}
+/* API 아이콘은 흰 글리프라 밝은 판 위에서는 보이지 않는다.
+   brightness(0)은 투명도를 남긴 채 색만 검게 눌러 게임 화면과 같은 모양이 된다. */
+/* 밝은 판 위의 아이콘만 검게 누른다. 판은 바깥 span이라 이 filter에 물들지 않는다. */
+.tree-diamond-inner img,.tree-node.on .tree-plate img,.tree-inherent.on .tree-plate img{filter:brightness(0)}
+
+/* ── 공명체인 ────────────────────────────────────────────────
+   게임처럼 왼쪽 아래에서 오른쪽 위로 오르는 사슬. 노드 여섯 개가
+   대각선으로 서고 금색 선이 잇는다. 오른쪽에 고른 단계의 설명이 붙는다. */
+/* 사슬이 위, 고른 단계의 설명이 아래. 세로로 쌓는다. */
+.chain-grid{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
+
+.chain-rail{display:flex;align-items:flex-start;justify-content:space-between;padding:26px 14px 20px;background:radial-gradient(120% 90% at 50% 0%,#2e354d 0%,#282f41 70%);border:1px solid #384155;border-radius:14px;overflow-x:auto}
+/* 1단계부터 오른쪽으로 나란히. 폭을 똑같이 나눠 가져서 잇는 선이 일정하게 놓인다. */
+.chain-node{position:relative;flex:1 1 0;min-width:80px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:0;background:none;border:none;cursor:pointer;z-index:2}
+/* 다음 노드로 이어지는 금색 선. 별 세로 가운데(26px)에 걸치고, 마지막 노드에는 그리지 않는다. */
+.chain-node:not(:last-of-type)::after{content:"";position:absolute;left:50%;top:26px;width:100%;height:2px;background:linear-gradient(to right,rgba(232,198,106,.4),rgba(232,198,106,.12));z-index:-1}
+.chain-node.owned:not(:last-of-type)::after{background:linear-gradient(to right,rgba(255,225,150,.9),rgba(232,198,106,.45))}
+
+.chain-star{width:52px;height:52px;display:grid;place-items:center;border-radius:12px;transform:rotate(45deg);background:#2d3345;border:1px solid #444e64}
+.chain-star img,.chain-star em{width:26px;height:26px;object-fit:contain;transform:rotate(-45deg);font-style:normal;color:#9aa3b3;display:grid;place-items:center;font-weight:700}
+.chain-node:hover .chain-star{border-color:#8794aa}
+/* 보유한 단계는 금빛으로 빛난다. */
+.chain-node.owned .chain-star{background:linear-gradient(135deg,#f7e6b4,#e8c66a);border-color:#fff0c4;box-shadow:0 0 18px 2px rgba(232,198,106,.5)}
+.chain-node.owned .chain-star img{filter:brightness(0)}
+.chain-node.picked .chain-star{outline:2px solid #e8c66a;outline-offset:3px}
+.chain-node-no{font-size:11px;color:#8791a4;font-variant-numeric:tabular-nums}
+.chain-node.owned .chain-node-no{color:#e8c66a}
+.chain-empty{margin:0;padding:20px;color:#8791a4;font-size:12px}
+.chain-node-name{font-size:11px;line-height:1.3;color:#8791a4;text-align:center;max-width:88px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chain-node.owned .chain-node-name{color:#a8b0bf}
+
+.chain-detail{display:flex;flex-direction:column;gap:10px;padding:16px;background:#2d3345;border:1px solid #384155;border-radius:14px}
+.chain-detail-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.chain-title{margin:0;font-size:17px;color:#c2c9d6}
+.chain-title span{color:#9aa3b3;font-size:13px;margin-right:6px}
+.chain-title.owned{color:#e8c66a}
+.chain-title.owned span{color:#978967}
+.chain-desc{margin:0;color:#a8b0bf;font-size:13px;line-height:1.7}
+.chain-state{align-self:flex-start;margin-top:auto;padding:4px 12px;font-size:12px;color:#9aa3b3;background:#2a3246;border:1px solid #3c455c;border-radius:999px}
+.chain-state.on{color:#e8c66a;border-color:#574f3a;background:#443c2b}
+
+
+/* ── 무기 교체 ────────────────────────────────────────────────
+   게임과 같은 두 단 — 왼쪽 격자(세로 스크롤) · 오른쪽 상세. */
+.weapon-layout{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:16px;align-items:start}
+.weapon-pane{display:flex;flex-direction:column;min-width:0}
+.weapon-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;max-height:min(56vh,520px);overflow-y:auto;padding-right:4px;align-content:start}
+
+.weapon-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 0 7px;text-align:center;cursor:pointer;background:#2a3246;border:1px solid #3c455c;border-radius:10px;overflow:hidden}
+.weapon-card:hover{border-color:#4a5266}
+.weapon-card.on{border-color:#e8c66a;background:#30394a;box-shadow:0 0 0 1px rgba(232,198,106,.35)}
+/* 등급별 바탕색 — 게임 카드 배경과 같은 흐름. */
+.weapon-card-art{position:relative;display:grid;place-items:center;width:100%;aspect-ratio:1;background:#30394a}
+.weapon-card-art.r5{background:linear-gradient(160deg,#4a3a1c,#453c31)}
+.weapon-card-art.r4{background:linear-gradient(160deg,#523969,#3c334a)}
+.weapon-card-art.r3{background:linear-gradient(160deg,#1f3550,#2f3a4a)}
+.weapon-card-art.r2{background:linear-gradient(160deg,#345b4c,#314440)}
+.weapon-card-art.r1{background:linear-gradient(160deg,#414752,#313744)}
+.weapon-card-art img{width:76%;height:76%;object-fit:contain}
+/* 정련 단계는 늘 띄운다. 장착 중인 카드만 금색으로, 나머지는 조용한 회색. */
+.weapon-card-refine{position:absolute;right:4px;bottom:4px;min-width:17px;padding:1px 4px;font-style:normal;font-size:11px;line-height:1.4;color:#a8b0bf;background:rgba(36,42,57,.72);border:1px solid #4a5266;border-radius:5px;font-weight:700}
+.weapon-card-refine.on{color:#282f41;background:#e8c66a;border-color:#e8c66a}
+.weapon-card-name{font-size:11px;line-height:1.3;color:#c2c9d6;padding:0 5px;max-height:2.6em;overflow:hidden}
+.weapon-card-lv{font-size:11px;color:#9aa3b3;font-variant-numeric:tabular-nums}
+
+.weapon-sort{display:flex;gap:6px;margin-top:10px}
+.weapon-sort button{padding:6px 12px;font-size:12px;border-radius:999px;cursor:pointer;background:#2a3246}
+.weapon-sort button.on{border-color:#e8c66a;color:#e8c66a;background:#443c2b}
+
+.weapon-detail{display:flex;flex-direction:column;gap:10px;padding:16px;background:#2d3345;border:1px solid #384155;border-radius:14px}
+.weapon-detail-head{display:flex;gap:12px;align-items:flex-start}
+.weapon-detail-head .weapon-card-art{width:64px;height:64px;flex:none;border-radius:10px;aspect-ratio:auto}
+.weapon-detail-head>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.weapon-detail-head strong{font-size:17px;color:#e8c66a}
+.weapon-detail-lv{display:flex;align-items:baseline;gap:2px;font-size:19px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.weapon-detail-lv em{font-style:normal;font-size:14px;color:#9aa3b3}
+.weapon-max{margin-left:8px;padding:1px 7px;font-size:10px;letter-spacing:1px;color:#c2c9d6;background:#364054;border-radius:4px}
+
+.weapon-stat-rows{display:flex;flex-direction:column;gap:1px;margin-top:2px}
+.weapon-stat-rows div{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:9px 12px;background:#30394a}
+.weapon-stat-rows div:first-child{border-radius:8px 8px 0 0}
+.weapon-stat-rows div:last-child{border-radius:0 0 8px 8px}
+.weapon-stat-rows span{font-size:13px;color:#a8b0bf}
+.weapon-stat-rows b{font-size:15px;color:#e9edf5;font-variant-numeric:tabular-nums}
+
+.weapon-passive-name{margin:6px 0 0;font-size:14px;color:#e8c66a}
+.weapon-detail .weapon-passive{margin:0;color:#a8b0bf!important;font-size:13px;line-height:1.7}
+.weapon-equipped{display:flex;align-items:center;gap:7px;margin-top:2px;font-size:12px;color:#e0a94d}
+.weapon-equipped img{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #574f3a}
+.weapon-unequip{align-self:flex-start;margin-top:auto;padding:7px 16px;font-size:13px;cursor:pointer}
+.weapon-none{margin:0;padding:40px 10px;text-align:center;color:#8791a4}
+
+@media(max-width:900px){.weapon-layout{grid-template-columns:1fr}.weapon-grid{max-height:none}}
+/* 다른 캐릭터가 끼고 있는 무기 — 그림 왼쪽 아래에 그 캐릭터 아이콘. */
+.weapon-card-wearers{position:absolute;left:4px;bottom:4px;display:flex;gap:2px;font-style:normal}
+.weapon-card-wearers img,.weapon-card-wearers b{width:20px;height:20px;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:#262d3f;border:1px solid #e0a94d;font-size:11px;font-weight:700;color:#e0a94d}
+/* 지금 보고 있는 캐릭터가 낀 것은 금색 테두리로 구분한다(카드 테두리와 같은 색). */
+.weapon-card-wearers img.self,.weapon-card-wearers b.self{border-color:#e8c66a;color:#e8c66a;box-shadow:0 0 6px rgba(232,198,106,.5)}
+
+/* ── 에코 설정 ────────────────────────────────────────────────
+   게임 화면 구성 — 왼쪽에 스탯·화음 이펙트, 오른쪽에 장착 슬롯 다섯 자리.
+   아래는 보유 에코에서 고르는 자리(게임의 「교체」에 해당). */
+.echo-layout{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:start}
+
+.echo-info{display:flex;flex-direction:column;gap:12px;min-width:0}
+
+.echo-heading{display:flex;align-items:center;gap:10px;margin:4px 0 0;font-size:13px;color:#c2c9d6;font-weight:600}
+.echo-heading::after{content:"";flex:1;height:1px;background:#384155}
+.echo-fetters{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+.echo-fetters li{display:flex;gap:8px;opacity:.45}
+.echo-fetters li.on{opacity:1}
+.echo-check{width:16px;flex:none;text-align:center;color:#8791a4;font-size:13px}
+.echo-fetters li.on .echo-check{color:#e8c66a}
+.echo-fetters li>span{display:flex;flex-direction:column;gap:3px;min-width:0}
+.echo-fetters b{display:flex;align-items:center;gap:6px;font-size:13px;color:#c2c9d6;font-weight:600}
+.echo-fetters li.on b{color:#e8c66a}
+.echo-fetters b img{width:16px;height:16px;object-fit:contain}
+.echo-fetters b em{font-style:normal;font-size:12px;color:#9aa3b3}
+.echo-fetters small{letter-spacing:0;font-size:12px;line-height:1.6;color:#a3adbd}
+.echo-note{margin:0;color:#8791a4;font-size:11px;line-height:1.6;letter-spacing:0}
+
+/* 오른쪽 슬롯 기둥 */
+.echo-slots{display:flex;flex-direction:column;align-items:center;gap:10px;padding:14px 10px;background:radial-gradient(120% 70% at 50% 0%,#2e354d 0%,#282f41 70%);border:1px solid #384155;border-radius:14px}
+.echo-cost{display:flex;flex-direction:column;align-items:center;gap:2px;margin-bottom:2px}
+.echo-cost b{font-size:19px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.echo-cost em{font-style:normal;font-size:13px;color:#9aa3b3}
+.echo-slot{position:relative;width:76px;height:76px;padding:0;display:grid;place-items:center;border-radius:50%;background:#30394a;border:1px solid #444e64;cursor:pointer;overflow:hidden}
+.echo-slot>img{width:100%;height:100%;object-fit:cover}
+.echo-slot:hover{border-color:#e8c66a}
+.echo-slot.empty{cursor:default;border-style:dashed}
+.echo-slot.empty em{font-style:normal;font-size:20px;color:#4a5266}
+.echo-slot-rarity{position:absolute;right:4px;top:4px;font-style:normal;font-size:11px;font-weight:700;color:#e8c66a;text-shadow:0 1px 3px #222}
+.echo-slot-foot{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:center;gap:3px;padding:2px 0;font-size:10px;color:#e9edf5;background:rgba(36,42,57,.78)}
+.echo-slot-foot img{width:12px;height:12px;object-fit:contain}
+
+/* 아래 보유 에코 고르기 */
+.echo-picker-head{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.echo-picker-head .weapon-search{margin-bottom:0}
+.echo-filters{display:flex;flex-wrap:wrap;gap:6px}
+.echo-filters button{display:inline-flex;align-items:center;gap:5px;padding:6px 12px;font-size:12px;border-radius:999px;cursor:pointer;background:#2a3246}
+.echo-filters button img{width:15px;height:15px;object-fit:contain}
+.echo-filters button.on{border-color:#e8c66a;color:#e8c66a;background:#443c2b}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@media(max-width:900px){.echo-layout{grid-template-columns:1fr}.echo-slots{flex-direction:row;flex-wrap:wrap;justify-content:flex-start}}
+/* 메인 슬롯 에코의 어빌리티 본문. */
+.echo-ability{display:flex;flex-direction:column;gap:6px;padding:12px;background:#30394a;border:1px solid #384155;border-radius:10px}
+.echo-ability b{display:flex;align-items:center;gap:8px;font-size:13px;color:#e8c66a;font-weight:600}
+.echo-ability b img{width:24px;height:24px;border-radius:50%;object-fit:cover;border:1px solid #574f3a}
+.echo-ability b em{margin-left:auto;font-style:normal;font-size:11px;color:#9aa3b3;white-space:nowrap}
+.echo-ability p{margin:0;font-size:12px;line-height:1.7;color:#a8b0bf;white-space:pre-line}
+/* 드래그 앤 드롭 — 끌고 있는 것은 흐리게, 놓일 자리는 금색으로 밝힌다. */
+
+
+.echo-slot.over{border-color:#e8c66a;box-shadow:0 0 0 2px rgba(232,198,106,.45),0 0 14px rgba(232,198,106,.4)}
+.echo-slot.empty.over{border-style:solid}
+/* 에코를 끼고 있는 캐릭터 — 그림 왼쪽 위. 본인은 금색, 다른 캐릭터는 주황. */
+
+
+
+/* 다른 캐릭터가 낀 에코는 살짝 죽여 둔다 — 고르면 그쪽에서 옮겨 온다. */
+/* 장착 여부 라디오 — 화음 필터 칩과 같은 모양으로 맞춘다. */
+
+
+
+
+/* 에코 목록 — 에코 관리 탭과 같은 가로 줄 구성.
+   아이콘 · 화음 · 이름과 메인 옵션 · 부옵션 · 장착 표시. */
+.echo-list{display:flex;flex-direction:column;gap:8px;max-height:min(46vh,420px);overflow-y:auto;padding-right:4px}
+.echo-row{display:flex;align-items:center;gap:16px;width:100%;padding:12px 16px;text-align:left;color:#fff;background:linear-gradient(135deg,#344059 0%,#2d3a52 100%);border:1px solid #4a5266;border-radius:6px;cursor:pointer}
+.echo-row:hover{border-color:#4a9eff}
+.echo-row.on{border-color:#e8c66a;box-shadow:0 0 0 1px rgba(232,198,106,.35)}
+.echo-row.taken{opacity:.62}
+.echo-row.dragging{opacity:.35}
+.echo-row[draggable="true"]{cursor:grab}
+
+.echo-row-icon{flex:5;display:grid;place-items:center;min-width:0}
+.echo-row-icon img{width:40px;height:40px;object-fit:cover;border-radius:4px;border:1px solid #4a5266}
+
+.echo-row-fetter{flex:10;display:flex;align-items:center;gap:4px;min-width:0;font-size:12px;color:#8d8d8d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.echo-row-fetter img{width:16px;height:16px;flex:none;object-fit:contain}
+
+.echo-row-name{flex:10;display:flex;flex-direction:column;gap:4px;min-width:0}
+.echo-row-name strong{font-size:14px;color:#4a9eff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.echo-row-name em{font-style:normal;font-size:12px;color:#9a9a9a}
+.echo-row-name em b{color:#7fc3ff;font-weight:400}
+
+.echo-row-subs{flex:60;display:flex;gap:8px;justify-content:space-around;min-width:0}
+.echo-row-subs>span{flex:1;min-width:0;text-align:center;font-size:12px;color:#aaa}
+.echo-row-subs b{display:block;font-size:11px;font-weight:500;color:#7fc3ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.echo-row-subs em{font-style:normal;font-size:11px}
+
+.echo-row-state{flex:none;display:flex;align-items:center;gap:6px}
+.echo-row-owner{width:24px;height:24px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:#262d3f;border:1px solid #e0a94d;font-style:normal;font-size:11px;font-weight:700;color:#e0a94d}
+.echo-row-owner img{width:100%;height:100%;object-fit:cover}
+.echo-row-owner.self{border-color:#e8c66a;color:#e8c66a;box-shadow:0 0 6px rgba(232,198,106,.5)}
+.echo-row-check{width:22px;height:22px;display:grid;place-items:center;border-radius:50%;font-style:normal;font-size:12px;font-weight:700;color:#282f41;background:#e8c66a}
+
+.echo-slot[draggable="true"]{cursor:grab}
+.echo-slot.dragging{opacity:.35}
+/* 계산 화면 위쪽 2×2 — 캐릭터 선택 · 파티 선택 / 파티 구성 · 몬스터 설정. */
+/* 파티 목록 칸을 빼면서 2×2가 아니라 「캐릭터 선택 · 파티 구성」 윗줄과
+   몬스터 설정 아랫줄이 되었다. 캐릭터 선택이 넓어야 격자가 덜 세로로 자란다. */
+.calc-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px;align-items:start}
+.calc-top>.panel:last-child{grid-column:1 / -1}
+.calc-top>.panel{margin-top:0;height:100%}
+.calc-top .enemy-grid{grid-template-columns:1fr}
+/* 캐릭터가 60명이라 격자를 그대로 늘리면 위쪽이 통째로 길어진다. 그렇다고 한 줄만
+   보이게 끊으면 「패널이 비어 보이는」 상태가 되므로, 카드를 줄이고 네 줄쯤 보이게 끊는다.
+   오른쪽 여백은 스크롤바와 선택된 카드의 금색 글로우가 잘리지 않게 두는 자리다. */
+.calc-top .pick-grid{max-height:376px;overflow-y:auto;padding:2px 8px 2px 2px}
+
+.preset-add{display:flex;gap:8px;margin-bottom:12px}
+.preset-add input{flex:1;min-width:0;padding:9px 12px;font:inherit;font-size:13px;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:8px}
+.preset-add button{padding:9px 16px;font-size:13px;cursor:pointer}
+.preset-add button:disabled{opacity:.4;cursor:not-allowed}
+.preset-empty{margin:0;color:#9aa3b3;font-size:12px;line-height:1.7}
+.preset-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.preset-list li{display:flex;align-items:center;gap:8px;padding:9px 12px;background:#2d3345;border:1px solid #384155;border-radius:9px}
+.preset-name{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+.preset-label{font-size:13px;color:#c2c9d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preset-name b{font-size:13px;color:#c2c9d6}
+.preset-name em{font-style:normal;font-size:11px;color:#9aa3b3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.preset-rename{flex:1;min-width:0;padding:5px 8px;font:inherit;font-size:13px;color:#e9edf5;background:#2a3246;border:1px solid #e8c66a;border-radius:7px}
+.preset-list button{padding:5px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246;white-space:nowrap}
+.preset-list button:hover{border-color:#8794aa}
+.preset-quiet{color:#9aa3b3}
+
+@media(max-width:900px){.calc-top{grid-template-columns:1fr}}
+
+/* ── 왼쪽 사이드바 ────────────────────────────────────────────
+   화면에 고정되고 본문만 스크롤된다. 활성 탭은 파란 기운으로 띄운다. */
+.sidebar{position:fixed;left:0;top:0;bottom:0;z-index:20;display:flex;flex-direction:column;width:252px;background:rgba(40,48,66,.97);border-right:1px solid rgba(255,255,255,.05)}
+
+.sidebar-brand{display:flex;align-items:center;gap:12px;padding:20px 18px;border-bottom:1px solid rgba(255,255,255,.05);flex:none}
+.sidebar-mark{width:42px;height:42px;flex:none;display:grid;place-items:center;border-radius:12px;font-size:19px;font-weight:700;color:#242a39;background:linear-gradient(135deg,#9ec5ff,#a9b0ff)}
+.sidebar-brand>span:last-child{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sidebar-brand b{font-size:15px;font-weight:700;color:#e9edf5;white-space:nowrap}
+.sidebar-brand em{font-style:normal;font-size:10px;letter-spacing:1.4px;color:#8791a4;white-space:nowrap}
+
+.sidebar-nav{flex:1;min-height:0;overflow-y:auto;display:flex;flex-direction:column;gap:4px;padding:14px 12px}
+.sidebar-link{display:flex;align-items:center;gap:12px;padding:9px 12px;text-align:left;background:none;border:1px solid transparent;border-radius:10px;cursor:pointer}
+.sidebar-link:hover{background:rgba(255,255,255,.05)}
+.sidebar-icon{width:24px;height:24px;flex:none;display:grid;place-items:center;color:#9aa3b3}
+.sidebar-icon svg{width:20px;height:20px}
+.sidebar-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.sidebar-text b{font-size:13px;font-weight:500;color:#a8b0bf;white-space:nowrap}
+.sidebar-text em{font-style:normal;font-size:11px;color:#8791a4;white-space:nowrap}
+.sidebar-link:hover .sidebar-text b{color:#dce6f5}
+/* 활성 탭 — 파란 배경에 얇은 링과 은은한 발광. */
+.sidebar-link.on{background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.2);box-shadow:0 0 15px rgba(59,130,246,.15)}
+.sidebar-link.on .sidebar-icon,.sidebar-link.on .sidebar-text b{color:#8fb4d9}
+.sidebar-link.on .sidebar-text em{color:#73849a}
+
+.sidebar-foot{flex:none;padding:14px 16px;border-top:1px solid rgba(255,255,255,.05)}
+.sidebar-foot small{letter-spacing:0;font-size:11px;font-weight:400;color:#828d9f}
+
+/* 본문은 사이드바 폭만큼 밀린다. */
+.app{width:auto;margin:0 0 0 252px;padding:28px 24px 70px}
+
+/* 계산 화면에서 한 줄을 통째로 쓰는 칸. */
+.calc-wide{grid-column:1 / -1}
+.calc-wide>.panel{margin-top:0}
+
+/* 좁은 화면에서도 왼쪽에 그대로 둔다. 글자만 접고 아이콘만 남긴다. */
+@media(max-width:1100px){
+.sidebar{width:66px}
+.sidebar-brand{justify-content:center;padding:16px 0}
+.sidebar-brand>span:last-child{display:none}
+.sidebar-nav{padding:12px 8px}
+.sidebar-link{justify-content:center;padding:10px 0}
+.sidebar-text{display:none}
+.sidebar-foot{display:none}
+.app{margin-left:66px;padding:18px 14px 60px}
+}
+/* 파티 관리 탭 — 위에 캐릭터 선택·파티 구성, 아래에 저장 목록. */
+.party-page{display:flex;flex-direction:column;gap:12px}
+.party-page-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px;align-items:start}
+.party-page-top>.panel{margin-top:0;height:100%}
+/* 파티 관리 탭은 편성이 본업이라 계산 탭보다 한 줄쯤 더 보여 준다. */
+.party-page-top .pick-grid{max-height:376px;overflow-y:auto;padding:2px 8px 2px 2px}
+.party-page-top .party article{padding:10px 8px;gap:4px}
+.party-page-top .party article img{width:48px;height:48px}
+.party-page-top .party strong{font-size:14px}
+.party-page>.panel{margin-top:0}
+
+/* 파티 한 벌의 얼굴들 — 아이콘을 겹쳐 세운다. */
+.preset-faces{display:flex;gap:8px;flex:none}
+.preset-faces i{display:flex;flex-direction:column;align-items:center;gap:3px;font-style:normal;width:42px}
+.preset-faces img,.preset-faces u{width:28px;height:28px;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:#262d3f;border:1px solid #4a5266;text-decoration:none;font-size:11px;font-weight:700;color:#9aa3b3}
+.preset-faces em{font-style:normal;font-size:10px;line-height:1.2;color:#9aa3b3;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+
+
+@media(max-width:900px){.party-page-top{grid-template-columns:1fr}}
+/* 파티 구성 — 자리 셋이 패널의 남은 높이를 다 쓴다.
+   섹션을 세로 flex로 두고 격자에 flex:1을 주면, 격자 칸은 기본이 stretch라 카드도 같이 늘어난다. */
+/* 「파티 구성」 제목 오른쪽에 붙는 불러오기 단추와, 눌렀을 때 열리는 서랍.
+   서랍 안의 패널은 이미 패널 안이므로 테두리와 여백을 지우고 목록만 남긴다. */
+.party-head{margin-bottom:10px}
+.party-load{margin-left:auto;padding:5px 12px;font-size:12px;border-radius:8px;cursor:pointer;background:#2a3246;white-space:nowrap}
+.party-load:hover{border-color:#8794aa}
+.party-load.on{border-color:#8d9ab0;background:#30394a;color:#fff}
+/* 다이얼로그로 띄운 파티 목록. 계산식 창의 껍데기를 그대로 쓰고 안쪽 패널만 지운다. */
+.party-load-modal{width:min(560px,100%)}
+.party-load-modal>.panel{margin:0;padding:0;background:none;border:none}
+.party-load-modal .panel-head{margin-bottom:10px}
+.party-load-modal .panel-head h2{display:none}
+.party-load-modal .preset-list{max-height:min(52vh,420px)}
+
+.party-panel{display:flex;flex-direction:column}
+.party-panel .party{flex:1;min-height:0}
+/* 캐릭터 선택 카드 — 인라인 스타일 대신 여기로 모았다.
+   (예전 인라인 값들은 정의되지 않은 CSS 변수를 참조해 실제로는 그려지지 않았다.) */
+.pick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(88px,1fr));gap:8px}
+.pick-card{display:flex;flex-direction:column;align-items:center;gap:5px;padding:9px 6px;text-align:center;background:#2d3345;border:1px solid #3c455c;border-radius:10px;cursor:pointer}
+.pick-card:hover{border-color:#4a5266}
+.pick-card img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
+.pick-card b{font-size:12px;font-weight:600;color:#c2c9d6;line-height:1.25}
+.pick-card em{font-style:normal;font-size:10px;color:#9aa3b3}
+/* 파티에 들어간 캐릭터는 살짝 죽이고, 지금 보고 있는 캐릭터는 금색으로. */
+.pick-card.in{opacity:.55}
+.pick-card.on{border-color:#e8c66a;background:#30394a;opacity:1}
+.pick-card.on img{border-color:#e8c66a;box-shadow:0 0 10px rgba(232,198,106,.4)}
+.pick-card.on b{color:#e8c66a}
+/* 버프를 들고 있는 캐릭터 아이콘 — 체크박스 오른쪽. */
+.buff-owner{width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:#262d3f;border:1px solid #4a5266;font-style:normal;font-size:11px;font-weight:700;color:#9aa3b3}
+.buff-owner img{width:100%;height:100%;object-fit:cover}
+/* 스택형 버프의 스택 선택. 버프 이름 줄 안에 붙는다. */
+.buff-stacks{display:inline-flex;align-items:center;gap:4px;margin-left:8px;font-style:normal;font-size:11px;color:#9aa3b3}
+.buff-stacks select{padding:2px 4px;font-size:11px;border-radius:6px;background:#2a3246;border:1px solid #3c455c;color:#e9edf5}
+.buffs input[type=checkbox]:disabled{opacity:.5;cursor:default}
+/* 무기 버프 아이콘 — 캐릭터 아이콘과 구분되게 사각형에 금색 테두리. */
+.buff-owner.weapon{border-radius:7px;border-color:#645941;background:#30394a}
+.buff-owner.weapon img{object-fit:contain;padding:2px}
+/* 공격 루틴 카드 — 왼쪽 위에 그 공격을 쓰는 캐릭터 얼굴. */
+.card{position:relative}
+.card-face{position:absolute;left:8px;top:8px;width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid #4a5266;background:#262d3f}
+.card .card-title{padding-left:32px;min-height:26px}
+
+/* 버프 창 — 화면을 덮지 않도록 오른쪽에 붙는 패널. */
+.buff-dialog{position:fixed;right:16px;top:50%;transform:translateY(-50%);z-index:40;display:flex;flex-direction:column;width:min(340px,calc(100vw - 32px));max-height:min(76vh,720px);background:#282f41;border:1px solid #414b61;border-radius:15px;box-shadow:0 12px 40px rgba(0,0,0,.35)}
+.buff-dialog-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 16px 12px;border-bottom:1px solid #384155}
+.buff-dialog-head>div{display:flex;flex-direction:column;gap:3px;min-width:0}
+.buff-dialog-head b{font-size:15px;color:#e9edf5}
+.buff-dialog-head em{font-style:normal;font-size:11px;color:#9aa3b3}
+.buff-dialog-head button{width:28px;height:28px;flex:none;padding:0;border-radius:50%;font-size:16px;line-height:1;cursor:pointer}
+.buff-dialog-body{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 16px}
+
+@media(max-width:900px){.buff-dialog{right:8px;left:8px;width:auto;top:auto;bottom:8px;transform:none;max-height:60vh}}
+/* 공격 루틴 — 가로로 스크롤하지 않고 줄이 차면 다음 줄로 넘어간다. */
+.rotation-wrap{width:100%}
+
+/* 공격 추가 — 왼쪽 캐릭터 목록, 오른쪽 공격 팔레트. */
+.palette-layout{display:grid;grid-template-columns:184px minmax(0,1fr);gap:14px;align-items:start}
+.palette-side{display:flex;flex-direction:column;gap:6px;padding:8px;background:#2d3345;border:1px solid #384155;border-radius:12px}
+.palette-side-item{display:flex;align-items:center;gap:10px;padding:8px;text-align:left;background:none;border:1px solid transparent;border-radius:10px;cursor:pointer}
+.palette-side-item:hover{background:#30394a}
+.palette-side-item img,.palette-side-blank{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:#262d3f;border:1px solid #3c455c;font-size:13px;font-weight:700;color:#78829a}
+.palette-side-item>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.palette-side-item b{font-size:13px;font-weight:600;color:#a8b0bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-side-item em{font-style:normal;font-size:11px;color:#8791a4}
+.palette-side-item.on{background:#30394a;border-color:#574f3a}
+.palette-side-item.on b{color:#e8c66a}
+.palette-side-item.on img,.palette-side-item.on .palette-side-blank{border-color:#e8c66a;box-shadow:0 0 0 2px rgba(232,198,106,.25)}
+.palette-main{min-width:0}
+
+/* 캐릭터 줄은 위에 가로로 눕히고, 공격은 분류마다 한 줄씩 가로로 편다. */
+.palette-layout{display:flex;flex-direction:column;gap:14px}
+.palette-side{flex-direction:row;flex-wrap:wrap;gap:8px}
+.palette-side-item{flex:0 1 auto;min-width:150px}
+.palette-groups{flex-direction:column;align-items:stretch;overflow-x:visible;gap:8px}
+.palette-group{flex:none;min-width:0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;padding:10px 12px}
+.palette-group-head{flex:none;width:118px;margin-bottom:0;min-height:34px}
+.palette-group .palette{flex:1;min-width:0;flex-direction:row;flex-wrap:wrap;gap:6px}
+.palette-group .palette button{width:auto;text-align:center}
+/* 에코 어빌리티 구역에만 붙는 한 줄 메모 — 원문 해석이 확실한지 알려준다. */
+.palette-note{flex:1 0 100%;margin:0;color:#949dae;font-size:11px;line-height:1.5}
+.palette-note.warn{color:#e0a94d}
+
+@media(max-width:900px){
+.palette-side{overflow-x:visible}
+.palette-side-item{flex:1 1 150px}
+.palette-group{flex-direction:column;gap:8px}
+.palette-group-head{width:auto}
+}
+
+/* ── 피해 분석 ────────────────────────────────────────────────
+   도넛(공격 분류별 비중)과 가로 막대(캐릭터별 피해량).
+   도넛 색은 정해진 순서로 배정하고, 여섯 번째부터는 「기타」로 접는다.
+   막대는 크기 비교라 한 가지 색만 쓴다. */
+/* 왼쪽 도넛 셋, 오른쪽 막대. */
+.viz-grid{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:20px;align-items:start}
+.viz-donuts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start}
+.viz-bars-fig{padding-left:20px;border-left:1px solid #384155}
+.viz-fig{margin:0;min-width:0}
+.viz-fig figcaption{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-size:12px;font-weight:600;letter-spacing:.5px;color:#a8b0bf}
+.viz-fig figcaption img{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
+.viz-total{margin-left:auto;font-size:11px;font-weight:400;color:#9aa3b3}
+.viz-total span{margin-left:6px;font-size:15px;font-weight:700;color:#e9edf5;font-variant-numeric:tabular-nums}
+.viz-toggle{padding:6px 14px;font-size:12px;border-radius:999px;cursor:pointer;background:#2a3246}
+.viz-toggle:hover{border-color:#8794aa}
+
+.viz-donut{position:relative;width:120px;margin:0 auto 12px}
+.viz-donut svg{display:block;width:120px;height:120px}
+.viz-donut path{cursor:default;transition:opacity .15s}
+.viz-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;pointer-events:none}
+.viz-donut-center b{font-size:16px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.viz-donut-center em{font-style:normal;font-size:10px;color:#9aa3b3}
+
+.viz-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.viz-legend li{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:7px;padding:4px 5px;border-radius:7px;transition:opacity .15s}
+.viz-legend li.dim{opacity:.4}
+.viz-legend li:hover{background:#2d3345}
+.viz-legend i{width:10px;height:10px;border-radius:3px}
+.viz-legend span{font-size:12px;color:#c2c9d6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viz-legend b{font-size:12px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.viz-legend em{font-style:normal;font-size:11px;color:#9aa3b3;font-variant-numeric:tabular-nums;min-width:56px;text-align:right}
+
+.viz-bars{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.viz-bars li{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px 10px}
+.viz-bar-name{grid-column:1 / -1;display:flex;align-items:center;gap:7px;font-size:12px;color:#c2c9d6}
+.viz-bar-name img{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
+.viz-bar-track{grid-column:1;height:12px;border-radius:6px;background:#30394a;overflow:hidden}
+.viz-bar-fill{display:block;height:100%;border-radius:6px;background:#3987e5}
+.viz-bars b{font-size:13px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.viz-bars em{font-style:normal;font-size:11px;color:#9aa3b3;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+
+@media(max-width:1100px){.viz-grid{grid-template-columns:1fr}.viz-bars-fig{padding-left:0;padding-top:16px;border-left:none;border-top:1px solid #384155}}
+@media(max-width:700px){.viz-donuts{grid-template-columns:1fr}}
+.viz-legend-empty{grid-template-columns:1fr!important;font-size:11px;color:#8791a4;text-align:center;white-space:nowrap}
+.viz-total-row td{border-top:1px solid #414b61;color:#e9edf5;font-weight:600}
+/* 몬스터 속성 — 색 점 대신 게임 속성 아이콘. */
+.enemy-icon{width:24px;height:24px;flex:none;object-fit:contain}
+
+/* ── 공격 루틴 기둥 ──────────────────────────────────────────
+   본문 오른쪽에 고정으로 세운다. 카드가 좁은 폭에서 두 줄로 흐른다. */
+/* 사이드바를 뺀 나머지를 본문과 반씩 나눈다. 1200px 이하에서는 기둥이 풀리므로
+   여기서 사이드바는 항상 252px다. */
+.rotation-rail{position:fixed;right:0;top:0;bottom:0;z-index:15;width:calc((100vw - 252px) / 2);overflow-y:auto;padding:20px;background:rgba(40,47,65,.97);border-left:1px solid #384155}
+.rotation-rail>.panel{margin-top:0;border:none;background:none;padding:0}
+.app.has-rail{margin-right:calc((100vw - 252px) / 2)}
+/* 버프 창은 기둥에 가리지 않게 그만큼 왼쪽으로 물러난다. */
+.app.has-rail .buff-dialog{right:calc((100vw - 252px) / 2 + 16px)}
+
+@media(max-width:1200px){
+.rotation-rail{position:static;width:auto;padding:0;background:none;border-left:none;overflow:visible}
+.rotation-rail>.panel{margin-top:12px;border:1px solid #384155;background:#282f41;padding:20px}
+.app.has-rail{margin-right:0}
+.app.has-rail .buff-dialog{right:16px}
+}
+/* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
+.panel-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.panel-head h2{margin:0;flex:none}
+.panel-search{flex:1;min-width:0;max-width:260px;margin-left:auto;padding:8px 12px;font:inherit;font-size:13px;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:9px}
+.panel-search:focus{outline:none;border-color:#8794aa}
+
+/* 파티 구성 패널의 아래 절반 — 콘텐츠(속성 저항 프리셋) 선택. */
+/* 파티 자리 — 누르면 그 캐릭터가 빠지고, 끌어다 놓으면 자리가 바뀐다. */
+.party article.filled{cursor:pointer}
+.party article.filled:hover{border-color:#4a5266}
+.party article.dragging{opacity:.35}
+.party article.over{border-color:#e8c66a;background:#30394a}
+
+.party-half{margin-top:16px;padding-top:16px;border-top:1px solid #384155}
+.party-half h2{margin-top:0}
+.party-half .enemy-hint{display:block;margin-top:8px}
+/* 콘텐츠 칩은 이름이 길어 글자를 한 단계 줄인다(속성 칩은 그대로). */
+.party-half .enemy-element{font-size:12px;padding:8px 10px}
+.party-half .enemy-res{font-size:10px}
+/* 몬스터 속성 칩 — 3개씩 두 줄, 가로 여백을 다 쓰고 글자를 키운다. */
+.enemy-field .enemy-element{font-size:15px;padding:12px 10px;gap:9px}
+
+/* ── 데이터 확인 탭 ─────────────────────────────────────
+   무기 버프를 무기별로 펼쳐 보고, 상시/발동·본인/파티만 손으로 고치는 자리. */
+.data-page header{align-items:flex-start}
+.data-page header h1{margin:6px 0 8px}
+.data-page header p{margin:0;max-width:720px;line-height:1.7;font-size:13px}
+.data-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px}
+.data-summary div{padding:12px 14px;background:#2e3648;border:1px solid #3b4457;border-radius:9px}
+.data-summary b{display:block;margin-top:5px;font-size:20px;font-variant-numeric:tabular-nums}
+.data-edited-count{color:#e8c66a}
+.data-filters{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:14px}
+.data-filters .chips{gap:5px}
+.data-filters .chip{cursor:pointer;background:#2a3246}
+.data-toggle{display:inline-flex;align-items:center;gap:7px;color:#a8b0bf;font-size:12px;cursor:pointer}
+.data-toggle input{accent-color:#8d9ab0;cursor:pointer}
+.data-search{flex:1 1 220px;width:auto;margin:0}
+.data-reset{padding:7px 13px;font-size:12px;border-radius:8px;cursor:pointer;color:#e0a94d;border-color:#66543a}
+.data-reset:hover{border-color:#e0a94d;background:#443c2b}
+.data-empty{margin:24px 0;color:#8791a4;text-align:center}
+.data-weapon-head{display:flex;align-items:center;gap:12px}
+.data-weapon-icon{width:44px;height:44px;flex:none;object-fit:contain;border-radius:9px;background:#30394a;border:1px solid #3c455c}
+.data-weapon-name{flex:1;min-width:0}
+.data-weapon-name h2{display:flex;align-items:center;gap:9px;margin:0 0 3px;font-size:17px}
+.data-weapon-name span{font-size:12px;color:#9ea7b7}
+.data-edited{padding:2px 8px;font-size:11px;font-weight:400;color:#e8c66a;background:#443c2b;border:1px solid #66543a;border-radius:999px}
+.data-weapon-desc{margin:12px 0 0;color:#a3adbd;font-size:12px;line-height:1.7}
+.data-none{margin:12px 0 0;color:#8791a4;font-size:12px}
+.data-table{margin-top:12px}
+.data-table td{vertical-align:middle}
+.data-cell-label{color:#e9edf5}
+.data-stacks{display:block;margin-top:3px;font-style:normal;font-size:11px;color:#9aa3b3}
+.data-cell-value{white-space:nowrap;color:#8fb4d9;font-variant-numeric:tabular-nums}
+.data-cell-cond{max-width:280px;color:#9aa3b3;font-size:12px;line-height:1.6}
+.data-select{padding:6px 9px;font-size:12px;border-radius:8px;cursor:pointer}
+.data-select-edited{border-color:#e8c66a;color:#e8c66a;background:#443c2b}
+@media(max-width:900px){.data-table{display:block;overflow-x:auto;white-space:nowrap}
+.data-cell-cond{white-space:normal;min-width:200px}}
+.data-done-count{color:#7fc08a}
+.data-check{padding:7px 13px;font-size:12px;border-radius:8px;cursor:pointer;white-space:nowrap;color:#7fc08a;border-color:#3d5f47}
+.data-check:hover{border-color:#7fc08a;background:#2d4335}
+.data-check.on{color:#a3adbd;border-color:#3c455c}
+.data-check.on:hover{border-color:#8794aa;color:#c2c9d6;background:#30394a}
+.data-checked-tag{padding:2px 8px;font-size:11px;font-weight:400;color:#7fc08a;background:#2d4335;border:1px solid #3d5f47;border-radius:999px}
+.data-weapon.is-checked{opacity:.6}
+.data-weapon.is-checked:hover{opacity:1}
+.data-stack-cell{display:flex;flex-direction:column;gap:5px;align-items:flex-start;min-width:160px}
+.data-stack-per{color:#9aa3b3;font-size:11px;white-space:nowrap}
+.data-stack-pick{display:flex;align-items:center;gap:4px}
+.data-stack-pick button{width:24px;padding:3px 0;font-size:11px;border-radius:6px;cursor:pointer;background:#2a3246;color:#a8b0bf}
+.data-stack-pick button.on{border-color:#8fb4d9;color:#8fb4d9;background:#2a3849}
+.data-stack-pick input[type=range]{width:96px;accent-color:#8fb4d9;cursor:pointer}
+.data-stack-pick em{font-style:normal;color:#9aa3b3;font-size:11px;white-space:nowrap}
+.data-stack-total{color:#8fb4d9;font-size:14px;white-space:nowrap}
+.data-stack-max{color:#8791a4;font-size:11px;white-space:nowrap}
+.data-later-count{color:#e0a94d}
+.data-later{padding:7px 13px;font-size:12px;border-radius:8px;cursor:pointer;white-space:nowrap;color:#e0a94d;border-color:#66543a}
+.data-later:hover{border-color:#e0a94d;background:#443c2b}
+.data-later.on{color:#a3adbd;border-color:#3c455c}
+.data-later.on:hover{border-color:#8794aa;color:#c2c9d6;background:#30394a}
+.data-later-tag{padding:2px 8px;font-size:11px;font-weight:400;color:#e0a94d;background:#443c2b;border:1px solid #66543a;border-radius:999px}
+.data-weapon.is-later{opacity:.6}
+.data-weapon.is-later:hover{opacity:1}
+.data-weapon-head{flex-wrap:wrap}
+
+/* ── 버프 정리 · 에코 데이터 확인 ───────────────────────
+   데이터 확인 탭과 같은 표를 쓰되, 훑는 단위가 다른 두 화면이 더 쓰는 것들.
+   버프 정리(캐릭터)는 카드가 아니라 표의 한 줄이 확인 단위라 줄에 상태가 붙는다. */
+.data-page.panel > header{margin-bottom:14px}
+.data-page.panel > .data-summary{margin-top:0}
+/* 확인 버튼 두 개가 한 칸에 나란히 선다. 표가 좁아져도 줄바꿈되지 않게 붙여 둔다. */
+.data-cell-review{display:flex;gap:6px;white-space:nowrap}
+.data-cell-review .data-check,
+.data-cell-review .data-later{padding:5px 9px;font-size:11px}
+.data-table tr.is-checked,
+.data-table tr.is-later{opacity:.5}
+.data-table tr.is-checked:hover,
+.data-table tr.is-later:hover{opacity:1}
+/* 화음 세트 원문은 세트 단계별로 줄을 나눠 담는다. */
+.data-weapon-desc{white-space:pre-line}
+/* 에코 어빌리티는 메인 슬롯(1번 자리)에 껴야만 걸린다 — 카드에서 바로 보이게 한다. */
+.data-main-slot{padding:2px 8px;font-size:11px;font-weight:400;color:#8fb4d9;background:#2a3849;border:1px solid #3b5168;border-radius:999px}
+.data-main-slot-note{color:#8fb4d9;font-weight:500}
+
+/* ── 에코 데미지 확인 ──────────────────────────────────────────
+   자동 추출분이 미덥지 못한 카드에 붙는 한 줄 메모와, 계수를 뽑아낸 원문 조각. */
+.echo-dmg-note{margin:10px 0 0;padding:8px 11px;color:#a3adbd;font-size:12px;line-height:1.6;background:#2c3444;border-left:2px solid #4a5266;border-radius:0 8px 8px 0}
+.echo-dmg-note.warn{color:#e0a94d;background:#3f392c;border-left-color:#e0a94d}
+.echo-dmg-sources{margin-top:12px;padding:11px 13px;background:#262d3f;border:1px solid #333c4f;border-radius:10px}
+.echo-dmg-sources small{display:block;margin-bottom:7px}
+.echo-dmg-sources p{margin:0 0 4px;color:#a3adbd;font-size:12px;line-height:1.6;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.echo-dmg-sources p:last-child{margin-bottom:0}
+
+/* 계산에 쓸 일이 없어 빼둔 에코 목록. 기본은 접혀 있고, 왜 없는지 확인할 때만 편다. */
+.echo-dmg-dropped{padding:0}
+.echo-dmg-dropped-head{display:flex;align-items:baseline;gap:12px;width:100%;padding:14px 20px;text-align:left;background:none;border:none;cursor:pointer}
+.echo-dmg-dropped-head b{font-size:14px;color:#a8b0bf}
+.echo-dmg-dropped-head span{flex:1;color:#9aa3b3;font-size:12px}
+.echo-dmg-dropped-head em{font-style:normal;color:#8fb4d9;font-size:12px}
+.echo-dmg-dropped ul{margin:0;padding:0 20px 16px;list-style:none;display:grid;gap:6px}
+.echo-dmg-dropped li{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;padding:8px 11px;background:#262d3f;border:1px solid #333c4f;border-radius:9px;font-size:12px}
+.echo-dmg-dropped li b{color:#a8b0bf;font-weight:600}
+.echo-dmg-dropped li span{color:#8791a4}
+.echo-dmg-dropped li em{flex:1;min-width:200px;font-style:normal;color:#9aa3b3}
+
+/* 이상 효과 카드 — 스택·발생 횟수를 카드 바로 아래에서 고친다. */
+.card-anomaly{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:6px;padding:7px 9px;background:#2d3345;border:1px solid #384155;border-radius:10px}
+.card-anomaly label{display:flex;align-items:center;gap:5px}
+.card-anomaly em{font-style:normal;font-size:11px;color:#9aa3b3}
+.card-anomaly input{width:52px;padding:4px 6px;font:inherit;font-size:12px;color:#e9edf5;background:#262d3f;border:1px solid #3c455c;border-radius:7px}
+.card-anomaly small{flex:1 0 100%;letter-spacing:0;color:#e0a94d;font-size:11px;font-weight:400}
+
+
+/* ── 무기 관리 ────────────────────────────────────────────────
+   위쪽 「내 무기」는 한 줄에 한 자루씩, 아래 도감은 격자로 편다. */
+.weapon-dup-note{color:#e8c66a}
+.my-weapons{display:grid;gap:8px;margin-top:12px}
+.my-weapon{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:9px 12px;background:#2d3345;border:1px solid #384155;border-radius:11px}
+.my-weapon>img{width:40px;height:40px;flex:none;object-fit:contain;border-radius:8px;background:#262d3f;border:1px solid #3c455c}
+.my-weapon-name{flex:1;min-width:160px;display:flex;flex-direction:column;gap:2px}
+.my-weapon-name b{font-size:13px;font-weight:600;color:#c2c9d6}
+.my-weapon-name span{font-size:11px;color:#9aa3b3}
+.my-weapon-name i{font-style:normal}
+.my-weapon-field{display:flex;align-items:center;gap:5px}
+.my-weapon-field em,.my-weapon-refine em{font-style:normal;font-size:11px;color:#9aa3b3}
+.my-weapon-field input{width:54px;padding:5px 7px;font:inherit;font-size:12px;color:#e9edf5;background:#262d3f;border:1px solid #3c455c;border-radius:7px}
+.my-weapon-refine{display:flex;align-items:center;gap:4px}
+.my-weapon-refine button{width:24px;padding:4px 0;font-size:11px;border-radius:6px;cursor:pointer;background:#2a3246}
+.my-weapon-refine button.on{border-color:#e8c66a;color:#e8c66a;background:#443c2b}
+.my-weapon-warn{flex:1 0 100%;color:#e0576b;font-size:11px}
+.my-weapon-remove{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer;color:#c2c9d6}
+.my-weapon-remove:hover{border-color:#e0576b;color:#e0576b}
+.weapon-catalog{display:grid;grid-template-columns:repeat(auto-fill,minmax(124px,1fr));gap:8px;margin-top:14px;max-height:60vh;overflow-y:auto}
+.weapon-card{position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 7px;cursor:pointer;text-align:center}
+.weapon-card img{width:46px;height:46px;object-fit:contain}
+.weapon-card b{font-size:12px;font-weight:600;color:#c2c9d6;line-height:1.3}
+.weapon-card em{font-style:normal;font-size:11px;color:#8791a4}
+.weapon-card.owned{border-color:#4c604c;background:#2f3c31}
+.weapon-count{position:absolute;top:5px;right:6px;min-width:18px;padding:1px 5px;font-style:normal;font-size:11px;font-weight:700;color:#242a39;background:#8fb4d9;border-radius:999px}
+.weapon-card-warn{color:#e0576b;font-size:10px}
+.weapon-owned-filter{display:flex;align-items:center;gap:6px;margin:8px 0 4px;color:#9aa3b3;font-size:12px;cursor:pointer}
+.weapon-owned-filter em{font-style:normal;color:#8791a4;font-size:11px}
+
+/* 파티 관리 ↔ 계산 탭 사이에서 편성을 주고받는 줄. */
+.party-bridge{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
+.party-bridge>div:first-child{display:flex;flex-direction:column;gap:3px}
+.party-bridge b{font-size:14px;color:#c2c9d6}
+.party-bridge-actions{display:flex;gap:8px;margin-left:auto}
+.party-bridge-actions button{padding:9px 14px;font-size:13px;cursor:pointer}
+.party-bridge-actions .primary{border-color:#e8c66a;color:#e8c66a;background:#443c2b}
+.party-bridge p{flex:1 0 100%;margin:0;color:#9aa3b3;font-size:12px;line-height:1.6}
+
+/* 이상 효과 스택 상한을 올려주는 버프가 켜졌을 때 뜨는 표시.
+   버프 목록(.buff-cap)과 딜사이클 카드(.card-anomaly .cap-note) 양쪽에서 같은 말을 한다. */
+.buff-cap{display:inline-flex;align-items:center;margin-left:6px;padding:1px 6px;border-radius:999px;font-style:normal;font-size:11px;font-weight:600;color:#d8b98a;background:#4f412b;border:1px solid #66543a}
+.card-anomaly .cap-note{color:#d8b98a}
+
+/* ── 진행 게이지와 알림창 (components/Feedback.tsx) ──
+   사진 한 장을 읽는 데 몇 초가 걸린다. 그동안 아무 말이 없으면 멈춘 것으로 보인다. */
+.progress{margin-top:12px}
+.progress-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:6px;font-size:12px;color:#9aa4b6}
+.progress-head b{color:#e9edf5;font-variant-numeric:tabular-nums}
+.progress-track{height:6px;border-radius:999px;background:#30374b;border:1px solid #3c455c;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#536b90,#7f9bc4);transition:width .25s ease}
+
+.dialog-backdrop{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(22,26,36,.66)}
+.dialog{width:min(460px,100%);padding:22px;background:#282f41;border:1px solid #414b61;border-radius:15px;box-shadow:0 24px 60px rgba(0,0,0,.35);cursor:default}
+.dialog h3{margin:0 0 12px;font-size:17px}
+.dialog-body p{margin:0 0 7px;font-size:13px;line-height:1.65;color:#a8b0bf}
+.dialog-body p:last-child{margin-bottom:0}
+.dialog-buttons{display:flex;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin-top:18px}
+.dialog-buttons button{padding:9px 16px;border-radius:9px;background:#30374b;border:1px solid #495466;color:#c2c9d6;font-size:13px;cursor:pointer}
+.dialog-buttons button:hover{background:#364054;color:#e9edf5}
+.dialog-buttons button.primary{background:#475a79;border-color:#61789a;color:#fff;font-weight:600}
+.dialog-buttons button.primary:hover{background:#44567180}
+
+/* ── 디스코드 프로필 입력 ──
+   읽은 값을 사람이 확인하는 화면이라, 「확인 필요」 표시가 눈에 띄는 것이 제일 중요하다. */
+/* 섹션은 .panel을 쓴다 — 전역 .card는 딜사이클 카드(폭 165px 고정)라 여기에 쓰면 안 된다. */
+.profile-import{display:grid;gap:12px}
+.profile-import>.panel{margin-top:0}
+.profile-import .hint{color:#9aa3b3;font-size:12.5px;line-height:1.6;margin:6px 0 0}
+.profile-import h2{margin:0;font-size:18px}
+.profile-import h3{margin:0 0 4px;font-size:15px}
+.profile-import .file-button{display:inline-flex;margin-top:12px;cursor:pointer}
+.profile-import .file-button input{display:none}
+.profile-import .file-button span{padding:10px 18px;border-radius:9px;background:#384257;border:1px solid #495466;color:#e9edf5;font-size:13px;font-weight:600}
+.profile-import .file-button:hover span{background:#3f4a60}
+/* 제목·설명과 단추를 한 줄에 둔다. 좁아지면 단추가 아래로 내려간다. */
+.profile-import .import-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.profile-import .import-head>div{flex:1 1 420px;min-width:0}
+.profile-import .import-head .file-button{margin-top:2px}
+.profile-import .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
+.profile-import .grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:10px}
+@media (max-width:1100px){.profile-import .grid5{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:1100px){.profile-import .grid4{grid-template-columns:repeat(2,1fr)}}
+.profile-import label{display:flex;flex-direction:column;gap:5px;font-size:12px}
+.profile-import label em{font-style:normal;color:#9aa4b6;font-weight:600}
+.profile-import label small{color:#9099ab;font-size:11px}
+.profile-import select,.profile-import input[type=number],.profile-import input[type=text]{padding:7px 8px;border-radius:7px;background:#2a3246;border:1px solid #3c455c;color:#e9edf5;font-size:12.5px;min-width:0}
+.profile-import .row{display:grid;grid-template-columns:1.7fr 1fr;gap:6px}
+/* 끌어서 고르는 숫자 칸(components/LevelSlider.tsx). 값은 오른쪽에 숫자로 같이 둔다. */
+.level-slider{display:flex;align-items:center;gap:8px;min-width:0}
+.level-slider input[type=range]{flex:1;min-width:0;accent-color:#8d9ab0;cursor:pointer}
+.level-slider b{flex:none;min-width:34px;text-align:right;font-size:12.5px;color:#e9edf5;font-variant-numeric:tabular-nums}
+.level-slider b i{font-style:normal;font-size:10.5px;color:#9099ab}
+/* 못 읽어서 아직 비어 있는 칸. 값이 들어간 칸과 눈에 띄게 달라야 그냥 넘어가지 않는다. */
+.profile-import select.blank{color:#978059;border-color:#66543a;background:#3f382b}
+.profile-import .with-face{display:grid;grid-template-columns:34px minmax(0,1fr);gap:7px;align-items:center}
+.profile-import .with-face .face{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:#262d3f;border:1px solid #3c455c;overflow:hidden}
+.profile-import .with-face .face img{width:100%;height:100%;object-fit:cover}
+
+/* 에코 다섯 개는 세로로 쌓고, 한 장은 「왼쪽 그림 + 오른쪽 두 줄」로 짠다.
+   윗줄에 어느 에코인지·주옵션·메인 서브옵션·화음, 아랫줄에 부옵션 다섯 개. */
+.profile-import .echo-drafts{display:grid;gap:10px;margin-top:12px}
+.profile-import .echo-draft{display:grid;grid-template-columns:5% minmax(0,1fr);gap:14px;align-items:start;padding:12px;border:1px solid #3c4558;border-radius:10px;background:#2d3345}
+.profile-import .echo-draft-icon{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:48px}
+.profile-import .echo-draft-icon img,.profile-import .echo-draft-icon>span{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;border-radius:9px;background:#262d3f;border:1px solid #3c455c;object-fit:contain}
+.profile-import .echo-draft-icon>span{color:#828d9f;font-size:20px}
+.profile-import .echo-draft-icon em{font-style:normal;font-size:11px;font-weight:600;color:#9aa3b3}
+.profile-import .echo-draft-body{display:grid;gap:10px;min-width:0}
+.profile-import .echo-draft-line{display:grid;grid-template-columns:1.7fr 1.2fr 1.2fr 1.7fr;gap:10px;align-items:start}
+.profile-import .echo-draft-line.subs{grid-template-columns:repeat(5,minmax(0,1fr))}
+.profile-import .echo-draft-line .cost{font-style:normal;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;color:#d8b98a;background:#4f412b;border:1px solid #66543a}
+@media (max-width:1000px){
+.profile-import .echo-draft{grid-template-columns:56px minmax(0,1fr)}
+.profile-import .echo-draft-line,.profile-import .echo-draft-line.subs{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+
+/* 화음은 두어 개뿐이라 윗줄 한 칸에 세로로 세운다. 안 골랐으면 테두리로 재촉한다. */
+.profile-import .fetters{display:flex;flex-direction:column;align-items:stretch;gap:5px;font-size:12px}
+.profile-import .fetters>em{font-style:normal;color:#9aa4b6;font-weight:600}
+.profile-import .fetters>small{color:#9099ab;font-size:11px}
+.profile-import .fetters .radio{flex-direction:row;align-items:center;gap:5px;padding:4px 9px 4px 6px;border-radius:7px;border:1px solid #3c455c;background:#2a3246;cursor:pointer}
+.profile-import .fetters .radio span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-import .fetters .radio:hover{background:#2e3852}
+.profile-import .fetters .radio img{width:16px;height:16px;object-fit:contain}
+.profile-import .fetters .radio input{accent-color:#7f9bc4;margin:0}
+.profile-import .fetters .radio:has(input:checked){border-color:#61789a;background:#334158}
+.profile-import .fetters.need .radio{border-color:#83663b}
+
+/* 검색해서 고르는 칸. 목록은 칸 바로 아래에 겹쳐 뜬다. */
+.profile-import .search-picker{position:relative;display:flex}
+.profile-import .search-picker input{width:100%}
+.profile-import .search-picker .clear{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:20px;height:20px;line-height:1;border:0;border-radius:5px;background:transparent;color:#9aa3b3;cursor:pointer}
+.profile-import .search-picker .clear:hover{background:#3c455c;color:#e9edf5}
+.profile-import .picker-list{position:absolute;z-index:30;top:calc(100% + 4px);left:0;right:0;max-height:260px;overflow-y:auto;padding:4px;border-radius:8px;border:1px solid #495466;background:#30374b;box-shadow:0 12px 28px rgba(0,0,0,.32)}
+.profile-import .picker-list button{display:flex;align-items:center;gap:7px;width:100%;padding:5px 7px;border:0;border-radius:6px;background:transparent;color:#e9edf5;font-size:12.5px;text-align:left;cursor:pointer}
+.profile-import .picker-list button:hover{background:#3c475e}
+.profile-import .picker-list button.on{background:#3f4e67}
+.profile-import .picker-list button img{width:22px;height:22px;border-radius:5px;object-fit:cover;flex:0 0 auto}
+.profile-import .picker-list button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.profile-import .picker-list button em{font-style:normal;color:#9099ab;font-size:11px;flex:0 0 auto}
+.profile-import .picker-empty{padding:8px;color:#9099ab;font-size:12px}
+
+/* 적용 단추와 설명도 한 줄로 */
+.profile-import .apply-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.profile-import .apply-row .primary{flex:0 0 auto}
+.profile-import .apply-row .hint{flex:1 1 380px;margin:0}
+/* 확인이 필요한 칸만 테두리로 표시한다. 나머지는 조용히 둔다. */
+.profile-import label.warn select,.profile-import label.warn input[type=text]{border-color:#83663b}
+.profile-import .warn-note{color:#d8b98a}
+.profile-import .primary{padding:11px 20px;border-radius:9px;background:#475a79;border:1px solid #61789a;color:#fff;font-size:13.5px;font-weight:600;cursor:pointer}
+.profile-import .primary:disabled{opacity:.45;cursor:default}
+
+/* ── 캐릭터 버프 확인 · 캐릭터 공격타입 확인 ──
+   둘 다 원문과 옮겨 적은 결과를 나란히 놓고 훑는 화면이라, 눈에 띄어야 하는 것은
+   「빠뜨린 것 같음」과 「판정 갈림」 두 가지뿐이다. 나머지는 조용히 둔다. */
+.char-buff-group{padding:16px 18px}
+.char-buff-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.char-buff-head img{width:34px;height:34px;border-radius:50%;object-fit:cover;border:1px solid #4a5266;background:#262d3f}
+.char-buff-head h2{margin:0;font-size:17px}
+.char-buff-head span{margin-left:auto;font-size:12px;color:#9aa3b3}
+
+.char-buff-card{padding:11px 13px;margin-top:8px;border:1px solid #384155;border-radius:11px;background:#2a3246}
+.char-buff-card.is-missing{border-color:#5a4326;background:#3f3527}
+.char-buff-card.is-checked{opacity:.55}
+.char-buff-card.is-later{border-color:#66543a}
+.char-buff-card-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px;font-size:13px}
+.char-buff-card-head b{font-size:13.5px}
+.char-buff-card-head em{font-style:normal;font-size:11px;color:#9099ab}
+.char-buff-card-head .data-check,.char-buff-card-head .data-later{margin-left:0}
+.char-buff-card-head>:nth-last-child(2){margin-left:auto}
+.char-buff-kind{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#8fb4d9;background:#293b55;border:1px solid #394f69}
+.char-buff-warn{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#e0a94d;background:#4f412b;border:1px solid #66543a}
+
+.char-buff-list{list-style:none;margin:9px 0 0;padding:0;display:grid;gap:5px}
+.char-buff-list li{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;padding:5px 8px;border-radius:7px;background:#282f41;font-size:12.5px}
+.char-buff-list li em{font-style:normal;color:#8fb4d9}
+.char-buff-list li span{color:#9099ab;font-size:11.5px}
+.char-buff-none{margin:9px 0 0;font-size:12.5px;color:#9aa3b3}
+
+.char-buff-quotes{margin-top:9px;padding:8px 10px;border-left:2px solid #4a5266;background:#282f41;border-radius:0 8px 8px 0}
+.char-buff-quotes small{display:block;margin-bottom:4px;letter-spacing:.6px;color:#8791a4}
+.char-buff-quotes p{margin:0 0 4px;font-size:12.5px;line-height:1.6;color:#a8b0bf}
+.char-buff-quotes p:last-child{margin-bottom:0}
+
+.char-buff-more{margin-top:8px;padding:4px 10px;border-radius:7px;background:#2a3246;border:1px solid #3c455c;color:#8fb4d9;font-size:11.5px;cursor:pointer}
+.char-buff-more:hover{border-color:#8794aa;color:#cfe0f2}
+.char-buff-text{margin:8px 0 0;padding:10px 12px;border-radius:8px;background:#262d3f;border:1px solid #384155;color:#a8b0bf;font-size:12px;line-height:1.7;white-space:pre-wrap;font-family:inherit;max-height:340px;overflow-y:auto}
+
+.char-buff-orphans{margin-top:10px;padding:9px 11px;border-radius:9px;background:#3f3527;border:1px solid #66543a}
+.char-buff-orphans small{display:block;margin-bottom:5px;letter-spacing:.6px;color:#d8b98a}
+.char-buff-orphans p{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 4px;font-size:12.5px}
+.char-buff-orphans p em{font-style:normal;color:#8fb4d9}
+
+/* 공격타입 확인 — 분류와 보너스 칸이 갈린 줄만 색으로 짚는다. */
+.char-attack-card.is-missing{border-color:#5a4326}
+.char-attack-card.is-checked{opacity:.55}
+.char-attack-head{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.char-attack-head img{width:38px;height:38px;border-radius:50%;object-fit:cover;border:1px solid #4a5266;background:#262d3f}
+.char-attack-name h2{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 3px;font-size:16px}
+.char-attack-name>span{font-size:12px;color:#9aa3b3}
+.char-attack-kind{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#8fb4d9;background:#293b55;border:1px solid #394f69}
+.char-attack-switch{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#d8b98a;background:#4f412b;border:1px solid #66543a}
+.char-attack-mode{padding:2px 8px;border-radius:999px;font-size:11px;font-weight:600;color:#a3c6b4;background:#2d4335;border:1px solid #3d5f47}
+.char-attack-card tr.is-switched td{background:#3f3527}
+
+/* 공격타입 확인 — 확인 표시가 **칸마다** 붙는다.
+   값 옆에 조그만 체크를 세우고, 확인한 칸만 초록으로 물들인다. */
+.char-attack-card .cell-wrap{display:flex;align-items:center;gap:6px;justify-content:space-between}
+.char-attack-card .cell-value{min-width:0}
+.char-attack-card .cell-check{flex:none;width:19px;height:19px;padding:0;line-height:1;border-radius:5px;
+  background:#2a3246;border:1px solid #3c455c;color:#828d9f;font-size:11px;cursor:pointer;opacity:.45}
+.char-attack-card tr:hover .cell-check{opacity:1}
+.char-attack-card .cell-check:hover{border-color:#8794aa;color:#cfe0f2}
+.char-attack-card .cell-check.on{opacity:1;background:#304b39;border-color:#3e6b4a;color:#a9d8b8}
+.char-attack-card td.is-ok{background:#2d3d31}
+/* 표 머리의 전체선택 — 값 칸의 체크와 같은 모양이되 늘 또렷하게 둔다. */
+.char-attack-card th .cell-check{opacity:1}
+.char-attack-card th .cell-wrap{gap:8px}
+.char-attack-review{white-space:nowrap;text-align:right}
+.char-attack-review .cell-check{opacity:1;margin-right:6px;vertical-align:middle}
+.char-attack-review b{margin-right:6px;font-size:11.5px;color:#9aa3b3;font-variant-numeric:tabular-nums}
+.char-attack-review b.all-done{color:#a9d8b8}
+.char-attack-card tr.is-checked td{opacity:.55}
+.char-attack-card tr.is-later td{background:#3f3527}
+
+/* ── 공격 트리거 확인 탭 ──────────────────────────────────── */
+.data-progress{display:flex;align-items:baseline;gap:12px;margin-bottom:14px}
+.data-progress b{font-size:16px;color:#e9edf5}
+.data-progress span{font-size:12px;color:#9aa3b3}
+.data-cell-note{font-size:11px;color:#8b95a8;line-height:1.6;max-width:420px}
+.data-cell-note b{color:#a3adbd;font-weight:600}
+.trigger-source{margin-top:12px;padding:10px 12px;background:#2d3345;border:1px solid #384155;border-radius:10px}
+.trigger-source summary{cursor:pointer;font-size:12px;color:#9ea7b7}
+.trigger-source ul{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.trigger-source li{font-size:12px;line-height:1.6;color:#a3adbd;padding:6px 9px;background:#2a3245;border:1px solid #364054;border-radius:8px}
+
+/* ── 사이클 관리 ──────────────────────────────────────────────
+   한 줄에 얼굴 · 이름 · 단추. 담긴 환경이 지금과 다르면 줄 안에서 미리 알린다. */
+.cycle-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cycle-list li{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 14px;
+  background:#2d3345;border:1px solid #384155;border-radius:10px}
+.cycle-row-main{display:flex;align-items:center;gap:14px;flex:1;min-width:0}
+.cycle-row-name{display:flex;flex-direction:column;gap:2px;min-width:0}
+.cycle-row-name b{font-size:14px;color:#e9edf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cycle-row-name em{font-style:normal;font-size:11px;color:#9aa3b3}
+/* 얼굴 아래 체인 수 — 담을 때의 환경이라 지금과 다를 수 있다는 표시이기도 하다. */
+.preset-faces em b{display:block;font-size:9px;color:#c9ab6b;font-weight:700}
+.cycle-warn{font-size:11px;color:#e0a94d}
+.cycle-row-actions{display:flex;gap:6px;margin-left:auto}
+.cycle-row-actions button{padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer;background:#2a3246;white-space:nowrap}
+.cycle-row-actions button:hover{border-color:#8794aa}
+.cycle-row-actions .primary{border-color:#8d9ab0;color:#fff;background:#30394a}
+
+/* 저장 줄 — 루틴 위에 잠깐 펼쳐지는 이름 입력. */
+.cycle-save{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;padding:10px 12px;
+  background:#2a3246;border:1px solid #3c455c;border-radius:10px}
+.cycle-save input{flex:1;min-width:180px;padding:8px 11px;font:inherit;font-size:13px;color:#e9edf5;
+  background:#262d3f;border:1px solid #3c455c;border-radius:8px}
+.cycle-save button{padding:8px 16px;font-size:13px;border-radius:8px;cursor:pointer}
+.cycle-save .primary{border-color:#8d9ab0;color:#fff;background:#30394a}
+.cycle-save small{flex-basis:100%;font-size:11px;color:#8b95a8;letter-spacing:0}
+.cycle-saved{margin:0 0 12px;font-size:12px;color:#8fd9b4}
+
+/* 추출·불러오기·확인 창 */
+.cycle-modal{width:min(720px,100%)}
+.cycle-code{width:100%;min-height:220px;padding:12px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:11px;line-height:1.6;color:#c2c9d6;background:#2a3246;border:1px solid #3c455c;border-radius:10px;resize:vertical}
+.cycle-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:12px}
+.cycle-modal-actions button{padding:9px 18px;font-size:13px;border-radius:8px;cursor:pointer;background:#2a3246}
+.cycle-modal-actions .primary{border-color:#8d9ab0;color:#fff;background:#30394a}
+.cycle-modal-actions button:disabled{opacity:.4;cursor:not-allowed}
+/* 파일 고르기 — 붙여넣기보다 앞에 세운다. */
+.cycle-import-file{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;
+  padding:14px;background:#2a3246;border:1px dashed #4a5266;border-radius:10px}
+.cycle-import-file button{padding:9px 18px;font-size:13px;border-radius:8px;cursor:pointer;
+  border-color:#8d9ab0;color:#fff;background:#30394a}
+.cycle-import-file small{font-size:11px;color:#8b95a8;letter-spacing:0}
+.cycle-error{margin:10px 0 0;padding:10px 12px;font:inherit;font-size:12px;line-height:1.7;
+  white-space:pre-wrap;color:#d99a9a;background:#3a2e2e;border:1px solid #553e3e;border-radius:8px}
+.cycle-diff{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto}
+.cycle-diff li{display:flex;gap:12px;align-items:baseline;padding:7px 10px;background:#2a3246;border:1px solid #364054;border-radius:8px;font-size:12px}
+.cycle-diff b{flex:none;min-width:84px;color:#e9edf5;font-weight:600}
+.cycle-diff span{color:#a3adbd}
+.cycle-diff em{display:block;font-style:normal;font-size:10px;color:#6b7689;margin-top:2px}
+.cycle-note{margin:10px 0 0;font-size:12px;line-height:1.7;color:#9aa3b3}
+
+@media(max-width:900px){.cycle-row-actions{margin-left:0;flex-basis:100%}}
+
+/* ── 저장소 띠 ────────────────────────────────────────────────
+   설정이 어디에 저장되는지 늘 보이게 한다. 연결 전에는 탭을 닫으면 사라지므로
+   「저장 안 됨」을 눈에 띄게 두는 것이 이 띠의 본업이다. */
+.storage-bar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px;
+  padding:10px 14px;border-radius:10px;font-size:12px;line-height:1.6}
+.storage-bar.on{background:#2d4335;border:1px solid #3d5f47;color:#a3c6b4}
+.storage-bar.warn{background:#4f412b;border:1px solid #66543a;color:#d8b98a}
+.storage-bar b{flex:none;font-size:12px;font-weight:700}
+.storage-bar span{min-width:0}
+.storage-bar code{padding:1px 5px;border-radius:4px;background:rgba(0,0,0,.25);font-size:11px}
+.storage-bar-actions{display:flex;gap:6px;margin-left:auto;flex:none}
+.storage-bar-actions button{padding:5px 12px;font-size:12px;border-radius:7px;cursor:pointer;background:#2a3246;color:#c2c9d6}
+.storage-bar-actions button:hover{border-color:#8794aa}
+.storage-bar-actions .primary{border-color:#8d9ab0;color:#fff;background:#30394a}
+.storage-bar-actions button:disabled{opacity:.5;cursor:not-allowed}
+.storage-note{margin:0 0 14px;font-size:12px;color:#8fd9b4}
+
+/* 양쪽에 내용이 있을 때 고르는 창 — 어느 쪽을 덮는지 분명히 적는다. */
+.storage-modal{width:min(560px,100%)}
+.storage-choice{display:flex;flex-direction:column;gap:8px}
+.storage-choice button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;
+  padding:14px 16px;text-align:left;cursor:pointer;background:#2a3246;border:1px solid #3c455c;border-radius:10px}
+.storage-choice button:hover{border-color:#8d9ab0;background:#30394a}
+.storage-choice b{font-size:13px;color:#e9edf5}
+.storage-choice em{font-style:normal;font-size:11px;line-height:1.6;color:#9aa3b3}
