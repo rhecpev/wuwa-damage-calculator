@@ -11,6 +11,7 @@ import {
 import { nodeStats } from "../../../data/characterNodes";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { calculateFinalStats } from "../../../calculator/stats";
+import { echoAbilityPanelStats } from "../../../calculator/equippedBuffs";
 import { equippedEchoes } from "../../../data/echoStore";
 import type { Echo, Element } from "../../../types/game";
 import type { Stats } from "../../../types/stats";
@@ -135,10 +136,20 @@ export function CharacterStatsSection({
           description: "켜둔 스킬 트리 스탯 노드의 합계",
           stats: nodeStats(character.id, characterNodes[character.id]),
         },
+        // 1번 자리 에코의 「메인 슬롯에 장착 시」 효과. 발동 조건이 없어 늘 걸려 있고
+        // 게임 속성 창에도 그대로 찍히는 값이라 여기서 함께 더한다.
+        // (화음 세트 효과는 속성 창에 찍히지 않으므로 들어오지 않는다 — equippedBuffs.ts 참고.)
+        {
+          id: "echoAbility",
+          name: "메인 에코 어빌리티",
+          source: "장착 효과",
+          description: "1번 자리 에코의 「메인 슬롯에 장착 시」 효과",
+          stats: echoAbilityPanelStats(characterId, characterEchoLinks),
+        },
       ],
       chain,
     );
-  }, [character, weapon, echoes, chain, characterNodes]);
+  }, [character, characterId, characterEchoLinks, weapon, echoes, chain, characterNodes]);
 
   if (!character || !stats) return null;
 

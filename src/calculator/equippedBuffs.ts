@@ -10,12 +10,14 @@ import {
   getEchoBuffOverrides,
 } from "../data/echoBuffOverrides";
 import { loadEchoLinks, loadMyEchoes, type EchoLink, type MyEcho } from "../data/echoStore";
+import { CATEGORY_BONUS_KEY, ELEMENT_BONUS_KEY } from "./damage";
 import type {
   Character,
   CharacterWeaponConfig,
   ManualBuff,
   PartyMemberConfig,
 } from "../types/game";
+import type { Stats } from "../types/stats";
 
 /**
  * 장착한 무기와 편성한 캐릭터가 들고 있는 버프를 버프 목록에 자동으로 합쳐 넣는다.
@@ -274,6 +276,68 @@ export function deriveEchoBuffs(
         ...(mainIcon ? { iconUrl: mainIcon } : {}),
       });
     });
+  }
+
+  return out;
+}
+
+/** 피해 종류 → 스탯창 칸. 속성 표와 분류 표를 한 번에 뒤지려고 합쳐 둔다. */
+const BONUS_KEY_BY_DAMAGE_TYPE: Partial<Record<string, keyof Stats>> = {
+  ...ELEMENT_BONUS_KEY,
+  ...CATEGORY_BONUS_KEY,
+};
+
+/** 이 버프가 스탯창의 어느 칸에 찍히는지. 찍힐 칸이 없으면 null. */
+function panelStatKey(buff: ManualBuff): keyof Stats | null {
+  switch (buff.target) {
+    case "damageBonus":
+      // "All"(전체 피해 보너스)과 "Chain"(협동 공격)은 게임 속성 창에도 칸이 없다.
+      return BONUS_KEY_BY_DAMAGE_TYPE[buff.damageType] ?? null;
+    case "critRate":
+      return "critRate";
+    case "critDamage":
+      return "critDamage";
+    case "energyRegen":
+      return "energyRegen";
+    default:
+      return null;
+  }
+}
+
+/**
+ * 메인 슬롯 에코 어빌리티에서 「끼고만 있으면 걸리는」 효과를 스탯창 값으로 옮긴다.
+ *
+ * 1번 자리에 낀 에코에는 「메인 슬롯에 장착 시 …」로 적힌 상시 효과가 붙는다.
+ * 발동 조건이 없어서 게임의 캐릭터 속성 창에 그대로 찍히는 값이고,
+ * 그래서 이 앱의 스탯 화면에도 보여야 한다.
+ *
+ * 화음 세트 효과는 여기 넣지 않는다 — 그쪽은 속성 창에 찍히지 않고 전투 중에 붙는다(실측 확인).
+ * 세트를 맞춰도 스탯 화면의 숫자가 그대로인 것이 맞다.
+ *
+ * 빼는 것 —
+ *   uptime "active"   발동 조건이 있는 것. 끼고만 있어서는 걸리지 않는다.
+ *   scope "party"     남에게 가는 것. 이 캐릭터의 속성 창에 찍힐 값이 아니다.
+ *   scaleFrom 있는 것  수치가 스탯에서 나오는 것. 스탯을 확정하는 자리에서 그 스탯을 되읽을 수 없다.
+ * 스탯창에 칸이 없는 것(전체 피해 보너스 · 협동 공격 등)도 옮길 자리가 없어 조용히 넘어간다.
+ *
+ * 이 값은 **보여주기 전용**이다. 피해 계산은 같은 효과를 ManualBuff 쪽에서 이미 받고 있으므로,
+ * 여기서 더한 것을 계산에 다시 넣으면 두 번 걸린다.
+ */
+export function echoAbilityPanelStats(
+  characterId: string,
+  links: EchoLink[] = loadEchoLinks(),
+  owned: MyEcho[] = loadMyEchoes(),
+): Partial<Stats> {
+  const out: Partial<Stats> = {};
+
+  for (const buff of deriveEchoBuffs([characterId], links, owned)) {
+    if (!buff.id.startsWith("echoability:")) continue;
+    if (buff.uptime === "active" || buff.scope === "party") continue;
+    if (buff.scaleFrom) continue;
+
+    const key = panelStatKey(buff);
+    if (!key) continue;
+    out[key] = (out[key] ?? 0) + buff.value * (buff.stacks || 1);
   }
 
   return out;
