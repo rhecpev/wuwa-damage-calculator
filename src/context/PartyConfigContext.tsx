@@ -93,7 +93,7 @@ export const PARTY_SLOTS: PartySlot[] = ["mainDps", "subDps", "support"];
 
 /** 몬스터 레벨 입력 범위 */
 export const ENEMY_LEVEL_MIN = 1;
-export const ENEMY_LEVEL_MAX = 110;
+export const ENEMY_LEVEL_MAX = 200;
 
 interface PartyConfigContextType {
   config: PartyConfig;
@@ -566,7 +566,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     if (config.mainDps.characterId) setCharacterMode(config.mainDps.characterId, mode);
   };
 
-  /** 몬스터 레벨. 슬라이더/입력 어느 쪽이든 1~110으로 잘라서 저장한다. */
+  /** 몬스터 레벨. 슬라이더/입력 어느 쪽이든 1~200으로 잘라서 저장한다. */
   const setEnemyLevel = (level: number) => {
     const clamped = Math.min(Math.max(Math.round(level), ENEMY_LEVEL_MIN), ENEMY_LEVEL_MAX);
     setConfig((current) => ({

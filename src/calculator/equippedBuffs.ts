@@ -287,7 +287,14 @@ const BONUS_KEY_BY_DAMAGE_TYPE: Partial<Record<string, keyof Stats>> = {
   ...CATEGORY_BONUS_KEY,
 };
 
-/** 이 버프가 스탯창의 어느 칸에 찍히는지. 찍힐 칸이 없으면 null. */
+/**
+ * 이 버프가 스탯창의 어느 칸에 찍히는지. 찍힐 칸이 없으면 null.
+ *
+ * 공격력·HP·방어력 %는 어느 묶음에서 왔는지로 자리가 갈린다(calculateFinalStats 주석 참고).
+ *   panel = 스탯창 값을 확정할 때 먼저 곱해지는 것 — 무기 효과 · 에코 옵션 · 스킬 트리
+ *   buff  = 확정된 값 위에 더해지는 것 — 공명체인 · 파티 버프 · 에코 세트 효과
+ * 그래서 나머지 칸과 달리 이 셋만 statGroup을 보고 자리를 고른다.
+ */
 function panelStatKey(buff: ManualBuff): keyof Stats | null {
   switch (buff.target) {
     case "damageBonus":
@@ -299,39 +306,70 @@ function panelStatKey(buff: ManualBuff): keyof Stats | null {
       return "critDamage";
     case "energyRegen":
       return "energyRegen";
+    case "syncAmplify":
+      return "syncAmplify";
+    case "discordEfficiency":
+      return "discordEfficiency";
+
+    // 공격력·HP·방어력 — 스탯창의 세 줄. 공격력만 있고 체력·방어력이 빠지면
+    // 같은 무기·에코를 끼고도 한 줄만 맞는 화면이 된다.
+    case "atkFlat":
+      return "atk";
+    case "atkPercent":
+      return buff.statGroup === "panel" ? "atkPercent" : "atkPercentBuff";
+    case "hpPercent":
+      return buff.statGroup === "panel" ? "hpPercent" : "hpPercentBuff";
+    case "defPercent":
+      return buff.statGroup === "panel" ? "defPercent" : "defPercentBuff";
+
     default:
       return null;
   }
 }
 
 /**
- * 메인 슬롯 에코 어빌리티에서 「끼고만 있으면 걸리는」 효과를 스탯창 값으로 옮긴다.
+ * 낀 것에서 나오는 **조건 없는** 효과를 스탯창 값으로 옮긴다.
  *
- * 1번 자리에 낀 에코에는 「메인 슬롯에 장착 시 …」로 적힌 상시 효과가 붙는다.
- * 발동 조건이 없어서 게임의 캐릭터 속성 창에 그대로 찍히는 값이고,
- * 그래서 이 앱의 스탯 화면에도 보여야 한다.
+ * 세 군데서 모은다.
+ *   무기 효과       「공격력이 12% 증가된다」처럼 끼고만 있으면 걸리는 것
+ *   고유 스킬·체인  발동 조건 없이 늘 붙는 것
+ *   에코 어빌리티   1번 자리 에코의 「메인 슬롯에 장착 시 …」
+ * 셋 다 게임의 캐릭터 속성 창에 그대로 찍히는 값이라, 이 앱의 스탯 화면에도 보여야 한다.
  *
- * 화음 세트 효과는 여기 넣지 않는다 — 그쪽은 속성 창에 찍히지 않고 전투 중에 붙는다(실측 확인).
- * 세트를 맞춰도 스탯 화면의 숫자가 그대로인 것이 맞다.
+ * 화음 세트 효과는 넣지 않는다 — 그쪽은 속성 창에 찍히지 않고 전투 중에 붙는다(실측 확인).
+ * 세트를 맞춰도 스탯 화면의 숫자가 그대로인 것이 맞다. 그래서 에코 쪽은 어빌리티만 걸러 받는다.
  *
  * 빼는 것 —
  *   uptime "active"   발동 조건이 있는 것. 끼고만 있어서는 걸리지 않는다.
  *   scope "party"     남에게 가는 것. 이 캐릭터의 속성 창에 찍힐 값이 아니다.
  *   scaleFrom 있는 것  수치가 스탯에서 나오는 것. 스탯을 확정하는 자리에서 그 스탯을 되읽을 수 없다.
- * 스탯창에 칸이 없는 것(전체 피해 보너스 · 협동 공격 등)도 옮길 자리가 없어 조용히 넘어간다.
+ * 스탯창에 칸이 없는 것(전체 피해 보너스 · 협동 공격 · 저항 무시 등)도 조용히 넘어간다.
  *
  * 이 값은 **보여주기 전용**이다. 피해 계산은 같은 효과를 ManualBuff 쪽에서 이미 받고 있으므로,
  * 여기서 더한 것을 계산에 다시 넣으면 두 번 걸린다.
  */
-export function echoAbilityPanelStats(
-  characterId: string,
+export function equippedPanelStats(
+  character: Character,
+  weaponConfig: CharacterWeaponConfig | undefined,
+  resonanceChain = 0,
   links: EchoLink[] = loadEchoLinks(),
   owned: MyEcho[] = loadMyEchoes(),
+  inherents: Record<string, string[] | undefined> = {},
 ): Partial<Stats> {
-  const out: Partial<Stats> = {};
+  const id = character.id;
 
-  for (const buff of deriveEchoBuffs([characterId], links, owned)) {
-    if (!buff.id.startsWith("echoability:")) continue;
+  const weaponBuffs = weaponConfig ? deriveWeaponBuffs({ [id]: weaponConfig }, [id]) : [];
+  const characterBuffs = deriveCharacterBuffs(
+    [{ character, config: { characterId: id, weaponId: weaponConfig?.weaponId ?? "", echoIds: [], resonanceChain } }],
+    inherents,
+  );
+  // 에코는 어빌리티만 — 화음 세트는 속성 창에 찍히지 않는다.
+  const echoBuffs = deriveEchoBuffs([id], links, owned).filter((buff) =>
+    buff.id.startsWith("echoability:"),
+  );
+
+  const out: Partial<Stats> = {};
+  for (const buff of [...weaponBuffs, ...characterBuffs, ...echoBuffs]) {
     if (buff.uptime === "active" || buff.scope === "party") continue;
     if (buff.scaleFrom) continue;
 

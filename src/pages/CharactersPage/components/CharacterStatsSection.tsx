@@ -11,7 +11,7 @@ import {
 import { nodeStats } from "../../../data/characterNodes";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { calculateFinalStats } from "../../../calculator/stats";
-import { echoAbilityPanelStats } from "../../../calculator/equippedBuffs";
+import { equippedPanelStats } from "../../../calculator/equippedBuffs";
 import { equippedEchoes } from "../../../data/echoStore";
 import type { Echo, Element } from "../../../types/game";
 import type { Stats } from "../../../types/stats";
@@ -136,20 +136,21 @@ export function CharacterStatsSection({
           description: "켜둔 스킬 트리 스탯 노드의 합계",
           stats: nodeStats(character.id, characterNodes[character.id]),
         },
-        // 1번 자리 에코의 「메인 슬롯에 장착 시」 효과. 발동 조건이 없어 늘 걸려 있고
-        // 게임 속성 창에도 그대로 찍히는 값이라 여기서 함께 더한다.
+        // 무기 효과 · 고유 스킬 · 메인 에코 어빌리티 중 **조건 없는** 것.
+        // 끼고만 있으면 늘 걸려서 게임 속성 창에도 그대로 찍히는 값이라 여기서 함께 더한다.
+        // 공격력뿐 아니라 체력·방어력도 같은 자리에서 잡힌다.
         // (화음 세트 효과는 속성 창에 찍히지 않으므로 들어오지 않는다 — equippedBuffs.ts 참고.)
         {
-          id: "echoAbility",
-          name: "메인 에코 어빌리티",
-          source: "장착 효과",
-          description: "1번 자리 에코의 「메인 슬롯에 장착 시」 효과",
-          stats: echoAbilityPanelStats(characterId, characterEchoLinks),
+          id: "equipped",
+          name: "장착 효과",
+          source: "무기 · 고유 · 에코 어빌리티",
+          description: "발동 조건 없이 늘 걸리는 효과",
+          stats: equippedPanelStats(character, equipped, chain, characterEchoLinks),
         },
       ],
       chain,
     );
-  }, [character, characterId, characterEchoLinks, weapon, echoes, chain, characterNodes]);
+  }, [character, equipped, characterEchoLinks, weapon, echoes, chain, characterNodes]);
 
   if (!character || !stats) return null;
 
