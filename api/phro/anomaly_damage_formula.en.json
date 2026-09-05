@@ -1,0 +1,128 @@
+{
+    "id": "14",
+    "title": "Wuthering Waves - Attribute Anomaly Damage Formula",
+    "sections": [
+        "Anomaly Overview",
+        "Erosion (Aero)",
+        "Luminous (Spectro)",
+        "Spark (Electro)",
+        "Darken (Havoc)"
+    ],
+    "content": {
+        "introduction": "A comprehensive guide to the calculation of Attribute Anomaly damage and debuffs in Wuthering Waves.",
+        "color_coding": {
+            "AERO": "#11c917",
+            "SPECTRO": "#e5d41d",
+            "ELECTRO": "#9c27b0",
+            "HAVOC": "#7e57c2",
+            "DEF": "#4759cf",
+            "RES": "#1e88e5",
+            "DEEPEN": "#029c69"
+        },
+        "main_formula": {
+            "title": "Anomaly Effect Damage Formula",
+            "formula": "Anomaly Damage = Anomaly Base × Occurrences × Boost × Anomaly Crit × DEF Multiplier × RES Multiplier × Final DMG",
+            "chain": [
+                {
+                    "label": "Anomaly Base",
+                    "color": "#11c917"
+                },
+                {
+                    "label": "Occurrences",
+                    "color": "#e0883a"
+                },
+                {
+                    "label": "Boost",
+                    "color": "#029c69"
+                },
+                {
+                    "label": "Anomaly Crit",
+                    "color": "#fbc02d"
+                },
+                {
+                    "label": "DEF Multiplier",
+                    "color": "#4759cf"
+                },
+                {
+                    "label": "RES Multiplier",
+                    "color": "#1e88e5"
+                },
+                {
+                    "label": "Final DMG",
+                    "color": "#d0fc5c"
+                }
+            ]
+        },
+        "sections": [
+            {
+                "id": "1",
+                "title": "Anomaly Base = B(L) × Elemental Coefficient",
+                "color": "#11c917",
+                "description": "The base damage of every anomaly effect is calculated by multiplying the level-based reference value B(L) by the elemental coefficient.",
+                "formula": "Anomaly Base = B(L) × Elemental Coefficient × Stack Function",
+                "is_formula": true,
+                "details": [
+                    "B(L): Level-based anomaly reference value. Lv90 = 3674",
+                    "Elemental coefficient · Stack function: Frost Chafe 203.77% [10 stacks], Fusion Burst 698.63% [10 stacks], Electro Flare 415.85% [10 stacks]"
+                ]
+            },
+            {
+                "id": "2",
+                "title": "Tick-Damage (Aero Erosion · Spectro Frazzle · Electro Flare)",
+                "color": "#e5d41d",
+                "description": "Triggers at fixed intervals while stacks are maintained, consuming 1 stack per trigger. Damage scales with the current stack count.",
+                "formula_conditions": [
+                    "Aero Erosion: 1 stack 1654 / n stacks 4134×(n−1)  (Lv90 basis)",
+                    "Spectro Frazzle: 1 stack 898×1.235 / n stacks 898×(n−1)",
+                    "Electro Flare: 3674×0.41585×n, stacks halved (floor) each tick, summed as decay series"
+                ],
+                "note": "Only Electro Flare halves its stacks each tick, accumulating as a decay series."
+            },
+            {
+                "id": "3",
+                "title": "Stack-Burst (Frost Chafe · Fusion Burst)",
+                "color": "#7e57c2",
+                "description": "Explodes into a single heavy hit when stacks reach the maximum. Occurrences = applications ÷ max stacks.",
+                "formula_conditions": [
+                    "Frost Chafe: 3674 × 2.0377 × (1 + α + 0.33×over)",
+                    "Fusion Burst: 3674 × 6.9863 × (1 + α + 0.33×over)",
+                    "over = max(0, n−10): +33% per stack when team buffs exceed max stacks (summed with α, not multiplied separately)"
+                ],
+                "note": "α: DMG-rate increase effect (applied only when present, default 0). The excess-stack bonus (0.33×over) is added into this same term alongside α, not multiplied as a separate factor."
+            },
+            {
+                "id": "4",
+                "title": "Debuff (Havoc Bane)",
+                "color": "#7e57c2",
+                "description": "A debuff-type anomaly effect that deals no direct damage.",
+                "formula": "DEF Reduction Rate = Stacks × 2% (max 6%)",
+                "is_formula": true,
+                "note": "The DEF Reduction from Havoc Bane applies directly to anomaly damage, and multiplies with DEF Ignore effects for normal damage."
+            },
+            {
+                "id": "5",
+                "title": "Common Multiplier Chain",
+                "color": "#029c69",
+                "description": "The following multipliers are applied sequentially to the calculated Anomaly Base:",
+                "formula": "× Occurrences × Boost(1+Boost%) × Anomaly Crit × DEF Multiplier × RES Multiplier × Final DMG(1+Total DMG)"
+            },
+            {
+                "id": "6",
+                "title": "DEF Multiplier",
+                "color": "#4759cf",
+                "description": "Damage reduction multiplier from enemy defense:",
+                "formula": "DEF Multiplier = (800 + 8 × Resonator Level) / (800 + 8 × Resonator Level + (792 + 8 × Enemy Level) × (1 − DEF Reduction))",
+                "is_formula": true,
+                "note": "Anomaly damage's DEF Multiplier does not factor in DEF Ignore — only DEF Reduction applies. (Normal damage factors in both DEF Ignore and DEF Reduction.)"
+            },
+            {
+                "id": "7",
+                "title": "RES Multiplier",
+                "color": "#1e88e5",
+                "description": "Multiplier from enemy elemental resistance (same rules as normal damage): 0.8 + RES Pen; excess over-penetration is halved.",
+                "formula": "RES Multiplier = max(0, 0.8 + RES Pen)",
+                "is_formula": true
+            }
+        ]
+    }
+}

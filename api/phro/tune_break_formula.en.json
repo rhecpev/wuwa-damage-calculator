@@ -1,0 +1,150 @@
+{
+  "id": "14",
+  "title": "Wuthering Waves - Tune Break Formula",
+  "sections": ["Tune Break Formula", "Base Value", "Tune Break Multiplier", "Tune Break Boost", "RES Multiplier", "DEF Multiplier", "Total DMG Multiplier"],
+  "content": {
+    "introduction": "Comprehensive Tune Break damage calculation formula for Wuthering Waves.",
+    "main_formula": {
+      "title": "Tune Break Damage Formula",
+      "formula": "Tune Break Damage =",
+      "chain": [
+        {"label": "Base 10000", "color": "#caa24a"},
+        {"label": "Multiplier", "color": "#e53935"},
+        {"label": "Boost", "color": "#43a047"},
+        {"label": "Tune Crit", "color": "#fbc02d"},
+        {"label": "RES", "color": "#1e88e5"},
+        {"label": "DEF", "color": "#4759cf"},
+        {"label": "Tune DMG Bonus", "color": "#fb8c00"},
+        {"label": "Repeat", "color": "#da3b70"}
+      ]
+    },
+    "sections": [
+      {
+        "id": "1",
+        "title": "Tune Break Base Value",
+        "description": "Fixed base value for Tune Break damage calculation:",
+        "formula": "Tune Break Base Value = 10000",
+        "is_formula": true,
+        "note": "This value is constant and does not change based on character stats."
+      },
+      {
+        "id": "2",
+        "title": "Tune Break Multiplier",
+        "color": "#e53935",
+        "description": "Skill-specific multiplier for Tune Break damage:",
+        "details": [
+          "Each Tune Break skill has its own multiplier value",
+          "This value is defined per skill and varies between characters",
+          "Check individual skill descriptions for exact multiplier values"
+        ],
+        "note": "Tune Break Multiplier is determined by the specific skill being used."
+      },
+      {
+        "id": "3",
+        "title": "Tune Break Boost",
+        "color": "#43a047",
+        "description": "Tune Break Boost multiplier from various sources:",
+        "formula": "Tune Break Boost = (100 + Additional Tune Break Boost) / 100",
+        "is_formula": true,
+        "details": [
+          "Base value is 100 (representing 100%)",
+          "Additional bonus is added as integer value",
+          "Final result is divided by 100 to convert to multiplier"
+        ],
+        "example": {
+          "title": "Example:",
+          "base": "Base: 100",
+          "bonus": "Additional Bonus: +50 (from echoes, weapons, etc.)",
+          "result": "Tune Break Boost = (100 + 50) / 100 = 1.5",
+          "is_formula_example": true
+        }
+      },
+      {
+        "id": "4",
+        "title": "RES Multiplier",
+        "color": "#1e88e5",
+        "description": "Resistance calculation based on enemy resistance (same formula as normal damage):",
+        "formula": "Piecewise function based on Res_Tot value",
+        "formula_conditions": [
+          "1 - Res_Tot if Res_Tot ≥ 0",
+          "1 - (Res_Tot/2) if Res_Tot < 0",
+          "1/(1 + 5 × Res_Tot) if Res_Tot > 0.8"
+        ],
+        "is_formula": true,
+        "details": [
+          "Tune Break Skills deal Physical damage by default",
+          "Some Tune Break Rupture-type Skills have their own elemental attribute",
+          "Check individual skill descriptions for the correct element type"
+        ],
+        "note": "Important: Apply the correct elemental resistance based on the skill type (Physical for standard Tune Break, or the specific element for Rupture-type skills)."
+      },
+      {
+        "id": "5",
+        "title": "DEF Multiplier",
+        "color": "#4759cf",
+        "description": "Defense calculation formula (same as normal damage):",
+        "formula": "DEF Multiplier = (800 + 8 × Lvl_char) / (800 + 8 × Lvl_char + (792 + 8 × Lvl_Enemy) × (1 - Def_ignr) × (1 - Def_red))",
+        "is_formula": true,
+        "conditions_title": "Conditions:",
+        "conditions": [
+          "Lvl_char: Character level (Default: 90 in Simulator)",
+          "Lvl_Enemy: Enemy level (Default: 90 in Simulator)",
+          "Def_ignr: Defense ignore ratio (e.g., 0.3 for 30% ignore)"
+        ],
+        "example": {
+          "title": "Example (Lvl 90 vs Lvl 90, no DEF ignore):",
+          "calculation": "DEF Multiplier = (800 + 720) / (800 + 720 + 1512) = 1520 / 3032 ≈ 0.5013",
+          "result": "DEF Multiplier ≈ 50.13%",
+          "is_formula_example": true
+        }
+      },
+      {
+        "id": "6",
+        "title": "Tune DMG Bonus",
+        "color": "#fb8c00",
+        "description": "Sum of all Tune DMG Bonus:",
+        "details": [
+          "Tune DMG Bonus"
+        ],
+        "formula": "Tune DMG Bonus = 1 + Sum of Tune DMG Bonus",
+        "is_formula": true,
+        "note": "Tune DMG Bonus"
+      },
+      {
+        "id": "6a",
+        "title": "Tune Crit Multiplier",
+        "color": "#fbc02d",
+        "description": "Expected critical hit multiplier for Tune Break. If there is no separate crit value, it is 1.0.",
+        "formula": "Tune Crit = 1 + Tune Crit Rate × (Tune Crit DMG - 1)",
+        "is_formula": true
+      },
+      {
+        "id": "6b",
+        "title": "Repeat",
+        "color": "#da3b70",
+        "description": "Number of times the same Tune Break occurs repeatedly. Default is 1.",
+        "formula": "Final Damage = (Single Tune Break Damage) × Repeat Count",
+        "is_formula": true
+      },
+      {
+        "id": "7",
+        "title": "Full Calculation Example",
+        "color": "#da3b70",
+        "description": "Complete Tune Break damage calculation:",
+        "example": {
+          "title": "Example Calculation (Standard Tune Break):",
+          "step1": "Tune Break Base Value = 10000",
+          "step2": "Tune Break Multiplier = 1600%",
+          "step3": "Tune Break Boost = 1.4 (40pt)",
+          "step4": "RES Multiplier = 0.8 (20% Physical RES)",
+          "step5": "DEF Multiplier = 0.5013 (Lvl 90 vs Lvl 90)",
+          "step6": "Tune DMG Bonus = 1",
+          "step7": "Tune Crit 1.0 (no crit applied)",
+          "step8": "Repeat 1 time",
+          "result": "Tune Break Damage = 10000 × 16.0 × 1.4 × 0.8 × 0.5013 × 1 ≈ 89832",
+          "is_formula_example": true
+        }
+      }
+    ]
+  }
+}

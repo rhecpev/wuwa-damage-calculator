@@ -1,0 +1,162 @@
+{
+  "id": "13",
+  "title": "Wuthering Waves - Damage Calculation Formula",
+  "sections": ["Damage Formula", "Base Stats", "Multiplier Details"],
+  "content": {
+    "introduction": "A comprehensive guide to the final damage calculation formula in Wuthering Waves.",
+    "main_formula": {
+      "title": "Final Damage Formula",
+      "formula": "Final Damage = Skill Multiplier × Base ATK × Multiplier Sum",
+      "others_formula": "Multiplier Sum = ATK × DMG Bonus × Crit × Boost × RES × DEF × DMG Taken × Total DMG",
+      "color_coding": {
+        "ATK": "#e53935",
+        "DMG": "#fb8c00",
+        "CRIT": "#fbc02d",
+        "BOOST": "#43a047",
+        "RES": "#1e88e5",
+        "DEF": "#4759cf",
+        "TAKEN": "#a32ac5",
+        "TOTAL": "#d0fc5c",
+        "OTHERS": "#da3b70"
+      },
+      "chain": [
+        {"label": "Multiplier", "color": "#da3b70"},
+        {"label": "Base ATK", "color": "#e53935"},
+        {"label": "ATK", "color": "#e53935"},
+        {"label": "Crit", "color": "#fbc02d"},
+        {"label": "DMG Bonus", "color": "#fb8c00"},
+        {"label": "Boost", "color": "#43a047"},
+        {"label": "RES", "color": "#1e88e5"},
+        {"label": "DEF", "color": "#4759cf"},
+        {"label": "DMG Taken", "color": "#a32ac5"},
+        {"label": "Total DMG", "color": "#d0fc5c"}
+      ]
+    },
+    "sections": [
+      {
+        "id": "0",
+        "title": "Multiplier",
+        "color": "#da3b70",
+        "description": "The product of the skill's intrinsic multipliers:",
+        "formula": "Multiplier = Skill Rate × DMG Rate × DMG Rate 2",
+        "is_formula": true,
+        "note": "DMG Rate and DMG Rate 2 are usually 1; some Resonators apply DMG-rate increases multiplicatively (DMG Rate 2)."
+      },
+      {
+        "id": "1",
+        "title": "Base ATK",
+        "description": "The sum of the raw stats from the Resonator and their Weapon:",
+        "details": [
+          "Resonator's Base ATK (Scaling by level)",
+          "Weapon's Base ATK"
+        ],
+        "note": "Note: For skills scaling with DEF or HP (e.g., Taoqi), use the corresponding Base Stat instead."
+      },
+      {
+        "id": "2",
+        "title": "ATK",
+        "color": "#e53935",
+        "description": "All bonus values applied to the Base ATK:",
+        "details": [
+          "Sum of all ATK% bonuses",
+          "Flat ATK converted into a percentage relative to Base ATK"
+        ],
+        "example": {
+          "title": "Calculation Example:",
+          "base_atk": "Base ATK: 1000",
+          "flat_atk": "Flat ATK: +100 (0.1)",
+          "atk_percent": "ATK%: +15% (0.15)",
+          "result": "ATK Multiplier = 1 + 0.1 + 0.15 = 1.25",
+          "is_formula_example": true
+        }
+      },
+      {
+        "id": "3",
+        "title": "DMG bonus",
+        "color": "#fb8c00",
+        "description": "Sum of damage type and attribute bonuses:",
+        "damage_types": [
+          "Basic / Heavy Attack DMG Bonus",
+          "Resonance Skill / Liberation DMG Bonus",
+          "Intro / Outro / Coordinated DMG Bonus",
+          "Echo Skill DMG Bonus",
+          "Glacio / Fusion / Aero DMG Bonus",
+          "Electro / Spectro / Havoc DMG Bonus"
+        ],
+        "two_columns": true
+      },
+      {
+        "id": "4",
+        "title": "Crit",
+        "color": "#fbc02d",
+        "description": "Expected damage multiplier based on Critical hits:",
+        "formula": "Crit Multiplier = 1 + Crit Rate × (Crit DMG - 1)",
+        "is_formula": true,
+        "note": "The default Crit DMG in Wuthering Waves is 150% (1.5)."
+      },
+      {
+        "id": "5",
+        "title": "Boost (DMG Deepen)",
+        "color": "#43a047",
+        "description": "Independent multipliers primarily provided by Outro Skills:",
+        "amplification_types": [
+          "Basic / Heavy Attack DMG Boost",
+          "Resonance Skill / Liberation DMG Boost",
+          "Attribute-specific DMG Boost (e.g., Electro DMG Boost)"
+        ],
+        "two_columns": false
+      },
+      {
+        "id": "6",
+        "title": "RES Multiplier",
+        "color": "#1e88e5",
+        "description": "Damage variance based on the target's Attribute Resistance:",
+        "simulator_note": "Simulator implementation: RES = 0.8 + Penetration. Enemy resistance is fixed at 20%, and excess over-penetration (negative RES) is reflected at half value. The high-resistance branch 1/(1+5×RES) from the original game does not occur in the simulator.",
+        "base_resistance": {
+          "field_monsters": "Overworld Monsters: 10%",
+          "tower_monsters": "Tower of Adversity: 20%"
+        },
+        "formula_conditions": [
+          "1 - RES_Value (if 0 ≤ RES_Value ≤ 0.8)",
+          "1 - (RES_Value / 2) (if RES_Value < 0)",
+          "1 / (1 + 5 × RES_Value) (if RES_Value > 0.8)"
+        ],
+        "is_formula": true
+      },
+      {
+        "id": "7",
+        "title": "DEF Multiplier",
+        "color": "#4759cf",
+        "description": "Defense calculation considering Level difference and DEF Ignore:",
+        "formula": "DEF Multiplier = (800 + 8 × Lvl_Char) / (800 + 8 × Lvl_Char + (792 + 8 × Lvl_Enemy) × (1 - DEF_Ignore) × (1 - DEF_Reduction))",
+        "is_formula": true,
+        "conditions": [
+          "Char Level / Enemy Level (Default: 90)",
+          "DEF Ignore: Penetration or Ignore ratio (e.g., 0.3)",
+          "DEF Reduction: Enemy DEF reduction ratio (e.g., 0.2)"
+        ]
+      },
+      {
+        "id": "8",
+        "title": "DMG Taken",
+        "color": "#a32ac5",
+        "description": "An independent multiplier where the damage received by the enemy increases:",
+        "examples": [
+          "Tower of Adversity stage-specific buffs",
+          "Special environmental modifiers"
+        ]
+      },
+      {
+        "id": "9",
+        "title": "Total DMG",
+        "color": "#d0fc5c",
+        "description": "An independent multiplier that increases the final damage dealt to the enemy:",
+        "examples": [
+          "Strain-type buffs for Resonators (v3.0+)",
+          "Special late-game environmental effects",
+          "Fixed additional damage (fixed_dmg) is added last, independent of all multipliers above"
+        ]
+      }
+    ]
+  }
+}
