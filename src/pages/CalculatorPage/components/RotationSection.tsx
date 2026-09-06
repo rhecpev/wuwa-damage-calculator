@@ -135,9 +135,20 @@ export function RotationSection({ results }: RotationSectionProps) {
             <div className="item">
               {/* 카드와 버튼을 한 상자에 묶는다 — 잇는 선까지 기준으로 잡히면 버튼이 멀리 떨어진다. */}
               <div className="item-card">
-              <button
+              {/* 카드 안에 스택·횟수 입력칸이 들어가서 button으로 둘 수 없다
+                  — button 안의 input은 표준이 아니고 누르는 판정도 엉킨다. */}
+              <div
                 className={`card ${open ? "selected" : ""}`}
+                role="button"
+                tabIndex={0}
                 onClick={() => setSelectedId(open ? null : result.item.id)}
+                onKeyDown={(event) => {
+                  // 안쪽 입력칸에서 누른 키는 카드를 여닫지 않는다.
+                  if (event.target !== event.currentTarget) return;
+                  if (event.key !== "Enter" && event.key !== " ") return;
+                  event.preventDefault();
+                  setSelectedId(open ? null : result.item.id);
+                }}
               >
                 {result.character.iconUrl && (
                   <img
@@ -211,7 +222,95 @@ export function RotationSection({ results }: RotationSectionProps) {
                 >
                   상세보기
                 </span>
-              </button>
+
+                {/* 이상 효과는 스택이 곧 피해다 — 카드 안에서 바로 고칠 수 있게 둔다. */}
+                {result.damage.kind === "anomaly" && (() => {
+                  // 스택 상한은 고정이 아니다 — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면
+                  // 그만큼 더 쌓을 수 있고, 폭발형은 넘긴 스택마다 33%씩 더 터진다.
+                  const cap = anomalyStackCap(
+                    result.damage.breakdown.anomaly,
+                    allBuffs,
+                    result.item.enabledBuffIds,
+                  );
+                  return (
+                  <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
+                    <label>
+                      <em>스택</em>
+                      <input
+                        type="number"
+                        min={0}
+                        max={cap.max}
+                        value={result.damage.breakdown.stacks}
+                        onChange={(event) =>
+                          setAnomalyStacks(result.item.id, Number(event.target.value))
+                        }
+                      />
+                    </label>
+                    <label>
+                      <em>횟수</em>
+                      <input
+                        type="number"
+                        min={1}
+                        max={99}
+                        value={result.damage.breakdown.occurrences}
+                        onChange={(event) =>
+                          setAnomalyOccurrences(result.item.id, Number(event.target.value))
+                        }
+                      />
+                    </label>
+                    {cap.bonus > 0 && (
+                      <small className="cap-note">
+                        {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}
+                      </small>
+                    )}
+                    {/* 폭발형은 최대 스택에 닿아야 터진다 — 그 전에는 피해가 0이다. */}
+                    {result.damage.breakdown.base === 0 && (
+                      <small>
+                        {result.damage.breakdown.anomalyType === "burst"
+                          ? `최대 ${ANOMALIES[result.damage.breakdown.anomaly].maxStacks}스택에서 터집니다`
+                          : "피해가 없는 효과입니다"}
+                      </small>
+                    )}
+                  </div>
+                  );
+                })()}
+
+                {/* 조화도 파괴 — 배율이 스킬마다 달라서 카드 안에서 바로 고칠 수 있게 둔다. */}
+                {result.damage.kind === "discord" && (
+                  <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
+                    <label>
+                      <em>배율 %</em>
+                      <input
+                        type="number"
+                        min={0}
+                        max={20000}
+                        step={10}
+                        value={Math.round(result.damage.breakdown.baseRate * 100)}
+                        onChange={(event) =>
+                          setDiscordRate(result.item.id, Number(event.target.value) / 100)
+                        }
+                      />
+                    </label>
+                    <label>
+                      <em>횟수</em>
+                      <input
+                        type="number"
+                        min={1}
+                        max={99}
+                        value={result.damage.breakdown.occurrences}
+                        onChange={(event) =>
+                          setDiscordOccurrences(result.item.id, Number(event.target.value))
+                        }
+                      />
+                    </label>
+                    <small>
+                      공격력·크리티컬·피해 보너스가 걸리지 않습니다 · 물리 피해
+                      {result.damage.breakdown.syncAmplify > 0 &&
+                        ` · 조화도 파괴 증폭 ${result.damage.breakdown.syncAmplify}pt 적용됨`}
+                    </small>
+                  </div>
+                )}
+              </div>
 
               <span className="item-tools">
                 <button
@@ -240,94 +339,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                   ×
                 </button>
               </span>
-
-              {/* 이상 효과는 스택이 곧 피해다 — 카드 아래에서 바로 고칠 수 있게 둔다. */}
-              {result.damage.kind === "anomaly" && (() => {
-                // 스택 상한은 고정이 아니다 — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면
-                // 그만큼 더 쌓을 수 있고, 폭발형은 넘긴 스택마다 33%씩 더 터진다.
-                const cap = anomalyStackCap(
-                  result.damage.breakdown.anomaly,
-                  allBuffs,
-                  result.item.enabledBuffIds,
-                );
-                return (
-                <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
-                  <label>
-                    <em>스택</em>
-                    <input
-                      type="number"
-                      min={0}
-                      max={cap.max}
-                      value={result.damage.breakdown.stacks}
-                      onChange={(event) =>
-                        setAnomalyStacks(result.item.id, Number(event.target.value))
-                      }
-                    />
-                  </label>
-                  <label>
-                    <em>횟수</em>
-                    <input
-                      type="number"
-                      min={1}
-                      max={99}
-                      value={result.damage.breakdown.occurrences}
-                      onChange={(event) =>
-                        setAnomalyOccurrences(result.item.id, Number(event.target.value))
-                      }
-                    />
-                  </label>
-                  {cap.bonus > 0 && (
-                    <small className="cap-note">
-                      {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}
-                    </small>
-                  )}
-                  {/* 폭발형은 최대 스택에 닿아야 터진다 — 그 전에는 피해가 0이다. */}
-                  {result.damage.breakdown.base === 0 && (
-                    <small>
-                      {result.damage.breakdown.anomalyType === "burst"
-                        ? `최대 ${ANOMALIES[result.damage.breakdown.anomaly].maxStacks}스택에서 터집니다`
-                        : "피해가 없는 효과입니다"}
-                    </small>
-                  )}
-                </div>
-                );
-              })()}
-
-              {/* 조화도 파괴 — 배율이 스킬마다 달라서 카드에서 바로 고칠 수 있게 둔다. */}
-              {result.damage.kind === "discord" && (
-                <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
-                  <label>
-                    <em>배율 %</em>
-                    <input
-                      type="number"
-                      min={0}
-                      max={20000}
-                      step={10}
-                      value={Math.round(result.damage.breakdown.baseRate * 100)}
-                      onChange={(event) =>
-                        setDiscordRate(result.item.id, Number(event.target.value) / 100)
-                      }
-                    />
-                  </label>
-                  <label>
-                    <em>횟수</em>
-                    <input
-                      type="number"
-                      min={1}
-                      max={99}
-                      value={result.damage.breakdown.occurrences}
-                      onChange={(event) =>
-                        setDiscordOccurrences(result.item.id, Number(event.target.value))
-                      }
-                    />
-                  </label>
-                  <small>
-                    공격력·크리티컬·피해 보너스가 걸리지 않습니다 · 물리 피해
-                    {result.damage.breakdown.syncAmplify > 0 &&
-                      ` · 조화도 파괴 증폭 ${result.damage.breakdown.syncAmplify}pt 적용됨`}
-                  </small>
-                </div>
-              )}
               </div>
 
               {/* 다음 카드가 같은 사이클일 때만 화살표로 잇는다 — 사이클을 넘어가면 줄이 끊긴다. */}

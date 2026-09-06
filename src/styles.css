@@ -20,7 +20,7 @@
 /* 제목줄의 단추 둘을 나란히. */
 .rotation-tools{display:flex;gap:8px}
 
-.rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:165px;min-height:105px;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:7px;cursor:pointer}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
+.rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:165px;min-height:105px;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:7px;cursor:pointer;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
 .item-card{position:relative}
 .item-tools{position:absolute;right:-6px;top:-8px;display:flex;gap:4px;z-index:2}
 .item-tools button{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;background:#2a3246}
@@ -898,6 +898,12 @@
    버프 목록(.buff-cap)과 딜사이클 카드(.card-anomaly .cap-note) 양쪽에서 같은 말을 한다. */
 .buff-cap{display:inline-flex;align-items:center;margin-left:6px;padding:1px 6px;border-radius:999px;font-style:normal;font-size:11px;font-weight:600;color:#d8b98a;background:#4f412b;border:1px solid #66543a}
 .card-anomaly .cap-note{color:#d8b98a}
+/* 카드 안에 들어간 이상 효과·조화도 입력칸.
+   카드 속은 137px밖에 안 돼서 두 칸을 나란히 두면 입력칸이 짜부라진다 —
+   한 줄에 하나씩, 이름은 왼쪽 값은 오른쪽으로 붙인다. */
+.card .card-anomaly{margin-top:0;flex-direction:column;align-items:stretch;gap:5px;padding:7px 8px}
+.card .card-anomaly label{justify-content:space-between;gap:8px}
+.card .card-anomaly input{width:58px;flex:none;text-align:right}
 
 /* ── 진행 게이지와 알림창 (components/Feedback.tsx) ──
    사진 한 장을 읽는 데 몇 초가 걸린다. 그동안 아무 말이 없으면 멈춘 것으로 보인다. */
