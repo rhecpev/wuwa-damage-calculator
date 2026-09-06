@@ -41,6 +41,27 @@
 .stat-bonus{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:12px}.stat-bonus div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 12px;background:#2d3345;border:1px solid #384155;border-radius:9px}.stat-bonus span{color:#a8b0bf;font-size:12px}.stat-bonus b{color:#8fb4d9;font-size:13px;white-space:nowrap}.stat-source{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:12px;color:#9aa3b3}.stat-source b{color:#c2c9d6;font-weight:600}.stat-note{margin:10px 0 0;color:#949dae;font-size:12px;line-height:1.6}
 .stat-bonus div.zero{opacity:.45}.stat-bonus div.zero b{color:#9aa3b3}
 
+/* 스탯 한 칸을 누르면 그 값이 어디서 왔는지 바로 아래에 펼친다(CharacterStatsSection). */
+.char-content .stats div,.stat-bonus div{cursor:pointer}
+.char-content .stats div:hover,.stat-bonus div:hover{background:#333c4f}
+.char-content .stats div.picked,.stat-bonus div.picked{background:#333c4f;box-shadow:inset 3px 0 0 #e8c66a}
+.stat-origin{margin-top:10px;padding:12px 14px;background:#2a3245;border:1px solid #3b4457;border-radius:10px}
+.stat-origin-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:9px}
+.stat-origin-head b{font-size:13px;color:#c2c9d6}
+.stat-origin-head b span{margin-left:8px;color:#e8c66a;font-size:15px;font-variant-numeric:tabular-nums}
+.stat-origin-head button{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer;background:#2a3246}
+.stat-origin-steps{list-style:none;margin:0 0 10px;padding:0;display:flex;flex-direction:column;gap:4px}
+.stat-origin-steps li{display:grid;grid-template-columns:92px minmax(0,1fr) auto;gap:10px;align-items:baseline;padding:6px 10px;background:#2e3648;border:1px solid #364054;border-radius:7px;font-size:12px}
+.stat-origin-steps span{color:#a8b0bf;font-weight:600}
+.stat-origin-steps em{font-style:normal;color:#8791a4}
+.stat-origin-steps b{color:#8fb4d9;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stat-origin-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:4px}
+.stat-origin-list li{display:flex;justify-content:space-between;gap:14px;padding:5px 10px;background:#2e3648;border:1px solid #364054;border-radius:7px;font-size:12px}
+.stat-origin-list b{color:#c2c9d6;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-origin-list span{color:#8fb4d9;white-space:nowrap}
+.stat-origin-empty{display:block;margin-top:6px;color:#8791a4;font-size:12px;font-style:normal}
+@media(max-width:700px){.stat-origin-steps li{grid-template-columns:minmax(0,1fr) auto}.stat-origin-steps em{grid-column:1/-1}}
+
 
 .weapon-level{display:flex;align-items:center;gap:8px;color:#9aa3b3!important;font-size:12px}.weapon-level input[type=range]{flex:1;min-width:0;max-width:220px;accent-color:#8d9ab0;cursor:pointer}.weapon-level b{color:#e9edf5;font-size:12px;min-width:22px;text-align:right}
 

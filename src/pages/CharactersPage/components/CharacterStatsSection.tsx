@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { characters } from "../../../data/sampleData";
 import { DEFAULT_WEAPON_LEVEL, weaponAtLevel, weaponsById } from "../../../data/weapons";
 import {
@@ -16,6 +16,7 @@ import { equippedEchoes } from "../../../data/echoStore";
 import type { Echo, Element } from "../../../types/game";
 import type { Stats } from "../../../types/stats";
 import { flat } from "../../../utils/format";
+import { StatOrigin } from "./StatOrigin";
 
 interface CharacterStatsSectionProps {
   characterId: string;
@@ -119,6 +120,9 @@ export function CharacterStatsSection({
     [characterId, characterEchoLinks],
   );
 
+  // 누른 스탯 한 칸 — 어느 목록에서 눌렀는지까지 들고 있어야 그 목록 아래에 펼칠 수 있다.
+  const [picked, setPicked] = useState<{ list: "main" | "bonus"; key: keyof Stats } | null>(null);
+
   const stats = useMemo(() => {
     if (!character) return null;
     // 조건부 버프(무기 스킬·고유효과·수기 버프)는 공격마다 판정이 달라서 빼고,
@@ -157,6 +161,28 @@ export function CharacterStatsSection({
   // 0인 항목도 그대로 둔다 — 어떤 스탯이 잡히고 안 잡히는지 한눈에 보려는 목적.
   const bonusRows = BONUS_ROWS;
 
+  /** 같은 칸을 다시 누르면 접는다. */
+  const toggle = (list: "main" | "bonus", key: keyof Stats) =>
+    setPicked((current) =>
+      current && current.list === list && current.key === key ? null : { list, key },
+    );
+
+  /** 누른 칸의 내역. 표기 방식을 그대로 넘겨 화면에 뜬 값과 같은 문자열을 보여준다. */
+  const origin = (key: keyof Stats, rows: Row[]) => {
+    const row = rows.find(([rowKey]) => rowKey === key);
+    if (!row) return null;
+    return (
+      <StatOrigin
+        statKey={key}
+        label={row[1]}
+        display={format(stats[key], row[2])}
+        withBase={row[2] === "base"}
+        stats={stats}
+        onClose={() => setPicked(null)}
+      />
+    );
+  };
+
   return (
     <section className="panel">
       <div className="row">
@@ -190,23 +216,42 @@ export function CharacterStatsSection({
 
       <div className="stats">
         {MAIN_ROWS.map(([key, label, form]) => (
-          <div key={key}>
+          <div
+            key={key}
+            className={picked?.list === "main" && picked.key === key ? "picked" : undefined}
+            title="누르면 이 값이 어디서 왔는지 펼칩니다"
+            onClick={() => toggle("main", key)}
+          >
             <small>{label}</small>
             <b>{format(stats[key], form)}</b>
           </div>
         ))}
       </div>
 
+      {picked?.list === "main" && origin(picked.key, MAIN_ROWS)}
+
       {bonusRows.length > 0 && (
         <div className="stat-bonus">
           {bonusRows.map(([key, label, form]) => (
-            <div key={key} className={stats[key] === 0 ? "zero" : undefined}>
+            <div
+              key={key}
+              className={[
+                stats[key] === 0 ? "zero" : "",
+                picked?.list === "bonus" && picked.key === key ? "picked" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              title="누르면 이 값이 어디서 왔는지 펼칩니다"
+              onClick={() => toggle("bonus", key)}
+            >
               <span>{label}</span>
               <b>{format(stats[key], form)}</b>
             </div>
           ))}
         </div>
       )}
+
+      {picked?.list === "bonus" && origin(picked.key, bonusRows)}
 
       <div className="stat-source">
         <span>

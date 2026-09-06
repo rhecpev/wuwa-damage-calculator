@@ -147,7 +147,15 @@ export function calculateFinalStats(
     const charPercent = percent - echoPct;
     const panel = Math.floor(base * (1 + charPercent)) + Math.floor(base * echoPct);
     const buffAmount = base * buffPercent;
-    return { percent, buffPercent, panel, buffAmount, plus, raw: panel + buffAmount + plus };
+    return {
+      percent,
+      echoPercent: echoPct,
+      buffPercent,
+      panel,
+      buffAmount,
+      plus,
+      raw: panel + buffAmount + plus,
+    };
   };
 
   const atk = resolve(baseAtk, r.atkPercent, echoPercent.atk, r.atkPercentBuff, r.atk);

@@ -128,9 +128,14 @@ export interface StatSource {
   weapon: number;
   /** 스탯창에 반영되는 퍼센트 합(스킬 트리 · 무기 · 에코). */
   percent: number;
+  /**
+   * 그중 에코 옵션에서 온 몫. 스탯창 단계에서 캐릭터 쪽과 갈라 따로 버림하기 때문에
+   * (calculateFinalStats 주석 참고) 내역을 보여줄 때도 둘을 나눠 적어야 계산이 맞는다.
+   */
+  echoPercent: number;
   /** 전투 중 버프 퍼센트 합(공명체인 · 파티 버프 · 에코 세트). */
   buffPercent: number;
-  /** 스탯창 값 = ⌊(기초+무기) × (1 + percent)⌋. 여기서 한 번 버린다. */
+  /** 스탯창 값 = ⌊기초 × (1 + 캐릭터 쪽 %)⌋ + ⌊기초 × 에코 %⌋. 여기서 두 번 버린다. */
   panel: number;
   /** 버프분 = (기초+무기) × buffPercent. 버리지 않고 그대로 더한다. */
   buffAmount: number;

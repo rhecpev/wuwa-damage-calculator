@@ -10,6 +10,7 @@ import {
   ELEMENT_BOOST_KEY,
 } from "../../../calculator/damage";
 import { dec, num, pct } from "../../../utils/format";
+import { STAT_NAMES } from "../../../utils/statNames";
 
 interface DamageFormulaModalProps {
   result: CalculationResult;
@@ -48,54 +49,6 @@ const mult = (v: number) => v.toFixed(4);
 /** 이 창이 보고 있는 계산의 출처 내역. Row가 어디서든 꺼내 쓸 수 있게 문맥으로 넘긴다. */
 const ContributionContext = createContext<StatContribution[]>([]);
 
-/** 스탯 키 -> 화면에 뜰 이름. 내역 줄에 "무엇을" 얹었는지 적을 때 쓴다. */
-const STAT_NAMES: Partial<Record<keyof Stats, string>> = {
-  hp: "HP",
-  hpPercent: "HP %",
-  atk: "공격력",
-  atkPercent: "공격력 %(스탯창)",
-  atkPercentBuff: "공격력 %(버프)",
-  def: "방어력",
-  defPercent: "방어력 %(스탯창)",
-  defPercentBuff: "방어력 %(버프)",
-  hpPercentBuff: "HP %(버프)",
-  critRate: "크리티컬 확률",
-  critDamage: "크리티컬 피해",
-  energyRegen: "공명 효율",
-  allDamageBonus: "피해증가(전체)",
-  basicDamageBonus: "일반 공격 피해증가",
-  heavyDamageBonus: "강공격 피해증가",
-  skillDamageBonus: "공명 스킬 피해증가",
-  liberationDamageBonus: "공명 해방 피해증가",
-  introDamageBonus: "반주 스킬 피해증가",
-  outroDamageBonus: "변주 스킬 피해증가",
-  echoDamageBonus: "에코 피해증가",
-  glacioDamageBonus: "응결 피해증가",
-  fusionDamageBonus: "용융 피해증가",
-  aeroDamageBonus: "기류 피해증가",
-  electroDamageBonus: "전도 피해증가",
-  spectroDamageBonus: "회절 피해증가",
-  havocDamageBonus: "인멸 피해증가",
-  allBoost: "부스트(전체)",
-  basicBoost: "일반 공격 부스트",
-  heavyBoost: "강공격 부스트",
-  skillBoost: "공명 스킬 부스트",
-  liberationBoost: "공명 해방 부스트",
-  glacioBoost: "응결 부스트",
-  fusionBoost: "용융 부스트",
-  aeroBoost: "기류 부스트",
-  electroBoost: "전도 부스트",
-  spectroBoost: "회절 부스트",
-  havocBoost: "인멸 부스트",
-  motionValueAmplify: "계수 상승",
-  motionValueIncrease: "계수 증가",
-  defIgnore: "방어력 무시",
-  defReduction: "방어력 감소",
-  resPen: "저항 무시",
-  resReduction: "저항 감소",
-  damageTakenBonus: "받는 피해",
-  totalDamageBonus: "최종 피해",
-};
 
 /** 깡수치는 그대로, 나머지는 퍼센트로 적는다. */
 const FLAT_KEYS = new Set<keyof Stats>(["hp", "atk", "def"]);
@@ -299,7 +252,11 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
             />
             <Row
               label="스탯창 값"
-              expr={`⌊(${dec(src.base + src.weapon)}) × (1 + ${pct(src.percent)})⌋ — 여기서 한 번 버린다`}
+              expr={`⌊${dec(src.base + src.weapon)} × (1 + 캐릭터 ${pct(
+                src.percent - src.echoPercent,
+              )})⌋ + ⌊${dec(src.base + src.weapon)} × 에코 ${pct(
+                src.echoPercent,
+              )}⌋ — 갈라서 각각 버린다`}
               value={num(src.panel)}
             />
             <Row
