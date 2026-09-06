@@ -679,6 +679,14 @@ export function ProfileImportPage() {
                         {e.options.map((o, n) => {
                           const held = drag?.echo === i && drag.from === n;
                           const target = drag?.echo === i && drag.over === n && drag.from !== n;
+                          // 한 에코 안에서 같은 부옵션이 두 번 나올 수는 없다. 다른 칸이
+                          // 이미 쓰고 있는 이름은 목록에서 빼되, 이 칸이 든 것은 남긴다.
+                          const taken = new Set(
+                            e.options.filter((_, m) => m !== n).map((x) => x.key).filter(Boolean),
+                          );
+                          const subKeys = Object.keys(OPTIONS.subOption).filter(
+                            (k) => k === o.key || !taken.has(k),
+                          );
                           return (
                             <Fragment key={n}>
                               {/* 칸과 칸 사이의 자리 바꾸기 단추. 한 칸씩 밀 때는 끄는 것보다 빠르다. */}
@@ -723,7 +731,7 @@ export function ProfileImportPage() {
                                 <span className="row">
                                   <OptionSelect
                                     value={o.key}
-                                    items={Object.keys(OPTIONS.subOption)}
+                                    items={subKeys}
                                     blank="— 없음 —"
                                     onChange={(v) =>
                                       patchEcho(i, {
