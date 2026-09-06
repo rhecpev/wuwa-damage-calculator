@@ -670,6 +670,18 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 2,
   },
+  // 같은 50%가 둘로 갈린다. 치사 본인은 「파멸의 선」을 늘 두르고 있어 조건이 항상 서지만,
+  // 다른 파티원은 그 상태일 때만 받는다 — 그래서 본인 쪽은 상시, 파티 쪽은 발동으로 둔다.
+  // 파티 쪽은 excludeOwner로 본인에게서 뺀다 — 치사의 버프 목록에는 뜨지 않는다.
+  {
+    label: "2체인 · 본인 속성 피해 보너스",
+    target: "damageBonus",
+    damageType: "All",
+    value: 0.5, // 50% 증가
+    uptime: "passive", // 「파멸의 선」을 늘 두르고 있어 조건이 항상 선다
+    scope: "self",
+    resonanceChain: 2,
+  },
   {
     label: "2체인 · 파티 전체 속성 피해 보너스",
     target: "damageBonus",
@@ -677,6 +689,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     value: 0.5, // 50% 증가
     uptime: "active",
     scope: "party", // 파티 전원에게 걸린다
+    excludeOwner: true, // 치사 본인은 위 상시 쪽으로 받는다
     resonanceChain: 2,
     condition: "근처 파티원이 「파멸의 선」 상태일 때",
   },
