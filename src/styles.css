@@ -1140,3 +1140,4 @@
 .storage-choice button:hover{border-color:#8d9ab0;background:#30394a}
 .storage-choice b{font-size:13px;color:#e9edf5}
 .storage-choice em{font-style:normal;font-size:11px;line-height:1.6;color:#9aa3b3}
+.build-stamp{display:block;margin-top:6px;color:#6f7a8d;font-size:11px}.build-stamp code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#9aa3b3}
