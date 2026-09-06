@@ -11,6 +11,7 @@ import {
 import type { ManualBuff } from "../../../types/game";
 import { characters } from "../../../data/sampleData";
 import { num } from "../../../utils/format";
+import { CopyJson } from "./CopyJson";
 
 /**
  * scaleFrom 버프가 어느 스탯에서 수치를 가져오는지 — 목록에 그대로 적는다.
@@ -72,7 +73,11 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
             {selected.character.name} · 켜둔 것 {selected.item.enabledBuffIds.length}개
           </em>
         </div>
-        <button onClick={onClose}>×</button>
+        {/* 계산이 어긋나 보일 때 통째로 퍼서 보여주는 자리 — 버프 한 줄씩 수치까지 담긴다. */}
+        <span className="buff-dialog-tools">
+          <CopyJson result={selected} allBuffs={usable} label="계산 JSON" />
+          <button onClick={onClose}>×</button>
+        </span>
       </div>
 
     <div className="buff-dialog-split">

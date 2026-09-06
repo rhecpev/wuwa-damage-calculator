@@ -403,8 +403,11 @@ export function buffContributions(
   return out;
 }
 
-/** 버프가 몇 번 자리에 얼마를 얹는지 — Stats 한 칸짜리 조각으로 돌려준다. */
-function statPatch(buff: ManualBuff, amount: number): Partial<Stats> | null {
+/**
+ * 버프가 몇 번 자리에 얼마를 얹는지 — Stats 한 칸짜리 조각으로 돌려준다.
+ * JSON 내보내기에서 「이 버프가 어느 칸에 들어갔는지」를 적는 데도 쓴다.
+ */
+export function statPatch(buff: ManualBuff, amount: number): Partial<Stats> | null {
   switch (buff.target) {
     // 스킬 배율에서만 증가/상승이 갈린다.
     //   증가: 계수에 그대로 더해짐(합연산)   상승: 계수에 곱해짐(곱연산)
