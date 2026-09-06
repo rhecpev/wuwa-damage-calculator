@@ -28,27 +28,14 @@ const byCharacter = characterNodesData as Record<string, CharacterNode[] | undef
 export const nodesOf = (characterId: string): CharacterNode[] => byCharacter[characterId] ?? [];
 
 /**
- * 노드에 적힌 퍼센트가 실제로는 그보다 조금 낮게 걸린다 — 노드 하나당 0.004%p.
+ * 노드에 적힌 퍼센트는 표시값 그대로 쓴다.
  *
- * 에코 부옵션과 같은 꼴인데(calculator/echoStats.ts의 SUB_PERCENT_ADJUST) 폭이 더 작다.
- * 수수 Lv.90 실측이 이 자리를 잡아 준다. 기초 HP 16712 · HP 노드 넷(1.8+1.8+4.2+4.2=12%) ·
- * 에코 부옵션 HP% 9.4 · 깡 2280+2280+430+430 → 게임 25703
- *   노드를 적힌 대로: ⌊16712×1.12⌋=18717 + ⌊16712×0.09392⌋=1569 + 5420 = 25706  (3 어긋남)
- *   노드마다 0.004%p 낮게: ⌊16712×1.11984⌋=18714 + 1569 + 5420 = 25703            ← 일치
- * 에코 쪽으로 3을 메우려면 부옵션 한 줄에 0.02%p가 필요한데, 그러면 치사 Lv.90 실측
- * (부옵션 한 줄 7.9% → +3130)이 깨진다. 그래서 어긋난 자리는 노드 쪽이다.
- *
- * 이 노드 몫은 공격력·HP·방어력 %에만 건다. 다른 칸(피해 보너스·치료 효과)은 어디서도
- * 버림을 타지 않아 0.004%p를 빼 봐야 결과가 달라지지 않는다.
- *
- * 「노드마다」인지 「합계에 한 번」인지는 실측 한 건으로는 갈리지 않는다. 에코 부옵션이
- * 개수를 따라가는 것에 맞춰 노드마다로 둔다. 실측이 더 모이면 다시 확인할 것.
- *   (공격력 실측 둘 — 단근 1527 · 치사 2564 — 은 어느 쪽으로 둬도 그대로다.)
+ * 한동안 노드마다 0.004%p를 깎았다 — 수수 Lv.90 HP 실측(25703)이 3 높게 나와서였다.
+ * 그 뒤 히유키·루실라 실측이 붙으면서, 어긋남의 자리가 노드가 아니라 **에코 부옵션**이라는
+ * 것이 드러났다(calculator/echoStats.ts의 SUB_PANEL_PERCENT). 부옵션 값별 표로 맞추면
+ * 노드를 깎지 않아도 수수 실측이 맞고, 「히유키 에코를 전부 뺀 공격력 1300」 실측이
+ * 캐릭터측 갈래(노드 12% + 무기 효과 12%)가 표시값 그대로임을 직접 확인해 준다.
  */
-const NODE_PERCENT_ADJUST = 0.00004;
-
-/** 위 보정을 받는 칸. 스탯창 값을 확정할 때 버림을 타는 셋이다. */
-const ADJUSTED_KEYS = new Set<keyof Stats>(["hpPercent", "atkPercent", "defPercent"]);
 
 /**
  * 켜둔 노드의 스탯 합계.
@@ -61,8 +48,7 @@ export function nodeStats(characterId: string, enabled?: string[]): Partial<Stat
   for (const node of nodesOf(characterId)) {
     if (enabled && !enabled.includes(node.id)) continue;
     for (const [key, value] of Object.entries(node.stats) as [keyof Stats, number][]) {
-      const amount = ADJUSTED_KEYS.has(key) ? value - NODE_PERCENT_ADJUST : value;
-      result[key] = (result[key] ?? 0) + amount;
+      result[key] = (result[key] ?? 0) + value;
     }
   }
 
