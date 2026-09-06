@@ -935,7 +935,8 @@
 .profile-import .echo-draft-icon em{font-style:normal;font-size:11px;font-weight:600;color:#9aa3b3}
 .profile-import .echo-draft-body{display:grid;gap:10px;min-width:0}
 .profile-import .echo-draft-line{display:grid;grid-template-columns:1.7fr 1.2fr 1.2fr 1.7fr;gap:10px;align-items:start}
-.profile-import .echo-draft-line.subs{grid-template-columns:repeat(5,minmax(0,1fr))}
+.profile-import .echo-draft-line.subs{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
+.profile-import .echo-draft-line.subs>label{flex:1 1 130px;min-width:0}
 .profile-import .echo-draft-line .cost{font-style:normal;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;color:#d8b98a;background:#4f412b;border:1px solid #66543a}
 @media (max-width:1000px){
 .profile-import .echo-draft{grid-template-columns:56px minmax(0,1fr)}
@@ -1141,8 +1142,11 @@
 .storage-choice b{font-size:13px;color:#e9edf5}
 .storage-choice em{font-style:normal;font-size:11px;line-height:1.6;color:#9aa3b3}
 .build-stamp{display:block;margin-top:6px;color:#6f7a8d;font-size:11px}.build-stamp code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#9aa3b3}
-/* 부옵션 순서 바꾸기 — 왼쪽 손잡이를 끌어 옮긴다. 칸 전체를 끌게 하면 안의 select를 못 쓴다. */
-.profile-import .subs .grip{display:inline-block;margin-right:4px;color:#6f7a8d;cursor:grab;font-size:11px;user-select:none}
-.profile-import .subs .grip:active{cursor:grabbing}
+/* 부옵션 순서 바꾸기 — 칸을 끌어 옮기거나, 칸 사이의 <>로 양옆을 맞바꾼다. */
+.profile-import .subs>label{cursor:grab}
+.profile-import .subs>label:active{cursor:grabbing}
+.profile-import .subs>label select{cursor:pointer}
 .profile-import .subs label.held{opacity:.35}
 .profile-import .subs label.target{outline:2px dashed #8fb4d9;outline-offset:3px;border-radius:8px}
+.profile-import .subs .swap{flex:none;align-self:center;padding:3px 5px;border-radius:6px;background:#2a3246;border:1px solid #3c455c;color:#6f7a8d;font-size:11px;line-height:1;letter-spacing:-1px;cursor:pointer}
+.profile-import .subs .swap:hover{color:#e9edf5;border-color:#5a6479;background:#333c52}

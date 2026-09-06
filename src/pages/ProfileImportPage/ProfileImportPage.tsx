@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { characters } from "../../data/sampleData";
 import { weapons } from "../../data/weapons";
 import { isExcludedEcho } from "../../data/echoExcludes";
@@ -586,8 +586,8 @@ export function ProfileImportPage() {
               글자 대신 <b>그림을 도감과 견줘서</b> 채웠습니다 — 코스트 왼쪽의 동그란 화음
               아이콘이 「우글글」과 「악몽 · 우글글」처럼 그림이 거의 같은 짝을 갈라 줍니다.
               미덥지 않은 자리에는 표시를 남겼으니 그것만 확인하세요. 안 고른 에코는
-              등록하지 않고 넘어갑니다. 부옵션이 밀려 읽혔으면 왼쪽 손잡이(<b>⠿</b>)를
-              끌어서 자리를 바꾸세요.
+              등록하지 않고 넘어갑니다. 부옵션이 밀려 읽혔으면 칸을 <b>끌어서</b> 옮기거나
+              칸 사이의 <b>&lt;&gt;</b>로 양옆 자리를 바꾸세요.
             </p>
 
             <div className="echo-drafts">
@@ -680,65 +680,74 @@ export function ProfileImportPage() {
                           const held = drag?.echo === i && drag.from === n;
                           const target = drag?.echo === i && drag.over === n && drag.from !== n;
                           return (
-                            <label
-                              key={n}
-                              className={[o.note ? "warn" : "", held ? "held" : "", target ? "target" : ""]
-                                .filter(Boolean)
-                                .join(" ")}
-                              // 같은 에코 안에서만 받는다. preventDefault를 해야 놓기가 열린다.
-                              onDragOver={(ev) => {
-                                if (drag?.echo !== i) return;
-                                ev.preventDefault();
-                                if (drag.over !== n) setDrag({ ...drag, over: n });
-                              }}
-                              onDrop={(ev) => {
-                                ev.preventDefault();
-                                if (drag?.echo === i) moveOption(i, drag.from, n);
-                                setDrag(null);
-                              }}
-                            >
-                              <em>
-                                {/* 손잡이만 끌린다 — 칸 전체를 draggable로 두면 안의 select를
-                                    건드릴 수 없다. click을 막는 것은 label이 select를 열지 않게. */}
-                                <i
-                                  className="grip"
-                                  draggable
-                                  onDragStart={() => setDrag({ echo: i, from: n, over: n })}
-                                  onDragEnd={() => setDrag(null)}
-                                  onClick={(ev) => ev.preventDefault()}
-                                  title="끌어서 순서를 바꿉니다"
+                            <Fragment key={n}>
+                              {/* 칸과 칸 사이의 자리 바꾸기 단추. 한 칸씩 밀 때는 끄는 것보다 빠르다. */}
+                              {n > 0 && (
+                                <button
+                                  type="button"
+                                  className="swap"
+                                  title={`부옵션 ${n}과 ${n + 1}의 자리를 바꿉니다`}
+                                  onClick={() => moveOption(i, n, n - 1)}
                                 >
-                                  ⠿
-                                </i>
-                                부옵션 {n + 1}
-                              </em>
-                              <span className="row">
-                                <OptionSelect
-                                  value={o.key}
-                                  items={Object.keys(OPTIONS.subOption)}
-                                  blank="— 없음 —"
-                                  onChange={(v) =>
-                                    patchEcho(i, {
-                                      options: e.options.map((x, m) =>
-                                        m === n ? { ...x, key: v, value: "", note: "" } : x,
-                                      ),
-                                    })
+                                  &lt;&gt;
+                                </button>
+                              )}
+                              <label
+                                className={[o.note ? "warn" : "", held ? "held" : "", target ? "target" : ""]
+                                  .filter(Boolean)
+                                  .join(" ")}
+                                // 칸 아무 데나 집어 끌 수 있다. 다만 드롭다운에서 시작한 것은
+                                // 끌기로 치지 않는다 — 그러면 목록을 열 수가 없다.
+                                draggable
+                                onDragStart={(ev) => {
+                                  if ((ev.target as HTMLElement).closest("select")) {
+                                    ev.preventDefault();
+                                    return;
                                   }
-                                />
-                                <OptionSelect
-                                  value={o.value}
-                                  items={OPTIONS.subOption[o.key] ?? []}
-                                  onChange={(v) =>
-                                    patchEcho(i, {
-                                      options: e.options.map((x, m) =>
-                                        m === n ? { ...x, value: v, note: "" } : x,
-                                      ),
-                                    })
-                                  }
-                                />
-                              </span>
-                              {o.note && <small className="warn-note">{o.note}</small>}
-                            </label>
+                                  setDrag({ echo: i, from: n, over: n });
+                                }}
+                                onDragEnd={() => setDrag(null)}
+                                // 같은 에코 안에서만 받는다. preventDefault를 해야 놓기가 열린다.
+                                onDragOver={(ev) => {
+                                  if (drag?.echo !== i) return;
+                                  ev.preventDefault();
+                                  if (drag.over !== n) setDrag({ ...drag, over: n });
+                                }}
+                                onDrop={(ev) => {
+                                  ev.preventDefault();
+                                  if (drag?.echo === i) moveOption(i, drag.from, n);
+                                  setDrag(null);
+                                }}
+                              >
+                                <em>부옵션 {n + 1}</em>
+                                <span className="row">
+                                  <OptionSelect
+                                    value={o.key}
+                                    items={Object.keys(OPTIONS.subOption)}
+                                    blank="— 없음 —"
+                                    onChange={(v) =>
+                                      patchEcho(i, {
+                                        options: e.options.map((x, m) =>
+                                          m === n ? { ...x, key: v, value: "", note: "" } : x,
+                                        ),
+                                      })
+                                    }
+                                  />
+                                  <OptionSelect
+                                    value={o.value}
+                                    items={OPTIONS.subOption[o.key] ?? []}
+                                    onChange={(v) =>
+                                      patchEcho(i, {
+                                        options: e.options.map((x, m) =>
+                                          m === n ? { ...x, value: v, note: "" } : x,
+                                        ),
+                                      })
+                                    }
+                                  />
+                                </span>
+                                {o.note && <small className="warn-note">{o.note}</small>}
+                              </label>
+                            </Fragment>
                           );
                         })}
                       </div>
