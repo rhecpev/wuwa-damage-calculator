@@ -757,14 +757,18 @@
    본문 오른쪽에 고정으로 세운다. 카드가 좁은 폭에서 두 줄로 흐른다. */
 /* 사이드바를 뺀 나머지를 본문과 반씩 나눈다. 1200px 이하에서는 기둥이 풀리므로
    여기서 사이드바는 항상 252px다. */
-/* 공격 루틴 — 본문 맨 위에 가로로 눕는다. 카드가 폭을 다 쓰고 여러 줄로 접힌다.
-   너무 길어지면 스스로 스크롤한다(아래 섹션이 화면 밖으로 밀리지 않게). */
-.rotation-rail{display:block}
+/* 공격 루틴 — 본문 맨 위에 가로로 눕고, 스크롤해도 위 막대 바로 아래에 붙어 있는다.
+   카드가 폭을 다 쓰고 여러 줄로 접히며, 너무 길어지면 그 판만 스스로 스크롤한다
+   (아래 섹션이 화면 밖으로 밀리지 않게). 배경을 깔아야 밑을 지나가는 내용이 비치지 않는다. */
+.rotation-rail{position:sticky;top:56px;z-index:12;display:block;
+  margin:-8px -8px 0;padding:8px 8px 10px;background:#242a39;
+  box-shadow:0 10px 16px -12px rgba(0,0,0,.6)}
 .rotation-rail>.panel{margin-top:0}
-.rotation-rail .rotation-wrap{max-height:min(52vh,520px);overflow-y:auto;padding-right:4px}
+.rotation-rail .rotation-wrap{max-height:min(46vh,460px);overflow-y:auto;padding-right:4px}
 .app.has-rail{margin-right:0}
-/* 좁은 화면에서는 루틴이 길어져도 스스로 접지 않는다 — 위아래로 그냥 이어 붙인다. */
+/* 좁은 화면에서는 붙여 두지 않는다 — 판이 길어지면 화면을 통째로 덮어 버린다. */
 @media(max-width:1200px){
+.rotation-rail{position:static;margin:0;padding:0;background:none;box-shadow:none}
 .rotation-rail .rotation-wrap{max-height:none;overflow:visible;padding-right:0}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
