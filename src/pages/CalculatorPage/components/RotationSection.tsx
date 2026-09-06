@@ -11,6 +11,47 @@ interface RotationSectionProps {
   results: CalculationResult[];
 }
 
+/**
+ * 카드 색을 가르는 갈래. 색만 다를 뿐 계산과는 무관하다.
+ *
+ * 공명 회로는 공격 자체에 자리가 없다 — 회로에 든 공격도 type은 강공격·공명 스킬이라
+ * 스킬 갈래(skillCategory)를 먼저 본다. 이상 효과·조화도 파괴는 피해식이 통째로 달라
+ * 그쪽을 가장 먼저 가른다.
+ */
+function cardKind(result: CalculationResult): string {
+  if (result.damage.kind === "anomaly") return "anomaly";
+  if (result.damage.kind === "discord") return "discord";
+  if (result.skillCategory === "Circuit") return "circuit";
+  switch (result.attack.type) {
+    case "Basic":
+    case "Aerial":
+      return "basic";
+    case "Heavy":
+    case "DodgeCounter":
+      return "heavy";
+    case "Skill":
+      return "skill";
+    case "Liberation":
+    case "Ultimate":
+      return "liberation";
+    case "Intro":
+      return "intro";
+    case "Outro":
+    case "Variation":
+      return "outro";
+    case "Echo":
+      return "echo";
+    default:
+      return "basic";
+  }
+}
+
+/**
+ * 카드에 적을 공격 이름. 끝에 붙은 「피해」를 뗀다 —
+ * 좁은 카드에서 줄만 잡아먹고, 어차피 카드에 뜨는 숫자가 피해량이다.
+ */
+const attackLabel = (name: string) => name.replace(/\s*피해$/, "");
+
 export function RotationSection({ results }: RotationSectionProps) {
   const { selectedId, setSelectedId } = useAppState();
   const {
@@ -180,10 +221,11 @@ export function RotationSection({ results }: RotationSectionProps) {
               {/* 카드 안에 스택·횟수 입력칸이 들어가서 button으로 둘 수 없다
                   — button 안의 input은 표준이 아니고 누르는 판정도 엉킨다. */}
               <div
-                className={`card ${open ? "selected" : ""}`}
+                className={`card kind-${cardKind(result)} ${open ? "selected" : ""}`}
                 role="button"
                 tabIndex={0}
                 title={`${result.character.name} · ${result.attack.name}`}
+                data-kind={cardKind(result)}
                 onClick={() => setSelectedId(open ? null : result.item.id)}
                 onKeyDown={(event) => {
                   // 안쪽 입력칸에서 누른 키는 카드를 여닫지 않는다.
@@ -204,7 +246,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                     />
                   )}
                   <span className="card-title">
-                    {index + 1}. {result.attack.name}
+                    {index + 1}. {attackLabel(result.attack.name)}
                   </span>
                 </span>
 

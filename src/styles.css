@@ -44,14 +44,38 @@
 .item[draggable="true"]:active{cursor:grabbing}
 .cycle-copy{order:1;padding:2px 8px;border-radius:7px;background:#2a3246;border:1px solid #3c455c;color:#9aa3b3;font-size:10.5px;cursor:pointer;white-space:nowrap}
 .cycle-copy:hover{border-color:#e8c66a;color:#e8c66a;background:#30394a}
+
+/* 공격 갈래별 색 — 카드 왼쪽 띠와 공격명에 같은 색을 쓴다.
+   일반 공격 · 강공격 · 공명 스킬 · 공명 회로 · 공명 해방 · 반주 · 변주 · 조화도 · 이상 효과 · 에코. */
+.card{border-left-width:3px}
+.card.kind-basic{border-left-color:#6d8fb8}
+.card.kind-basic .card-title{color:#a9c6e4}
+.card.kind-heavy{border-left-color:#c08a4e}
+.card.kind-heavy .card-title{color:#e0b482}
+.card.kind-skill{border-left-color:#5aa87a}
+.card.kind-skill .card-title{color:#94d5b1}
+.card.kind-circuit{border-left-color:#9b7ac2}
+.card.kind-circuit .card-title{color:#c9aee6}
+.card.kind-liberation{border-left-color:#d0a83f}
+.card.kind-liberation .card-title{color:#eccf7c}
+.card.kind-intro{border-left-color:#4fa3a8}
+.card.kind-intro .card-title{color:#8fd6da}
+.card.kind-outro{border-left-color:#c06a94}
+.card.kind-outro .card-title{color:#e6a0c1}
+.card.kind-discord{border-left-color:#c05a5a}
+.card.kind-discord .card-title{color:#e69a9a}
+.card.kind-anomaly{border-left-color:#7f8ac9}
+.card.kind-anomaly .card-title{color:#b3bcf0}
+.card.kind-echo{border-left-color:#8a94a6}
+.card.kind-echo .card-title{color:#c2cad8}
 .item-tools{position:absolute;right:-6px;top:-8px;display:flex;gap:4px;z-index:2}
 .item-tools button{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;background:#2a3246}
 .item-tools .copy{color:#8fb4d9}
 .item-tools .copy:hover{border-color:#8fb4d9;background:#30394a}
 .item-tools .x{color:#c2c9d6;font-size:14px}
 .item-tools .x:hover{border-color:#e0576b;color:#e0576b;background:#30394a}/* 카드 사이를 잇는 선 — 끝에 화살촉을 붙여 진행 방향을 보여준다. 글자(→)는 감춘다. */
-.item>em{position:relative;align-self:center;width:26px;height:2px;margin:0 6px;background:linear-gradient(to right,#3c455c,#576478);font-size:0}
-.item>em::after{content:"";position:absolute;right:0;top:50%;width:6px;height:6px;border-top:2px solid #576478;border-right:2px solid #576478;transform:translate(1px,-50%) rotate(45deg)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stats div{padding:13px;background:#2e3648;border:1px solid #3b4457;border-radius:9px}.stats b{display:block;font-size:18px;margin-top:5px}.buffs{display:grid;gap:8px}.buffs label{display:flex;gap:10px;padding:11px;border:1px solid #3c4558;border-radius:9px;background:#2d3345;cursor:pointer}.buffs label.on{border-color:#8794aa}.buffs span{display:flex;flex-direction:column;gap:3px}.buffs small{letter-spacing:0}.buffs label.na{opacity:.45}.buffs label.na.on{border-color:#66543a}.buffs b{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;font-size:14px}.buff-amount{font-style:normal;color:#8fb4d9;font-size:12px;font-weight:600}.buffs small{color:#9aa3b3}.enemy-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}.enemy-field{display:flex;flex-direction:column;gap:9px}.enemy-hint{color:#949dae;font-size:12px}/* 칩이 남는 폭을 나눠 갖는다 — 속성 6개와 콘텐츠 3개가 같은 규칙을 쓴다. */
+.item>em{position:relative;align-self:center;width:26px;height:2px;margin:0 6px;background:linear-gradient(to right,#6b7488,#a4b1c6);font-size:0}
+.item>em::after{content:"";position:absolute;right:0;top:50%;width:7px;height:7px;border-top:2px solid #a4b1c6;border-right:2px solid #a4b1c6;transform:translate(1px,-50%) rotate(45deg)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stats div{padding:13px;background:#2e3648;border:1px solid #3b4457;border-radius:9px}.stats b{display:block;font-size:18px;margin-top:5px}.buffs{display:grid;gap:8px}.buffs label{display:flex;gap:10px;padding:11px;border:1px solid #3c4558;border-radius:9px;background:#2d3345;cursor:pointer}.buffs label.on{border-color:#8794aa}.buffs span{display:flex;flex-direction:column;gap:3px}.buffs small{letter-spacing:0}.buffs label.na{opacity:.45}.buffs label.na.on{border-color:#66543a}.buffs b{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;font-size:14px}.buff-amount{font-style:normal;color:#8fb4d9;font-size:12px;font-weight:600}.buffs small{color:#9aa3b3}.enemy-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;align-items:start}.enemy-field{display:flex;flex-direction:column;gap:9px}.enemy-hint{color:#949dae;font-size:12px}/* 칩이 남는 폭을 나눠 갖는다 — 속성 6개와 콘텐츠 3개가 같은 규칙을 쓴다. */
 .enemy-elements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.enemy-element{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 7px;padding:9px 12px;border:1px solid #3c455c;border-radius:14px;background:#2a3246;color:#a8b0bf;font-size:13px;cursor:pointer;user-select:none;text-align:center;min-width:0}.enemy-element:hover{border-color:#4a5266}.enemy-element input{position:absolute;opacity:0;width:0;height:0}/* 고른 콘텐츠. 배경만 살짝 바뀌던 것을 금색 테두리·글자로 바꿔 한눈에 보이게 한다.
    테두리 두께를 늘리면 칩이 흔들리므로 안쪽 그림자로 두껍게 보이게 한다. */
 .enemy-element.on{background:#3f382b;border-color:#e8c66a;color:#e8c66a;font-weight:600;
@@ -733,21 +757,15 @@
    본문 오른쪽에 고정으로 세운다. 카드가 좁은 폭에서 두 줄로 흐른다. */
 /* 사이드바를 뺀 나머지를 본문과 반씩 나눈다. 1200px 이하에서는 기둥이 풀리므로
    여기서 사이드바는 항상 252px다. */
-.rotation-rail{position:fixed;right:0;top:56px;bottom:0;z-index:15;width:min(46vw,760px);overflow-y:auto;padding:20px;background:rgba(40,47,65,.97);border-left:1px solid #384155}
-.rotation-rail>.panel{margin-top:0;border:none;background:none;padding:0}
-.app.has-rail{margin-right:min(46vw,760px)}
-/* 공격 루틴(오른쪽 기둥)과 나머지 섹션(본문)이 가로로 나뉜다.
-   기둥이 화면 절반 가까이 쓰므로 본문은 한 줄짜리로 두고 위아래로 쌓는다. */
-.app.has-rail .calc-top{grid-template-columns:minmax(0,1fr)}
-@media(min-width:1500px){.app.has-rail .calc-top{grid-template-columns:minmax(0,1.2fr) minmax(0,1fr)}}
-/* 버프 창은 기둥에 가리지 않게 그만큼 왼쪽으로 물러난다. */
-.app.has-rail .buff-dialog{right:calc(min(46vw,760px) + 16px)}
-
-@media(max-width:1200px){
-.rotation-rail{position:static;width:auto;padding:0;background:none;border-left:none;overflow:visible}
-.rotation-rail>.panel{margin-top:12px;border:1px solid #384155;background:#282f41;padding:20px}
+/* 공격 루틴 — 본문 맨 위에 가로로 눕는다. 카드가 폭을 다 쓰고 여러 줄로 접힌다.
+   너무 길어지면 스스로 스크롤한다(아래 섹션이 화면 밖으로 밀리지 않게). */
+.rotation-rail{display:block}
+.rotation-rail>.panel{margin-top:0}
+.rotation-rail .rotation-wrap{max-height:min(52vh,520px);overflow-y:auto;padding-right:4px}
 .app.has-rail{margin-right:0}
-.app.has-rail .buff-dialog{right:16px}
+/* 좁은 화면에서는 루틴이 길어져도 스스로 접지 않는다 — 위아래로 그냥 이어 붙인다. */
+@media(max-width:1200px){
+.rotation-rail .rotation-wrap{max-height:none;overflow:visible;padding-right:0}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
 .panel-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}

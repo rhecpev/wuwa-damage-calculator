@@ -32,6 +32,7 @@ import type {
   CharacterWeaponConfig,
   ManualBuff,
   PartyConfig,
+  SkillCategory,
 } from "../../../types/game";
 
 export interface CalculationResult {
@@ -39,6 +40,11 @@ export interface CalculationResult {
   character: Character;
   attack: Character["skills"][number]["attacks"][number];
   activeBuffs: typeof buffs;
+  /**
+   * 이 공격이 든 스킬의 갈래(공명 회로 등). 공격 자체(Attack.type)에는 회로 자리가 없어서
+   * — 회로에 든 공격도 type은 강공격·공명 스킬이다 — 카드 색을 가르려면 이쪽이 필요하다.
+   */
+  skillCategory?: SkillCategory;
   stats: ReturnType<typeof calculateFinalStats>;
   /**
    * 피해 결과. 일반 공격과 이상 효과는 계산식이 통째로 달라 모양도 다르다.
@@ -231,6 +237,7 @@ export function useCalculationResults(
         item,
         character,
         attack,
+        skillCategory: (found.skill as { category?: SkillCategory }).category,
         activeBuffs,
         stats,
         damage: attack.discord
