@@ -2,6 +2,7 @@ import myEchoData from "./myEcho.json";
 import characterEchoLinksData from "./characterEchoLinks.json";
 import { loadPersisted, savePersisted } from "../utils/persist";
 import { echoStats } from "../calculator/echoStats";
+import { fetterGroupByName } from "./echoes";
 import type { Echo } from "../types/game";
 
 /**
@@ -120,4 +121,29 @@ export function equippedEchoes(
       stats: echoStats(e),
       effects: [],
     }));
+}
+
+/**
+ * 이 캐릭터가 맞춰 둔 화음 세트 — 이름 · 아이콘 · 맞춘 개수.
+ *
+ * 세트 효과가 몇 세트에서 열리는지는 data/echoBuffs.ts가 알고 있고, 여기서는
+ * 「무엇을 몇 개 맞췄는지」만 센다. 파티 카드처럼 한눈에 보여줄 자리에서 쓴다.
+ * 세는 규칙은 화음 세트 버프를 만드는 자리(calculator/equippedBuffs.ts)와 같다.
+ */
+export function equippedFetterSets(
+  characterId: string,
+  links: EchoLink[] = loadEchoLinks(),
+  owned: MyEcho[] = loadMyEchoes(),
+): { name: string; icon: string | null | undefined; count: number }[] {
+  const counts = new Map<string, number>();
+
+  for (const link of links.filter((l) => l.characterId === characterId)) {
+    const echo = owned.find((e) => e.pk === link.echoId);
+    const name = (echo?.options as { selectedFetter?: string } | undefined)?.selectedFetter;
+    if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+
+  return [...counts]
+    .map(([name, count]) => ({ name, count, icon: fetterGroupByName(name)?.icon }))
+    .sort((a, b) => b.count - a.count);
 }

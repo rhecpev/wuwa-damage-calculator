@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { characters, getAvailableCharacters } from "../../../data/sampleData";
 import type { PartyConfig } from "../../../types/game";
 import {
@@ -7,6 +7,7 @@ import {
   usePartyConfig,
 } from "../../../context/PartyConfigContext";
 import { useAppState } from "../../../context/AppStateContext";
+import { echoStoreVersion, equippedFetterSets, subscribeEchoStore } from "../../../data/echoStore";
 import { PartyPresetSection } from "./PartyPresetSection";
 
 interface PartySectionProps {
@@ -134,6 +135,10 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
   // 담아둔 파티는 평소엔 접어 둔다 — 늘 펼쳐 두면 이 칸이 통째로 길어진다.
   const [presetOpen, setPresetOpen] = useState(false);
   // 끌고 있는 자리 번호와, 지금 아이콘이 올라와 있는 자리 번호.
+  // 에코 저장소는 React 상태가 아니라 localStorage 한 벌이다. 에코를 갈아끼우면
+  // 화음 세트도 달라지므로, 저장될 때마다 올라가는 번호를 보고 다시 그린다.
+  useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
+
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [overSlot, setOverSlot] = useState<number | null>(null);
   // 예전에 만들어진 설정에는 프리셋이 없다 — 필드로 본다.
@@ -240,9 +245,31 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
 
               {character ? (
                 <>
-                  {character.iconUrl && (
-                    <img src={character.iconUrl} alt="" loading="lazy" draggable={false} />
-                  )}
+                  {/* 캐릭터 그림 옆에 맞춰 둔 화음 세트를 붙인다 — 어느 세트를 끼고 있는지
+                      파티를 짜면서 바로 보이도록. 개수는 아이콘 위 작은 숫자로 적는다. */}
+                  <div className="party-face">
+                    {character.iconUrl && (
+                      <img src={character.iconUrl} alt="" loading="lazy" draggable={false} />
+                    )}
+                    {(() => {
+                      const sets = equippedFetterSets(character.id);
+                      if (sets.length === 0) return null;
+                      return (
+                        <span className="party-sets">
+                          {sets.map((set) => (
+                            <i key={set.name} title={`${set.name} · ${set.count}개`}>
+                              {set.icon ? (
+                                <img src={set.icon} alt="" loading="lazy" draggable={false} />
+                              ) : (
+                                set.name[0]
+                              )}
+                              <b>{set.count}</b>
+                            </i>
+                          ))}
+                        </span>
+                      );
+                    })()}
+                  </div>
                   <strong>{character.name}</strong>
                 </>
               ) : (
