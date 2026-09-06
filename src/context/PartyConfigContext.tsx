@@ -1,6 +1,7 @@
 import { createContext, useContext, useMemo, useState, useSyncExternalStore } from "react";
 import type { ReactNode } from "react";
 import type {
+  AttackType,
   CharacterWeaponConfig,
   Element,
   EnemyResPreset,
@@ -156,6 +157,11 @@ interface PartyConfigContextType {
   toggleBuff: (rotationId: string, buffId: string) => void;
   /** 스택형 버프를 이 공격에서 몇 스택으로 볼지 정한다. */
   setBuffStacks: (rotationId: string, buffId: string, stacks: number) => void;
+  /**
+   * 이 한 대의 피해 판정을 바꿔치기한다. null이면 공격 자료를 그대로 따른다.
+   * 「공명 스킬인데 공명 해방 피해로 들어간다」처럼 자료와 실제가 갈릴 때 쓴다.
+   */
+  setAttackDamageType: (id: string, type: AttackType | null) => void;
   /** 이상 효과 항목의 스택과 발생 횟수. 이상 항목이 아니면 아무 일도 하지 않는다. */
   setAnomalyStacks: (rotationId: string, stacks: number) => void;
   setAnomalyOccurrences: (rotationId: string, occurrences: number) => void;
@@ -492,6 +498,18 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         ],
       };
     });
+  };
+
+  /** 이 한 대의 피해 판정 바꿔치기. null이면 지운다(공격 자료를 그대로 따른다). */
+  const setAttackDamageType = (id: string, type: AttackType | null) => {
+    setConfig((current) => ({
+      ...current,
+      rotation: current.rotation.map((item) => {
+        if (item.id !== id) return item;
+        const { damageBonusType: _drop, ...rest } = item;
+        return type ? { ...rest, damageBonusType: type } : rest;
+      }),
+    }));
   };
 
   /** 복사 — 켜둔 버프와 스택을 그대로 들고 맨 뒤에 하나 더 붙인다. */
@@ -1023,6 +1041,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setAttackCycle,
     moveAttack,
     duplicateCycle,
+    setAttackDamageType,
     removeAttack,
     duplicateAttack,
     clearRotation,

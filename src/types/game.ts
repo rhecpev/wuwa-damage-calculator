@@ -181,7 +181,10 @@ export interface Enemy{id:string;name:string;level:number;element:Element;resPre
 // baseRes: 몬스터 속성과 다른 속성 공격에 적용되는 기본 속성 저항.
 // sameElementRes: 몬스터 속성과 같은 속성 공격에 적용되는 저항.
 // damageTakenBonus: 받는피해(DMG Taken) — 역경의 탑 스테이지 전용 버프 등 적이 받는 피해를 늘리는 독립 배율
-export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];disabledBuffIds?:string[];buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;}
+export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];disabledBuffIds?:string[];damageBonusType?:AttackType;buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;}
+// damageBonusType: 이 한 대의 피해 판정을 손으로 바꿔치기한 값. 자료가 「공명 스킬」이라고
+//   적어 둔 공격이 실제로는 공명 해방 피해로 들어가는 일이 있어(스킬 설명에 그렇게 적힌다),
+//   카드에서 바로 고칠 수 있게 열어 두었다. 비어 있으면 공격 자료를 그대로 따른다.
 // disabledBuffIds: 상시(passive) 버프 중 이 공격에서만 꺼 둔 것. 상시는 조건이 없어 늘 걸리지만
 //   「이 버프가 얼마나 보태는지」를 보려고 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 두었다.
 //   비어 있으면(대개) 상시는 전부 걸린다.

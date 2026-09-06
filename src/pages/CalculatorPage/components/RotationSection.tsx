@@ -6,6 +6,7 @@ import { DamageFormulaModal } from "./DamageFormulaModal";
 import { num } from "../../../utils/format";
 import { ANOMALIES } from "../../../data/anomalies";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
+import type { AttackType } from "../../../types/game";
 
 interface RotationSectionProps {
   results: CalculationResult[];
@@ -47,6 +48,22 @@ function cardKind(result: CalculationResult): string {
 }
 
 /**
+ * 카드에서 고를 수 있는 피해 판정.
+ * 계산에 실제로 자리가 있는 것만 둔다(calculator/damage.ts의 CATEGORY_BONUS_KEY).
+ */
+const DAMAGE_TYPES: { value: AttackType; label: string }[] = [
+  { value: "Basic", label: "일반 공격" },
+  { value: "Heavy", label: "강공격" },
+  { value: "Aerial", label: "공중 공격" },
+  { value: "DodgeCounter", label: "회피 반격" },
+  { value: "Skill", label: "공명 스킬" },
+  { value: "Liberation", label: "공명 해방" },
+  { value: "Intro", label: "반주 스킬" },
+  { value: "Outro", label: "변주 스킬" },
+  { value: "Echo", label: "에코" },
+];
+
+/**
  * 카드에 적을 공격 이름. 끝에 붙은 「피해」를 뗀다 —
  * 좁은 카드에서 줄만 잡아먹고, 어차피 카드에 뜨는 숫자가 피해량이다.
  */
@@ -65,6 +82,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     addCycle,
     moveAttack,
     duplicateCycle,
+    setAttackDamageType,
     openCycle,
     saveCyclePreset,
     allBuffs,
@@ -79,7 +97,10 @@ export function RotationSection({ results }: RotationSectionProps) {
   // 끌어다 놓기 — 집은 카드와 지금 걸쳐 있는 카드.
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  // 피해 판정을 고르는 창을 연 항목.
+  const [typeId, setTypeId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
+  const typeResult = results.find((r) => r.item.id === typeId);
 
   return (
     <section className="panel">
@@ -245,8 +266,24 @@ export function RotationSection({ results }: RotationSectionProps) {
                       draggable={false}
                     />
                   )}
-                  <span className="card-title">
+                  <span
+                    className="card-title"
+                    role="button"
+                    tabIndex={0}
+                    title="누르면 이 한 대의 피해 판정을 바꿉니다"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setTypeId(result.item.id);
+                    }}
+                    onKeyDown={(event) => {
+                      if (event.key !== "Enter" && event.key !== " ") return;
+                      event.preventDefault();
+                      event.stopPropagation();
+                      setTypeId(result.item.id);
+                    }}
+                  >
                     {index + 1}. {attackLabel(result.attack.name)}
+                    {result.item.damageBonusType && <i className="card-typed">판정</i>}
                   </span>
                 </span>
 
@@ -389,6 +426,64 @@ export function RotationSection({ results }: RotationSectionProps) {
 
       {formulaResult && (
         <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />
+      )}
+
+      {/* 피해 판정 고르기 — 카드의 공격명을 누르면 뜬다.
+          자료가 「공명 스킬」이라고 적어 둔 공격이 실제로는 공명 해방 피해로 들어가는 일이 있어,
+          그 한 대만 손으로 바꿀 수 있게 해 둔다. */}
+      {typeResult && (
+        <div className="formula-backdrop" onClick={() => setTypeId(null)} role="presentation">
+          <div className="type-modal" onClick={(event) => event.stopPropagation()}>
+            <div className="formula-head">
+              <div>
+                <small>피해 판정</small>
+                <h3>{attackLabel(typeResult.attack.name)}</h3>
+                <span>
+                  {typeResult.character.name} · 자료에 적힌 판정{" "}
+                  {DAMAGE_TYPES.find(
+                    (t) => t.value === (typeResult.attack.damageBonusType ?? typeResult.attack.type),
+                  )?.label ?? (typeResult.attack.damageBonusType ?? typeResult.attack.type)}
+                </span>
+              </div>
+              <button className="formula-close" onClick={() => setTypeId(null)}>
+                ×
+              </button>
+            </div>
+
+            <div className="type-grid">
+              {DAMAGE_TYPES.map((type) => {
+                const on = typeResult.item.damageBonusType === type.value;
+                return (
+                  <button
+                    key={type.value}
+                    className={on ? "on" : ""}
+                    onClick={() => {
+                      setAttackDamageType(typeResult.item.id, on ? null : type.value);
+                      setTypeId(null);
+                    }}
+                  >
+                    {type.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="type-foot">
+              <button
+                onClick={() => {
+                  setAttackDamageType(typeResult.item.id, null);
+                  setTypeId(null);
+                }}
+                disabled={!typeResult.item.damageBonusType}
+              >
+                자료대로 되돌리기
+              </button>
+              <small>
+                이 한 대에만 걸립니다. 피해 보너스(일반 공격 · 강공격 …)와 버프 판정이 함께 바뀝니다.
+              </small>
+            </div>
+          </div>
+        </div>
       )}
     </section>
   );

@@ -174,7 +174,11 @@ export function useCalculationResults(
 
       // 「이번 피해는 공명 해방 피해로 적용된다」 같은 조건부 분류 전환을 먼저 얹는다.
       // 아래 버프 판정(appliesTo)이 damageBonusType을 보므로 순서가 여기여야 한다.
-      const attack = applyDamageTypeSwitch(leveledAttack, itemBuffs);
+      // 카드에서 손으로 고른 판정이 있으면 그것이 마지막에 이긴다 — 사람이 고른 값이라서다.
+      const switched = applyDamageTypeSwitch(leveledAttack, itemBuffs);
+      const attack = item.damageBonusType
+        ? { ...switched, damageBonusType: item.damageBonusType }
+        : switched;
 
       // 증분을 calculateFinalStats 안으로 넘겨서 공격력% 같은 값이
       // 기초 스탯 곱연산에 제대로 들어가게 한다.
