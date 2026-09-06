@@ -91,6 +91,14 @@
 .formula-origin li{display:flex;justify-content:space-between;gap:14px;font-size:12px;padding:4px 8px;background:#2e3648;border:1px solid #364054;border-radius:7px}
 .formula-origin li b{color:#c2c9d6;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .formula-origin li span{color:#8fb4d9;white-space:nowrap}
+/* 계산 내역을 JSON으로 통째로 복사하는 자리 — 어긋난 계산을 그대로 붙여넣어 보이려는 것. */
+.formula-actions{position:relative;display:flex;flex:none;align-items:center;gap:8px}
+.formula-json-copy{padding:6px 12px;border-radius:8px;background:#2a3246;border:1px solid #3c455c;color:#c2c9d6;font-size:12px;cursor:pointer}
+.formula-json-copy:hover{background:#333c52;color:#e9edf5}
+.formula-json-copy.done{border-color:#5f8f5f;color:#a6d6a6}
+.formula-json-box{position:absolute;right:0;top:calc(100% + 6px);z-index:5;width:min(460px,70vw);display:flex;flex-direction:column;gap:6px;padding:8px;background:#262d3f;border:1px solid #495466;border-radius:9px;box-shadow:0 12px 28px rgba(0,0,0,.4)}
+.formula-json-box small{color:#9aa3b3;font-size:11px;font-weight:400;letter-spacing:0}
+.formula-json-box textarea{width:100%;height:180px;padding:8px;border-radius:7px;background:#2a3246;border:1px solid #3c455c;color:#e9edf5;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace;resize:vertical}
 .formula-expr{color:#9aa3b3;font-size:12px;line-height:1.6;word-break:break-word}
 .formula-value{width:130px;text-align:right;color:#8fb4d9;font-variant-numeric:tabular-nums;white-space:nowrap}
 .formula-sum td{border-bottom:none;border-top:1px solid #414b61}

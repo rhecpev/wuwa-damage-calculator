@@ -11,6 +11,7 @@ import {
 } from "../../../calculator/damage";
 import { dec, num, pct } from "../../../utils/format";
 import { STAT_NAMES } from "../../../utils/statNames";
+import { formulaJson } from "./formulaJson";
 
 interface DamageFormulaModalProps {
   result: CalculationResult;
@@ -54,6 +55,48 @@ const ContributionContext = createContext<StatContribution[]>([]);
 const FLAT_KEYS = new Set<keyof Stats>(["hp", "atk", "def"]);
 const statValue = (key: keyof Stats, value: number) =>
   FLAT_KEYS.has(key) ? dec(value) : pct(value);
+
+/**
+ * 이 창이 보고 있는 계산을 JSON 한 덩이로 복사한다.
+ *
+ * 클립보드가 막힌 자리(권한을 꺼 둔 브라우저 등)에서는 글상자를 펼쳐 직접 고르게 한다
+ * — 복사가 조용히 실패하면 "눌렀는데 아무 일도 없다"가 되기 때문이다.
+ */
+function CopyJson({ result }: { result: CalculationResult }) {
+  const [state, setState] = useState<"idle" | "done" | "manual">("idle");
+  const [text, setText] = useState("");
+
+  const copy = async () => {
+    const json = formulaJson(result);
+    setText(json);
+    try {
+      await navigator.clipboard.writeText(json);
+      setState("done");
+      window.setTimeout(() => setState("idle"), 1500);
+    } catch {
+      setState("manual");
+    }
+  };
+
+  return (
+    <>
+      <button
+        className={state === "done" ? "formula-json-copy done" : "formula-json-copy"}
+        onClick={copy}
+        title="이 한 대의 계산 내역을 JSON으로 복사합니다"
+      >
+        {state === "done" ? "복사됨" : "JSON 복사"}
+      </button>
+
+      {state === "manual" && (
+        <div className="formula-json-box">
+          <small>클립보드가 막혀 있습니다 — 아래 내용을 직접 복사하세요.</small>
+          <textarea readOnly value={text} onFocus={(event) => event.currentTarget.select()} />
+        </div>
+      )}
+    </>
+  );
+}
 
 /**
  * 표 한 줄 — 이름 / 어떻게 나온 값인지 / 결과.
@@ -196,9 +239,12 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
               {d.skillLevel}
             </span>
           </div>
-          <button className="formula-close" onClick={onClose}>
-            ×
-          </button>
+          <div className="formula-actions">
+            <CopyJson result={result} />
+            <button className="formula-close" onClick={onClose}>
+              ×
+            </button>
+          </div>
         </div>
 
         <p className="formula-top">
@@ -454,9 +500,12 @@ function AnomalyFormulaModal({
                 {d.stacks}스택
               </span>
             </div>
-            <button className="formula-close" onClick={onClose}>
-              ×
-            </button>
+            <div className="formula-actions">
+              <CopyJson result={result} />
+              <button className="formula-close" onClick={onClose}>
+                ×
+              </button>
+            </div>
           </div>
 
           <p className="formula-top">
