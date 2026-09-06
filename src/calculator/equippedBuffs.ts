@@ -332,14 +332,17 @@ function panelStatKey(buff: ManualBuff): keyof Stats | null {
 /**
  * 낀 것에서 나오는 **조건 없는** 효과를 스탯창 값으로 옮긴다.
  *
- * 세 군데서 모은다.
+ * 네 군데서 모은다.
  *   무기 효과       「공격력이 12% 증가된다」처럼 끼고만 있으면 걸리는 것
  *   고유 스킬·체인  발동 조건 없이 늘 붙는 것
  *   에코 어빌리티   1번 자리 에코의 「메인 슬롯에 장착 시 …」
- * 셋 다 게임의 캐릭터 속성 창에 그대로 찍히는 값이라, 이 앱의 스탯 화면에도 보여야 한다.
+ *   화음 세트 효과  2세트처럼 맞추기만 하면 조건 없이 걸리는 것
  *
- * 화음 세트 효과는 넣지 않는다 — 그쪽은 속성 창에 찍히지 않고 전투 중에 붙는다(실측 확인).
- * 세트를 맞춰도 스탯 화면의 숫자가 그대로인 것이 맞다. 그래서 에코 쪽은 어빌리티만 걸러 받는다.
+ * 화음 세트는 예전에 통째로 뺐었다 — 공격력% 세트가 게임 속성 창에 안 찍힌다는 실측 때문이다.
+ * 그런데 2세트 고정 스탯(「내려앉은 깃털의 노래」 공명 효율 10% 등)까지 같이 빠져서
+ * 화면에 아예 안 잡혔다. 그래서 조건 없는 것만 받도록 바꾸고, 공격력·HP·방어력 %는
+ * statGroup이 "buff"라 스탯창 몫이 아니라 버프 몫으로 들어간다(panelStatKey 참고) —
+ * 속성 창 숫자는 그대로 두면서 세트 효과는 화면에 잡히는 자리다.
  *
  * 빼는 것 —
  *   uptime "active"   발동 조건이 있는 것. 끼고만 있어서는 걸리지 않는다.
@@ -365,10 +368,8 @@ export function equippedPanelStats(
     [{ character, config: { characterId: id, weaponId: weaponConfig?.weaponId ?? "", echoIds: [], resonanceChain } }],
     inherents,
   );
-  // 에코는 어빌리티만 — 화음 세트는 속성 창에 찍히지 않는다.
-  const echoBuffs = deriveEchoBuffs([id], links, owned).filter((buff) =>
-    buff.id.startsWith("echoability:"),
-  );
+  // 어빌리티와 화음 세트 둘 다. 조건이 붙은 것은 아래 uptime 검사에서 빠진다.
+  const echoBuffs = deriveEchoBuffs([id], links, owned);
 
   const out: Partial<Stats> = {};
   for (const buff of [...weaponBuffs, ...characterBuffs, ...echoBuffs]) {

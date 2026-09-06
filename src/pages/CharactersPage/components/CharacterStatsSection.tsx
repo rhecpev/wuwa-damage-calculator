@@ -140,14 +140,13 @@ export function CharacterStatsSection({
           description: "켜둔 스킬 트리 스탯 노드의 합계",
           stats: nodeStats(character.id, characterNodes[character.id]),
         },
-        // 무기 효과 · 고유 스킬 · 메인 에코 어빌리티 중 **조건 없는** 것.
-        // 끼고만 있으면 늘 걸려서 게임 속성 창에도 그대로 찍히는 값이라 여기서 함께 더한다.
+        // 무기 효과 · 고유 스킬 · 메인 에코 어빌리티 · 화음 세트 중 **조건 없는** 것.
+        // 끼고만 있으면 늘 걸리는 값이라 여기서 함께 더한다.
         // 공격력뿐 아니라 체력·방어력도 같은 자리에서 잡힌다.
-        // (화음 세트 효과는 속성 창에 찍히지 않으므로 들어오지 않는다 — equippedBuffs.ts 참고.)
         {
           id: "equipped",
           name: "장착 효과",
-          source: "무기 · 고유 · 에코 어빌리티",
+          source: "무기 · 고유 · 에코 어빌리티 · 화음 세트",
           description: "발동 조건 없이 늘 걸리는 효과",
           stats: equippedPanelStats(character, equipped, chain, characterEchoLinks),
         },
@@ -267,9 +266,10 @@ export function CharacterStatsSection({
       </div>
 
       <p className="stat-note">
-        기초 스탯 · 무기 · 장착 에코 · 공명체인 고정 스탯만 합산한 값입니다. 공명 효율은
-        표시 전용으로, 피해 계산식에는 들어가지 않습니다. 조건부로 걸리는
-        무기 스킬 · 고유효과 · 수기 버프는 공격마다 판정이 달라 계산 탭에서 반영됩니다.
+        기초 스탯 · 무기 · 장착 에코 · 화음 세트 · 공명체인 고정 스탯만 합산한 값입니다.
+        공명 효율은 표시 전용으로, 피해 계산식에는 들어가지 않습니다. 조건부로 걸리는
+        무기 스킬 · 고유효과 · 화음 5세트 · 수기 버프는 공격마다 판정이 달라 계산 탭에서
+        반영됩니다.
       </p>
     </section>
   );
