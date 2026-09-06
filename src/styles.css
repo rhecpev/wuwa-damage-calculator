@@ -1148,5 +1148,9 @@
 .profile-import .subs>label select{cursor:pointer}
 .profile-import .subs label.held{opacity:.35}
 .profile-import .subs label.target{outline:2px dashed #8fb4d9;outline-offset:3px;border-radius:8px}
-.profile-import .subs .swap{flex:none;align-self:center;padding:3px 5px;border-radius:6px;background:#2a3246;border:1px solid #3c455c;color:#6f7a8d;font-size:11px;line-height:1;letter-spacing:-1px;cursor:pointer}
-.profile-import .subs .swap:hover{color:#e9edf5;border-color:#5a6479;background:#333c52}
+/* 자리 바꾸기 단추는 부옵션 드롭다운과 키를 맞춘다. 이름줄(16px)과 사이 간격(5px)만큼
+   내려서 드롭다운 줄에 나란히 서게 하고, 색은 보라 계열로 따로 둬서 입력칸과 구분한다. */
+.profile-import .subs>label>em{line-height:16px}
+.profile-import .subs .row select{height:32px}
+.profile-import .subs .swap{flex:none;align-self:flex-start;margin-top:21px;height:32px;padding:0 7px;border-radius:7px;background:#3a3151;border:1px solid #574473;color:#b7a2dd;font-size:11px;line-height:1;letter-spacing:-1px;cursor:pointer}
+.profile-import .subs .swap:hover{color:#efe6ff;border-color:#7a63a2;background:#483c66}
