@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { characters } from "../../data/sampleData";
 import { weapons } from "../../data/weapons";
 import { isExcludedEcho } from "../../data/echoExcludes";
@@ -192,25 +192,17 @@ export function ProfileImportPage() {
 
   const [busy, setBusy] = useState<Progress | null>(null);
   const [read, setRead] = useState<ProfileRead | null>(null);
-  /**
-   * 넣은 사진을 화면에 그대로 띄우기 위한 주소.
-   * 아래 확인 칸이 사진과 맞는지 눈으로 견주려면 사진이 같은 화면에 있어야 한다.
-   * createObjectURL은 직접 놓아 주지 않으면 탭이 닫힐 때까지 메모리에 남는다 —
-   * 새 사진으로 바꿀 때와 화면을 떠날 때 반드시 revoke한다.
-   */
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  useEffect(
-    () => () => {
-      if (imageUrl) URL.revokeObjectURL(imageUrl);
-    },
-    // 사진이 바뀌면 **앞 사진**을 놓아 주고, 화면을 떠날 때 마지막 것을 놓아 준다.
-    [imageUrl],
-  );
   const [draft, setDraft] = useState<Draft | null>(null);
   /** 적용이 끝나면 뜨는 알림. 무엇이 저장됐는지 줄줄이 보여 준다. */
   const [done, setDone] = useState<string[] | null>(null);
   /** 이미 가진 것과 똑같은 에코가 있을 때, 어떻게 할지 물어보는 창. */
   const [duplicates, setDuplicates] = useState<EchoDraft[] | null>(null);
+  /**
+   * 부옵션을 끌어 옮기는 중인 자리. echo는 몇 번째 에코인지, from은 집어 든 줄,
+   * over는 지금 손이 올라가 있는 줄이다(그 줄에 놓을 자리 표시를 그린다).
+   * 다른 에코 칸으로는 옮길 수 없다 — echo가 다르면 놓기를 받지 않는다.
+   */
+  const [drag, setDrag] = useState<{ echo: number; from: number; over: number } | null>(null);
 
   // 목록에서 뺀 에코(새알심 · 「이상」 중복)는 고를 수 없어야 한다.
   const echoItems = useMemo(
@@ -236,8 +228,6 @@ export function ProfileImportPage() {
     if (!file) return;
 
     setDone(null);
-    // 읽기가 오래 걸리므로 사진부터 띄운다 — 무엇을 넣었는지 바로 보이게.
-    setImageUrl(URL.createObjectURL(file));
     setBusy({ label: "사진 여는 중", done: 0, total: 1 });
     try {
       const result = await readProfileCard(file, (label, done, total) =>
@@ -295,6 +285,30 @@ export function ProfileImportPage() {
   const patchEcho = (i: number, next: Partial<EchoDraft>) =>
     setDraft((d) =>
       d ? { ...d, echoes: d.echoes.map((e, n) => (n === i ? { ...e, ...next } : e)) } : d,
+    );
+
+  /**
+   * 부옵션 한 줄을 다른 자리로 옮긴다.
+   *
+   * OCR이 줄을 통째로 놓치거나 두 줄을 뒤바꿔 읽는 일이 있어서, 사람이 카드를 보고
+   * 자리를 맞출 수 있어야 한다. 지우고 다시 고르는 것보다 끌어 옮기는 쪽이 빠르다.
+   * 다섯 줄을 통째로 다시 늘어놓으므로 빈 줄도 함께 밀린다 — 빈 자리가 어디였는지가
+   * 그대로 지켜진다(utils/ocr.ts의 pairRows 설명 참고).
+   */
+  const moveOption = (echo: number, from: number, to: number) =>
+    setDraft((d) =>
+      !d || from === to
+        ? d
+        : {
+            ...d,
+            echoes: d.echoes.map((e, n) => {
+              if (n !== echo) return e;
+              const options = [...e.options];
+              const [moved] = options.splice(from, 1);
+              options.splice(to, 0, moved);
+              return { ...e, options };
+            }),
+          },
     );
 
   /** 종류와 값이 모두 있는 부옵션 줄만. 빈 줄은 저장하지 않는다. */
@@ -448,23 +462,6 @@ export function ProfileImportPage() {
         {busy && <ProgressBar progress={busy} />}
       </section>
 
-      {/* 넣은 사진. 아래 확인 칸을 사진과 견주며 고쳐야 해서 같은 화면에 둔다.
-          카드가 가로로 길어 높이만 묶어 두고, 원본은 새 탭에서 크게 본다. */}
-      {imageUrl && (
-        <section className="panel card-preview">
-          <div className="card-preview-head">
-            <div>
-              <small>PREVIEW</small>
-              <h2>넣은 사진</h2>
-            </div>
-            <a href={imageUrl} target="_blank" rel="noreferrer">
-              원본 크기로 열기
-            </a>
-          </div>
-          <img src={imageUrl} alt="넣은 프로필 카드" />
-        </section>
-      )}
-
       {draft && read && (
         <>
           <section className="panel">
@@ -589,7 +586,8 @@ export function ProfileImportPage() {
               글자 대신 <b>그림을 도감과 견줘서</b> 채웠습니다 — 코스트 왼쪽의 동그란 화음
               아이콘이 「우글글」과 「악몽 · 우글글」처럼 그림이 거의 같은 짝을 갈라 줍니다.
               미덥지 않은 자리에는 표시를 남겼으니 그것만 확인하세요. 안 고른 에코는
-              등록하지 않고 넘어갑니다.
+              등록하지 않고 넘어갑니다. 부옵션이 밀려 읽혔으면 왼쪽 손잡이(<b>⠿</b>)를
+              끌어서 자리를 바꾸세요.
             </p>
 
             <div className="echo-drafts">
@@ -678,37 +676,71 @@ export function ProfileImportPage() {
                       </div>
 
                       <div className="echo-draft-line subs">
-                        {e.options.map((o, n) => (
-                          <label key={n} className={o.note ? "warn" : ""}>
-                            <em>부옵션 {n + 1}</em>
-                            <span className="row">
-                              <OptionSelect
-                                value={o.key}
-                                items={Object.keys(OPTIONS.subOption)}
-                                blank="— 없음 —"
-                                onChange={(v) =>
-                                  patchEcho(i, {
-                                    options: e.options.map((x, m) =>
-                                      m === n ? { ...x, key: v, value: "", note: "" } : x,
-                                    ),
-                                  })
-                                }
-                              />
-                              <OptionSelect
-                                value={o.value}
-                                items={OPTIONS.subOption[o.key] ?? []}
-                                onChange={(v) =>
-                                  patchEcho(i, {
-                                    options: e.options.map((x, m) =>
-                                      m === n ? { ...x, value: v, note: "" } : x,
-                                    ),
-                                  })
-                                }
-                              />
-                            </span>
-                            {o.note && <small className="warn-note">{o.note}</small>}
-                          </label>
-                        ))}
+                        {e.options.map((o, n) => {
+                          const held = drag?.echo === i && drag.from === n;
+                          const target = drag?.echo === i && drag.over === n && drag.from !== n;
+                          return (
+                            <label
+                              key={n}
+                              className={[o.note ? "warn" : "", held ? "held" : "", target ? "target" : ""]
+                                .filter(Boolean)
+                                .join(" ")}
+                              // 같은 에코 안에서만 받는다. preventDefault를 해야 놓기가 열린다.
+                              onDragOver={(ev) => {
+                                if (drag?.echo !== i) return;
+                                ev.preventDefault();
+                                if (drag.over !== n) setDrag({ ...drag, over: n });
+                              }}
+                              onDrop={(ev) => {
+                                ev.preventDefault();
+                                if (drag?.echo === i) moveOption(i, drag.from, n);
+                                setDrag(null);
+                              }}
+                            >
+                              <em>
+                                {/* 손잡이만 끌린다 — 칸 전체를 draggable로 두면 안의 select를
+                                    건드릴 수 없다. click을 막는 것은 label이 select를 열지 않게. */}
+                                <i
+                                  className="grip"
+                                  draggable
+                                  onDragStart={() => setDrag({ echo: i, from: n, over: n })}
+                                  onDragEnd={() => setDrag(null)}
+                                  onClick={(ev) => ev.preventDefault()}
+                                  title="끌어서 순서를 바꿉니다"
+                                >
+                                  ⠿
+                                </i>
+                                부옵션 {n + 1}
+                              </em>
+                              <span className="row">
+                                <OptionSelect
+                                  value={o.key}
+                                  items={Object.keys(OPTIONS.subOption)}
+                                  blank="— 없음 —"
+                                  onChange={(v) =>
+                                    patchEcho(i, {
+                                      options: e.options.map((x, m) =>
+                                        m === n ? { ...x, key: v, value: "", note: "" } : x,
+                                      ),
+                                    })
+                                  }
+                                />
+                                <OptionSelect
+                                  value={o.value}
+                                  items={OPTIONS.subOption[o.key] ?? []}
+                                  onChange={(v) =>
+                                    patchEcho(i, {
+                                      options: e.options.map((x, m) =>
+                                        m === n ? { ...x, value: v, note: "" } : x,
+                                      ),
+                                    })
+                                  }
+                                />
+                              </span>
+                              {o.note && <small className="warn-note">{o.note}</small>}
+                            </label>
+                          );
+                        })}
                       </div>
                     </div>
                   </div>
