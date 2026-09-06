@@ -63,7 +63,7 @@ const BONUS_ROWS: Row[] = [
   ["critRate", "크리티컬", "pct"],
   ["critDamage", "크리티컬 피해", "base"],
   ["energyRegen", "공명 효율", "base"],
-  ["discordEfficiency", "부조화 수치 누적 효율", "pct"],
+  ["discordEfficiency", "부조화 수치 누적 효율", "base"], // 누구나 기본 100%를 깔고 있다
   ["skillDamageBonus", "공명 스킬 피해 보너스", "pct"],
   ["basicDamageBonus", "일반 공격 피해 보너스", "pct"],
   ["heavyDamageBonus", "강공격 피해 보너스", "pct"],

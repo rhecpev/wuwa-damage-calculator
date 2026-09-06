@@ -96,7 +96,9 @@ export interface Stats {
   // 스탯창을 게임과 같은 줄로 채우려고 자리만 만들어 둔다.
   physicalDamageBonus: number; // 물리 피해 보너스. Element에는 물리가 없어 따로 둔다.
   syncAmplify: number; // 조화도 파괴 증폭
-  discordEfficiency: number; // 부조화 수치 누적 효율
+  // 부조화 수치 누적 효율 — 공명 효율과 같이 **기본 100%를 뺀 보너스분**만 담는다.
+  //   표시값 = 1 + discordEfficiency. 누구나 100%를 깔고 시작한다.
+  discordEfficiency: number;
   healingBonus: number; // 치료 효과 보너스
   // 내가 받는 속성 피해 저항. 적 저항(Enemy.baseRes)과는 다른 값이다.
   physicalRes: number;

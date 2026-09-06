@@ -237,7 +237,7 @@ export function appliesTo(buff: ManualBuff, attack: Attack, characterId?: string
  *                     「방어력 20%를 기반으로」 → 방어력 2000 × 0.2 = 400% = 4.0이 되도록.
  *   EnergyRegen       게임 표시값(퍼센트포인트). 스탯은 100%를 뺀 보너스분만 담으므로 1을 더한다
  *                     — 공명 효율 130%면 130이 나온다.
- *   DiscordEfficiency 표시값(퍼센트포인트). 0.25 → 25
+ *   DiscordEfficiency 표시값(퍼센트포인트). 기본 100%가 깔려 있어 보너스 0.25 → 125
  *   SyncAmplify       표시값(pt = 퍼센트포인트). 0.2 → 20
  *   CritRate          표시값(퍼센트포인트). 1.3 → 130
  *
@@ -248,7 +248,9 @@ const SCALE_SOURCES: Record<BuffScaleStat, (s: Stats) => number> = {
   HP: (s) => Math.floor(s.hp) / 100,
   DEF: (s) => Math.floor(s.def) / 100,
   EnergyRegen: (s) => (1 + s.energyRegen) * 100,
-  DiscordEfficiency: (s) => s.discordEfficiency * 100,
+  // 부조화 수치 누적 효율은 공명 효율과 같은 꼴이다 — 누구나 기본 100%를 깔고 있고
+  // Stats에는 그 위에 얹힌 보너스분만 담는다. 「1%당」이라고 적힌 효과는 표시값(=100+보너스)을 본다.
+  DiscordEfficiency: (s) => (1 + s.discordEfficiency) * 100,
   SyncAmplify: (s) => s.syncAmplify * 100,
   CritRate: (s) => s.critRate * 100,
 };
