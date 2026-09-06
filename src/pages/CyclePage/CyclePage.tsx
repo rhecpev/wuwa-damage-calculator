@@ -23,7 +23,8 @@ import {
  * 남의 사이클을 열면 내 체인이 1돌인데 상대는 3돌이라 그 id가 아예 없을 수 있다.
  * 그러면 켜둔 체크가 조용히 사라져 「같은 루틴인데 딜이 다른」 상태가 된다.
  *
- * 그래서 앉히기 전에 지금 환경(allBuffs)에 그 id가 실제로 있는지 하나씩 본다.
+ * 그래서 앉히기 전에 **앉힌 뒤의 환경**에 그 id가 실제로 있는지 하나씩 본다
+ * (지금 파티로 따지면 다른 팀의 사이클은 그 팀 버프가 통째로 없는 것으로 잡힌다).
  * 없는 것이 있으면 무엇이 왜 빠지는지 보여 주고, 사람이 「그건 빼고 넣기」를 고르게 한다.
  */
 
@@ -52,7 +53,7 @@ export function CyclePage() {
     renameCyclePreset,
     removeCyclePreset,
     currentCycleMembers,
-    allBuffs,
+    buffIdsFor,
   } = usePartyConfig();
   const { setTab } = useAppState();
 
@@ -84,7 +85,6 @@ export function CyclePage() {
     null,
   );
 
-  const buffIds = useMemo(() => new Set(allBuffs.map((b) => b.id)), [allBuffs]);
   // 컨텍스트가 다시 그려질 때마다 새로 읽는다 — 지금 파티·체인을 그대로 봐야 해서
   // 기억해 두면 안 된다(useMemo를 걸면 옛 환경과 견주게 된다).
   const here = currentCycleMembers();
@@ -104,10 +104,13 @@ export function CyclePage() {
    */
   const orphansOf = (preset: CyclePreset): string[] => {
     const manual = new Set(preset.manualBuffs.map((b) => b.id));
+    // **앉힌 뒤**의 버프로 따진다. 지금 파티로 따지면 다른 팀의 사이클은 그 팀 버프가
+    // 통째로 없는 것으로 잡혀, 켜 둔 체크가 전부 빠진 채로 들어온다.
+    const after = buffIdsFor(preset.members.map((m) => m.characterId));
     const seen = new Set<string>();
     for (const item of preset.rotation) {
       for (const id of item.enabledBuffIds) {
-        if (manual.has(id) || buffIds.has(id)) continue;
+        if (manual.has(id) || after.has(id)) continue;
         seen.add(id);
       }
     }

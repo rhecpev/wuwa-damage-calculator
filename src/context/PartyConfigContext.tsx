@@ -211,6 +211,13 @@ interface PartyConfigContextType {
   removeCyclePreset: (id: string) => void;
   /** 지금 환경을 사이클과 같은 모양으로. 담긴 것과 견주려고 화면이 쓴다. */
   currentCycleMembers: () => CycleMember[];
+  /**
+   * 이 캐릭터들을 파티에 앉혔을 때 **생길** 버프 id 목록.
+   *
+   * 사이클을 앉히기 전에 「살아남지 못할 체크」를 가릴 때 쓴다. 지금 파티로 따지면
+   * 다른 팀의 사이클은 그 팀 버프가 전부 없는 것으로 잡혀, 켜 둔 체크가 통째로 빠진다.
+   */
+  buffIdsFor: (characterIds: string[]) => Set<string>;
 }
 
 const PartyConfigContext = createContext<PartyConfigContextType | undefined>(undefined);
@@ -902,6 +909,42 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   // localStorage 한 벌이라, 저장될 때마다 올라가는 번호를 보고 다시 계산한다.
   const echoVersion = useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
 
+  /**
+   * 주어진 캐릭터들이 파티에 앉았을 때 생기는 버프 목록.
+   * 무기·체인·모드·에코는 지금 설정을 그대로 본다 — 사이클을 앉혀도 그쪽은 안 건드리기 때문이다.
+   */
+  const deriveBuffsFor = (characterIds: string[]): ManualBuff[] => {
+    const members = characterIds
+      .map((id) => {
+        const character = characters.find((c) => c.id === id);
+        if (!character) return null;
+        return {
+          character,
+          config: {
+            characterId: id,
+            weaponId: characterWeapons[id]?.weaponId ?? "",
+            echoIds: [],
+            resonanceChain: characterChains[id] ?? 0,
+            resonanceMode: characterModes[id] ?? character.resonanceModes?.[0],
+          },
+        };
+      })
+      .filter((m): m is NonNullable<typeof m> => m !== null);
+
+    return [
+      ...deriveCharacterBuffs(members, characterInherents),
+      ...deriveWeaponBuffs(
+        characterWeapons,
+        members.map((m) => m.character.id),
+      ),
+      ...deriveEchoBuffs(members.map((m) => m.character.id)),
+      ...anomalyStateBuffs(),
+    ];
+  };
+
+  const buffIdsFor = (characterIds: string[]) =>
+    new Set(deriveBuffsFor(characterIds).map((b) => b.id));
+
   // 파티에 앉은 캐릭터의 고유 버프와, 그 캐릭터가 낀 무기의 스킬 버프를 자동으로 합친다.
   // 편성·무기·정련·공명체인·공명 모드를 바꾸면 목록이 바로 따라온다.
   const allBuffs = useMemo(() => {
@@ -1017,6 +1060,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     renameCyclePreset,
     removeCyclePreset,
     currentCycleMembers,
+    buffIdsFor,
   };
 
   return <PartyConfigContext.Provider value={value}>{children}</PartyConfigContext.Provider>;
