@@ -701,6 +701,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0,
     raisesAnomalyStacks: 3,
+    // 이상 스택 상한 증가는 게임에서 중첩되지 않는다 — 한 번에 하나만 켜지게 묶는다.
+    exclusiveGroup: "anomalyStackCap",
     raisesAnomalyKinds: ["AeroErosion"],
     resonanceChain: 2,
     uptime: "active",

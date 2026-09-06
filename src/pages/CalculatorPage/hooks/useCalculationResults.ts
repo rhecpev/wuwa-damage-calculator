@@ -152,7 +152,13 @@ export function useCalculationResults(
         // 스택형 버프는 이 공격에서 정한 스택이 있으면 그 값으로 바꿔 넣는다.
         .map((buff) => {
           const picked = item.buffStacks?.[buff.id];
-          return picked === undefined || picked === buff.stacks ? buff : { ...buff, stacks: picked };
+          if (picked === undefined || picked === buff.stacks) return buff;
+          // 이상 효과 스택을 쓰는 버프는 상한이 버프 구성에 따라 오르내린다 —
+          // 상한을 올려주던 버프를 끄면 담아 뒀던 스택이 상한 밖으로 남는다. 그때는 잘라 쓴다.
+          const cap = buff.anomalyStacks
+            ? anomalyStackCap(buff.anomalyStacks, manualBuffs, item.enabledBuffIds).max
+            : (buff.maxStacks ?? picked);
+          return { ...buff, stacks: Math.min(picked, cap) };
         });
 
       // 「이번 피해는 공명 해방 피해로 적용된다」 같은 조건부 분류 전환을 먼저 얹는다.

@@ -731,18 +731,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // 이상 피해 쪽은 방어무시를 아예 안 보고 이 값만 본다(calculator/anomaly.ts).
   // 적에게 걸리는 디버프라 파티 전원이 같이 덕을 본다.
   // 스택 상한은 3이지만 고정이 아니다 — 치사의 반주가 켜져 있으면 6까지 올라간다.
-  {
-    label: "암흑 효과 · 목표 방어력 감소",
-    target: "defReduction",
-    damageType: "All",
-    value: 0.02, // 스택당 2%
-    stacks: 3,
-    maxStacks: 3,
-    anomalyStacks: "HavocBane",
-    uptime: "active",
-    scope: "party",
-    condition: "목표에 「암흑 효과」가 붙어 있을 때 — 붙인 스택 수만큼",
-  },
+  // 암흑 효과의 방어력 감소는 여기 없다 — 적에게 붙는 상태라 누가 붙였든 한 줄뿐이어서
+  // data/anomalyBuffs.ts로 옮겼다. 파티에 둘을 같이 넣으면 두 번 걸리던 것을 막는다.
   {
     // 원문: 「공격 명중 후 목표의 「이상 효과」 · 「자기 폭발」 스택 최대치를 3스택 증가,
     //        15초 지속」 + 「이상 효과를 추가하거나 이상 효과 피해를 입힌 후 파멸의 선 획득」
@@ -753,6 +743,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0.18, // 파멸의 선 — 방어력 18% 무시
     raisesAnomalyStacks: 3,
+    // 이상 스택 상한 증가는 게임에서 중첩되지 않는다 — 한 번에 하나만 켜지게 묶는다.
+    exclusiveGroup: "anomalyStackCap",
     uptime: "active",
     scope: "party",
     condition: "반주 「현을 푸는 제0법칙」 후 20초 · 상한 증가분은 15초",

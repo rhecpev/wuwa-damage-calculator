@@ -99,7 +99,11 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
 
   // 이상 효과는 공격이 아니라 적에게 쌓이는 상태라 스킬 목록에 없다.
   // 이 캐릭터가 붙일 수 있는 효과만 따로 버튼으로 세운다(characterAnomalies 표).
-  const anomalies = active.character ? anomaliesOf(active.character.id) : [];
+  // 피해가 없는 효과(암흑)는 담을 것이 없다 — 지금 몇 스택 붙어 있는지로만 쓰이므로
+  // 공격 목록이 아니라 버프 창에서 켠다(data/anomalyBuffs.ts).
+  const anomalies = (active.character ? anomaliesOf(active.character.id) : []).filter(
+    (kind) => ANOMALIES[kind].type !== "debuff",
+  );
 
   return (
     <section className="panel">

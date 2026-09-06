@@ -31,6 +31,8 @@ import {
 import { getEchoBuffOverrides, subscribeEchoBuffOverrides } from "../data/echoBuffOverrides";
 import { echoStoreVersion, subscribeEchoStore } from "../data/echoStore";
 import { anomalyFromAttackId } from "../data/anomalies";
+import { anomalyStateBuffs } from "../data/anomalyBuffs";
+import { anomalyStackCap } from "../calculator/manualBuffs";
 import { isDiscordAttackId } from "../data/discord";
 
 /**
@@ -493,16 +495,21 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
 
   /** 스택형 버프의 스택 수. 1 미만이나 최대치 밖은 잘라낸다. */
   const setBuffStacks = (rotationId: string, buffId: string, stacks: number) => {
-    const max = allBuffs.find((b) => b.id === buffId)?.maxStacks ?? 1;
-    const value = Math.min(Math.max(Math.round(stacks) || 1, 1), max);
+    const buff = allBuffs.find((b) => b.id === buffId);
 
     setConfig((current) => ({
       ...current,
-      rotation: current.rotation.map((item) =>
-        item.id === rotationId
-          ? { ...item, buffStacks: { ...item.buffStacks, [buffId]: value } }
-          : item,
-      ),
+      rotation: current.rotation.map((item) => {
+        if (item.id !== rotationId) return item;
+        // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과)는 상한이 고정이 아니다 —
+        // 이 공격에서 켜 둔 상한 증가 버프까지 보고 자른다. 버프 창이 띄우는 목록과 같은 규칙이라
+        // 「6까지 고를 수 있는데 3으로 잘리는」 어긋남이 생기지 않는다.
+        const max = buff?.anomalyStacks
+          ? anomalyStackCap(buff.anomalyStacks, allBuffs, item.enabledBuffIds).max
+          : (buff?.maxStacks ?? 1);
+        const value = Math.min(Math.max(Math.round(stacks) || 1, 1), max);
+        return { ...item, buffStacks: { ...item.buffStacks, [buffId]: value } };
+      }),
     }));
   };
 
@@ -846,6 +853,8 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ),
       // 장착 에코에서 나오는 것 — 화음 세트는 맞춘 개수만큼, 어빌리티는 메인 슬롯 것만.
       ...deriveEchoBuffs(members.map((m) => m.character.id)),
+      // 적에게 붙은 상태(암흑 효과)는 누가 붙였든 하나뿐이라 파티와 무관하게 늘 담는다.
+      ...anomalyStateBuffs(),
     ];
   }, [
     manualBuffs,

@@ -487,7 +487,9 @@ export function anomalyStackCap(
     if (buff.raisesAnomalyKinds && !buff.raisesAnomalyKinds.includes(kind)) continue;
     // 상시 버프는 늘 걸린다. 나머지는 이 공격에서 켜 뒀을 때만 센다.
     if (buff.uptime !== "passive" && !enabledBuffIds.includes(buff.id)) continue;
-    bonus += buff.raisesAnomalyStacks;
+    // 중첩되지 않는다 — 여럿이 켜져 있어도 가장 크게 올려주는 것 하나만 센다.
+    // (목록에서도 배타 묶음으로 하나만 켜지지만, 상시 버프가 섞여도 여기서 다시 막힌다.)
+    bonus = Math.max(bonus, buff.raisesAnomalyStacks);
     from.push(buff.label || describeTarget(buff.target));
   }
   return { max: base + bonus, bonus, from };

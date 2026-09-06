@@ -37,7 +37,13 @@ export interface AnomalyDef {
   baseDamage: (stacks: number) => number;
   /** 화면에 그대로 띄우는 산출 근거 한 줄. */
   formula: string;
+  /** 게임 속성 아이콘. 버프 목록처럼 이름만으로는 눈에 안 들어오는 자리에 쓴다. */
+  icon: string;
 }
+
+/** 속성 아이콘 주소. 파일 이름만 다르고 앞부분은 같다. */
+const ATTR_ICON = (name: string) =>
+  `https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconAttribute/T_Iconproperty${name}_UI.webp`;
 
 /**
  * 공명자 레벨별 이상 기준값 B(L). 90레벨 값만 알려져 있다.
@@ -115,6 +121,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 3,
     baseDamage: (n) => ANOMALY_BASE_LV90 * anomalyRate("AeroErosion", n),
     formula: "3674.3 × 배율표 (1스택 45% · 3스택 225% · 이후 스택당 +112.5%p)",
+    icon: ATTR_ICON("redwind"),
   },
   SpectroFrazzle: {
     id: "SpectroFrazzle",
@@ -124,6 +131,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 10,
     baseDamage: (n) => ANOMALY_BASE_LV90 * anomalyRate("SpectroFrazzle", n),
     formula: "3674.3 × 배율표 (1스택 30.02% · 10스택 249.49% · 13스택 498.98%)",
+    icon: ATTR_ICON("redlight"),
   },
   ElectroFlare: {
     id: "ElectroFlare",
@@ -133,6 +141,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 10,
     baseDamage: (n) => ANOMALY_BASE_LV90 * anomalyRate("ElectroFlare", n),
     formula: "3674.3 × 배율표 (1스택 50.01% · 10스택 415.85% · 13스택 831.64%)",
+    icon: ATTR_ICON("redmine"),
   },
 
   // 폭발·부여형 둘.
@@ -144,6 +153,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 10,
     baseDamage: (n) => ANOMALY_BASE_LV90 * anomalyRate("FrostChafe", n),
     formula: "3674.3 × 배율표 (1스택 24.61% · 10스택 203.77% · 13스택 407.54%)",
+    icon: ATTR_ICON("redice"),
   },
   FusionBurst: {
     id: "FusionBurst",
@@ -153,6 +163,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 10,
     baseDamage: (n) => ANOMALY_BASE_LV90 * anomalyRate("FusionBurst", n),
     formula: "3674.3 × 배율표 (10스택 698.63% · 13스택 1397.26%) — 최대 스택에서만 터진다",
+    icon: ATTR_ICON("redhot"),
   },
 
   // 디버프형 — 피해가 없다. 방어력만 깎는다.
@@ -164,6 +175,7 @@ export const ANOMALIES: Record<AnomalyKind, AnomalyDef> = {
     maxStacks: 3,
     baseDamage: () => 0,
     formula: "피해 없음 · 방어력 감소 = 스택 × 2%p (버프로 처리 · 상한은 늘어날 수 있다)",
+    icon: ATTR_ICON("reddark"),
   },
 };
 
