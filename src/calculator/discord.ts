@@ -42,7 +42,8 @@ function discordDefMultiplier(
 }
 
 /** 피해량 올림. 게임과 같은 자리에서 올리도록 float32로 떨어뜨린 뒤 올린다(damage.ts 설명 참고). */
-const ceilDamage = (v: number) => Math.ceil(Math.fround(v) - 1e-9);
+const ceilDamage = (v: number) =>
+  Math.ceil(Math.fround(v) - Math.max(1e-9, Math.abs(v) * 1.2e-7));
 
 export interface DiscordDamageInput {
   /** 조화도 파괴 배율. 기본 조화도 파괴는 1600%(=16.0)다. */

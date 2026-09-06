@@ -51,7 +51,8 @@ function anomalyDefMultiplier(charLevel: number, enemyLevel: number, defReductio
 }
 
 /** 피해량 올림. 게임과 같은 자리에서 올리도록 float32로 떨어뜨린 뒤 올린다(damage.ts 설명 참고). */
-const ceilDamage = (v: number) => Math.ceil(Math.fround(v) - 1e-9);
+const ceilDamage = (v: number) =>
+  Math.ceil(Math.fround(v) - Math.max(1e-9, Math.abs(v) * 1.2e-7));
 
 export interface AnomalyDamageInput {
   kind: AnomalyKind;

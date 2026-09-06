@@ -145,9 +145,16 @@ export function calculateFinalStats(
   /**
    * 두 단계 계산을 세 스탯에 똑같이 적용한다.
    *
-   * 스탯창 단계의 버림은 **한 번이 아니라 두 번**이다. 캐릭터 쪽 패널%(스킬 트리 · 무기)와
-   * 에코 옵션%를 각각 버린 뒤 더한다. 실측 두 건이 이 모양만 맞춘다 —
-   * 위 주석의 단근 예(에코 없음)와 치사 예(에코 87.8%)를 함께 보면 다른 모양은 전부 어긋난다.
+   * 스탯창 단계의 버림은 **한 번**이다. 캐릭터 쪽 패널%(스킬 트리 · 무기)와 에코 옵션%를
+   * 한 덩이로 더한 뒤 한 번만 버린다.
+   *
+   * 한때 둘로 갈라 각각 버렸었다(⌊기초×(1+캐릭터%)⌋ + ⌊기초×에코%⌋). 스무 칸짜리 실측이
+   * 그때도 전부 맞아서 구분이 안 갔는데, 치사 공격력이 그 둘을 갈랐다 —
+   *   기초 937 · 캐릭터측 24% · 에코 87.72%
+   *   갈라 버리면 ⌊937×1.24⌋ + ⌊937×0.8772⌋ = 1161 + 821 = 1982
+   *   한 번 버리면 ⌊937×2.1172⌋              = 1983   ← 게임값(깡 300을 더해 2283)
+   * 치사의 피해 일곱 줄(일반 2단 · 파열 관통 · 운명을 가르는 가위)이 2283 쪽만 맞는다.
+   * 다른 열아홉 칸은 두 모양이 같은 값을 내므로 이 바꿈으로 깨지는 것이 없다.
    */
   const resolve = (
     base: number,
@@ -158,7 +165,7 @@ export function calculateFinalStats(
     plus: number,
   ) => {
     const charPercent = percent - echoPct;
-    const panel = Math.floor(base * (1 + charPercent)) + Math.floor(base * echoPct);
+    const panel = Math.floor(base * (1 + charPercent + echoPct));
     const buffAmount = base * buffPercent;
     return {
       percent,
