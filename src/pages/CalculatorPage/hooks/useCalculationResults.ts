@@ -6,6 +6,7 @@ import { buffs } from "../../../data/buffs";
 import { DEFAULT_WEAPON_LEVEL, weaponAtLevel, weaponsById } from "../../../data/weapons";
 import { DEFAULT_CHARACTER_LEVEL, characterAtLevel } from "../../../data/characterStats";
 import { nodeStats } from "../../../data/characterNodes";
+import { equippedPanelStats } from "../../../calculator/equippedBuffs";
 import {
   echoStoreVersion,
   equippedEchoes,
@@ -46,6 +47,12 @@ export interface CalculationResult {
    */
   skillCategory?: SkillCategory;
   stats: ReturnType<typeof calculateFinalStats>;
+  /**
+   * 파티 전원의 스탯창 값. 파티 버프의 비례분은 **준 사람**의 스탯에서 나오므로
+   * (수수의 「꽃향기의 편지」는 수수 자신의 공명 효율을 본다) 그 값을 들고 다닌다.
+   * 버프 창에서도 같은 수치를 보여야 해서 결과에 실어 둔다.
+   */
+  ownerPanels: Record<string, Stats>;
   /**
    * 피해 결과. 일반 공격과 이상 효과는 계산식이 통째로 달라 모양도 다르다.
    * kind로 갈라 보면 된다 — 카드에 뜨는 숫자(normalDamage 등)는 양쪽이 같다.
@@ -108,6 +115,47 @@ export function useCalculationResults(
     // 장착 에코는 캐릭터 관리 탭에서 정한 것을 그대로 쓴다(저장본 한 벌).
     const links = loadEchoLinks();
     const owned = loadMyEchoes();
+
+    // 파티 버프의 비례분이 볼 「준 사람의 스탯창」. 루틴에 나오는 캐릭터와 편성 세 자리를
+    // 모두 미리 재 둔다 — 수수가 필드에 없어도 그의 공명 효율로 편지 버프가 정해진다.
+    // 조건부 버프는 빼고 늘 걸리는 것만 담은, 캐릭터 관리 탭에 찍히는 그 값이다.
+    const ownerPanels: Record<string, Stats> = {};
+    const ownerIds = new Set<string>([
+      ...config.rotation.map((r) => r.characterId),
+      ...[config.mainDps, config.subDps, config.support].map((m) => m?.characterId ?? ""),
+    ]);
+    for (const id of ownerIds) {
+      const found = characters.find((c) => c.id === id);
+      if (!found) continue;
+      const owner = characterAtLevel(found, characterLevels[id] ?? DEFAULT_CHARACTER_LEVEL);
+      const ownerWeaponConfig = characterWeapons[id];
+      const ownerWeaponEntry = weaponsById.get(ownerWeaponConfig?.weaponId ?? "");
+      const ownerChain = characterChains[id] ?? 0;
+      ownerPanels[id] = calculateFinalStats(
+        owner,
+        ownerWeaponEntry
+          ? weaponAtLevel(ownerWeaponEntry, ownerWeaponConfig?.level ?? DEFAULT_WEAPON_LEVEL)
+          : { id: "", name: "", baseAtk: 0, stats: {} },
+        equippedEchoes(id, links, owned),
+        [
+          {
+            id: "skillTree",
+            name: "스킬 트리",
+            source: owner.name,
+            description: "켜둔 스킬 트리 스탯 노드의 합계",
+            stats: nodeStats(id, characterNodes[id]),
+          },
+          {
+            id: "equipped",
+            name: "장착 효과",
+            source: "무기 · 고유 · 에코 어빌리티 · 화음 세트",
+            description: "발동 조건 없이 늘 걸리는 효과",
+            stats: equippedPanelStats(owner, ownerWeaponConfig, ownerChain, links, owned),
+          },
+        ],
+        ownerChain,
+      );
+    }
 
     for (const item of config.rotation) {
       const baseCharacter = characters.find((c) => c.id === item.characterId);
@@ -192,7 +240,7 @@ export function useCalculationResults(
       const chain = characterChains[character.id] ?? 0;
 
       // 수치가 처음부터 정해져 있는 버프.
-      const base = manualBuffDelta(attack, itemBuffs, character.id);
+      const base = manualBuffDelta(attack, itemBuffs, character.id, undefined, "base", ownerPanels);
 
       // 공명 효율 · 조화도 파괴 증폭 · 부조화 효율에 비례하는 버프는 그 세 수치가
       // 확정돼야 값이 나온다. 셋 다 공격력에 기대지 않으므로 한 번 계산해서 꺼내 오면 된다
@@ -206,7 +254,14 @@ export function useCalculationResults(
         chain,
         base,
       );
-      const panel = manualBuffDelta(attack, itemBuffs, character.id, panelSource, "panel");
+      const panel = manualBuffDelta(
+        attack,
+        itemBuffs,
+        character.id,
+        panelSource,
+        "panel",
+        ownerPanels,
+      );
 
       const stats = calculateFinalStats(
         character,
@@ -217,25 +272,40 @@ export function useCalculationResults(
         addStats(base, panel),
         // 같은 버프를 한 줄씩 남긴 것. 계산에는 위 증분을 쓰고, 이건 상세보기 내역용이다.
         [
-          ...buffContributions(attack, itemBuffs, character.id),
-          ...buffContributions(attack, itemBuffs, character.id, panelSource, "panel"),
+          ...buffContributions(attack, itemBuffs, character.id, undefined, "base", ownerPanels),
+          ...buffContributions(
+            attack,
+            itemBuffs,
+            character.id,
+            panelSource,
+            "panel",
+            ownerPanels,
+          ),
         ],
       );
 
       // 공격력·HP·방어력에 비례하는 버프(scaleFrom: ATK/HP/DEF)는 최종 스탯이 나온 뒤에야
       // 값이 정해진다. 마지막으로 한 번 더 불러 그것만 얹는다 — 이 버프들은 스탯을 올리지 않으니
       // 위에서 구한 공격력·방어력·HP가 그대로 최종값이고 순환이 생기지 않는다.
-      const scaled = manualBuffDelta(attack, itemBuffs, character.id, stats, "scaled");
+      const scaled = manualBuffDelta(
+        attack,
+        itemBuffs,
+        character.id,
+        stats,
+        "scaled",
+        ownerPanels,
+      );
       for (const key of Object.keys(scaled) as (keyof typeof scaled)[]) {
         if (scaled[key]) stats[key] += scaled[key];
       }
       stats.contributions.push(
-        ...buffContributions(attack, itemBuffs, character.id, stats, "scaled"),
+        ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", ownerPanels),
       );
 
       output.push({
         item,
         character,
+        ownerPanels,
         attack,
         skillCategory: (found.skill as { category?: SkillCategory }).category,
         activeBuffs,

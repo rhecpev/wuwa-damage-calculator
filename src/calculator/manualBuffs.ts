@@ -282,6 +282,27 @@ export const buffPhase = (buff: ManualBuff): BuffPhase =>
 export type BuffPhase = "base" | "panel" | "scaled";
 
 /**
+ * 비례분을 **누구의 스탯**에서 뽑을지.
+ *
+ * 파티 버프는 준 사람의 스탯을 본다 — 수수의 「꽃향기의 편지」가 「수수 자신의 공명 효율이
+ * 200%를 초과할 경우」라고 적힌 것처럼, 게임 설명이 가리키는 것은 늘 버프를 건 캐릭터다.
+ * 맞는 사람의 공명 효율로 재면 수수의 편지가 딜러의 공명 효율을 따라가 버린다.
+ *
+ * ownerPanels는 캐릭터별 스탯창 값이다(useCalculationResults가 파티 전원 몫을 미리 만든다).
+ * 없거나 못 찾으면 예전대로 때리는 캐릭터의 스탯을 쓴다 — 수기 버프는 주인이 없다.
+ */
+function scaleStats(
+  buff: ManualBuff,
+  stats?: Stats,
+  ownerPanels?: Record<string, Stats>,
+): Stats | undefined {
+  if (buff.scope === "party" && buff.ownerId && ownerPanels?.[buff.ownerId]) {
+    return ownerPanels[buff.ownerId];
+  }
+  return stats;
+}
+
+/**
  * 이 버프가 이번 공격에서 실제로 얼마만큼 걸리는지.
  *
  * 보통은 value × stacks 그대로다. scaleFrom이 붙은 버프만 그때의 스탯에서 값을 뽑는다.
@@ -293,13 +314,19 @@ export type BuffPhase = "base" | "panel" | "scaled";
  * 부르는 자리(calculateFinalStats로 들어가는 증분)가 그렇다.
  * 화면에서도 같은 값을 써야 해서 export 한다.
  */
-export function buffAmount(buff: ManualBuff, stacks: number, stats?: Stats): number {
+export function buffAmount(
+  buff: ManualBuff,
+  stacks: number,
+  stats?: Stats,
+  ownerPanels?: Record<string, Stats>,
+): number {
   if (!buff.scaleFrom) return buff.value * stacks;
-  if (!stats) return 0;
+  const from = scaleStats(buff, stats, ownerPanels);
+  if (!from) return 0;
 
   // 「공명 효율 100%를 초과한 1%당」처럼 문턱이 적힌 효과는 넘긴 만큼만 센다.
   // 문턱에 못 미치면 0 — 음수가 되어 버프가 마이너스로 걸리는 일이 없게 한다.
-  const source = SCALE_SOURCES[buff.scaleFrom](stats);
+  const source = SCALE_SOURCES[buff.scaleFrom](from);
   const over = buff.scaleOffset === undefined ? source : Math.max(0, source - buff.scaleOffset);
   const raw = over * buff.value * stacks;
   // 「최대 25%까지」 같은 상한. 적어두지 않았으면 상한 없음.
@@ -337,9 +364,10 @@ export function manualBuffDelta(
   characterId?: string,
   stats?: Stats,
   phase: BuffPhase = "base",
+  ownerPanels?: Record<string, Stats>,
 ): Stats {
   const result = emptyStats();
-  for (const item of buffContributions(attack, buffs, characterId, stats, phase)) {
+  for (const item of buffContributions(attack, buffs, characterId, stats, phase, ownerPanels)) {
     add(result, item.stats);
   }
   return result;
@@ -359,6 +387,7 @@ export function buffContributions(
   characterId?: string,
   stats?: Stats,
   phase: BuffPhase = "base",
+  ownerPanels?: Record<string, Stats>,
 ): StatContribution[] {
   const active = buffs.filter(
     (buff) => buff.enabled && buffPhase(buff) === phase && appliesTo(buff, attack, characterId),
@@ -366,7 +395,7 @@ export function buffContributions(
 
   const out: StatContribution[] = [];
   for (const buff of active) {
-    const amount = buffAmount(buff, buff.stacks, stats);
+    const amount = buffAmount(buff, buff.stacks, stats, ownerPanels);
     if (!amount) continue;
     const patch = statPatch(buff, amount);
     if (patch) out.push({ source: buff.label || describeTarget(buff.target), stats: patch });

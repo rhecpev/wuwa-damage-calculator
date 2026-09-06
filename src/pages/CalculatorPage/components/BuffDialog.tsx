@@ -107,7 +107,8 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
             const max = cap ? cap.max : (buff.maxStacks ?? 1);
             const stacks = selected.item.buffStacks?.[buff.id] ?? buff.stacks;
             // scaleFrom 버프는 그때의 스탯에서 수치가 나온다 — 계산에 쓴 최종 스탯을 그대로 넘긴다.
-            const amount = buffAmount(buff, stacks, selected.stats);
+            // 파티 버프는 준 사람의 스탯을 보므로 파티 전원의 스탯창도 함께 넘긴다.
+            const amount = buffAmount(buff, stacks, selected.stats, selected.ownerPanels);
             const owner = buff.ownerId
               ? characters.find((c) => c.id === buff.ownerId)
               : undefined;
