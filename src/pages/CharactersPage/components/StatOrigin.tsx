@@ -103,18 +103,11 @@ export function StatOrigin({
             expr={`⌊${num(base)} × (1 + ${pct(charPercent)})⌋ — 스킬 트리 · 무기 · 장착 효과`}
             value={num(Math.floor(base * (1 + charPercent)))}
           />
-          {src.echoPercent - src.echoSubPercent !== 0 && (
+          {src.echoPercent !== 0 && (
             <Step
-              label="에코 메인 %"
-              expr={`⌊${num(base)} × ${pct(src.echoPercent - src.echoSubPercent)}⌋ — 에코의 메인 옵션 몫`}
-              value={num(Math.floor(base * (src.echoPercent - src.echoSubPercent)))}
-            />
-          )}
-          {src.echoSubPercent !== 0 && (
-            <Step
-              label="에코 부옵션 %"
-              expr={`⌊${num(base)} × ${pct(src.echoSubPercent)}⌋ — 메인 옵션과 갈라서 따로 버린다`}
-              value={num(Math.floor(base * src.echoSubPercent))}
+              label="에코 옵션 %"
+              expr={`⌊${num(base)} × ${pct(src.echoPercent)}⌋ — 캐릭터 쪽과 갈라서 따로 버린다`}
+              value={num(Math.floor(base * src.echoPercent))}
             />
           )}
           <Step

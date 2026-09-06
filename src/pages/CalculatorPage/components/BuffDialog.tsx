@@ -10,6 +10,7 @@ import {
 } from "../../../calculator/manualBuffs";
 import type { ManualBuff } from "../../../types/game";
 import { characters } from "../../../data/sampleData";
+import { num } from "../../../utils/format";
 
 /**
  * scaleFrom 버프가 어느 스탯에서 수치를 가져오는지 — 목록에 그대로 적는다.
@@ -74,6 +75,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         <button onClick={onClose}>×</button>
       </div>
 
+    <div className="buff-dialog-split">
     <div className="buff-dialog-body">
       
 
@@ -199,6 +201,36 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         </div>
       )}
       </div>
+
+      {/* 오른쪽 — 이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
+          버프를 켜고 끄면서 어느 타가 얼마나 움직이는지 그 자리에서 보려는 것이다. */}
+      <div className="buff-dialog-hits">
+        <small>히트별</small>
+        <table>
+          <thead>
+            <tr>
+              <th>타</th>
+              <th>일반</th>
+              <th>치명타</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selected.damage.hits.map((hit, index) => (
+              <tr key={index}>
+                <td>{index + 1}</td>
+                <td>{num(hit.normalDamage)}</td>
+                <td>{num(hit.criticalDamage)}</td>
+              </tr>
+            ))}
+            <tr className="buff-hits-sum">
+              <td>합</td>
+              <td>{num(selected.damage.normalDamage)}</td>
+              <td>{num(selected.damage.criticalDamage)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
     </aside>
   );
 }
