@@ -280,22 +280,8 @@ export function RotationSection({ results }: RotationSectionProps) {
                       draggable={false}
                     />
                   )}
-                  <span
-                    className="card-title"
-                    role="button"
-                    tabIndex={0}
-                    title="누르면 이 뒤에 담을 공격을 고릅니다"
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      setAddId((cur) => (cur === result.item.id ? null : result.item.id));
-                    }}
-                    onKeyDown={(event) => {
-                      if (event.key !== "Enter" && event.key !== " ") return;
-                      event.preventDefault();
-                      event.stopPropagation();
-                      setAddId((cur) => (cur === result.item.id ? null : result.item.id));
-                    }}
-                  >
+                  {/* 공격명은 그냥 글자다 — 누르면 카드가 눌린 것으로 쳐서 버프 창이 열린다. */}
+                  <span className="card-title">
                     {index + 1}. {attackLabel(result.attack.name)}
                   </span>
                 </span>
@@ -395,6 +381,13 @@ export function RotationSection({ results }: RotationSectionProps) {
 
               <span className="item-tools">
                 <button
+                  className="plus"
+                  title="이 뒤에 공격 담기 — 켜 둔 버프를 이어받습니다"
+                  onClick={() => setAddId((cur) => (cur === result.item.id ? null : result.item.id))}
+                >
+                  ＋
+                </button>
+                <button
                   className="pen"
                   title="이 카드의 공격 바꾸기"
                   onClick={() => setSwapId(result.item.id)}
@@ -413,7 +406,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                 </button>
               </span>
 
-              {/* 이 뒤에 담을 공격 고르기 — 공격명을 누르면 카드 아래로 펼친다.
+              {/* 이 뒤에 담을 공격 고르기 — 카드 옆 ＋를 누르면 카드 아래로 펼친다.
                   켜 둔 버프를 그대로 이어받아, 콤보를 이어 담을 때 매번 다시 켜지 않아도 된다. */}
               {addId === result.item.id && (
                 <div className="card-add" onClick={(event) => event.stopPropagation()}>
