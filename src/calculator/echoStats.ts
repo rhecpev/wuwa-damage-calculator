@@ -72,6 +72,7 @@ const ECHO_DMG_CAL_TYPES = echoOptionData.dmgCalType as Record<string, DmgCalTyp
  * 칸은 표시값이 맞다 — 현령 실측 열 줄이 그것을 따로 확인했다(아래 ADJUSTED_KEYS).
  */
 const SUB_PANEL_PERCENT: Record<string, Record<string, number>> = {
+  // HP % — 실측 여덟 건. 표시값보다 조금씩 낮다.
   hpPercent: {
     "6.4": 6.388,
     "7.1": 7.093,
@@ -81,25 +82,21 @@ const SUB_PANEL_PERCENT: Record<string, Record<string, number>> = {
     "10.9": 10.9,
     "11.6": 11.599,
   },
+  // 공격력 % — 실측 여섯 건. 10.1을 뺀 나머지는 표시값 그대로가 맞는다.
   atkPercent: {
-    "6.4": 6.376,
-    "7.9": 7.95,
-    "8.6": 8.6,
-    "9.4": 9.374,
-    "10.1": 10.109,
-    "10.9": 10.888,
-    "11.6": 11.575,
+    "10.1": 10.02,
   },
+  // 방어력 % — 실측 네 건. 눈금 자체가 다르다(8.1 · 9.0 · 10.0 · 10.9 · 11.8 · 12.8 · 13.8 · 14.7).
   defPercent: {
-    "9.0": 9.03,
+    "9.0": 8.99,
     "10.9": 10.77,
     "11.8": 11.93,
     "13.8": 13.79,
   },
 };
 
-/** 표에 없는 값은 아직 실측이 없다. 예전 상수만큼만 깎아 둔다. */
-const SUB_PERCENT_ADJUST = 0.008;
+/** 표에 없는 값은 표시값 그대로 쓴다 — 실측이 없는 칸을 어림으로 깎지 않는다. */
+const SUB_PERCENT_ADJUST = 0;
 
 /**
  * 표시값 -> 스탯창 버림에 들어갈 값(퍼센트 단위 그대로).
