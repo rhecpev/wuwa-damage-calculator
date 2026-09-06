@@ -126,8 +126,9 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
 ];
 
 /**
- * 왼쪽에 붙는 세로 네비게이션.
- * 위에 이름표, 가운데에 탭 목록, 아래에 안내 한 줄.
+ * 화면 위에 붙는 가로 네비게이션.
+ * 왼쪽에 이름표, 가운데에 탭 목록, 오른쪽에 안내 한 줄.
+ * 좁은 화면에서는 탭 줄이 가로로 넘어간다(설명 줄은 title로만 남는다).
  */
 export function TabNavigation() {
   const { tab, setTab } = useAppState();
@@ -147,6 +148,7 @@ export function TabNavigation() {
           <button
             key={item.id}
             className={item.id === tab ? "sidebar-link on" : "sidebar-link"}
+            title={`${item.label} — ${item.hint}`}
             onClick={() => setTab(item.id)}
           >
             <span className="sidebar-icon">{item.icon}</span>
