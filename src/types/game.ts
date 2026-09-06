@@ -79,7 +79,10 @@ export interface Character{id:string;name:string;level:number;element:Element;we
 export interface Weapon{id:string;name:string;baseAtk:number;stats:Partial<Stats>;atkLevels?:number[];}
 // baseAtk: 이 무기의 공격력. 레벨이 정해진 무기는 weaponAtLevel()이 atkLevels에서 꺼내 채워준다.
 // atkLevels: 레벨별 공격력 표. atkLevels[레벨-1] = 그 레벨의 공격력(api/weapons.json의 Properties 공격력).
-export interface Echo{id:string;name:string;cost:number;stats:Partial<Stats>;effects:string[];iconUrl?:string;fetterGroups?:{name:string;icon:string}[];}
+export interface Echo{id:string;name:string;cost:number;stats:Partial<Stats>;subStats?:Partial<Stats>;effects:string[];iconUrl?:string;fetterGroups?:{name:string;icon:string}[];}
+// subStats: stats 중 **부옵션 5줄에서 온 몫**. 스탯창 값을 낼 때 에코 옵션의 버림이
+//   메인 옵션 몫과 부옵션 몫으로 갈리기 때문에 따로 들고 다닌다(calculateFinalStats 참고).
+//   합산은 stats로만 한다 — subStats는 그 안에 이미 들어 있는 값이라 더하면 두 번 걸린다.
 export interface Buff{id:string;name:string;source:string;description:string;stats:Partial<Stats>;}
 export type BuffUptime="passive"|"active";
 // 버프가 걸려 있는 방식.

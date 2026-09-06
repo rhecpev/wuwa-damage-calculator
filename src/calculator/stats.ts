@@ -34,7 +34,8 @@ export function asBuffPercent(s: Partial<Stats>): Partial<Stats> {
  * 공격력·HP·방어력은 게임과 같은 두 단계로 구한다.
  *
  *   기초   = ⌊캐릭터 기초⌋ + ⌊무기 공격력⌋
- *   스탯창 = ⌊기초 × (1 + Σ캐릭터측 패널%)⌋ + ⌊기초 × Σ에코 옵션%⌋   ← 갈라서 각각 버린다
+ *   스탯창 = ⌊기초 × (1 + Σ캐릭터측 패널%)⌋ + ⌊기초 × Σ에코 메인%⌋ + ⌊기초 × Σ에코 부옵션%⌋
+ *                                                          ← 세 덩이로 갈라서 각각 버린다
  *   최종   = ⌊스탯창 + 기초 × Σ버프% + Σ깡수치⌋
  *
  * 퍼센트는 어디서 왔느냐로 두 묶음이 갈린다.
@@ -47,7 +48,7 @@ export function asBuffPercent(s: Partial<Stats>): Partial<Stats> {
  *   → ⌊849×1.30⌋=1103, +849×0.50=424.5 → 1527.5 → 1527 (게임 표시와 일치)
  * 두 묶음을 한 Σ로 합치면 ⌊849×1.80⌋=1528이 되어 1이 어긋난다 — 스탯창 단계의 버림이 빠져서다.
  *
- * ── 스탯창 단계의 버림은 두 번이다 ───────────────────────────
+ * ── 스탯창 단계의 버림은 세 번이다 ───────────────────────────
  * 위 단근 예는 에코 옵션이 없어서 한 번 버리는 것과 구별되지 않았다. 에코를 낀 경우가 갈랐다.
  *   치사 Lv.90 · 쿠모키리 Lv.90(정련 1) · 에코 5개
  *   기초 ⌊437.5⌋+500=937, 캐릭터측 24%(트리 12+무기효과 12), 에코 87.8%,
@@ -57,6 +58,15 @@ export function asBuffPercent(s: Partial<Stats>): Partial<Stats> {
  * 한 Σ로 합치면 ⌊937×2.118⌋=1984가 되어 2565로 1이 어긋난다.
  * 반대로 출처를 전부 따로 버리면(트리·무기를 갈라 놓으면) 위 단근 예가 1526이 되어 어긋난다.
  * 두 실측을 동시에 맞추는 모양은 「캐릭터측 한 덩어리 + 에코 한 덩어리」뿐이다.
+ *
+ * 그 뒤 에코 덩어리가 다시 **메인 옵션 몫과 부옵션 몫**으로 갈린다는 것이 잡혔다.
+ *   현령 Lv.90 · 기초 ⌊425⌋+⌊587⌋=1012 · 트리 12% · 에코 메인 66%(30+18+18) ·
+ *   에코 부옵션 28.1%(10.1+9.4+8.6) · 깡 350 → 게임 공격력 2434
+ *     한 덩이로: ⌊1012×1.11984⌋ + ⌊1012×0.94076⌋ = 1133+952 = 2085 → 2435 (1 높다)
+ *     갈라서:   ⌊1012×1.11984⌋ + ⌊1012×0.66⌋ + ⌊1012×0.28076⌋ = 1133+667+284 = 2084 → 2434 ← 일치
+ *   0.05 차이로 넘느냐 마느냐라 부옵션 보정폭으로는 맞출 수 없다 — 그쪽을 키우면
+ *   현령 HP 실측(18243)이 깨진다. 갈라진 버림만 두 실측을 동시에 맞춘다.
+ *   앞서 맞춰 둔 HP 실측 넷은 전부 HP% 메인 옵션이 없어서 이 변화의 영향을 받지 않는다.
  * 실측이 더 모이면 이 묶음 단위를 다시 확인할 것.
  *
  * ── 버림이 걸리는 값 자체도 표시값과 다르다 ──────────────────
@@ -110,13 +120,19 @@ export function calculateFinalStats(
     contributions.push({ source: `무기 · ${w.name} 공격력`, stats: { atk: Math.floor(w.baseAtk) } });
   // 무기 부옵션과 에코 옵션은 스탯창에 그대로 찍히는 값이라 패널 묶음이다.
   take(w.name ? `무기 · ${w.name} 부옵션` : "무기 부옵션", w.stats);
-  // 에코에서 온 패널%는 따로도 세어 둔다 — 스탯창 단계에서 캐릭터 쪽과 갈라 버림한다.
+  // 에코에서 온 패널%는 따로도 세어 둔다 — 스탯창 단계에서 캐릭터 쪽과 갈라 버림하고,
+  // 그 안에서 메인 옵션 몫과 부옵션 몫이 한 번 더 갈린다.
   const echoPercent = { atk: 0, hp: 0, def: 0 };
+  const echoSubPercent = { atk: 0, hp: 0, def: 0 };
   e.forEach((x) => {
     take(`에코 · ${x.name}`, x.stats);
+    const sub = x.subStats ?? {};
     echoPercent.atk += x.stats.atkPercent ?? 0;
     echoPercent.hp += x.stats.hpPercent ?? 0;
     echoPercent.def += x.stats.defPercent ?? 0;
+    echoSubPercent.atk += sub.atkPercent ?? 0;
+    echoSubPercent.hp += sub.hpPercent ?? 0;
+    echoSubPercent.def += sub.defPercent ?? 0;
   });
   b.forEach((x) => take(x.source ? `${x.source} · ${x.name}` : x.name, x.stats));
   // 공명체인은 전투 중에 붙는 값이라 버프 묶음으로 옮겨 담는다.
@@ -141,15 +157,21 @@ export function calculateFinalStats(
     base: number,
     percent: number,
     echoPct: number,
+    echoSubPct: number,
     buffPercent: number,
     plus: number,
   ) => {
     const charPercent = percent - echoPct;
-    const panel = Math.floor(base * (1 + charPercent)) + Math.floor(base * echoPct);
+    const echoMainPct = echoPct - echoSubPct;
+    const panel =
+      Math.floor(base * (1 + charPercent)) +
+      Math.floor(base * echoMainPct) +
+      Math.floor(base * echoSubPct);
     const buffAmount = base * buffPercent;
     return {
       percent,
       echoPercent: echoPct,
+      echoSubPercent: echoSubPct,
       buffPercent,
       panel,
       buffAmount,
@@ -158,9 +180,9 @@ export function calculateFinalStats(
     };
   };
 
-  const atk = resolve(baseAtk, r.atkPercent, echoPercent.atk, r.atkPercentBuff, r.atk);
-  const hp = resolve(baseHp, r.hpPercent, echoPercent.hp, r.hpPercentBuff, r.hp);
-  const def = resolve(baseDef, r.defPercent, echoPercent.def, r.defPercentBuff, r.def);
+  const atk = resolve(baseAtk, r.atkPercent, echoPercent.atk, echoSubPercent.atk, r.atkPercentBuff, r.atk);
+  const hp = resolve(baseHp, r.hpPercent, echoPercent.hp, echoSubPercent.hp, r.hpPercentBuff, r.hp);
+  const def = resolve(baseDef, r.defPercent, echoPercent.def, echoSubPercent.def, r.defPercentBuff, r.def);
 
   const sources = {
     atk: { base: Math.floor(c.baseStats.atk), weapon: Math.floor(w.baseAtk), ...atk },

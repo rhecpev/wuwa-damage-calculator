@@ -133,9 +133,14 @@ export interface StatSource {
    * (calculateFinalStats 주석 참고) 내역을 보여줄 때도 둘을 나눠 적어야 계산이 맞는다.
    */
   echoPercent: number;
+  /** 그중 다시 부옵션에서 온 몫. 메인 옵션 몫과 갈라서 각각 버림한다. */
+  echoSubPercent: number;
   /** 전투 중 버프 퍼센트 합(공명체인 · 파티 버프 · 에코 세트). */
   buffPercent: number;
-  /** 스탯창 값 = ⌊기초 × (1 + 캐릭터 쪽 %)⌋ + ⌊기초 × 에코 %⌋. 여기서 두 번 버린다. */
+  /**
+   * 스탯창 값 = ⌊기초 × (1 + 캐릭터 쪽 %)⌋ + ⌊기초 × 에코 메인 %⌋ + ⌊기초 × 에코 부옵션 %⌋.
+   * 여기서 세 번 버린다.
+   */
   panel: number;
   /** 버프분 = (기초+무기) × buffPercent. 버리지 않고 그대로 더한다. */
   buffAmount: number;

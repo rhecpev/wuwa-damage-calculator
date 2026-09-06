@@ -300,9 +300,9 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
               label="스탯창 값"
               expr={`⌊${dec(src.base + src.weapon)} × (1 + 캐릭터 ${pct(
                 src.percent - src.echoPercent,
-              )})⌋ + ⌊${dec(src.base + src.weapon)} × 에코 ${pct(
-                src.echoPercent,
-              )}⌋ — 갈라서 각각 버린다`}
+              )})⌋ + ⌊× 에코 메인 ${pct(
+                src.echoPercent - src.echoSubPercent,
+              )}⌋ + ⌊× 에코 부옵션 ${pct(src.echoSubPercent)}⌋ — 갈라서 각각 버린다`}
               value={num(src.panel)}
             />
             <Row

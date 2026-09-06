@@ -1,7 +1,7 @@
 import myEchoData from "./myEcho.json";
 import characterEchoLinksData from "./characterEchoLinks.json";
 import { loadPersisted, savePersisted } from "../utils/persist";
-import { echoStats } from "../calculator/echoStats";
+import { echoStats, echoSubStats } from "../calculator/echoStats";
 import { fetterGroupByName } from "./echoes";
 import type { Echo } from "../types/game";
 
@@ -119,6 +119,7 @@ export function equippedEchoes(
       name: e.name,
       cost: 0, // 덤프에 코스트가 없다.
       stats: echoStats(e),
+      subStats: echoSubStats(e),
       effects: [],
     }));
 }
