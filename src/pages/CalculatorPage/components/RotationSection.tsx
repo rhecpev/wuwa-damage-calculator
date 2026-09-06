@@ -6,7 +6,6 @@ import { DamageFormulaModal } from "./DamageFormulaModal";
 import { num } from "../../../utils/format";
 import { ANOMALIES } from "../../../data/anomalies";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
-import type { AttackType } from "../../../types/game";
 
 interface RotationSectionProps {
   results: CalculationResult[];
@@ -46,22 +45,6 @@ function cardKind(result: CalculationResult): string {
       return "basic";
   }
 }
-
-/**
- * 카드에서 고를 수 있는 피해 판정.
- * 계산에 실제로 자리가 있는 것만 둔다(calculator/damage.ts의 CATEGORY_BONUS_KEY).
- */
-const DAMAGE_TYPES: { value: AttackType; label: string }[] = [
-  { value: "Basic", label: "일반 공격" },
-  { value: "Heavy", label: "강공격" },
-  { value: "Aerial", label: "공중 공격" },
-  { value: "DodgeCounter", label: "회피 반격" },
-  { value: "Skill", label: "공명 스킬" },
-  { value: "Liberation", label: "공명 해방" },
-  { value: "Intro", label: "반주 스킬" },
-  { value: "Outro", label: "변주 스킬" },
-  { value: "Echo", label: "에코" },
-];
 
 /**
  * 「이 뒤에 담기」 목록에 세울 공격들. 스킬 갈래로 묶는다 — 공격 추가 팔레트와 같은 순서다.
@@ -110,7 +93,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     addCycle,
     moveAttack,
     duplicateCycle,
-    setAttackDamageType,
+    setAttackId,
     addAttackAfter,
     openCycle,
     saveCyclePreset,
@@ -128,10 +111,10 @@ export function RotationSection({ results }: RotationSectionProps) {
   const [overId, setOverId] = useState<string | null>(null);
   // 「이 뒤에 담기」 목록을 펼친 항목.
   const [addId, setAddId] = useState<string | null>(null);
-  // 피해 판정을 고르는 창을 연 항목.
-  const [typeId, setTypeId] = useState<string | null>(null);
+  // 공격을 갈아 끼우는 창을 연 항목.
+  const [swapId, setSwapId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
-  const typeResult = results.find((r) => r.item.id === typeId);
+  const swapResult = results.find((r) => r.item.id === swapId);
 
   return (
     <section className="panel">
@@ -314,7 +297,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                     }}
                   >
                     {index + 1}. {attackLabel(result.attack.name)}
-                    {result.item.damageBonusType && <i className="card-typed">판정</i>}
                   </span>
                 </span>
 
@@ -414,8 +396,8 @@ export function RotationSection({ results }: RotationSectionProps) {
               <span className="item-tools">
                 <button
                   className="pen"
-                  title="이 한 대의 피해 판정 바꾸기"
-                  onClick={() => setTypeId(result.item.id)}
+                  title="이 카드의 공격 바꾸기"
+                  onClick={() => setSwapId(result.item.id)}
                 >
                   ✎
                 </button>
@@ -493,59 +475,44 @@ export function RotationSection({ results }: RotationSectionProps) {
         <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />
       )}
 
-      {/* 피해 판정 고르기 — 카드의 공격명을 누르면 뜬다.
-          자료가 「공명 스킬」이라고 적어 둔 공격이 실제로는 공명 해방 피해로 들어가는 일이 있어,
-          그 한 대만 손으로 바꿀 수 있게 해 둔다. */}
-      {typeResult && (
-        <div className="formula-backdrop" onClick={() => setTypeId(null)} role="presentation">
+      {/* 공격 바꾸기 — 카드의 펜(✎)을 누르면 뜬다.
+          담아 둔 카드가 「이 타수가 아니었네」일 때 지우고 다시 담지 않고 갈아 끼운다.
+          자리·사이클·버프 체크는 그대로 남는다. */}
+      {swapResult && (
+        <div className="formula-backdrop" onClick={() => setSwapId(null)} role="presentation">
           <div className="type-modal" onClick={(event) => event.stopPropagation()}>
             <div className="formula-head">
               <div>
-                <small>피해 판정</small>
-                <h3>{attackLabel(typeResult.attack.name)}</h3>
-                <span>
-                  {typeResult.character.name} · 자료에 적힌 판정{" "}
-                  {DAMAGE_TYPES.find(
-                    (t) => t.value === (typeResult.attack.damageBonusType ?? typeResult.attack.type),
-                  )?.label ?? (typeResult.attack.damageBonusType ?? typeResult.attack.type)}
-                </span>
+                <small>공격 바꾸기</small>
+                <h3>{attackLabel(swapResult.attack.name)}</h3>
+                <span>{swapResult.character.name} · 버프 체크와 자리는 그대로 남습니다</span>
               </div>
-              <button className="formula-close" onClick={() => setTypeId(null)}>
+              <button className="formula-close" onClick={() => setSwapId(null)}>
                 ×
               </button>
             </div>
 
-            <div className="type-grid">
-              {DAMAGE_TYPES.map((type) => {
-                const on = typeResult.item.damageBonusType === type.value;
-                return (
-                  <button
-                    key={type.value}
-                    className={on ? "on" : ""}
-                    onClick={() => {
-                      setAttackDamageType(typeResult.item.id, on ? null : type.value);
-                      setTypeId(null);
-                    }}
-                  >
-                    {type.label}
-                  </button>
-                );
-              })}
-            </div>
-
-            <div className="type-foot">
-              <button
-                onClick={() => {
-                  setAttackDamageType(typeResult.item.id, null);
-                  setTypeId(null);
-                }}
-                disabled={!typeResult.item.damageBonusType}
-              >
-                자료대로 되돌리기
-              </button>
-              <small>
-                이 한 대에만 걸립니다. 피해 보너스(일반 공격 · 강공격 …)와 버프 판정이 함께 바뀝니다.
-              </small>
+            <div className="swap-list">
+              {attackGroups(swapResult.character).map((group) => (
+                <div key={group.label} className="card-add-group">
+                  <em>{group.label}</em>
+                  <div>
+                    {group.attacks.map((attack) => (
+                      <button
+                        key={attack.id}
+                        className={attack.id === swapResult.item.attackId ? "on" : ""}
+                        title={attack.name}
+                        onClick={() => {
+                          setAttackId(swapResult.item.id, attack.id);
+                          setSwapId(null);
+                        }}
+                      >
+                        {attackLabel(attack.name)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
