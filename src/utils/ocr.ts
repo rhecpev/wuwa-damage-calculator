@@ -757,9 +757,21 @@ export interface ProfileRead {
  * 카드가 좁아서 주옵션이 「공격력」과 「18%」 두 줄로 읽히는 일이 잦다.
  * 이름만 있는 줄 바로 뒤에 숫자만 있는 줄이 오면 한 줄로 본다.
  * (같은 높이에 있는 것끼리는 readRows가 이미 묶어 놨다.)
+ *
+ * ── 읽다 만 줄도 자리에 남긴다 ────────────────────────────────
+ * 에코 표는 **위에서부터의 순서가 곧 뜻**이다. 첫 줄이 주옵션, 둘째가 메인 서브옵션,
+ * 나머지 다섯 줄이 부옵션 1~5다. 그래서 읽지 못한 줄을 빼 버리면 뒤의 줄이 앞자리로
+ * 당겨져 뜻이 통째로 바뀐다 — 부옵션 둘째 줄을 놓치면 3·4·5가 2·3·4로 올라오고
+ * 빈칸은 엉뚱하게 맨 끝에 생긴다. 사람이 확인 화면에서 고칠 때 어느 줄이 빈 것인지
+ * 알 수 없게 되고, 그대로 「적용」하면 부옵션이 한 자리씩 밀린 채 저장된다.
+ *
+ * 그래서 못 읽은 줄도 버리지 않는다.
+ *   이름을 못 읽었으면  name을 빈 문자열로 두고 값만 남긴다
+ *   값을 못 읽었으면    value를 null로 두고 이름만 남긴다
+ * 둘 다 없는 줄만 버린다 — 그건 표의 줄이 아니라 아이콘이 글자로 읽힌 것이다.
  */
 function pairRows(rows: TextRow[]) {
-  type Row = { name: string; value: number; pct: boolean; raw: string };
+  type Row = { name: string; value: number | null; pct: boolean; raw: string };
   const out: Row[] = [];
   // 한글 두 자 이상이나 HP가 있으면 이름 줄로 본다. 줄 앞의 아이콘은 X · 2 · ® 같은
   // 글자로 읽히므로 이름으로 치지 않는다.
@@ -768,16 +780,24 @@ function pairRows(rows: TextRow[]) {
   const hasName = (row: TextRow) => /[가-힣]{2,}/.test(row.name) || /HP/i.test(row.name);
   for (let i = 0; i < rows.length; i += 1) {
     const r = rows[i];
-    if (hasName(r) && r.value !== null) {
+    if (!hasName(r)) {
+      // 이름이 없는 줄. 바로 앞 이름 줄이 값으로 가져간 줄은 아래 병합 가지에서 이미
+      // 건너뛰었으니, 여기까지 온 것은 이름만 깨진 옵션 줄로 본다.
+      if (r.value !== null) out.push({ name: "", value: r.value, pct: r.pct, raw: r.text });
+      continue;
+    }
+    if (r.value !== null) {
       out.push({ name: r.name, value: r.value, pct: r.pct, raw: r.text });
       continue;
     }
-    if (!hasName(r)) continue; // 숫자만 있는 줄은 바로 앞 이름이 이미 가져갔다
     const next = rows[i + 1];
     if (next && next.value !== null && !hasName(next)) {
       out.push({ name: r.name, value: next.value, pct: next.pct, raw: `${r.text} ${next.text}` });
       i += 1;
+      continue;
     }
+    // 값만 못 읽은 줄. 이름은 살아 있으니 그 자리에 그대로 둔다.
+    out.push({ name: r.name, value: null, pct: r.pct, raw: r.text });
   }
   return out;
 }
@@ -795,7 +815,8 @@ function parseProfileEcho(textRows: TextRow[]): ProfileEcho {
 
   const mainRow = body[0];
   const mainKey = mainRow && mainOf(mainRow);
-  const cost = mainKey && mainRow ? inferCost(mainKey, mainRow.value) : undefined;
+  const cost =
+    mainKey && mainRow && mainRow.value !== null ? inferCost(mainKey, mainRow.value) : undefined;
   const tier = cost !== undefined ? TIER[cost] : undefined;
   const mainList = mainKey ? OPTIONS.mainOption[mainKey] : [];
   const mainValue =
@@ -821,9 +842,12 @@ function parseProfileEcho(textRows: TextRow[]): ProfileEcho {
     raw: subRow?.raw ?? "",
   };
 
+  // 다섯 줄을 자리 그대로 가져온다. 못 읽은 줄은 pairRows가 반쪽짜리로 남겨 둔 것이라,
+  // 여기서도 그 자리를 지킨 채 「못찾음」으로 넘긴다. 사람이 그 칸만 고르면 된다.
   const subOptions = body.slice(2, 7).map<ReadOption>((r) => {
     const key = findOptionKey(OPTIONS.subOption, r.name, r.pct);
-    if (!key) return { value: "", ocr: r.value, state: "못찾음", raw: r.raw };
+    if (!key || r.value === null)
+      return { key, value: "", ocr: r.value, state: "못찾음", raw: r.raw };
     const m = matchOptionValue(OPTIONS.subOption[key], r.value);
     return { key, value: m.value, ocr: r.value, state: m.state, raw: r.raw };
   });
