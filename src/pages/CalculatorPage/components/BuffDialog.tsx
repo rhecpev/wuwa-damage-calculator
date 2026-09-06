@@ -11,8 +11,20 @@ import {
 import type { ManualBuff } from "../../../types/game";
 import { characters } from "../../../data/sampleData";
 
-/** scaleFrom 버프가 어느 스탯에서 수치를 가져오는지 — 목록에 그대로 적는다. */
-const SCALE_LABEL: Record<string, string> = { ATK: "공격력", HP: "HP", DEF: "방어력" };
+/**
+ * scaleFrom 버프가 어느 스탯에서 수치를 가져오는지 — 목록에 그대로 적는다.
+ * BuffScaleStat 전부를 적어 둔다. 빠진 것이 있으면 「undefined × 0.1%」로 새어 나온다
+ * (「내려앉은 깃털의 노래」 5세트가 공명 효율 비례라 그렇게 보였다).
+ */
+const SCALE_LABEL: Record<string, string> = {
+  ATK: "공격력",
+  HP: "HP",
+  DEF: "방어력",
+  EnergyRegen: "공명 효율",
+  DiscordEfficiency: "부조화 효율",
+  SyncAmplify: "조화도 파괴 증폭",
+  CritRate: "크리티컬",
+};
 
 /** 버프 한 줄을 "적용 대상 · 피해 종류 · 방식"으로 요약한다. */
 function describe(buff: ManualBuff): string {
@@ -125,7 +137,9 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                         ? `이상 스택 상한 +${buff.raisesAnomalyStacks}`
                         : `${(amount * 100).toFixed(1)}%`}
                       {buff.scaleFrom
-                        ? ` (${SCALE_LABEL[buff.scaleFrom]} × ${(buff.value * 100).toFixed(1)}%)`
+                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom} × ${(
+                            buff.value * 100
+                          ).toFixed(1)}%)`
                         : stacks > 1 &&
                           buff.value > 0 &&
                           ` (${(buff.value * 100).toFixed(1)}% × ${stacks})`}
