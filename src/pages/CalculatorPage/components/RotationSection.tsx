@@ -47,7 +47,7 @@ function cardKind(result: CalculationResult): string {
 }
 
 /**
- * 「이 뒤에 담기」 목록에 세울 공격들. 스킬 갈래로 묶는다 — 공격 추가 팔레트와 같은 순서다.
+ * 「공격 바꾸기」 목록에 세울 공격들. 스킬 갈래로 묶는다 — 공격 추가 팔레트와 같은 순서다.
  * 이상 효과·조화도 파괴는 스킬이 아니라 상태·별도 항목이라 여기 나오지 않는다(위 팔레트에서 담는다).
  */
 function attackGroups(character: CalculationResult["character"]) {
@@ -94,7 +94,6 @@ export function RotationSection({ results }: RotationSectionProps) {
     moveAttack,
     duplicateCycle,
     setAttackId,
-    addAttackAfter,
     openCycle,
     saveCyclePreset,
     allBuffs,
@@ -109,8 +108,6 @@ export function RotationSection({ results }: RotationSectionProps) {
   // 끌어다 놓기 — 집은 카드와 지금 걸쳐 있는 카드.
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
-  // 「이 뒤에 담기」 목록을 펼친 항목.
-  const [addId, setAddId] = useState<string | null>(null);
   // 공격을 갈아 끼우는 창을 연 항목.
   const [swapId, setSwapId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
@@ -286,23 +283,9 @@ export function RotationSection({ results }: RotationSectionProps) {
                   </span>
                 </span>
 
-                {/* 기대 피해가 곧 「상세보기」 단추다 — 카드를 좁히면서 자리를 합쳤다. */}
-                <span
-                  className="card-exp"
-                  role="button"
-                  tabIndex={0}
-                  title="누르면 이 한 대의 계산식을 펼칩니다"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setFormulaId(result.item.id);
-                  }}
-                  onKeyDown={(event) => {
-                    if (event.key !== "Enter" && event.key !== " ") return;
-                    event.preventDefault();
-                    event.stopPropagation();
-                    setFormulaId(result.item.id);
-                  }}
-                >
+                {/* 기대 피해는 그냥 숫자다 — 누르면 카드가 눌린 것으로 쳐서 버프 창이 열린다.
+                    계산식은 카드 옆 돋보기(⌕)로 뺐다. */}
+                <span className="card-exp">
                   {num(result.damage.expectedDamage)}
                   {multi && <i>{result.damage.hits.length}타</i>}
                 </span>
@@ -381,11 +364,11 @@ export function RotationSection({ results }: RotationSectionProps) {
 
               <span className="item-tools">
                 <button
-                  className="plus"
-                  title="이 뒤에 공격 담기 — 켜 둔 버프를 이어받습니다"
-                  onClick={() => setAddId((cur) => (cur === result.item.id ? null : result.item.id))}
+                  className="mag"
+                  title="이 한 대의 계산식 펼치기"
+                  onClick={() => setFormulaId(result.item.id)}
                 >
-                  ＋
+                  ⌕
                 </button>
                 <button
                   className="pen"
@@ -406,32 +389,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                 </button>
               </span>
 
-              {/* 이 뒤에 담을 공격 고르기 — 카드 옆 ＋를 누르면 카드 아래로 펼친다.
-                  켜 둔 버프를 그대로 이어받아, 콤보를 이어 담을 때 매번 다시 켜지 않아도 된다. */}
-              {addId === result.item.id && (
-                <div className="card-add" onClick={(event) => event.stopPropagation()}>
-                  <small>이 뒤에 담기 — 켜 둔 버프를 이어받습니다</small>
-                  {attackGroups(result.character).map((group) => (
-                    <div key={group.label} className="card-add-group">
-                      <em>{group.label}</em>
-                      <div>
-                        {group.attacks.map((attack) => (
-                          <button
-                            key={attack.id}
-                            title={attack.name}
-                            onClick={() => {
-                              addAttackAfter(result.item.id, attack.id, result.character.id);
-                              setAddId(null);
-                            }}
-                          >
-                            {attackLabel(attack.name)}
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
               </div>
 
               {/* 다음 카드가 같은 사이클일 때만 화살표로 잇는다 — 사이클을 넘어가면 줄이 끊긴다. */}
