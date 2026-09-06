@@ -86,14 +86,21 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
       ) : (
         <div className="buffs">
           {usable.map((buff: ManualBuff) => {
-            // 상시 버프는 조건이 없어 늘 걸린다 — 켜진 채로 잠근다.
+            // 상시 버프는 조건이 없어 기본으로 걸린다. 다만 「이게 얼마나 보태는지」를 보려고
+            // 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 뒀다 — 끈 것은 그 공격에만 남는다.
             const always = buff.uptime === "passive";
-            const checked = always || selected.item.enabledBuffIds.includes(buff.id);
+            const off = selected.item.disabledBuffIds?.includes(buff.id) ?? false;
+            const checked = always ? !off : selected.item.enabledBuffIds.includes(buff.id);
             // 스택형이면 이 공격에서 정한 스택을, 없으면 버프의 기본값을 쓴다.
             // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과의 방어력 감소 등)는 상한이 고정이 아니다
             // — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면 같이 올라간다.
             const cap = buff.anomalyStacks
-              ? anomalyStackCap(buff.anomalyStacks, allBuffs, selected.item.enabledBuffIds)
+              ? anomalyStackCap(
+                  buff.anomalyStacks,
+                  allBuffs,
+                  selected.item.enabledBuffIds,
+                  selected.item.disabledBuffIds,
+                )
               : null;
             const max = cap ? cap.max : (buff.maxStacks ?? 1);
             const stacks = selected.item.buffStacks?.[buff.id] ?? buff.stacks;
@@ -108,8 +115,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                 <input
                   type="checkbox"
                   checked={checked}
-                  disabled={always}
-                  title={always ? "상시 버프라 항상 걸립니다" : undefined}
+                  title={always ? "상시 버프 — 끄면 이 공격에서만 빠집니다" : undefined}
                   onChange={() => toggleBuff(selected.item.id, buff.id)}
                 />
                 {/* 무기 버프는 무기 그림, 그 외는 들고 있는 캐릭터 아이콘. */}
@@ -182,7 +188,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                   </b>
                   <small>
                     {describe(buff)}
-                    {always && " · 상시"}
+                    {always && (off ? " · 상시(이 공격에서 끔)" : " · 상시")}
                     {buff.exclusiveGroup && " · 같은 묶음에서 하나만"}
                     {!buff.enabled && " · 목록에서 꺼둠"}
                   </small>

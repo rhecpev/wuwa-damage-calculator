@@ -181,7 +181,10 @@ export interface Enemy{id:string;name:string;level:number;element:Element;resPre
 // baseRes: 몬스터 속성과 다른 속성 공격에 적용되는 기본 속성 저항.
 // sameElementRes: 몬스터 속성과 같은 속성 공격에 적용되는 저항.
 // damageTakenBonus: 받는피해(DMG Taken) — 역경의 탑 스테이지 전용 버프 등 적이 받는 피해를 늘리는 독립 배율
-export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;}
+export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];disabledBuffIds?:string[];buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;}
+// disabledBuffIds: 상시(passive) 버프 중 이 공격에서만 꺼 둔 것. 상시는 조건이 없어 늘 걸리지만
+//   「이 버프가 얼마나 보태는지」를 보려고 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 두었다.
+//   비어 있으면(대개) 상시는 전부 걸린다.
 // cycle: 이 공격이 몇 번째 사이클에 드는지(1부터). 루틴은 보통 4~5사이클을 도는 단위로 읽히므로
 //   그 경계를 자료에 남겨 화면에서 구분선을 긋는다. 생략(예전에 담은 공격)은 1사이클로 본다.
 // discordRate: 조화도 파괴 항목일 때 그 스킬의 배율(16 = 1600%). 생략하면 기본 조화도 파괴 배율.

@@ -471,7 +471,25 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
    * — 「HP 60% 이상 / 미만」처럼 동시에 성립할 수 없는 상태를 위한 것이다.
    */
   const toggleBuff = (rotationId: string, buffId: string) => {
-    const group = allBuffs.find((b) => b.id === buffId)?.exclusiveGroup;
+    const buff = allBuffs.find((b) => b.id === buffId);
+    // 상시 버프는 「켠 목록」이 아니라 「꺼 둔 목록」으로 다룬다 — 기본이 켜짐이라서다.
+    if (buff?.uptime === "passive") {
+      setConfig((current) => ({
+        ...current,
+        rotation: current.rotation.map((item) => {
+          if (item.id !== rotationId) return item;
+          const off = item.disabledBuffIds ?? [];
+          return {
+            ...item,
+            disabledBuffIds: off.includes(buffId)
+              ? off.filter((id) => id !== buffId)
+              : [...off, buffId],
+          };
+        }),
+      }));
+      return;
+    }
+    const group = buff?.exclusiveGroup;
     const siblings = group
       ? allBuffs.filter((b) => b.exclusiveGroup === group && b.id !== buffId).map((b) => b.id)
       : [];
@@ -663,6 +681,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         rotation: config.rotation.map((item) => ({
           ...item,
           enabledBuffIds: [...item.enabledBuffIds],
+          ...(item.disabledBuffIds?.length ? { disabledBuffIds: [...item.disabledBuffIds] } : {}),
           ...(item.buffStacks ? { buffStacks: { ...item.buffStacks } } : {}),
         })),
         enemy: { ...config.enemy },
@@ -700,6 +719,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       rotation: preset.rotation.map((item) => ({
         ...item,
         enabledBuffIds: item.enabledBuffIds.filter((buffId) => !drop.has(buffId)),
+        ...(item.disabledBuffIds?.length ? { disabledBuffIds: [...item.disabledBuffIds] } : {}),
         ...(item.buffStacks ? { buffStacks: { ...item.buffStacks } } : {}),
       })),
       enemy: { ...preset.enemy },

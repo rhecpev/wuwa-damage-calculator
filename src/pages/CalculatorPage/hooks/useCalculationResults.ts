@@ -144,11 +144,15 @@ export function useCalculationResults(
         ? weaponAtLevel(weaponEntry, equippedWeapon?.level ?? DEFAULT_WEAPON_LEVEL)
         : undefined;
 
-      // 상시(passive) 버프는 조건이 없으니 늘 걸린다 — 켜고 끄는 대상이 아니다.
-      // 조건부(active) 버프만 이 공격에서 켜둔 것을 넣는다.
+      // 상시(passive) 버프는 조건이 없으니 기본으로 걸린다. 다만 「이 버프가 얼마나 보태는지」를
+      // 보려고 잠깐 빼 보는 일이 잦아, 이 공격에서 꺼 둔 것(disabledBuffIds)은 뺀다.
+      // 조건부(active) 버프는 반대로 켜둔 것만 넣는다.
       // 공격 분류가 맞는지는 manualBuffDelta 안의 appliesTo가 다시 본다.
+      const off = new Set(item.disabledBuffIds ?? []);
       const itemBuffs = manualBuffs
-        .filter((buff) => buff.uptime === "passive" || item.enabledBuffIds.includes(buff.id))
+        .filter((buff) =>
+          buff.uptime === "passive" ? !off.has(buff.id) : item.enabledBuffIds.includes(buff.id),
+        )
         // 스택형 버프는 이 공격에서 정한 스택이 있으면 그 값으로 바꿔 넣는다.
         .map((buff) => {
           const picked = item.buffStacks?.[buff.id];
@@ -156,7 +160,8 @@ export function useCalculationResults(
           // 이상 효과 스택을 쓰는 버프는 상한이 버프 구성에 따라 오르내린다 —
           // 상한을 올려주던 버프를 끄면 담아 뒀던 스택이 상한 밖으로 남는다. 그때는 잘라 쓴다.
           const cap = buff.anomalyStacks
-            ? anomalyStackCap(buff.anomalyStacks, manualBuffs, item.enabledBuffIds).max
+            ? anomalyStackCap(buff.anomalyStacks, manualBuffs, item.enabledBuffIds, item.disabledBuffIds)
+                .max
             : (buff.maxStacks ?? picked);
           return { ...buff, stacks: Math.min(picked, cap) };
         });
@@ -247,7 +252,8 @@ export function useCalculationResults(
                 // 상한을 올려주는 버프(치사의 반주)를 켜 뒀으면 그 상한을 쓴다.
                 stacks:
                   item.anomalyStacks ??
-                  anomalyStackCap(attack.anomaly, itemBuffs, item.enabledBuffIds).max,
+                  anomalyStackCap(attack.anomaly, itemBuffs, item.enabledBuffIds, item.disabledBuffIds)
+                    .max,
                 occurrences: item.anomalyOccurrences ?? 1,
               },
               character,

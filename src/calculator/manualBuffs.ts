@@ -479,6 +479,7 @@ export function anomalyStackCap(
   kind: AnomalyKind,
   buffs: ManualBuff[],
   enabledBuffIds: string[] = [],
+  disabledBuffIds: string[] = [],
 ): { max: number; bonus: number; from: string[] } {
   const base = ANOMALIES[kind].maxStacks;
   const from: string[] = [];
@@ -487,8 +488,10 @@ export function anomalyStackCap(
     if (!buff.raisesAnomalyStacks) continue;
     // 특정 효과만 올리는 버프는 그 효과에만 센다.
     if (buff.raisesAnomalyKinds && !buff.raisesAnomalyKinds.includes(kind)) continue;
-    // 상시 버프는 늘 걸린다. 나머지는 이 공격에서 켜 뒀을 때만 센다.
-    if (buff.uptime !== "passive" && !enabledBuffIds.includes(buff.id)) continue;
+    // 상시 버프는 이 공격에서 꺼 두지 않았으면 걸린다. 나머지는 켜 뒀을 때만 센다.
+    if (buff.uptime === "passive") {
+      if (disabledBuffIds.includes(buff.id)) continue;
+    } else if (!enabledBuffIds.includes(buff.id)) continue;
     // 중첩되지 않는다 — 여럿이 켜져 있어도 가장 크게 올려주는 것 하나만 센다.
     // (목록에서도 배타 묶음으로 하나만 켜지지만, 상시 버프가 섞여도 여기서 다시 막힌다.)
     bonus = Math.max(bonus, buff.raisesAnomalyStacks);
