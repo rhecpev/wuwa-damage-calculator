@@ -73,6 +73,23 @@ const ECHO_DMG_CAL_TYPES = echoOptionData.dmgCalType as Record<string, DmgCalTyp
 const SUB_PERCENT_ADJUST = 0.00008;
 
 /**
+ * 위 보정을 받는 칸 — **스탯창에서 버림을 타는 셋**뿐이다.
+ *
+ * 보정 자체가 「⌊기초 × Σ%⌋의 버림이 1~2 어긋난다」를 맞추려고 넣은 값이다. 피해 보너스나
+ * 크리티컬처럼 버림을 타지 않고 피해식에 그대로 곱해지는 칸은 깎을 이유가 없고,
+ * 깎으면 오히려 피해가 어긋난다.
+ *
+ * 현령 Lv.90 실측이 이 자리를 잡아 준다. 같은 공격력·같은 적으로 잰 두 갈래를 견주면
+ * 공격력이 몇이든 상관없이 **피해 보너스의 비**만 남는다.
+ *   일반 공격(전체 24% + 일반 부옵션 10.1% + 인멸 30%) 아홉 줄
+ *   공명 해방 · 만음을 잠재운 깃털(전체 36% + 강공 부옵션 32.3% + 인멸 30%) 한 줄
+ *   → 두 (1+보너스)의 비가 1.20838~1.20849 사이여야 열 줄이 모두 맞는다.
+ *     보정을 걸면 1.98268/1.64092 = 1.208273 (구간 밖)
+ *     걸지 않으면 1.983/1.641   = 1.208410 (구간 안)
+ */
+const ADJUSTED_KEYS = new Set<keyof Stats>(["hpPercent", "atkPercent", "defPercent"]);
+
+/**
  * 라벨에 "(%)"가 붙어 있으면 표시값이 퍼센트다 — 0.01 단위로 바꿔 담는다.
  * fromSub는 부옵션 5줄에서 온 값이라는 뜻이다(위 SUB_PERCENT_ADJUST 설명 참고).
  */
@@ -88,7 +105,8 @@ function put(
   const value = typeof raw === "number" ? raw : parseFloat(String(raw ?? ""));
   if (!Number.isFinite(value)) return;
   const isPercent = type.endsWith("(%)");
-  const amount = isPercent ? value / 100 - (fromSub ? SUB_PERCENT_ADJUST : 0) : value;
+  const adjust = fromSub && ADJUSTED_KEYS.has(key) ? SUB_PERCENT_ADJUST : 0;
+  const amount = isPercent ? value / 100 - adjust : value;
   target[key] = (target[key] ?? 0) + amount;
 }
 
@@ -100,6 +118,25 @@ export function echoStats(echo: any): Partial<Stats> {
 
   put(stats, options.mainOption?.type, options.mainOption?.value);
   put(stats, options.mainSubOption?.type, options.mainSubOption?.value);
+
+  const mains: string[] = options.mainSelects ?? [];
+  const subs: string[] = options.subSelects ?? [];
+  mains.forEach((type, index) => put(stats, type, subs[index], true));
+
+  return stats;
+}
+
+/**
+ * 위에서 **부옵션 5줄만** 따로 뽑은 것.
+ *
+ * 스탯창 값을 낼 때 에코 옵션의 버림이 메인 옵션 몫과 부옵션 몫으로 한 번 더 갈리기 때문에
+ * (calculateFinalStats 주석 참고) 그 몫을 알아야 한다. 합산에 두 번 들어가지 않도록
+ * 계산에는 echoStats 쪽만 쓰고, 이 값은 「그중 얼마가 부옵션에서 왔는지」로만 쓴다.
+ */
+export function echoSubStats(echo: any): Partial<Stats> {
+  const stats: Partial<Stats> = {};
+  const options = echo?.options;
+  if (!options) return stats;
 
   const mains: string[] = options.mainSelects ?? [];
   const subs: string[] = options.subSelects ?? [];
