@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { characters } from "../../data/sampleData";
 import { weapons } from "../../data/weapons";
 import { isExcludedEcho } from "../../data/echoExcludes";
@@ -101,6 +101,8 @@ interface EchoDraft {
 interface Draft {
   characterId: string;
   characterLevel: number;
+  /** 공명체인 단계(0~6). 카드에는 동그라미 그림뿐이라 못 읽는다 — 사람이 고른다. */
+  resonanceChain: number;
   skillLevels: number[];
   weaponId: string;
   weaponLevel: number;
@@ -178,11 +180,32 @@ function closestBy<T>(items: T[], nameOf: (x: T) => string, raw: string): T | un
 }
 
 export function ProfileImportPage() {
-  const { setCharacterLevel, setSkillLevel, setCharacterWeapon, setWeaponLevel, setWeaponRefine } =
-    usePartyConfig();
+  const {
+    setCharacterLevel,
+    setSkillLevel,
+    setCharacterWeapon,
+    setWeaponLevel,
+    setWeaponRefine,
+    characterChains,
+    setCharacterChain,
+  } = usePartyConfig();
 
   const [busy, setBusy] = useState<Progress | null>(null);
   const [read, setRead] = useState<ProfileRead | null>(null);
+  /**
+   * 넣은 사진을 화면에 그대로 띄우기 위한 주소.
+   * 아래 확인 칸이 사진과 맞는지 눈으로 견주려면 사진이 같은 화면에 있어야 한다.
+   * createObjectURL은 직접 놓아 주지 않으면 탭이 닫힐 때까지 메모리에 남는다 —
+   * 새 사진으로 바꿀 때와 화면을 떠날 때 반드시 revoke한다.
+   */
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  useEffect(
+    () => () => {
+      if (imageUrl) URL.revokeObjectURL(imageUrl);
+    },
+    // 사진이 바뀌면 **앞 사진**을 놓아 주고, 화면을 떠날 때 마지막 것을 놓아 준다.
+    [imageUrl],
+  );
   const [draft, setDraft] = useState<Draft | null>(null);
   /** 적용이 끝나면 뜨는 알림. 무엇이 저장됐는지 줄줄이 보여 준다. */
   const [done, setDone] = useState<string[] | null>(null);
@@ -213,6 +236,8 @@ export function ProfileImportPage() {
     if (!file) return;
 
     setDone(null);
+    // 읽기가 오래 걸리므로 사진부터 띄운다 — 무엇을 넣었는지 바로 보이게.
+    setImageUrl(URL.createObjectURL(file));
     setBusy({ label: "사진 여는 중", done: 0, total: 1 });
     try {
       const result = await readProfileCard(file, (label, done, total) =>
@@ -224,9 +249,14 @@ export function ProfileImportPage() {
       const weapon = closestBy(weapons, (w) => w.name, result.weaponName);
       // 캐릭터는 반신 그림으로 찾은 쪽을 먼저 믿는다 — 이름 OCR보다 잘 맞는다.
       const byIcon = result.characterIcon?.characterId;
+      const characterId =
+        (byIcon && characters.some((c) => c.id === byIcon) ? byIcon : character?.id) ?? "";
       setDraft({
-        characterId: (byIcon && characters.some((c) => c.id === byIcon) ? byIcon : character?.id) ?? "",
+        characterId,
         characterLevel: result.characterLevel ?? 90,
+        // 카드로는 못 읽는 값이라 **이미 저장해 둔 단계**에서 출발한다.
+        // 0으로 두면 다시 불러올 때마다 체인이 조용히 지워진다.
+        resonanceChain: characterChains[characterId] ?? 0,
         // 다섯 개를 못 읽었으면 나머지는 10으로 둔다 — 보통 다 만렙이다.
         skillLevels: SKILL_SLOTS.map((_, i) => result.skillLevels[i] ?? 10),
         weaponId: weapon?.id ?? "",
@@ -325,7 +355,10 @@ export function ProfileImportPage() {
       const skill = character.skills.find((s) => s.category === slot.key);
       if (skill) setSkillLevel(character.id, skill.id, draft.skillLevels[i]);
     });
-    log.push(`레벨 ${draft.characterLevel} · 스킬 ${draft.skillLevels.join("/")} 로 맞췄습니다.`);
+    setCharacterChain(character.id, draft.resonanceChain);
+    log.push(
+      `레벨 ${draft.characterLevel} · 공명체인 ${draft.resonanceChain}단계 · 스킬 ${draft.skillLevels.join("/")} 로 맞췄습니다.`,
+    );
 
     // ── 무기 ── 보유 목록에 한 자루 담고, 그것을 이 캐릭터에게 채운다.
     if (draft.weaponId) {
@@ -415,6 +448,23 @@ export function ProfileImportPage() {
         {busy && <ProgressBar progress={busy} />}
       </section>
 
+      {/* 넣은 사진. 아래 확인 칸을 사진과 견주며 고쳐야 해서 같은 화면에 둔다.
+          카드가 가로로 길어 높이만 묶어 두고, 원본은 새 탭에서 크게 본다. */}
+      {imageUrl && (
+        <section className="panel card-preview">
+          <div className="card-preview-head">
+            <div>
+              <small>PREVIEW</small>
+              <h2>넣은 사진</h2>
+            </div>
+            <a href={imageUrl} target="_blank" rel="noreferrer">
+              원본 크기로 열기
+            </a>
+          </div>
+          <img src={imageUrl} alt="넣은 프로필 카드" />
+        </section>
+      )}
+
       {draft && read && (
         <>
           <section className="panel">
@@ -433,7 +483,11 @@ export function ProfileImportPage() {
                   <SearchPicker
                     items={characterItems}
                     value={draft.characterId}
-                    onChange={(id) => patch({ characterId: id })}
+                    // 캐릭터를 바꾸면 체인도 그 캐릭터에 저장해 둔 값으로 따라간다 —
+                    // 앞 캐릭터의 단계가 남아 엉뚱한 캐릭터에 얹히지 않게.
+                    onChange={(id) =>
+                      patch({ characterId: id, resonanceChain: characterChains[id] ?? 0 })
+                    }
                     placeholder="캐릭터 이름 검색"
                   />
                 </span>
@@ -441,13 +495,26 @@ export function ProfileImportPage() {
               </label>
 
               <label>
-                <em>캐릭터 레벨</em>
-                <LevelSlider
-                  value={draft.characterLevel}
-                  min={1}
-                  max={90}
-                  onChange={(v) => patch({ characterLevel: v })}
-                />
+                <em>캐릭터 레벨 · 공명체인</em>
+                <span className="row">
+                  <LevelSlider
+                    value={draft.characterLevel}
+                    min={1}
+                    max={90}
+                    onChange={(v) => patch({ characterLevel: v })}
+                  />
+                  <select
+                    value={draft.resonanceChain}
+                    onChange={(e) => patch({ resonanceChain: Number(e.target.value) })}
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                      <option key={n} value={n}>
+                        체인 {n}
+                      </option>
+                    ))}
+                  </select>
+                </span>
+                <small>공명체인은 카드에 동그라미 그림으로만 있어 못 읽습니다 — 직접 고르세요.</small>
               </label>
 
               <label>

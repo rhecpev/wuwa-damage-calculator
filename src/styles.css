@@ -1141,3 +1141,8 @@
 .storage-choice b{font-size:13px;color:#e9edf5}
 .storage-choice em{font-style:normal;font-size:11px;line-height:1.6;color:#9aa3b3}
 .build-stamp{display:block;margin-top:6px;color:#6f7a8d;font-size:11px}.build-stamp code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#9aa3b3}
+/* 넣은 프로필 카드 사진. 가로로 긴 그림이라 높이만 묶고 원본 비율은 지킨다. */
+.profile-import .card-preview img{display:block;width:100%;max-height:360px;object-fit:contain;object-position:left top;margin-top:10px;border:1px solid #333c50;border-radius:10px;background:#171c28}
+.profile-import .card-preview-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+.profile-import .card-preview a{align-self:center;color:#8fb4d9;font-size:12px;text-decoration:none;white-space:nowrap}
+.profile-import .card-preview a:hover{text-decoration:underline}
