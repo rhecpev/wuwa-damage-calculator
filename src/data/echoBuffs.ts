@@ -1,3 +1,4 @@
+import type { AnomalyKind } from "./anomalies";
 import type {
   BuffDamageType,
   BuffModifier,
@@ -71,6 +72,19 @@ export interface EchoBuffTemplate {
    * 조건에 안 맞는 캐릭터에게도 버프가 그대로 붙는다.
    */
   onlyCharacters?: string[];
+  /**
+   * **낀 캐릭터가 이 이상 효과를 붙일 수 있을 때만** 뜨는 효과.
+   *
+   * 「적에게 「암흑 효과」 추가 시」처럼 조건문의 주어가 장착 캐릭터인 줄에 적는다.
+   * 붙일 수 없는 캐릭터에게는 영영 서지 않는 조건이라 버프 목록에 띄우지 않는다 —
+   * 「내려앉은 깃털의 노래」 5세트처럼 암흑 갈래와 서리 갈래가 함께 적힌 세트에서,
+   * 낀 사람이 실제로 쓸 수 있는 갈래만 남기려는 것이다.
+   *
+   * 누가 무엇을 붙일 수 있는지는 data/characterAnomalies.ts가 갖고 있다(스킬 설명문에서
+   * 뽑아 검사 스크립트가 지키는 표다). 조화도 파괴 쪽 상태(「해킹 · 이탈」 등)는 이상 효과가
+   * 아니라 이 표에 없으므로 여기에 적지 않는다.
+   */
+  requiresAnomaly?: AnomalyKind;
 }
 
 /** 화음 세트 효과 한 줄. 몇 세트에서 열리는지를 함께 담는다. */
@@ -199,6 +213,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「암흑 효과」 추가 시, 15초간",
+      requiresAnomaly: "HavocBane",
     },
     {
       setKey: 5,
@@ -209,6 +224,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「암흑 효과」 추가 시, 15초간",
+      requiresAnomaly: "HavocBane",
     },
     {
       setKey: 5,
@@ -221,6 +237,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "party", // 파티 내 캐릭터 전원
       condition: "적에게 「서리 효과」 추가 시, 10초간",
+      requiresAnomaly: "FrostChafe",
     },
   ],
 
@@ -528,6 +545,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「불꽃 효과」 추가 시, 15초간",
+      requiresAnomaly: "FusionBurst",
     },
     {
       setKey: 5,
@@ -667,6 +685,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "party", // 파티 내 캐릭터 전원
       condition: "적에게 「풍식 효과」를 추가 시, 20초간",
+      requiresAnomaly: "AeroErosion",
     },
     {
       setKey: 5,
@@ -677,6 +696,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self", // 위 파티분에 더해 본인만 한 번 더 받는다
       condition: "적에게 「풍식 효과」를 추가 시, 20초간",
+      requiresAnomaly: "AeroErosion",
     },
   ],
 
@@ -762,6 +782,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「암흑 효과」 추가 시, 5초간",
+      requiresAnomaly: "HavocBane",
     },
     {
       setKey: 3,
@@ -772,6 +793,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「암흑 효과」 추가 시, 5초간",
+      requiresAnomaly: "HavocBane",
     },
   ],
 
@@ -912,6 +934,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "적에게 「광학 효과」를 추가 시, 15초간",
+      requiresAnomaly: "SpectroFrazzle",
     },
     {
       setKey: 5,

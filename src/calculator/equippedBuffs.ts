@@ -2,6 +2,7 @@ import { weaponsById } from "../data/weapons";
 import { getWeaponBuffOverrides, weaponBuffKey } from "../data/weaponBuffOverrides";
 import { characterBuffKey, getCharacterBuffOverrides } from "../data/characterBuffOverrides";
 import { echoAbilityBuffs, echoSetBuffs } from "../data/echoBuffs";
+import { anomaliesOf } from "../data/characterAnomalies";
 import { echoesById, fetterGroupByName } from "../data/echoes";
 import {
   echoAbilityOwnerId,
@@ -211,6 +212,12 @@ export function deriveEchoBuffs(
         if (count < template.setKey) return;
         // 낀 사람을 가리는 효과라면 그 사람일 때만(어빌리티 쪽과 같은 규칙).
         if (template.onlyCharacters && !template.onlyCharacters.includes(characterId)) return;
+        // 「적에게 ○○ 효과 추가 시」가 조건인 줄은 그 효과를 붙일 수 있는 사람에게만 뜬다.
+        if (
+          template.requiresAnomaly &&
+          !anomaliesOf(characterId).includes(template.requiresAnomaly)
+        )
+          return;
 
         const override = overrides[echoBuffKey(ownerKey, index)];
         out.push({
@@ -252,6 +259,9 @@ export function deriveEchoBuffs(
       // 「장착 캐릭터가 루시 혹은 레베카일 경우」처럼 낀 사람을 가리는 효과.
       // 조건 메모만으로는 걸러지지 않아 여기서 실제로 뺀다.
       if (template.onlyCharacters && !template.onlyCharacters.includes(characterId)) return;
+      // 세트 쪽과 같은 규칙 — 못 붙이는 이상 효과가 조건이면 이 줄은 서지 않는다.
+      if (template.requiresAnomaly && !anomaliesOf(characterId).includes(template.requiresAnomaly))
+        return;
 
       const override = overrides[echoBuffKey(abilityOwnerKey, index)];
       out.push({
