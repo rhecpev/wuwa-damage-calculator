@@ -145,6 +145,8 @@ export function deriveCharacterBuffs(
         enabled: true,
         uptime: override?.uptime ?? template.uptime ?? (template.condition ? "active" : "passive"),
         scope: override?.scope ?? template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
+        // 파티 버프인데 본인은 빼는 것(치사 2체인) — 본인 몫이 따로 적혀 있다.
+        ...(template.excludeOwner ? { excludeOwner: true } : {}),
         ownerId: character.id,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
