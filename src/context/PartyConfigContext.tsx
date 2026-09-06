@@ -139,6 +139,12 @@ interface PartyConfigContextType {
   removeAttack: (id: string) => void;
   /** 같은 공격을 버프 체크·스택까지 그대로 복사해 루틴 맨 뒤에 붙인다. */
   duplicateAttack: (id: string) => void;
+  /**
+   * 이 공격 **바로 뒤**에 다른 공격을 담는다. 사이클과 버프 체크·스택을 그대로 이어받는다
+   * — 콤보를 이어 담을 때 매번 같은 버프를 다시 켜지 않게 하려는 것이다.
+   * 이어받은 체크 중 새 공격에 걸리지 않는 것은 계산에서 알아서 빠진다(appliesTo).
+   */
+  addAttackAfter: (afterId: string, attackId: string, characterId: string) => void;
   /** 공격 루틴을 통째로 비운다. */
   clearRotation: () => void;
   /** 지금 공격을 담으면 들어갈 사이클 번호. 아직 빈 사이클이면 화면이 자리만 그려 준다. */
@@ -510,6 +516,28 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         return type ? { ...rest, damageBonusType: type } : rest;
       }),
     }));
+  };
+
+  /** 이 공격 바로 뒤에 다른 공격을 담는다. 사이클과 버프 체크를 그대로 이어받는다. */
+  const addAttackAfter = (afterId: string, attackId: string, characterId: string) => {
+    setConfig((current) => {
+      const at = current.rotation.findIndex((item) => item.id === afterId);
+      if (at < 0) return current;
+      const source = current.rotation[at];
+      const next: RotationAttack = {
+        id: crypto.randomUUID(),
+        attackId,
+        characterId,
+        cycle: source.cycle,
+        enabledBuffIds: [...source.enabledBuffIds],
+        ...(source.disabledBuffIds?.length ? { disabledBuffIds: [...source.disabledBuffIds] } : {}),
+        ...(source.buffStacks ? { buffStacks: { ...source.buffStacks } } : {}),
+      };
+      return {
+        ...current,
+        rotation: [...current.rotation.slice(0, at + 1), next, ...current.rotation.slice(at + 1)],
+      };
+    });
   };
 
   /** 복사 — 켜둔 버프와 스택을 그대로 들고 맨 뒤에 하나 더 붙인다. */
@@ -1044,6 +1072,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setAttackDamageType,
     removeAttack,
     duplicateAttack,
+    addAttackAfter,
     clearRotation,
     toggleBuff,
     setBuffStacks,

@@ -48,6 +48,20 @@
 /* 피해 판정 고르기 창 — 카드의 공격명을 누르면 뜬다. */
 .card-title[role="button"]{cursor:pointer;border-radius:5px}
 .card-title[role="button"]:hover{text-decoration:underline dotted;text-underline-offset:2px}
+/* 카드 아래로 펼치는 「이 뒤에 담기」 목록. 카드를 밀어내지 않게 띄워서 그린다. */
+.card-add{position:absolute;left:0;top:calc(100% + 6px);z-index:30;width:min(300px,72vw);
+  max-height:300px;overflow-y:auto;padding:10px;background:#262d3f;border:1px solid #495466;
+  border-radius:11px;box-shadow:0 12px 28px rgba(0,0,0,.4);cursor:default}
+.card-add>small{display:block;margin-bottom:8px;color:#9aa3b3;font-size:10.5px;letter-spacing:0;font-weight:400}
+.card-add-group{margin-bottom:8px}
+.card-add-group>em{display:block;margin-bottom:4px;font-style:normal;font-size:10px;letter-spacing:.6px;color:#8791a4}
+.card-add-group>div{display:flex;flex-wrap:wrap;gap:4px}
+.card-add-group button{max-width:100%;padding:4px 8px;border-radius:7px;background:#2a3246;
+  border:1px solid #3c455c;color:#c2c9d6;font-size:11px;cursor:pointer;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-add-group button:hover{border-color:#8794aa;background:#30394a;color:#e9edf5}
+.item-tools .pen{color:#9aa3b3;font-size:11px}
+.item-tools .pen:hover{border-color:#8fb4d9;color:#8fb4d9;background:#30394a}
 .card-typed{margin-left:5px;padding:0 5px;border-radius:999px;background:#4f412b;border:1px solid #66543a;
   color:#d8b98a;font-style:normal;font-size:9px;vertical-align:middle}
 .type-modal{width:min(420px,calc(100vw - 32px));padding:18px;background:#282f41;border:1px solid #414b61;

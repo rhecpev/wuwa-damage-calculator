@@ -64,6 +64,34 @@ const DAMAGE_TYPES: { value: AttackType; label: string }[] = [
 ];
 
 /**
+ * 「이 뒤에 담기」 목록에 세울 공격들. 스킬 갈래로 묶는다 — 공격 추가 팔레트와 같은 순서다.
+ * 이상 효과·조화도 파괴는 스킬이 아니라 상태·별도 항목이라 여기 나오지 않는다(위 팔레트에서 담는다).
+ */
+function attackGroups(character: CalculationResult["character"]) {
+  const order: { category: string; label: string }[] = [
+    { category: "Basic", label: "기본 공격" },
+    { category: "Skill", label: "공명 스킬" },
+    { category: "Circuit", label: "공명 회로" },
+    { category: "Liberation", label: "공명 해방" },
+    { category: "Variation", label: "변주 스킬" },
+    { category: "Intro", label: "반주 스킬" },
+    { category: "Sync", label: "조화도 파괴" },
+  ];
+  const bucket = new Map<string, CalculationResult["attack"][]>();
+  for (const skill of character.skills) {
+    const key = skill.category ?? "Basic";
+    for (const attack of skill.attacks) {
+      const rows = bucket.get(key);
+      if (rows) rows.push(attack);
+      else bucket.set(key, [attack]);
+    }
+  }
+  return order
+    .map((row) => ({ label: row.label, attacks: bucket.get(row.category) ?? [] }))
+    .filter((row) => row.attacks.length > 0);
+}
+
+/**
  * 카드에 적을 공격 이름. 끝에 붙은 「피해」를 뗀다 —
  * 좁은 카드에서 줄만 잡아먹고, 어차피 카드에 뜨는 숫자가 피해량이다.
  */
@@ -83,6 +111,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     moveAttack,
     duplicateCycle,
     setAttackDamageType,
+    addAttackAfter,
     openCycle,
     saveCyclePreset,
     allBuffs,
@@ -97,6 +126,8 @@ export function RotationSection({ results }: RotationSectionProps) {
   // 끌어다 놓기 — 집은 카드와 지금 걸쳐 있는 카드.
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
+  // 「이 뒤에 담기」 목록을 펼친 항목.
+  const [addId, setAddId] = useState<string | null>(null);
   // 피해 판정을 고르는 창을 연 항목.
   const [typeId, setTypeId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
@@ -270,16 +301,16 @@ export function RotationSection({ results }: RotationSectionProps) {
                     className="card-title"
                     role="button"
                     tabIndex={0}
-                    title="누르면 이 한 대의 피해 판정을 바꿉니다"
+                    title="누르면 이 뒤에 담을 공격을 고릅니다"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setTypeId(result.item.id);
+                      setAddId((cur) => (cur === result.item.id ? null : result.item.id));
                     }}
                     onKeyDown={(event) => {
                       if (event.key !== "Enter" && event.key !== " ") return;
                       event.preventDefault();
                       event.stopPropagation();
-                      setTypeId(result.item.id);
+                      setAddId((cur) => (cur === result.item.id ? null : result.item.id));
                     }}
                   >
                     {index + 1}. {attackLabel(result.attack.name)}
@@ -382,6 +413,13 @@ export function RotationSection({ results }: RotationSectionProps) {
 
               <span className="item-tools">
                 <button
+                  className="pen"
+                  title="이 한 대의 피해 판정 바꾸기"
+                  onClick={() => setTypeId(result.item.id)}
+                >
+                  ✎
+                </button>
+                <button
                   className="copy"
                   title="이 공격을 버프 설정까지 그대로 복사해 맨 뒤에 추가"
                   onClick={() => duplicateAttack(result.item.id)}
@@ -392,6 +430,33 @@ export function RotationSection({ results }: RotationSectionProps) {
                   ×
                 </button>
               </span>
+
+              {/* 이 뒤에 담을 공격 고르기 — 공격명을 누르면 카드 아래로 펼친다.
+                  켜 둔 버프를 그대로 이어받아, 콤보를 이어 담을 때 매번 다시 켜지 않아도 된다. */}
+              {addId === result.item.id && (
+                <div className="card-add" onClick={(event) => event.stopPropagation()}>
+                  <small>이 뒤에 담기 — 켜 둔 버프를 이어받습니다</small>
+                  {attackGroups(result.character).map((group) => (
+                    <div key={group.label} className="card-add-group">
+                      <em>{group.label}</em>
+                      <div>
+                        {group.attacks.map((attack) => (
+                          <button
+                            key={attack.id}
+                            title={attack.name}
+                            onClick={() => {
+                              addAttackAfter(result.item.id, attack.id, result.character.id);
+                              setAddId(null);
+                            }}
+                          >
+                            {attackLabel(attack.name)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
               </div>
 
               {/* 다음 카드가 같은 사이클일 때만 화살표로 잇는다 — 사이클을 넘어가면 줄이 끊긴다. */}
