@@ -146,6 +146,13 @@ interface PartyConfigContextType {
   addCycle: () => void;
   /** 그 공격을 다른 사이클로 옮긴다. */
   setAttackCycle: (id: string, cycle: number) => void;
+  /**
+   * 끌어다 놓아 순서를 바꾼다. 놓인 자리의 사이클을 따라간다 —
+   * 사이클 경계를 넘겨 놓으면 그 사이클로 옮겨진 것으로 본다.
+   */
+  moveAttack: (id: string, beforeId: string | null) => void;
+  /** 사이클 하나를 통째로 복사해 맨 뒤에 새 사이클로 붙인다(버프 체크·스택 그대로). */
+  duplicateCycle: (cycle: number) => void;
   toggleBuff: (rotationId: string, buffId: string) => void;
   /** 스택형 버프를 이 공격에서 몇 스택으로 볼지 정한다. */
   setBuffStacks: (rotationId: string, buffId: string, stacks: number) => void;
@@ -429,6 +436,55 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         item.id === id ? { ...item, cycle: Math.max(1, Math.round(cycle)) } : item,
       ),
     }));
+  };
+
+  /**
+   * 끌어다 놓기로 순서 바꾸기.
+   * beforeId가 가리키는 공격 **앞**에 끼워 넣고, 그 공격의 사이클을 따라간다.
+   * beforeId가 null이면 맨 뒤로 보내고 마지막 사이클에 붙는다.
+   */
+  const moveAttack = (id: string, beforeId: string | null) => {
+    if (id === beforeId) return;
+    setConfig((current) => {
+      const moving = current.rotation.find((item) => item.id === id);
+      if (!moving) return current;
+      const rest = current.rotation.filter((item) => item.id !== id);
+      const at = beforeId ? rest.findIndex((item) => item.id === beforeId) : -1;
+      // 놓인 자리의 사이클을 따라간다. 맨 뒤면 마지막 공격과 같은 사이클.
+      const cycle = at >= 0 ? (rest[at].cycle ?? 1) : (rest.at(-1)?.cycle ?? 1);
+      const next = { ...moving, cycle };
+      return {
+        ...current,
+        rotation: at >= 0 ? [...rest.slice(0, at), next, ...rest.slice(at)] : [...rest, next],
+      };
+    });
+  };
+
+  /**
+   * 사이클 통째로 복사 — 그 사이클의 공격을 순서대로 새 사이클에 붙인다.
+   * 버프 체크·스택·이상 스택까지 그대로 들고 간다(id만 새로 뗀다).
+   */
+  const duplicateCycle = (cycle: number) => {
+    setConfig((current) => {
+      const rows = current.rotation.filter((item) => (item.cycle ?? 1) === cycle);
+      if (rows.length === 0) return current;
+      const next = lastCycle(current.rotation) + 1;
+      setOpenCycle(next);
+      return {
+        ...current,
+        rotation: [
+          ...current.rotation,
+          ...rows.map((item) => ({
+            ...item,
+            id: crypto.randomUUID(),
+            cycle: next,
+            enabledBuffIds: [...item.enabledBuffIds],
+            ...(item.disabledBuffIds?.length ? { disabledBuffIds: [...item.disabledBuffIds] } : {}),
+            ...(item.buffStacks ? { buffStacks: { ...item.buffStacks } } : {}),
+          })),
+        ],
+      };
+    });
   };
 
   /** 복사 — 켜둔 버프와 스택을 그대로 들고 맨 뒤에 하나 더 붙인다. */
@@ -922,6 +978,8 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     openCycle,
     addCycle,
     setAttackCycle,
+    moveAttack,
+    duplicateCycle,
     removeAttack,
     duplicateAttack,
     clearRotation,

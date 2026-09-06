@@ -5,7 +5,6 @@ import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { DamageFormulaModal } from "./DamageFormulaModal";
 import { num } from "../../../utils/format";
 import { ANOMALIES } from "../../../data/anomalies";
-import { triggerKind, triggerLabel, triggersOf } from "../../../data/attackTriggers";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
 
 interface RotationSectionProps {
@@ -23,11 +22,11 @@ export function RotationSection({ results }: RotationSectionProps) {
     setDiscordRate,
     setDiscordOccurrences,
     addCycle,
-    setAttackCycle,
+    moveAttack,
+    duplicateCycle,
     openCycle,
     saveCyclePreset,
     allBuffs,
-    characterModes,
   } = usePartyConfig();
   // 상세보기를 연 항목의 id. 카드 선택(selectedId)과는 별개로 둔다 —
   // 카드를 눌러 히트별로 펼치는 것과 계산식을 여는 것은 다른 동작이다.
@@ -36,6 +35,9 @@ export function RotationSection({ results }: RotationSectionProps) {
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saved, setSaved] = useState(false);
+  // 끌어다 놓기 — 집은 카드와 지금 걸쳐 있는 카드.
+  const [dragId, setDragId] = useState<string | null>(null);
+  const [overId, setOverId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
 
   return (
@@ -130,9 +132,49 @@ export function RotationSection({ results }: RotationSectionProps) {
               <div className="cycle-head">
                 <b>{cycle}사이클</b>
                 <span>{cycleCount}대</span>
+                <button
+                  className="cycle-copy"
+                  title="이 사이클을 통째로 복사해 맨 뒤에 새 사이클로 붙입니다"
+                  onClick={() => duplicateCycle(cycle)}
+                >
+                  ⧉ 사이클 복제
+                </button>
               </div>
             )}
-            <div className="item">
+            <div
+              className={[
+                "item",
+                dragId === result.item.id ? "dragging" : "",
+                overId === result.item.id ? "over" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
+              // 카드를 끌어 순서를 바꾼다. 놓인 자리의 사이클을 따라가므로 사이클 이동도 이걸로 한다.
+              draggable
+              onDragStart={(event) => {
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", result.item.id);
+                setDragId(result.item.id);
+              }}
+              onDragEnd={() => {
+                setDragId(null);
+                setOverId(null);
+              }}
+              onDragOver={(event) => {
+                if (!dragId || dragId === result.item.id) return;
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+                if (overId !== result.item.id) setOverId(result.item.id);
+              }}
+              onDragLeave={() => setOverId((cur) => (cur === result.item.id ? null : cur))}
+              onDrop={(event) => {
+                event.preventDefault();
+                const from = event.dataTransfer.getData("text/plain") || dragId;
+                if (from) moveAttack(from, result.item.id);
+                setDragId(null);
+                setOverId(null);
+              }}
+            >
               {/* 카드와 버튼을 한 상자에 묶는다 — 잇는 선까지 기준으로 잡히면 버튼이 멀리 떨어진다. */}
               <div className="item-card">
               {/* 카드 안에 스택·횟수 입력칸이 들어가서 button으로 둘 수 없다
@@ -141,6 +183,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                 className={`card ${open ? "selected" : ""}`}
                 role="button"
                 tabIndex={0}
+                title={`${result.character.name} · ${result.attack.name}`}
                 onClick={() => setSelectedId(open ? null : result.item.id)}
                 onKeyDown={(event) => {
                   // 안쪽 입력칸에서 누른 키는 카드를 여닫지 않는다.
@@ -150,67 +193,29 @@ export function RotationSection({ results }: RotationSectionProps) {
                   setSelectedId(open ? null : result.item.id);
                 }}
               >
-                {result.character.iconUrl && (
-                  <img
-                    className="card-face"
-                    src={result.character.iconUrl}
-                    alt=""
-                    loading="lazy"
-                    title={result.character.name}
-                  />
-                )}
-
-                <span className="card-title">
-                  {index + 1}. {result.attack.name}
-                </span>
-                <span style={{ fontSize: 11, color: "#9aa3b3" }}>{result.character.name}</span>
-
-                {/* 비크리 · 크리를 나란히, 기대 피해는 그 아래 큰 숫자로. */}
-                <span className="card-dmg">
-                  <em>비크리</em>
-                  <i>{num(result.damage.normalDamage)}</i>
-                  <em>크리</em>
-                  <i>{num(result.damage.criticalDamage)}</i>
+                <span className="card-head">
+                  {result.character.iconUrl && (
+                    <img
+                      className="card-face"
+                      src={result.character.iconUrl}
+                      alt=""
+                      loading="lazy"
+                      draggable={false}
+                    />
+                  )}
+                  <span className="card-title">
+                    {index + 1}. {result.attack.name}
+                  </span>
                 </span>
 
-                <b>{num(result.damage.expectedDamage)}</b>
-                <small>기대 피해{multi && ` · ${result.damage.hits.length}타`}</small>
-
-                {/* 이 공격을 쓰면 따라 일어나는 일 — 이상 효과·자원이 어디서 쌓이고
-                    어디서 타는지 루틴을 훑으며 눈으로 따라갈 수 있게 적어 둔다.
-                    피해 계산에는 들어가지 않는다(data/attackTriggers.ts). */}
-                {(() => {
-                  // 이중 모드 캐릭터는 지금 고른 모드에 맞는 줄만 남긴다 —
-                  // 데니아처럼 같은 공격이 모드마다 다른 것을 붙이는 자리가 있어서다.
-                  const mode =
-                    characterModes[result.character.id] ?? result.character.resonanceModes?.[0];
-                  const triggers = triggersOf(result.attack.id).filter(
-                    (t) => t.resonanceMode === undefined || t.resonanceMode === mode,
-                  );
-                  if (triggers.length === 0) return null;
-                  return (
-                    <span className="card-triggers">
-                      {triggers.map((trigger, i) => (
-                        <em
-                          key={i}
-                          className={`trigger-${triggerKind(trigger)}-${trigger.action}`}
-                          title={[trigger.condition, trigger.source].filter(Boolean).join(" — ")}
-                        >
-                          {triggerLabel(trigger)}
-                          {trigger.condition && "*"}
-                        </em>
-                      ))}
-                    </span>
-                  );
-                })()}
-
-                {/* 카드가 button이라 안에 button을 둘 수 없어서 span으로 만든다. */}
+                {/* 기대 피해가 곧 「상세보기」 단추다 — 카드를 좁히면서 자리를 합쳤다. */}
                 <span
-                  className="card-detail"
+                  className="card-exp"
                   role="button"
                   tabIndex={0}
+                  title="누르면 이 한 대의 계산식을 펼칩니다"
                   onClick={(event) => {
-                    event.stopPropagation(); // 카드 선택까지 같이 걸리지 않도록
+                    event.stopPropagation();
                     setFormulaId(result.item.id);
                   }}
                   onKeyDown={(event) => {
@@ -220,7 +225,8 @@ export function RotationSection({ results }: RotationSectionProps) {
                     setFormulaId(result.item.id);
                   }}
                 >
-                  상세보기
+                  {num(result.damage.expectedDamage)}
+                  {multi && <i>{result.damage.hits.length}타</i>}
                 </span>
 
                 {/* 이상 효과는 스택이 곧 피해다 — 카드 안에서 바로 고칠 수 있게 둔다. */}
@@ -231,6 +237,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                     result.damage.breakdown.anomaly,
                     allBuffs,
                     result.item.enabledBuffIds,
+                    result.item.disabledBuffIds,
                   );
                   return (
                   <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
@@ -258,19 +265,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                         }
                       />
                     </label>
-                    {cap.bonus > 0 && (
-                      <small className="cap-note">
-                        {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}
-                      </small>
-                    )}
-                    {/* 폭발형은 최대 스택에 닿아야 터진다 — 그 전에는 피해가 0이다. */}
-                    {result.damage.breakdown.base === 0 && (
-                      <small>
-                        {result.damage.breakdown.anomalyType === "burst"
-                          ? `최대 ${ANOMALIES[result.damage.breakdown.anomaly].maxStacks}스택에서 터집니다`
-                          : "피해가 없는 효과입니다"}
-                      </small>
-                    )}
                   </div>
                   );
                 })()}
@@ -303,11 +297,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                         }
                       />
                     </label>
-                    <small>
-                      공격력·크리티컬·피해 보너스가 걸리지 않습니다 · 물리 피해
-                      {result.damage.breakdown.syncAmplify > 0 &&
-                        ` · 조화도 파괴 증폭 ${result.damage.breakdown.syncAmplify}pt 적용됨`}
-                    </small>
                   </div>
                 )}
               </div>
@@ -319,21 +308,6 @@ export function RotationSection({ results }: RotationSectionProps) {
                   onClick={() => duplicateAttack(result.item.id)}
                 >
                   ⧉
-                </button>
-                <button
-                  className="cyc"
-                  title="앞 사이클로 옮기기"
-                  onClick={() => setAttackCycle(result.item.id, cycle - 1)}
-                  disabled={cycle <= 1}
-                >
-                  ↑
-                </button>
-                <button
-                  className="cyc"
-                  title="뒤 사이클로 옮기기"
-                  onClick={() => setAttackCycle(result.item.id, cycle + 1)}
-                >
-                  ↓
                 </button>
                 <button className="x" title="삭제" onClick={() => removeAttack(result.item.id)}>
                   ×

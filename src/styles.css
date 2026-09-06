@@ -27,8 +27,23 @@
 /* 제목줄의 단추 둘을 나란히. */
 .rotation-tools{display:flex;gap:8px}
 
-.rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:165px;min-height:105px;padding:14px;text-align:left;display:flex;flex-direction:column;justify-content:space-between;gap:7px;cursor:pointer;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
+.rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:150px;min-height:0;padding:8px 9px;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
 .item-card{position:relative}
+/* 좁아진 루틴 카드 — 아이콘 · 공격명 · 기대 피해 · 복사 · 삭제만 남긴다.
+   기대 피해 숫자가 곧 「상세보기」 단추다(누르면 계산식 창). */
+.card-head{display:flex;align-items:center;gap:7px;min-width:0}
+.card .card-face{width:26px;height:26px;flex:none;margin:0;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
+.card .card-title{flex:1;min-width:0;font-size:11.5px;line-height:1.35;color:#dce6f5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-exp{display:flex;align-items:baseline;justify-content:flex-end;gap:5px;padding:2px 4px;border-radius:6px;font-size:16px;font-weight:600;color:#8fb4d9;font-variant-numeric:tabular-nums;cursor:pointer}
+.card-exp:hover{background:#333c52;color:#cfe0f2}
+.card-exp i{font-style:normal;font-size:10px;color:#8791a4}
+/* 끌어다 놓기 — 집은 카드는 흐리게, 놓일 자리는 왼쪽에 선을 세운다. */
+.item.dragging{opacity:.4}
+.item.over>.item-card{box-shadow:-3px 0 0 #e8c66a}
+.item[draggable="true"]{cursor:grab}
+.item[draggable="true"]:active{cursor:grabbing}
+.cycle-copy{order:1;padding:2px 8px;border-radius:7px;background:#2a3246;border:1px solid #3c455c;color:#9aa3b3;font-size:10.5px;cursor:pointer;white-space:nowrap}
+.cycle-copy:hover{border-color:#e8c66a;color:#e8c66a;background:#30394a}
 .item-tools{position:absolute;right:-6px;top:-8px;display:flex;gap:4px;z-index:2}
 .item-tools button{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;background:#2a3246}
 .item-tools .copy{color:#8fb4d9}
