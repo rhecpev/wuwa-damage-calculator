@@ -648,8 +648,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     attackIds: ["1004207_4"],
     value: 0.01554, // 2.59%p × 120% ÷ 2히트 — 3체인 쪽과 같은 계산이다
     modifier: "increase",
-    stacks: 50, // 아래 「잔향」 버프와 같은 스택으로 맞춘다
-    maxStacks: 50,
+    stacks: 100, // 아래 「잔향」 버프와 같은 스택으로 맞춘다
+    maxStacks: 100,
     uptime: "active",
     scope: "self",
     condition: "「얽힘 · 결말」 중. 잔향 버프와 같은 스택으로 켠다",
@@ -657,6 +657,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 
   // ── 공명 회로 「톱니바퀴의 잔향」 소모 보정 ──
   // 속성표의 「「톱니바퀴의 잔향」 1pt 당 피해 배율 증가량」(레벨 10 기준 2.59%p)이다.
+  // 상한은 원문에 있다 — 「1pt 소모할 때마다 다음 톱니바퀴 · 종결의 피해 배율을 증가시킬 수
+  // 있고, 최대 100pt까지 계산된다」. 잔향 자체의 최대 누적도 100pt다.
   // 배율 「증가」는 스킬의 배율 합계에 %p를 더하는 형태라 히트 수로 나눠 넣는다.
   // 톱니바퀴 · 종결은 2히트이므로 2.59 ÷ 2 = 1.295%p씩 얹는다.
   {
@@ -666,8 +668,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     attackIds: ["1004207_4"],
     value: 0.01295, // 2.59%p ÷ 2히트
     modifier: "increase",
-    stacks: 50, // 기본값 — 상한이 API에 없어 넉넉히 잡았다
-    maxStacks: 50,
+    stacks: 100, // 원문이 「최대 100pt까지 계산된다」고 못 박는다
+    maxStacks: 100,
     uptime: "active",
     scope: "self",
     condition: "속공 · 회피 반격으로 모은 「톱니바퀴의 잔향」 pt만큼",
@@ -679,8 +681,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     attackIds: ["1004207_4"],
     value: 0.01554, // 2.59%p × 120% ÷ 2히트
     modifier: "increase",
-    stacks: 50, // 위 「잔향」 버프와 같은 스택으로 맞춘다
-    maxStacks: 50,
+    stacks: 100, // 위 「잔향」 버프와 같은 스택으로 맞춘다
+    maxStacks: 100,
     uptime: "active",
     scope: "self",
     resonanceChain: 3,
@@ -825,7 +827,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
-//   회로 「톱니바퀴의 잔향」 스택 상한이 API에 없어 50으로 잡았다
 //   고유 「풀리지 않는 운명」 흔적 목표 격파 시 해답의 눈빛 쿨타임 리셋
 //   고유 「모든 것의 종점」 뒷부분 치료 효과 보너스 20% · 현을 꿰뚫는 시야(흔적 자동 부여)
 //   1체인 뒷부분            흔적 부여 시 61803pt의 고정 인멸 피해
