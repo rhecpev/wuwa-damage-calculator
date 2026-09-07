@@ -120,7 +120,7 @@ export function anomalyRate(kind: AnomalyKind, stacks: number): number {
 /**
  * 암흑 효과의 방어력 감소는 **버프로 담는다** — 암흑을 붙일 수 있는 캐릭터
  * (치사 · 양양 · 현령) 파일에 「암흑 효과 · 목표 방어력 감소」가 들어 있다.
- *   스택당 2% · target "defReduction" · scope "party"(적에게 걸리는 디버프라 파티 전원이 본다)
+ *   스택당 2.01%(표기는 2%) · target "defReduction" · scope "party"(적에게 걸리는 디버프라 파티 전원이 본다)
  * 상한이 3스택으로 고정이 아니라 버프로 올라가기 때문에(치사 반주 +3, 현령 3체인 +3)
  * 여기서 최대 6%로 잘라 두면 오히려 틀린다. 계산은 manualBuffs의 스택 × 2%가 맡는다.
  */
