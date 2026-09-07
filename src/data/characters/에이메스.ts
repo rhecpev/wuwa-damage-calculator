@@ -590,6 +590,50 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceMode: "Flame",
     condition: "제거된 「불꽃의 궤적」 스택만큼, 불꽃 효과의 메인 목표에게",
   },
+  {
+    // 회로 원문: 「공명 모드 · 불꽃」에 있을 시, 공명 스킬 「빛나는 날개의 합주」가 폭발시킨
+    //   「「불꽃 효과」」가 「「불꽃 효과」」의 메인 목표에게 입히는 피해 배율을 추가로 200% 상승시킨다.
+    // 2체인이 있으면 이 200%가 400%로 커지므로 둘을 배타로 묶는다.
+    label: "적막을 깎아 빚어낸 형태 · 합주 폭발 불꽃 효과 배율 상승",
+    target: "motionValue",
+    damageType: "FusionBurst",
+    modifier: "amplify",
+    value: 2, // 배율 200% 상승
+    uptime: "active",
+    scope: "self",
+    resonanceMode: "Flame",
+    exclusiveGroup: "aymes-flame-burst",
+    condition: "합주로 터뜨린 「불꽃 효과」의 메인 목표에게. 2체인이면 아래 400% 쪽을 켠다",
+  },
+  {
+    // 2체인 — 「별조각의 공진」이 위 배율 상승 효과를 400%로 키운다.
+    label: "2체인 · 합주 폭발 불꽃 효과 배율 상승 (별조각의 공진)",
+    target: "motionValue",
+    damageType: "FusionBurst",
+    modifier: "amplify",
+    value: 4, // 200% -> 400%
+    uptime: "active",
+    scope: "self",
+    resonanceMode: "Flame",
+    resonanceChain: 2,
+    exclusiveGroup: "aymes-flame-burst",
+    condition: "2체인 + 「별조각의 공진」. 위 200% 대신 켠다",
+  },
+  {
+    // 2체인 — 「불꽃의 궤적」의 스택당 배율 상승이 10% → 15%로 커진다.
+    // 위 「불꽃 궤적 1스택당 배율 상승」(10%)에 5%를 한 줄 더 얹어 같이 켠다.
+    label: "2체인 · 불꽃 궤적 1스택당 배율 상승 강화",
+    target: "motionValue",
+    damageType: "FusionBurst",
+    modifier: "amplify",
+    value: 0.05, // 10% -> 15%
+    maxStacks: 10,
+    uptime: "active",
+    scope: "self",
+    resonanceMode: "Flame",
+    resonanceChain: 2,
+    condition: "위 「불꽃 궤적 1스택당 배율 상승」과 같은 스택으로 켠다",
+  },
   // ── 고유 스킬 「만물이 있기 전에」 ──
   {
     label: "만물이 있기 전에 · 강공격 피해 부스트",
@@ -775,8 +819,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   1체인 뒷부분  즉시 대응 · 찬란한 빛 진입 조건, 「동기화율」 · 궤적 봉인 규칙
-//   2체인 뒷부분  조화 파동 궤적 / 불꽃 효과의 배율 상승 강화
-//                — 「불꽃 효과」와 「조화 파동 피해」는 별도 지속 피해라 이 계산기의 공격 목록에 없다
+//   2체인 가운데  「조화 파동 피해」 쪽 배율 상승(5스택)
+//                — 「조화 파동 피해」는 이상 효과가 아닌 별도 지속 피해라 붙일 자리가 없다
+//                (불꽃 효과 쪽 강화는 위 버프로 반영했다)
 //   5체인 「별바다 끝에 닿은 영원의 여정」 실드 · 부활 · 회복
 //   6체인 뒷부분  「조화 파동 피해」 쪽 크리티컬 고정 — 조화 파동은 이상 효과가 아니라
 //                별도 피해라 anomaly 쪽 자리를 못 쓴다(불꽃 효과 쪽은 반영했다)

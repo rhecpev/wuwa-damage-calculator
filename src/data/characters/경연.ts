@@ -548,6 +548,19 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     condition: "「등불의 미혹」 중 「생명의 불꽃」 25pt를 소모한 「강공격 · 혼백 탈취」·「강공격 · 북두칠성」에만",
   },
+  // 회로 뒷부분 — 「경연의 HP 최대치 1000pt 당 자신의 공격력을 36pt 증가시키고, 최대 1800까지」.
+  // scaleFrom은 HP를 100으로 나눠 주므로 「HP 100pt 당 3.6pt」로 적는다.
+  // atkFlat은 최종 스탯이 나온 뒤에 얹히는 자리라(scaled 단계) 순환이 생기지 않는다.
+  {
+    label: "삼도천을 거스르는 유람 · 공격력 (HP 최대치 비례)",
+    target: "atkFlat",
+    damageType: "All",
+    value: 3.6, // HP 100pt 당 3.6pt
+    scaleFrom: "HP",
+    maxValue: 1800, // 최대 1800pt
+    uptime: "passive",
+    scope: "self",
+  },
   // ── 공명체인 ──
   // 1체인 — DamageList에 33% 옆에 59.4%(= 33 × 1.8), 26% 옆에 46.8%(× 1.8),
   // 33.14% 옆에 59.64%(× 1.8) 엔트리가 들어 있다.
@@ -584,6 +597,36 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 2,
     condition: "전투 진입 시 얻는 「어둠 속으로」를 들고 발동한 뒤 4초간",
+  },
+  // 2체인 뒷부분 — 「「생명의 불꽃」」이 강공격 배율을 올리는 효과를 46% 상향시킨다.
+  // 위 「등불의 미혹 · 강공격 배율 상승」(HP 100pt 당 0.9%)이 1.46배가 되므로
+  // 늘어난 0.46배분만 같은 모양으로 한 줄 더 얹는다. 두 줄을 같이 켠다.
+  {
+    label: "2체인 · 등불의 미혹 배율 상승 강화 (HP 최대치 비례)",
+    target: "motionValue",
+    damageType: "Heavy",
+    attackIds: ["1005907_1", "1005907_2"],
+    modifier: "amplify",
+    value: 0.00414, // 0.9% × 46%
+    scaleFrom: "HP",
+    scaleOffset: 250, // 위 버프와 같은 문턱(HP 25000)
+    maxValue: 1.035, // 225% × 46%
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 2,
+    condition: "위 「등불의 미혹 · 강공격 배율 상승」과 같이 켠다",
+  },
+  // 3체인 — 「경연의 HP 최대치 1000pt 당 자신의 공격력을 50pt 증가시키고, 최대 2500까지」.
+  {
+    label: "3체인 · 공격력 (HP 최대치 비례)",
+    target: "atkFlat",
+    damageType: "All",
+    value: 5, // HP 100pt 당 5pt
+    scaleFrom: "HP",
+    maxValue: 2500, // 최대 2500pt
+    uptime: "passive", // 조건이 없어 늘 걸린다
+    scope: "self",
+    resonanceChain: 3,
   },
   {
     label: "4체인 · 파티 전체 속성 피해 보너스",

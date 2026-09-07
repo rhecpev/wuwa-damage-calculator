@@ -514,6 +514,19 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   // 6체인 — DamageList에 48.15% 옆에 84.75%(= 48.15 × 1.76) 엔트리가 들어 있다.
   {
+    // 5체인 앞부분 — 「반주 스킬 「연쇄 법칙」 피해 배율이 222% 증가된다」.
+    // 「증가」라 배율에 222%p를 그대로 더한다(「상승」인 뒤 문장과 다르다).
+    label: "5체인 · 연쇄 법칙 배율 증가",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: ["1002309_1"],
+    value: 2.22, // 222%p
+    modifier: "increase",
+    uptime: "passive", // 조건이 없어 늘 걸린다
+    scope: "self",
+    resonanceChain: 5,
+  },
+  {
     label: "6체인 · 만물의 법칙 배율 상승",
     target: "motionValue",
     damageType: "All",

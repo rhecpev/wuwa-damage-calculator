@@ -655,6 +655,34 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "「네트워크 백도어」가 2스택일 때만. 2스택이 아니면 끈다",
   },
 
+  {
+    // 원문: 「2스택까지 중첩될 시, 추가로 전체 피해가 5% 부스트되고, 해킹 피해 배율이 5% 상승된다」
+    // 위 「2스택 · 추가 전체 피해 부스트」와 짝을 이루는 배율 쪽이다. 둘을 같이 켠다.
+    label: "네트워크 백도어 2스택 · 추가 해킹 배율 상승",
+    inherentSkillId: "1004905",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: HACK_IDS,
+    value: 0.05, // 2스택일 때만 추가 배율 5% 상승
+    modifier: "amplify",
+    uptime: "active",
+    scope: "self",
+    condition: "「네트워크 백도어」가 2스택일 때만. 2스택이 아니면 끈다",
+  },
+
+  // ── 공명 회로 「알고리즘 압축」 ──
+  // 원문: 「공명 스킬 · 데드락」 발동 후 「알고리즘 압축」에 진입하며
+  //        「자신의 회절 피해 보너스가 65% 증가되고, 8초간 지속된다」.
+  {
+    label: "알고리즘 압축 · 회절 피해 보너스",
+    target: "damageBonus",
+    damageType: "Spectro",
+    value: 0.65, // 65% 증가
+    uptime: "active",
+    scope: "self",
+    condition: "「공명 스킬 · 데드락」으로 「알고리즘 압축」에 든 뒤 8초간",
+  },
+
   // ── 공명 회로 「블랙월 뎁스」 — 멀티 스레드 배율 상승 ──
   // DamageList에 30% 옆에 111%(= 30 × 3.7)와 198%(= 30 × 6.6) 엔트리가 들어 있다.
   // 270% 상승이 기본, 2체인이 있으면 560% 상승으로 커진다. 둘 중 하나만 켠다.

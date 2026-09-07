@@ -490,6 +490,29 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   // ── 반주 스킬 「리커젼」 ──
   {
+    // 공명 해방 「강력 공진 필드」 — 「효과 범위 내에 있는 근처 파티 내 모든 캐릭터의
+    // 방어력이 20% 증가된다」. 방어력 비례 딜러(연무·도기)에게 실제로 값이 붙는다.
+    label: "임계 프로토콜 · 강력 공진 필드 파티 방어력",
+    target: "defPercent",
+    damageType: "All",
+    value: 0.2, // 20% 증가
+    uptime: "active",
+    scope: "party",
+    condition: "「강력 공진 필드」 범위 안에 있을 때",
+  },
+  {
+    // 2체인 뒷부분 — 「공진 필드」·「강력 공진 필드」가 부조화 수치 누적 효율을
+    // 「추가로 20% 증가」시킨다. 위 회로 50%와 같이 켠다.
+    label: "2체인 · 파티 부조화 수치 누적 효율 추가",
+    target: "discordEfficiency",
+    damageType: "All",
+    value: 0.2, // 추가 20% 증가
+    uptime: "active",
+    scope: "party",
+    resonanceChain: 2,
+    condition: "「공진 필드」·「강력 공진 필드」 범위 안에 있을 때",
+  },
+  {
     label: "리커젼 · 파티 전체 피해 부스트",
     target: "boost",
     damageType: "All",

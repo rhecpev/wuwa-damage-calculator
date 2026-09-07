@@ -615,6 +615,32 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 
   // ── 공명체인 ──
   // 1체인 뒷부분 — 「결의」가 30 · 60 · 90 · 120pt를 지날 때마다 1스택씩 붙는다.
+  // ── 공명 해방 「기사의 소원대로」 ──
+  {
+    // 「「신권의 의지」」 + 「「실체화」」 — 「플뢰르 드 리스」 주변 목표가 받는
+    //   「풍식 효과」 피해가 50% 부스트된다. 이상 피해는 부스트 칸이 따로라 anomalyBoost다.
+    label: "신권의 의지 · 풍식 효과 피해 부스트",
+    target: "anomalyBoost",
+    damageType: "AeroErosion",
+    value: 0.5, // 50% 부스트
+    uptime: "active",
+    scope: "party", // 적에게 걸리는 효과라 파티가 같이 덕을 본다
+    condition: "「플뢰르 드 리스」가 「신권의 의지」 + 「실체화」를 들고 있을 때, 그 범위 안",
+  },
+  {
+    // 「공명 해방 · 폭풍의 울음을 가르는 칼날」 — 「피해를 입힐 시 목표가 1스택의
+    //   「풍식 효과」를 보유할 때마다 목표에게 입히는 피해가 20% 부스트되고 최대 5스택까지」.
+    label: "폭풍의 울음을 가르는 칼날 · 풍식 효과 1스택당 피해 부스트",
+    target: "boost",
+    damageType: "All",
+    attackIds: ["1003503_1"],
+    value: 0.2, // 스택당 20% 부스트
+    stacks: 5, // 기본값 — 최대 5스택(100%)
+    maxStacks: 5,
+    uptime: "active",
+    scope: "self",
+    condition: "때리기 직전 목표의 「풍식 효과」 스택만큼. 최대 5스택",
+  },
   {
     label: "1체인 · 결의 (플뢰르 드 리스 크리티컬 피해)",
     target: "critDamage",
@@ -716,7 +742,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 //   1체인 앞부분  「전심전력」 스택 유지·재부여 — 배율 수치가 없다
 //   5체인 「바람에서 피어난 희망」  실드와 HP 소모 감소 — 피해와 무관
 //   6체인 앞부분  풍식 효과 스택 부여와 발생 조작 — 배율 수치가 없다
-//                「풍식 효과」 자체는 별도 지속 피해라 이 계산기의 공격 목록에 없다
 
 const skills: Skill[] = [
   basicSkill,

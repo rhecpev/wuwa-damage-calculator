@@ -546,6 +546,28 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "party",
     condition: "천리강산 안에서 해당 이상 효과를 붙이거나 그 피해를 입힌 뒤 15초",
   },
+  // 원문 세 번째 항목: 「목표의 「「암흑 효과」」 스택을 소모한 후, 자신이 입히는 인멸 피해가
+  // 목표의 6% 방어력을 무시하고 목표의 12% 인멸 저항을 무시하며, 30초간 지속된다」.
+  // 「자신이 입히는」이라 천리강산 안의 파티원 각자에게 붙는다.
+  {
+    label: "천리강산 · 암흑 효과 소모 후 방어력 무시 (인멸 피해)",
+    target: "defIgnore",
+    damageType: "Havoc",
+    value: 0.06, // 목표 방어력 6% 무시
+    uptime: "active",
+    scope: "party",
+    condition: "천리강산 안에서 목표의 「암흑 효과」 스택을 소모한 뒤 30초",
+  },
+  {
+    label: "천리강산 · 암흑 효과 소모 후 인멸 저항 무시",
+    target: "resPen",
+    damageType: "Havoc",
+    element: "Havoc",
+    value: 0.12, // 인멸 저항 12% 무시
+    uptime: "active",
+    scope: "party",
+    condition: "천리강산 안에서 목표의 「암흑 효과」 스택을 소모한 뒤 30초",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들

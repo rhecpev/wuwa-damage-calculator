@@ -481,9 +481,42 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     value: 0.5,
     uptime: "active",
     scope: "self",
+    exclusiveGroup: "sigrica-sunspirit",
     condition: "「태양의 정령 에너지」 30pt를 소모한 「룬 · 폭발」 · 「뒤얽힌 사슬」 · 「태양의 정령」에만",
   },
   // ── 고유 스킬 「함의의 공명」 — 파티 전체에 걸리는 「함의의 축복」 ──
+  {
+    // 회로 원문: 「「타고난 재능?」」이 중첩 가능한 스택 최대치는 2스택이고, 각 스택마다
+    //   시그리카의 「룬 · 폭발」, 「룬 · 뒤얽힌 사슬」, 「룬 · 태양의 정령」과
+    //   「공명 회로 · 나 곧 함의이니」의 피해를 30% 부스트시킨다.
+    // 6체인이 같은 스택에 15%를 더 얹는다(아래 6체인 줄). 상한은 3체인이 4스택으로 올린다.
+    label: "드넓고 깊은 아득함 속에 · 타고난 재능? (룬 계열 피해 부스트)",
+    target: "boost",
+    damageType: "All",
+    attackIds: RUNE_IDS,
+    value: 0.3, // 스택당 30% 부스트
+    stacks: 2, // 기본 상한이 2스택
+    maxStacks: 4, // 3체인이면 4스택까지
+    uptime: "active",
+    scope: "self",
+    condition: "「타고난 재능?」 스택만큼 (기본 상한 2스택, 3체인이면 4스택)",
+  },
+  {
+    // 회로 원문: 「「룬」」 소모 시 「「태양의 정령 에너지」」가 30pt 미만이면 전부 소모되고,
+    //   10pt가 소모될 때마다 이번 「룬 · 폭발」, 「뒤얽힌 사슬」, 「태양의 정령」의 피해를 15% 부스트.
+    // 위 「룬 배율 상승」(30pt를 채워 쓴 경우)과 배타 관계다 — 둘 중 하나만 켠다.
+    label: "드넓고 깊은 아득함 속에 · 태양의 정령 에너지 10pt당 룬 피해 부스트",
+    target: "boost",
+    damageType: "All",
+    attackIds: RUNE_IDS,
+    value: 0.15, // 10pt당 15% 부스트
+    stacks: 2, // 기본값 — 30pt 미만이므로 최대 2번(20pt)
+    maxStacks: 2,
+    uptime: "active",
+    scope: "self",
+    exclusiveGroup: "sigrica-sunspirit",
+    condition: "「태양의 정령 에너지」가 30pt 미만일 때 소모한 10pt 묶음 수만큼",
+  },
   {
     label: "함의의 축복 · 파티 기류 피해 보너스",
     inherentSkillId: "1005105",

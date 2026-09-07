@@ -510,15 +510,64 @@ const C6_ATTACK_IDS = ["1005801_5", "1005807_6", "1005803_1"];
  */
 const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 스킬에서 오는 것 (설명문에서 옮김) ──
+  // 회로 원문은 「일반 공격 · 선인의 몸」과 「회피 반격 · 선인의 몸」 항목 아래에 있다 —
+  // 「「강공격 · 하늘의 정화 · 선인의 몸」 해제 전, 해당 스킬의 피해 배율이 100% 상승된다」.
+  // 「해당 스킬」은 그 항목의 스킬(선인의 몸 일반·회피 반격)이지 하늘의 정화가 아니다.
   {
-    label: "무형의 심검 · 하늘의 정화 배율 상승",
+    label: "무형의 심검 · 선인의 몸 배율 상승",
     target: "motionValue",
-    damageType: "Heavy",
+    damageType: "All",
+    attackIds: [
+      "1005807_1", // 일반 공격 · 선인의 몸 1단
+      "1005807_2", // 2단
+      "1005807_3", // 3단
+      "1005807_4", // 4단
+      "1005807_5", // 회피 반격 · 선인의 몸
+    ],
     modifier: "amplify",
-    value: 1.0,
+    value: 1.0, // 배율 100% 상승
     uptime: "active",
     scope: "self",
-    condition: "「강공격 · 하늘의 정화 · 선인의 몸」을 풀기 전 그 공격에만",
+    condition: "「심검의」가 차서 「강공격 · 하늘의 정화 · 선인의 몸」이 풀리기 전까지",
+  },
+  {
+    // 회로 「하늘의 깨달음」 — 「강공격 · 현검」 발동 시 다음번
+    //   「강공격 · 하늘의 정화 · 선인의 몸」을 강화한다: 「피해 배율이 100% 상승」.
+    label: "하늘의 깨달음 · 하늘의 정화 배율 상승",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: ["1005807_6"],
+    modifier: "amplify",
+    value: 1.0, // 배율 100% 상승
+    uptime: "active",
+    scope: "self",
+    condition: "「강공격 · 현검」으로 강화한 다음 한 번. 캐릭터를 바꾸면 끝난다",
+  },
+  // 회로 「올곧은 심지」 — 고유 스킬 쪽과 수치가 같지만 이쪽은 **부스트**다.
+  // 피해 증가(고유)와 부스트(회로)는 서로 다른 곱연산 그룹이라 따로 담아야 한다.
+  {
+    label: "올곧은 심지 · 피해 부스트 (스택당 2%)",
+    target: "boost",
+    damageType: "All",
+    attackIds: INSIGHT_IDS,
+    value: 0.02, // 스택당 2% 부스트
+    stacks: 25, // 기본값 — 2체인이면 상한이 25스택이다
+    maxStacks: 25,
+    uptime: "active",
+    scope: "self",
+    condition: "목표의 「올곧은 심지」 스택만큼. 다음 스킬 한 번에만 붙는다",
+  },
+  {
+    label: "올곧은 심지 · 피해 부스트 1~7스택 (스택당 추가 5%)",
+    target: "boost",
+    damageType: "All",
+    attackIds: INSIGHT_IDS,
+    value: 0.05, // 1~7스택 구간만 스택당 5% 추가
+    stacks: 7,
+    maxStacks: 7,
+    uptime: "active",
+    scope: "self",
+    condition: "「올곧은 심지」 1~7스택분. 위 버프와 함께 켠다",
   },
   // ── 고유 스킬 「만물의 통찰, 가려낸 악의」 ──
   {

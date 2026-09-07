@@ -541,15 +541,18 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "중참 · 온밤 명중 시 태운 「불빛」 pt만큼. 최대 40pt. 실제로 나간 단에만 켠다",
   },
 
-  // ── 반주 스킬 「미래 목표」 ──
+  // ── 공명 스킬 「참극」 ──
+  // 「집중 압박」·「습격 반격」 발동 시 「참극」에 들고, 그동안
+  // 「자신이 직접 입히는 「「광학 효과」」 피해가 20% 부스트된다」.
+  // 이상 피해는 부스트 칸이 일반 피해와 따로라(calculator/anomaly.ts) anomalyBoost에 담는다.
   {
-    label: "미래 목표 · 파티 회절 피해 부스트",
-    target: "boost",
-    damageType: "Spectro",
+    label: "참극 · 광학 효과 피해 부스트",
+    target: "anomalyBoost",
+    damageType: "SpectroFrazzle",
     value: 0.2, // 20% 부스트
     uptime: "active",
-    scope: "party",
-    condition: "「강렬한 불기운」이 붙은 목표에게, 젠니를 뺀 파티원에게 20초간",
+    scope: "self", // 「자신이 직접 입히는」 피해에만
+    condition: "「집중 압박」 또는 「습격 반격」으로 「참극」에 든 동안",
   },
 
   // ── 공명체인 ──

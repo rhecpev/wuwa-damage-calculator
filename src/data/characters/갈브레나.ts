@@ -675,6 +675,18 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 3,
   },
+  // 2체인 — 「내부 연소」가 제공하는 공격력 보너스가 350% 증가된다.
+  // 위 「내부 연소 · 공격력」 20%가 20 + 20×3.5 = 90%가 되므로, 늘어난 70%p를 따로 얹는다.
+  {
+    label: "2체인 · 내부 연소 공격력 강화",
+    target: "atkPercent",
+    damageType: "All",
+    value: 0.7, // 20% × 350% = +70%p
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 2,
+    condition: "「내부 연소」가 켜져 있을 때 — 위 「내부 연소 · 공격력」과 같이 켠다",
+  },
   {
     label: "4체인 · 파티 전체 속성 피해 보너스",
     target: "damageBonus",

@@ -609,15 +609,54 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 5,
   },
+  {
+    // 5체인 뒷부분 — 「반주 스킬 「뒤엉킨 넝쿨」 피해 배율이 68% 상승된다」.
+    // 반주 공격 두 갈래가 모두 속성표에 있다(1001309_1 · 일순의 꽃 뒤 1001309_2).
+    label: "5체인 · 뒤엉킨 넝쿨 배율 상승",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: ["1001309_1", "1001309_2"],
+    modifier: "amplify",
+    value: 0.68, // 배율 68% 상승
+    uptime: "passive", // 조건이 없어 늘 걸린다
+    scope: "self",
+    resonanceChain: 5,
+  },
+  // 6체인 — 회로 「달콤한 꿈」의 배율 상승이 커진다.
+  //   기본:      50% → 200% (추가로 150% 상승)
+  //   만개 직전: 50% → 250%
+  // 위 「식물성 우주 · 달콤한 꿈 배율 상승」(50%)에 얹는 몫이라 둘 중 하나만 켠다.
+  {
+    label: "6체인 · 달콤한 꿈 배율 상승 강화",
+    target: "motionValue",
+    damageType: "All",
+    modifier: "amplify",
+    value: 1.5, // 50% -> 200%
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    exclusiveGroup: "camellya-sweet-dream-c6",
+    condition: "위 「달콤한 꿈 배율 상승」과 같이 켠다. 「만개 직전」이면 아래 쪽을 켠다",
+  },
+  {
+    label: "6체인 · 달콤한 꿈 배율 상승 (만개 직전)",
+    target: "motionValue",
+    damageType: "All",
+    modifier: "amplify",
+    value: 2, // 50% -> 250%
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    exclusiveGroup: "camellya-sweet-dream-c6",
+    condition: "「시들지 않는 꽃」 후 「만개 직전 상태」일 때. 위 200% 대신 켠다",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「온실」 뒷부분   강공격 전지 피해가 일반 공격 피해로 적용(해당 공격이 속성표에 없다)
 //   고유 「점유」 뒷부분   경직 저항력 증가
 //   1체인 뒷부분         일순의 꽃 상태가 적 공격에 중단되지 않음
-//   5체인 뒷부분         반주 스킬 배율 +68% (반주 스킬에 공격 데이터가 없다)
-//   6체인 「그저 그대의…」  「달콤한 꿈」 배율 +150% · 「시들지 않는 꽃」으로 공명 스킬 대체
-//                      — 두 공격 모두 속성표에 없어 옮길 수 없다
+//   6체인 뒷부분         「시들지 않는 꽃」으로 공명 스킬이 대체되는 것 자체(공격이 속성표에 없다)
 
 const skills: Skill[] = [
   basicSkill,

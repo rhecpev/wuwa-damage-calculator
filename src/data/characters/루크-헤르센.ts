@@ -591,6 +591,21 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 2,
   },
   {
+    // 2체인 뒷부분 — 고유 「이유 없이 찾아온 치유의 계시」의 부스트가
+    //   조화도 파괴 증폭 10pt당 5% → 10%, 상한 30% → 60%로 커진다.
+    // 아래 기본 줄(0.5%/pt · 최대 30%)에 같은 크기를 한 줄 더 얹으면 딱 두 배가 된다.
+    label: "2체인 · 치유의 계시 피해 부스트 강화 (조화도 파괴 증폭 비례)",
+    target: "boost",
+    damageType: "All",
+    value: 0.005, // 조화도 파괴 증폭 1pt당 0.5% 부스트가 한 벌 더
+    scaleFrom: "SyncAmplify",
+    maxValue: 0.3, // 상한도 한 벌 더 — 합쳐서 60%
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 2,
+    condition: "「조화 밀집 · 간섭」이 있는 목표에게. 아래 기본 부스트와 같이 켠다",
+  },
+  {
     label: "3체인 · 햇무리 참살 계열 배율 상승",
     target: "motionValue",
     damageType: "All",

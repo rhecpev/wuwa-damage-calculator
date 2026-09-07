@@ -584,6 +584,20 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "passive",
     scope: "self",
   },
+  // 6체인 뒷부분 — 「강공격 · 섬뢰 · 회전 베기」, 「강공격 · 섬뢰 · 올려치기」 발동 과정 중
+  // 「분노의 번개」가 공격력의 100%에 해당하는 전도 피해를 2회 입히고, 강공격 피해로 적용된다.
+  // 두 공격 모두 이미 강공격 판정이라 배율에 200%p를 그대로 더한다.
+  {
+    label: "6체인 · 분노의 번개 추가 타격",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: ["1003901_7", "1003901_8"],
+    value: 2, // 100%p × 2회
+    modifier: "increase",
+    uptime: "passive", // 그 공격을 쓰면 늘 같이 나온다
+    scope: "self",
+    resonanceChain: 6,
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
