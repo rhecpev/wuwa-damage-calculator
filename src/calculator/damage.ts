@@ -175,9 +175,18 @@ export function calculateDamage(
   // 히트별로 "스킬 계수 × 기초 공격력 × 배율"을 구한다.
   // (일반공격 2단 = 38.99% 히트 1번 + 19.50% 히트 3번)
   // 게임도 히트마다 피해 숫자가 따로 뜨므로 한 대씩 값을 남겨두고, 합계는 아래에서 따로 낸다.
+  // 배율 「증가」는 스킬 전체 배율에 %p를 더하는 것이라, 히트마다 같은 값을 얹는 게 아니라
+  // **계수 비율대로 나뉜다**. 치사 종결 실측이 이걸 못 박았다 — 잔향을 잔뜩 얹어도 두 히트의
+  // 비가 계수 비(51.54 : 206.13 = 1 : 4)를 그대로 지켰다(게임 96032 : 383304 = 1 : 3.991).
+  // 히트마다 같은 %p를 더하면 그 비가 1 : 1.5로 뭉개져 전혀 다른 값이 나온다.
+  const baseTotal = a.hits.reduce((sum, levels) => {
+    return sum + (levels[Math.max(0, a.skillLevel - 1)] ?? levels.at(-1) ?? 0);
+  }, 0);
+
   const hits = a.hits.map((levels) => {
     const base = levels[Math.max(0, a.skillLevel - 1)] ?? levels.at(-1) ?? 0;
-    const mv = base * mvAmplify + mvIncrease;
+    const share = baseTotal > 0 ? base / baseTotal : 0;
+    const mv = base * mvAmplify + mvIncrease * share;
     const raw = attr * mv * multiplierChain;
 
     const hitNormal = ceilDamage(raw);
