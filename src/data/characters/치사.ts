@@ -646,7 +646,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.01554, // 2.59%p × 120% ÷ 2히트 — 3체인 쪽과 같은 계산이다
+    value: 0.03108, // 2.59%p × 120% — 히트마다 그대로 얹는다(3체인 쪽과 같은 계산)
     modifier: "increase",
     stacks: 100, // 아래 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
@@ -659,14 +659,14 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // 속성표의 「「톱니바퀴의 잔향」 1pt 당 피해 배율 증가량」(레벨 10 기준 2.59%p)이다.
   // 상한은 원문에 있다 — 「1pt 소모할 때마다 다음 톱니바퀴 · 종결의 피해 배율을 증가시킬 수
   // 있고, 최대 100pt까지 계산된다」. 잔향 자체의 최대 누적도 100pt다.
-  // 배율 「증가」는 스킬의 배율 합계에 %p를 더하는 형태라 히트 수로 나눠 넣는다.
-  // 톱니바퀴 · 종결은 2히트이므로 2.59 ÷ 2 = 1.295%p씩 얹는다.
+  // 배율 「증가」는 계수와 같은 단위로 더한다. 종결이 2히트지만 나누지 않고
+  // 히트마다 2.59%p를 그대로 얹는다(실측으로 확인할 자리다).
   {
     label: "톱니바퀴의 잔향 · 종결 배율 증가 (1pt당)",
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.01295, // 2.59%p ÷ 2히트
+    value: 0.0259, // 2.59%p 그대로 — 히트마다 얹는다
     modifier: "increase",
     stacks: 100, // 원문이 「최대 100pt까지 계산된다」고 못 박는다
     maxStacks: 100,
@@ -679,7 +679,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.01554, // 2.59%p × 120% ÷ 2히트
+    value: 0.03108, // 2.59%p × 120% — 히트마다 그대로 얹는다
     modifier: "increase",
     stacks: 100, // 위 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
