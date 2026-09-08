@@ -663,7 +663,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.0309, // 실측 3.0900%p — 3체인 강화(3.1203)와 다르다(아래 주석)
+    value: 0.0309, // 실측 3.09%p — 3체인 강화(3.12%p)와 다르다(아래 주석)
     modifier: "increase",
     stacks: 100, // 아래 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
@@ -686,9 +686,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   //   3체인 O · 얽힘 X   1pt당 5.6805 ~ 5.6806 %p   (네 판이 다섯 자리까지 같다)
   //   3체인 O · 얽힘 O   1pt당 8.7704 ~ 8.7712 %p
   //
-  // 빼면 3체인 강화 3.1201%p · 얽힘 강화 3.0902%p — 표기는 둘 다 「120% 커진다」인데
-  // 실제로는 잔향의 121.85% · 120.69%로 **서로 다르다**. 잔향 1pt당도 원문 표기 2.59%p의
-  // 반올림 창(2.585~2.595) 밖이다.
+  // 빼면 두 강화가 **소수 두 자리로 딱 떨어진다** — 3체인 3.12%p · 얽힘 3.09%p. 원문·API가
+  // 계수를 두 자리까지만 주는 것과 같은 모양이라 이 값으로 굳혔다. 표기는 둘 다 「120%
+  // 커진다」인데 실제로는 잔향의 121.84% · 120.67%로 서로 다르다. 잔향 1pt당(2.5608%p)만
+  // 원문 표기 2.59%p의 반올림 창(2.585~2.595) 밖이다.
   //
   // 다른 읽기 — 잔향이 원문 2.59%p이고 두 강화가 같은 값(3.0904%p)이라면, 3체인 X 판의
   // 잔향이 100pt가 아니라 98.87pt였다는 뜻이 된다. 그쪽이 모양은 예쁘지만, 3체인 O 판
@@ -709,7 +710,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.025605, // 실측 2.5605%p (원문 표기 2.59%p) — 위 주석
+    value: 0.025608, // 실측 2.5608%p (원문 표기 2.59%p) — 위 주석
     modifier: "increase",
     stacks: 100, // 원문이 「최대 100pt까지 계산된다」고 못 박는다
     maxStacks: 100,
@@ -722,7 +723,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.031203, // 실측 3.1203%p — 표기는 120%인데 잔향의 121.86%다(위 주석)
+    value: 0.0312, // 실측 3.12%p — 표기는 120%인데 잔향의 121.84%다(위 주석)
     modifier: "increase",
     stacks: 100, // 위 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
