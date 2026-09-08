@@ -87,7 +87,6 @@ export function RotationSection({ results }: RotationSectionProps) {
     duplicateAttack,
     clearRotation,
     setAnomalyStacks,
-    setAnomalyOccurrences,
     setDiscordRate,
     setDiscordOccurrences,
     addCycle,
@@ -283,52 +282,39 @@ export function RotationSection({ results }: RotationSectionProps) {
                   </span>
                 </span>
 
-                {/* 기대 피해는 그냥 숫자다 — 누르면 카드가 눌린 것으로 쳐서 버프 창이 열린다.
-                    계산식은 카드 옆 돋보기(⌕)로 뺐다. */}
-                <span className="card-exp">
-                  {num(result.damage.expectedDamage)}
-                  {multi && <i>{result.damage.hits.length}타</i>}
-                </span>
-
-                {/* 이상 효과는 스택이 곧 피해다 — 카드 안에서 바로 고칠 수 있게 둔다. */}
-                {result.damage.kind === "anomaly" && (() => {
-                  // 스택 상한은 고정이 아니다 — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면
-                  // 그만큼 더 쌓을 수 있고, 폭발형은 넘긴 스택마다 33%씩 더 터진다.
-                  const cap = anomalyStackCap(
-                    result.damage.breakdown.anomaly,
-                    allBuffs,
-                    result.item.enabledBuffIds,
-                    result.item.disabledBuffIds,
-                  );
-                  return (
-                  <div className="card-anomaly" onClick={(event) => event.stopPropagation()}>
-                    <label>
-                      <em>스택</em>
-                      <input
-                        type="number"
-                        min={0}
-                        max={cap.max}
-                        value={result.damage.breakdown.stacks}
-                        onChange={(event) =>
-                          setAnomalyStacks(result.item.id, Number(event.target.value))
-                        }
-                      />
-                    </label>
-                    <label>
-                      <em>횟수</em>
-                      <input
-                        type="number"
-                        min={1}
-                        max={99}
-                        value={result.damage.breakdown.occurrences}
-                        onChange={(event) =>
-                          setAnomalyOccurrences(result.item.id, Number(event.target.value))
-                        }
-                      />
-                    </label>
-                  </div>
-                  );
-                })()}
+                {/* 기대 피해 줄. 숫자는 그냥 글자라 누르면 카드가 눌린 것으로 쳐서 버프 창이 열린다
+                    (계산식은 카드 옆 돋보기 ⌕로 뺐다). 이상 효과는 스택이 곧 피해라
+                    아래로 내리지 않고 이 줄 왼쪽에 붙여 둔다. */}
+                <div className="card-line">
+                  {result.damage.kind === "anomaly" && (() => {
+                    // 스택 상한은 고정이 아니다 — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면
+                    // 그만큼 더 쌓을 수 있고, 폭발형은 넘긴 스택마다 33%씩 더 터진다.
+                    const cap = anomalyStackCap(
+                      result.damage.breakdown.anomaly,
+                      allBuffs,
+                      result.item.enabledBuffIds,
+                      result.item.disabledBuffIds,
+                    );
+                    return (
+                      <label className="card-stack" onClick={(event) => event.stopPropagation()}>
+                        <em>스택</em>
+                        <input
+                          type="number"
+                          min={0}
+                          max={cap.max}
+                          value={result.damage.breakdown.stacks}
+                          onChange={(event) =>
+                            setAnomalyStacks(result.item.id, Number(event.target.value))
+                          }
+                        />
+                      </label>
+                    );
+                  })()}
+                  <span className="card-exp">
+                    {num(result.damage.expectedDamage)}
+                    {multi && <i>{result.damage.hits.length}타</i>}
+                  </span>
+                </div>
 
                 {/* 조화도 파괴 — 배율이 스킬마다 달라서 카드 안에서 바로 고칠 수 있게 둔다. */}
                 {result.damage.kind === "discord" && (
