@@ -169,27 +169,29 @@ export function CycleComparePage() {
               >
                 {cyclePresets.map((p) => (
                   <option key={p.id} value={p.id}>
-                    {p.name} · {p.rotation.length}대
+                    {p.name}
                   </option>
                 ))}
               </select>
             </label>
-            <label>
+            {/* 캐릭터는 얼굴이 있어야 바로 알아본다 — select 로는 그림을 못 넣어 단추로 깐다. */}
+            <span className="compare-owners">
               <em>에코 바꿀 캐릭터</em>
-              <select
-                value={owner?.id ?? ""}
-                onChange={(event) => {
-                  setOwnerId(event.target.value);
-                  setSwaps({});
-                }}
-              >
-                {owners.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+              {owners.map((c) => (
+                <button
+                  key={c.id}
+                  className={c.id === owner?.id ? "on" : ""}
+                  title={c.name}
+                  onClick={() => {
+                    setOwnerId(c.id);
+                    setSwaps({});
+                  }}
+                >
+                  {c.iconUrl && <img src={c.iconUrl} alt="" loading="lazy" />}
+                  {c.name}
+                </button>
+              ))}
+            </span>
             {view?.changed && (
               <button className="pen" onClick={() => setSwaps({})} title="바꾼 것을 되돌린다">
                 되돌리기

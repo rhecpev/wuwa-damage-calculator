@@ -1313,6 +1313,17 @@
 .profile-import .subs .swap{flex:none;align-self:flex-start;margin-top:21px;height:32px;padding:0 7px;border-radius:7px;background:#3a3151;border:1px solid #574473;color:#b7a2dd;font-size:11px;line-height:1;letter-spacing:-1px;cursor:pointer}
 .profile-import .subs .swap:hover{color:#efe6ff;border-color:#7a63a2;background:#483c66}
 
+/* 에코 바꿀 캐릭터 — 얼굴을 같이 보여주는 단추 줄. */
+.compare-owners{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.compare-owners>em{font-style:normal;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px;margin-right:2px}
+.compare-owners button{display:flex;align-items:center;gap:6px;padding:5px 11px 5px 5px;
+  font:inherit;font-size:12.5px;color:#a8b0bf;background:#2a3246;border:1px solid #3c455c;
+  border-radius:999px;cursor:pointer}
+.compare-owners button img{width:22px;height:22px;border-radius:50%;object-fit:cover;
+  border:1px solid #4a5266}
+.compare-owners button:hover{border-color:#4a5266}
+.compare-owners button.on{border-color:#e8c66a;color:#e8c66a;background:#3a3628}
+
 /* 사이클 대미지 비교 — 에코 슬롯을 갈아 끼우는 줄. 바꾼 슬롯은 금색으로 표시한다. */
 .echo-swaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;
   margin:12px 0 4px}
