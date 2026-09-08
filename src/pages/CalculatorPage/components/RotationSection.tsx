@@ -3,6 +3,7 @@ import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { DamageFormulaModal } from "./DamageFormulaModal";
+import { BuffDialog } from "./BuffDialog";
 import { num } from "../../../utils/format";
 import { ANOMALIES } from "../../../data/anomalies";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
@@ -111,8 +112,12 @@ export function RotationSection({ results }: RotationSectionProps) {
   const [swapId, setSwapId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
   const swapResult = results.find((r) => r.item.id === swapId);
+  // 버프 창과 계산식 창은 루틴 오른쪽 자리(.rotation-dock)에 나란히 띄운다 —
+  // 화면 위에 떠서 루틴을 가리던 것을 옆으로 뺐다.
+  const selected = results.find((r) => r.item.id === selectedId) ?? null;
 
   return (
+    <>
     <section className="panel">
       <div className="row">
         <div>
@@ -407,10 +412,6 @@ export function RotationSection({ results }: RotationSectionProps) {
         </div>
       </div>
 
-      {formulaResult && (
-        <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />
-      )}
-
       {/* 공격 바꾸기 — 카드의 펜(✎)을 누르면 뜬다.
           담아 둔 카드가 「이 타수가 아니었네」일 때 지우고 다시 담지 않고 갈아 끼운다.
           자리·사이클·버프 체크는 그대로 남는다. */}
@@ -454,5 +455,21 @@ export function RotationSection({ results }: RotationSectionProps) {
         </div>
       )}
     </section>
+
+    {/* 루틴 오른쪽 자리 — 버프 창과 타수별 계산식 창이 여기에 뜬다.
+        아무것도 안 열려 있으면 무엇을 누르면 되는지만 적어 둔다. */}
+    <aside className="rotation-dock">
+      {selected && <BuffDialog selected={selected} onClose={() => setSelectedId(null)} />}
+      {formulaResult && (
+        <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />
+      )}
+      {!selected && !formulaResult && (
+        <div className="rotation-dock-empty">
+          <b>버프 · 계산식 자리</b>
+          <span>카드를 누르면 버프 창이, 돋보기(⌕)를 누르면 타수별 계산식이 여기에 뜹니다.</span>
+        </div>
+      )}
+    </aside>
+    </>
   );
 }
