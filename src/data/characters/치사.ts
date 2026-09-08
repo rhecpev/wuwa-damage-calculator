@@ -436,7 +436,7 @@ const circuitSkillAttacks: Attack[] = [
       [1.0368, 1.1219, 1.2069, 1.3259, 1.4109, 1.5087, 1.6447, 1.7808, 1.9168, 2.0613],
     ],
     // 잔향 배율 증가가 히트에 나뉘는 몫. 계수 비(51.54 : 206.13 → 0.20002)와 다르다 — 위 주석 참고.
-    increaseShare: [0.200668, 0.799332],
+    increaseShare: [0.2006685, 0.7993315],
   },
   {
     // 속공 2단(1004207_2)과 같은 표라 레벨 10만 10.638%로 맞춘다 — 실측 근거는 그쪽 주석.
@@ -663,7 +663,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.030902, // 실측 3.0902%p — 3체인 강화(3.1201)와 다르다(아래 주석)
+    value: 0.0309025, // 실측 3.09025%p — 3체인 강화(3.1201)와 다르다(아래 주석)
     modifier: "increase",
     stacks: 100, // 아래 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
@@ -718,7 +718,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004207_4"],
-    value: 0.031201, // 실측 3.1201%p — 표기는 120%인데 잔향의 121.85%다(위 주석)
+    value: 0.0312005, // 실측 3.12005%p — 표기는 120%인데 잔향의 121.85%다(위 주석)
     modifier: "increase",
     stacks: 100, // 위 「잔향」 버프와 같은 스택으로 맞춘다
     maxStacks: 100,
