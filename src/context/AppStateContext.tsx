@@ -7,10 +7,8 @@ export type TabType =
   | "party"
   | "characters"
   | "echoes"
-  | "characterBuffs"
-  | "characterAttacks"
-  | "attackTriggers"
   | "cycles"
+  | "cycleCompare"
   | "weapons"
   | "profileImport";
 

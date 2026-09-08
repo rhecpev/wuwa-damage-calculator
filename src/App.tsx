@@ -9,10 +9,8 @@ import { EchoesPage } from "./pages/EchoesPage/EchoesPage";
 import { WeaponsPage } from "./pages/WeaponsPage/WeaponsPage";
 import { PartyPage } from "./pages/PartyPage/PartyPage";
 import { ProfileImportPage } from "./pages/ProfileImportPage/ProfileImportPage";
-import { CharacterBuffPage } from "./pages/CharacterBuffPage/CharacterBuffPage";
-import { CharacterAttackPage } from "./pages/CharacterAttackPage/CharacterAttackPage";
-import { AttackTriggerPage } from "./pages/AttackTriggerPage/AttackTriggerPage";
 import { CyclePage } from "./pages/CyclePage/CyclePage";
+import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -32,10 +30,8 @@ function AppContent() {
         {tab === "characters" && <CharactersPage />}
         {tab === "weapons" && <WeaponsPage />}
         {tab === "echoes" && <EchoesPage />}
-        {tab === "characterBuffs" && <CharacterBuffPage />}
-        {tab === "characterAttacks" && <CharacterAttackPage />}
-        {tab === "attackTriggers" && <AttackTriggerPage />}
         {tab === "cycles" && <CyclePage />}
+        {tab === "cycleCompare" && <CycleComparePage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />

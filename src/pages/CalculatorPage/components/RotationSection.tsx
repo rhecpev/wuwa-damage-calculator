@@ -465,7 +465,7 @@ export function RotationSection({ results }: RotationSectionProps) {
       )}
       {!selected && !formulaResult && (
         <div className="rotation-dock-empty">
-          <b>버프 · 계산식 자리</b>
+          <b>선택된 카드가 없습니다</b>
           <span>카드를 누르면 버프 창이, 돋보기(⌕)를 누르면 타수별 계산식이 여기에 뜹니다.</span>
         </div>
       )}

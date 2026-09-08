@@ -80,34 +80,12 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "characterBuffs",
-    label: "캐릭터 버프 확인",
-    hint: "스킬 원문 · 옮긴 버프",
+    id: "cycleCompare",
+    label: "사이클 대미지 비교",
+    hint: "조건을 바꾸면 얼마나 오르나",
     icon: icon(
       <>
-        <path d="M12 3v18M3 12h18" />
-        <circle cx="12" cy="12" r="8.5" />
-      </>,
-    ),
-  },
-  {
-    id: "characterAttacks",
-    label: "캐릭터 공격타입 확인",
-    hint: "분류 · 보너스 칸",
-    icon: icon(
-      <>
-        <path d="M4 20 20 4M15 4h5v5" />
-        <path d="M4 9V4h5" />
-      </>,
-    ),
-  },
-  {
-    id: "attackTriggers",
-    label: "공격 트리거 확인",
-    hint: "이상 효과 · 자원 추가/소모",
-    icon: icon(
-      <>
-        <path d="M13 3 5 13h6l-1 8 8-10h-6z" />
+        <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
       </>,
     ),
   },
