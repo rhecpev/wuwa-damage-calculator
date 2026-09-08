@@ -25,7 +25,7 @@ export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo";
 //   이중 모드 캐릭터는 넷이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
 //   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
-export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;anomaly?:AnomalyKind;discord?:boolean;}
+export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;anomaly?:AnomalyKind;discord?:boolean;}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다
 //   — 공격력을 타지 않고 10027.14 고정값에서 출발하는 별도 피해식이다(data/discord.ts 참고).
 // anomaly: 이 항목이 공격이 아니라 「이상 효과 피해」일 때 어느 효과인지.
@@ -42,6 +42,9 @@ export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:A
 //   예: 2단(38.99%+19.50%*3)이면 hits.length===4.
 //   계산 시 히트마다 각각 데미지를 구해 합산하므로, 실제 게임처럼 히트별로
 //   크리티컬이 독립 판정되는 구조를 그대로 반영하면서도 결과는 "2단" 하나로 묶여 나온다.
+// increaseShare: 배율 「증가」(%p)를 히트에 나눌 때 쓰는 몫. 히트 수만큼 적고, 합이 1이
+//   아니어도 된다(엔진이 정규화한다). 생략하면 계수 비율대로 나눈다 — 대부분 그게 맞다.
+//   실측으로 계수 비율과 다르다는 게 확인된 공격에만 적는다(지금은 치사 종결 하나).
 // fixedDamage: 모든 배율(피해증가/부스트/저항/방어/받는피해/최종피해)과 무관하게
 //   계산 마지막 단계에 그대로 더해지는 고정 추가 피해. 크리티컬 영향도 받지 않음.
 // resonanceMode: 특정 공명 모드에서만 발동하는 공격일 때 지정. 미지정 시 모드와 무관하게
