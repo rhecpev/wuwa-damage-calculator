@@ -809,14 +809,19 @@
 /* 공격 루틴 — 본문 맨 위에 가로로 눕고, 스크롤해도 위 막대 바로 아래에 붙어 있는다.
    카드가 폭을 다 쓰고 여러 줄로 접히며, 너무 길어지면 그 판만 스스로 스크롤한다
    (아래 섹션이 화면 밖으로 밀리지 않게). 배경을 깔아야 밑을 지나가는 내용이 비치지 않는다. */
-.rotation-rail{--dock-w:clamp(300px,30vw,470px);
-  position:sticky;top:56px;z-index:12;display:block;
+.rotation-rail{--dock-w:clamp(300px,30vw,470px);--rail-h:min(46vh,460px);
+  position:sticky;top:56px;z-index:12;display:flex;
   margin:-8px -8px 0;padding:8px 8px 10px;background:#242a39;
   box-shadow:0 10px 16px -12px rgba(0,0,0,.6)}
-/* 판이 이 줄의 높이를 정한다. 오른쪽 자리는 그 높이에 딱 맞춰 붙는다
-   — 자리를 흐름에 두면 내용이 길 때 판까지 같이 늘어나 빈칸이 생긴다. */
-.rotation-rail>.panel{margin-top:0;margin-right:calc(var(--dock-w) + 12px)}
-.rotation-rail .rotation-wrap{max-height:min(46vh,460px);overflow-y:auto;padding-right:4px}
+/* 판이 이 줄의 높이를 정하고, 오른쪽 자리는 그 높이에 딱 맞춰 붙는다
+   — 자리를 흐름에 두면 내용이 길 때 판까지 같이 늘어나 빈칸이 생긴다.
+   카드가 몇 장 없어도 --rail-h 아래로는 안 내려간다. 판이 짧아지면 자리도 같이
+   쪼그라들어 버프 목록이 손바닥만 해지기 때문이다. 위아래 한 값(--rail-h)으로 묶는다. */
+.rotation-rail>.panel{flex:1;min-width:0;min-height:var(--rail-h);
+  margin-top:0;margin-right:calc(var(--dock-w) + 12px);
+  display:flex;flex-direction:column}
+.rotation-rail .rotation-wrap{flex:1;min-height:0;max-height:var(--rail-h);
+  overflow-y:auto;padding-right:4px}
 /* 루틴 오른쪽 자리 — 버프 창과 타수별 계산식 창이 여기에 뜬다.
    화면 위에 떠서 루틴을 가리던 것을 옆으로 뺐다. 둘 다 열려 있으면 위아래로 쌓이고
    넘치면 이 자리만 스스로 스크롤한다. */
@@ -835,9 +840,9 @@
 .app.has-rail{margin-right:0}
 /* 좁은 화면에서는 붙여 두지 않는다 — 판이 길어지면 화면을 통째로 덮어 버린다. */
 @media(max-width:1200px){
-.rotation-rail{position:static;margin:0;padding:0;background:none;box-shadow:none}
-.rotation-rail>.panel{margin-right:0}
-.rotation-rail .rotation-wrap{max-height:none;overflow:visible;padding-right:0}
+.rotation-rail{position:static;display:block;margin:0;padding:0;background:none;box-shadow:none}
+.rotation-rail>.panel{display:block;min-height:0;margin-right:0}
+.rotation-rail .rotation-wrap{flex:none;max-height:none;overflow:visible;padding-right:0}
 .rotation-dock{position:static;width:100%;margin-top:12px;overflow:visible}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
