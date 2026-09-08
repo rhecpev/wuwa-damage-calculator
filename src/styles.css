@@ -28,7 +28,9 @@
 .rotation-tools{display:flex;gap:8px}
 
 .rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:150px;min-height:0;padding:8px 9px;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer;font:inherit;color:#e9edf5;background:#2a3246;border:1px solid #3c455c;border-radius:10px}.card span{color:#a8b0bf;font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:#949dae}.card.selected{border-color:#8d9ab0;transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
-.item-card{position:relative}
+/* 카드 하나를 감싸는 상자. 단추들은 카드 위에 떠 있지 않고 카드 아래에 한 줄로 붙는다
+   — 떠 있으면 카드 제목·아이콘을 가린다. */
+.item-card{position:relative;display:flex;flex-direction:column;gap:5px}
 /* 좁아진 루틴 카드 — 아이콘 · 공격명 · 기대 피해 · 복사 · 삭제만 남긴다.
    기대 피해 숫자가 곧 「상세보기」 단추다(누르면 계산식 창). */
 .card-head{display:flex;align-items:center;gap:7px;min-width:0}
@@ -93,7 +95,7 @@
 .card.kind-anomaly .card-title{color:#b3bcf0}
 .card.kind-echo{border-left-color:#8a94a6}
 .card.kind-echo .card-title{color:#c2cad8}
-.item-tools{position:absolute;right:-6px;top:-8px;display:flex;gap:4px;z-index:2}
+.item-tools{display:flex;gap:4px;justify-content:flex-end;z-index:2}
 .item-tools button{width:22px;height:22px;padding:0;display:grid;place-items:center;border-radius:50%;font-size:12px;line-height:1;cursor:pointer;background:#2a3246}
 .item-tools .copy{color:#8fb4d9}
 .item-tools .copy:hover{border-color:#8fb4d9;background:#30394a}
