@@ -1313,11 +1313,16 @@
 .profile-import .subs .swap{flex:none;align-self:flex-start;margin-top:21px;height:32px;padding:0 7px;border-radius:7px;background:#3a3151;border:1px solid #574473;color:#b7a2dd;font-size:11px;line-height:1;letter-spacing:-1px;cursor:pointer}
 .profile-import .subs .swap:hover{color:#efe6ff;border-color:#7a63a2;background:#483c66}
 
-/* 사이클 대미지 비교 — 표 맨 아랫줄의 「직접 넣기」 칸. */
-.compare-custom{display:flex;align-items:center;gap:6px}
-.compare-custom select{padding:6px 8px;font:inherit;font-size:12px;color:#e9edf5;
-  background:#2a3246;border:1px solid #3c455c;border-radius:8px}
-.compare-custom .buff-stack{width:72px}
+/* 사이클 대미지 비교 — 에코 슬롯을 갈아 끼우는 줄. 바꾼 슬롯은 금색으로 표시한다. */
+.echo-swaps{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;
+  margin:12px 0 4px}
+.echo-swaps label{display:flex;flex-direction:column;gap:5px;padding:10px 12px;
+  background:#2d3345;border:1px solid #384155;border-radius:11px}
+.echo-swaps label.on{border-color:#e8c66a;background:#3a3628}
+.echo-swaps em{font-style:normal;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px}
+.echo-swaps small{letter-spacing:0;color:#8791a4;font-size:11px}
+.echo-swaps select{width:100%;padding:7px 9px;font:inherit;font-size:12px;color:#e9edf5;
+  background:#262d3f;border:1px solid #3c455c;border-radius:8px}
 
 /* 사이클 비교 — 위 가로 판에서 기준·견줌 사이클을 고른다. */
 .compare-picks{display:flex;align-items:center;gap:10px;flex-wrap:wrap}

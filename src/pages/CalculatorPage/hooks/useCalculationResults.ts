@@ -108,12 +108,17 @@ export function computeResults(
   characterSkillLevels: Record<string, Record<string, number>> = {},
   characterLevels: Record<string, number> = {},
   characterNodes: Record<string, string[]> = {},
+  /**
+   * 장착 에코 연결을 덮어쓴다. 생략하면 저장된 것(캐릭터 관리 탭에서 낀 것)을 쓴다.
+   * 「이 에코를 저걸로 바꾸면 얼마나 오르나」를 보려고 열어 뒀다(사이클 대미지 비교 탭).
+   */
+  echoLinks?: EchoLink[],
 ): CalculationResult[] {
   const output: CalculationResult[] = [];
   const enemy = config.enemy;
 
   // 장착 에코는 캐릭터 관리 탭에서 정한 것을 그대로 쓴다(저장본 한 벌).
-  const links = loadEchoLinks();
+  const links = echoLinks ?? loadEchoLinks();
   const owned = loadMyEchoes();
 
   // 파티 버프의 비례분이 볼 「준 사람의 스탯창」. 루틴에 나오는 캐릭터와 편성 세 자리를

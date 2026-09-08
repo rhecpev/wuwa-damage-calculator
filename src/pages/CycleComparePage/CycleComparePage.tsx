@@ -1,71 +1,28 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { usePartyConfig } from "../../context/PartyConfigContext";
 import { computeResults } from "../CalculatorPage/hooks/useCalculationResults";
 import type { CalculationResult } from "../CalculatorPage/hooks/useCalculationResults";
 import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreakdownSection";
+import {
+  echoStoreVersion,
+  loadEchoLinks,
+  loadMyEchoes,
+  subscribeEchoStore,
+} from "../../data/echoStore";
+import type { EchoLink } from "../../data/echoStore";
+import { characters } from "../../data/sampleData";
 import { num } from "../../utils/format";
-import type { BuffTarget, ManualBuff, PartyConfig } from "../../types/game";
+import type { Character, ManualBuff, PartyConfig } from "../../types/game";
 
 /**
- * 사이클 대미지 비교.
+ * 사이클 대미지 비교 — **에코를 바꾸면 얼마나 달라지나**.
  *
- * 담아 둔 사이클 하나를 **지금 환경**(무기 · 공명체인 · 에코 · 스킬 레벨)으로 다시 돌려
- * 총 피해를 낸 뒤, 「이 조건이 바뀌면 얼마나 오르나」를 나란히 보여준다.
+ * 사이클 하나를 잡고, 거기 나오는 캐릭터 한 명의 에코를 슬롯 단위로 갈아 끼워 본다.
+ * 왼쪽 그래프가 지금 낀 그대로, 오른쪽이 갈아 끼운 뒤다.
  *
- * 조건은 전부 **늘 걸리는 버프 한 줄**로 만들어 얹는다(uptime:"passive", scope:"party",
- * 소유자 없음 → 파티 전원). 에코를 갈아 끼우는 것도 결국 스탯이 바뀌는 일이라,
- * 바뀌는 스탯을 그대로 넣으면 그 교체의 값어치가 나온다.
- *
- * 계산은 계산 탭과 같은 함수(computeResults)를 쓴다. 훅이 아니라 함수라서
- * 한 화면에서 조건 수만큼 돌릴 수 있다.
+ * 계산은 계산 탭과 같은 함수(computeResults)를 쓴다. 에코 연결(EchoLink)만 덮어써서
+ * 넘기므로 저장된 장착 상태는 건드리지 않는다 — 여기서 아무리 바꿔 봐도 원래대로 남는다.
  */
-
-/** 조건 한 줄을 늘 걸리는 버프로 만든다. */
-function scenarioBuff(id: string, label: string, target: BuffTarget, value: number): ManualBuff {
-  return {
-    id: `cycle-compare:${id}`,
-    label,
-    target,
-    damageType: "All",
-    value,
-    stacks: 1,
-    modifier: "increase",
-    enabled: true,
-    uptime: "passive",
-    scope: "party",
-    // 공격력·HP·방어력 %는 전투 중에 얹히는 자리로 둔다 — 스탯창(panel)에 넣으면 버림이 한 번 더 낀다.
-    ...(target === "atkPercent" || target === "hpPercent" || target === "defPercent"
-      ? { statGroup: "buff" as const }
-      : {}),
-  };
-}
-
-/** 미리 담아 둔 조건. 「스탯 한 줄이 이만큼 붙으면」을 그대로 옮긴 것이다. */
-const PRESETS: Array<{ id: string; label: string; target: BuffTarget; value: number }> = [
-  { id: "atk10", label: "공격력 +10%", target: "atkPercent", value: 0.1 },
-  { id: "atkflat", label: "공격력 +100 (깡)", target: "atkFlat", value: 100 },
-  { id: "crit", label: "크리티컬 확률 +10%p", target: "critRate", value: 0.1 },
-  { id: "critdmg", label: "크리티컬 피해 +20%p", target: "critDamage", value: 0.2 },
-  { id: "bonus", label: "피해 보너스 +10%p", target: "damageBonus", value: 0.1 },
-  { id: "boost", label: "피해 부스트 +10%p", target: "boost", value: 0.1 },
-  { id: "defign", label: "방어력 무시 +10%p", target: "defIgnore", value: 0.1 },
-  { id: "respen", label: "저항 무시 +10%p", target: "resPen", value: 0.1 },
-  { id: "taken", label: "받는 피해 +10%p", target: "damageTaken", value: 0.1 },
-];
-
-/** 직접 넣기에서 고를 수 있는 자리. percent=true면 입력값을 100으로 나눠 비율로 쓴다. */
-const TARGETS: Array<{ value: BuffTarget; label: string; percent: boolean }> = [
-  { value: "critDamage", label: "크리티컬 피해 %p", percent: true },
-  { value: "critRate", label: "크리티컬 확률 %p", percent: true },
-  { value: "atkPercent", label: "공격력 %", percent: true },
-  { value: "atkFlat", label: "공격력 (깡)", percent: false },
-  { value: "damageBonus", label: "피해 보너스 %p", percent: true },
-  { value: "boost", label: "피해 부스트 %p", percent: true },
-  { value: "defIgnore", label: "방어력 무시 %p", percent: true },
-  { value: "resPen", label: "저항 무시 %p", percent: true },
-  { value: "damageTaken", label: "받는 피해 %p", percent: true },
-];
-
 export function CycleComparePage() {
   const {
     config,
@@ -78,91 +35,96 @@ export function CycleComparePage() {
     cyclePresets,
   } = usePartyConfig();
 
+  // 에코 저장소는 React 상태가 아니라 localStorage 한 벌이다 — 바뀌면 다시 읽는다.
+  const echoVersion = useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
+  const links = useMemo(() => loadEchoLinks(), [echoVersion]);
+  const owned = useMemo(() => loadMyEchoes(), [echoVersion]);
+
   const [baseId, setBaseId] = useState("");
-  const [otherId, setOtherId] = useState("");
-  const [customTarget, setCustomTarget] = useState<BuffTarget>("critDamage");
-  const [customAmount, setCustomAmount] = useState("21");
+  const [ownerId, setOwnerId] = useState("");
+  /** 슬롯 번호(그 캐릭터의 연결 순서) → 바꿔 낄 에코 pk. 비어 있으면 그대로 둔다. */
+  const [swaps, setSwaps] = useState<Record<number, number>>({});
 
   const preset = cyclePresets.find((p) => p.id === baseId) ?? cyclePresets[0] ?? null;
-  // 견줄 상대. 담아 둔 사이클이 둘 이상이면 기본으로 다음 것을 잡는다.
-  const rival =
-    cyclePresets.find((p) => p.id === otherId) ??
-    cyclePresets.find((p) => p.id !== preset?.id) ??
-    preset;
-  const customMeta = TARGETS.find((t) => t.value === customTarget) ?? TARGETS[0];
+
+  // 이 사이클에 나오는 캐릭터들. 에코를 바꿔 볼 대상은 여기서 고른다.
+  const owners = useMemo<Character[]>(() => {
+    if (!preset) return [];
+    const ids = [...new Set(preset.rotation.map((r) => r.characterId))];
+    return ids
+      .map((id) => characters.find((c) => c.id === id))
+      .filter((c): c is Character => Boolean(c));
+  }, [preset]);
+
+  const owner = owners.find((c) => c.id === ownerId) ?? owners[0] ?? null;
+
+  /** 고른 캐릭터가 낀 에코를 연결 순서대로. 슬롯 번호가 곧 이 배열의 자리다. */
+  const slots = useMemo(() => {
+    if (!owner) return [];
+    return links
+      .filter((l) => l.characterId === owner.id)
+      .map((l, index) => ({ index, link: l, echo: owned.find((e) => e.pk === l.echoId) }));
+  }, [owner, links, owned]);
 
   const view = useMemo(() => {
     if (!preset) return null;
 
-    // 저장할 때 손으로 넣은 버프는 지금 목록에 없을 수 있다 — 없는 것만 보태 준다.
-    // 캐릭터·무기·에코에서 나오는 버프는 지금 환경 것을 그대로 쓴다.
     const merged: ManualBuff[] = [
       ...allBuffs,
       ...preset.manualBuffs.filter((b) => !allBuffs.some((a) => a.id === b.id)),
     ];
 
-    const resultsWith = (
-      extra: ManualBuff | null,
-      rotation = preset.rotation,
-      enemy = preset.enemy,
-    ): CalculationResult[] => {
-      const cfg: PartyConfig = { ...config, rotation, enemy };
+    const run = (echoLinks?: EchoLink[]): CalculationResult[] => {
+      const cfg: PartyConfig = { ...config, rotation: preset.rotation, enemy: preset.enemy };
       return computeResults(
         cfg,
         characterWeapons,
-        extra ? [...merged, extra] : merged,
+        merged,
         characterChains,
         characterSkillLevels,
         characterLevels,
         characterNodes,
+        echoLinks,
       );
     };
     const sum = (rows: CalculationResult[]) =>
       rows.reduce((acc, r) => acc + r.damage.expectedDamage, 0);
-    const totalWith = (
-      extra: ManualBuff | null,
-      rotation = preset.rotation,
-      enemy = preset.enemy,
-    ) => sum(resultsWith(extra, rotation, enemy));
 
-    const base = totalWith(null);
-    const rate = (total: number) => (base > 0 ? (total / base - 1) * 100 : 0);
+    // 바꾼 뒤의 연결. 고른 캐릭터의 n번째 연결만 갈아 끼운다.
+    let seen = -1;
+    const swapped: EchoLink[] = links.map((l) => {
+      if (!owner || l.characterId !== owner.id) return l;
+      seen += 1;
+      const next = swaps[seen];
+      return next === undefined ? l : { ...l, echoId: next };
+    });
+    const changed = swapped.some((l, i) => l.echoId !== links[i].echoId);
 
-    const rows = PRESETS.map((p) => {
-      const total = totalWith(scenarioBuff(p.id, p.label, p.target, p.value));
-      return { ...p, total, delta: total - base, rate: rate(total) };
+    const before = run();
+    const after = changed ? run(swapped) : before;
+    const a = sum(before);
+    const b = sum(after);
+
+    // 캐릭터별로도 갈라 본다 — 남의 에코를 바꿔도 파티 버프로 내 딜이 움직인다.
+    const byCharacter = owners.map((c) => {
+      const x = sum(before.filter((r) => r.character.id === c.id));
+      const y = sum(after.filter((r) => r.character.id === c.id));
+      return { id: c.id, name: c.name, before: x, after: y, delta: y - x };
     });
 
-    const amount = Number(customAmount);
-    const value = Number.isFinite(amount) ? (customMeta.percent ? amount / 100 : amount) : 0;
-    const customTotal = value
-      ? totalWith(scenarioBuff("custom", "직접 넣기", customTarget, value))
-      : base;
-
-    // 담아 둔 다른 사이클도 같은 환경에서 돌려 나란히 세운다.
-    const others = cyclePresets.map((p) => ({
-      id: p.id,
-      name: p.name,
-      hits: p.rotation.length,
-      total: totalWith(null, p.rotation, p.enemy),
-    }));
-
-    // 딜 그래프용 — 기준과 견줄 상대를 각각 통째로 돌린 결과.
-    const baseResults = resultsWith(null);
-    const rivalResults =
-      rival && rival.id !== preset.id ? resultsWith(null, rival.rotation, rival.enemy) : baseResults;
-
     return {
-      base,
-      rows,
-      custom: { total: customTotal, delta: customTotal - base, rate: rate(customTotal) },
-      others,
-      baseResults,
-      rivalResults,
+      before,
+      after,
+      total: { before: a, after: b, delta: b - a, rate: a > 0 ? (b / a - 1) * 100 : 0 },
+      byCharacter,
+      changed,
     };
   }, [
     preset,
-    rival,
+    owner,
+    owners,
+    swaps,
+    links,
     config,
     characterWeapons,
     allBuffs,
@@ -170,10 +132,6 @@ export function CycleComparePage() {
     characterSkillLevels,
     characterLevels,
     characterNodes,
-    cyclePresets,
-    customTarget,
-    customAmount,
-    customMeta,
   ]);
 
   if (!preset) {
@@ -182,7 +140,7 @@ export function CycleComparePage() {
         <h2>사이클 대미지 비교</h2>
         <p className="enemy-hint">
           담아 둔 사이클이 없습니다. 「데미지 계산」 탭에서 루틴을 짠 뒤 사이클로 담으면 여기서
-          조건별 증가량을 볼 수 있습니다.
+          에코를 바꿔 가며 견줄 수 있습니다.
         </p>
       </section>
     );
@@ -192,6 +150,7 @@ export function CycleComparePage() {
 
   return (
     <>
+      {/* ── 위: 가로로 긴 판. 무엇을 어떻게 바꿀지 여기서 다 고른다. ── */}
       <section className="panel">
         <div className="row">
           <div>
@@ -199,8 +158,15 @@ export function CycleComparePage() {
           </div>
           <div className="compare-picks">
             <label>
-              <em>기준</em>
-              <select value={preset.id} onChange={(event) => setBaseId(event.target.value)}>
+              <em>사이클</em>
+              <select
+                value={preset.id}
+                onChange={(event) => {
+                  setBaseId(event.target.value);
+                  setOwnerId("");
+                  setSwaps({});
+                }}
+              >
                 {cyclePresets.map((p) => (
                   <option key={p.id} value={p.id}>
                     {p.name} · {p.rotation.length}대
@@ -209,159 +175,146 @@ export function CycleComparePage() {
               </select>
             </label>
             <label>
-              <em>견줌</em>
-              <select value={rival?.id ?? ""} onChange={(event) => setOtherId(event.target.value)}>
-                {cyclePresets.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name} · {p.rotation.length}대
+              <em>에코 바꿀 캐릭터</em>
+              <select
+                value={owner?.id ?? ""}
+                onChange={(event) => {
+                  setOwnerId(event.target.value);
+                  setSwaps({});
+                }}
+              >
+                {owners.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name}
                   </option>
                 ))}
               </select>
             </label>
+            {view?.changed && (
+              <button className="pen" onClick={() => setSwaps({})} title="바꾼 것을 되돌린다">
+                되돌리기
+              </button>
+            )}
           </div>
         </div>
 
         <p className="enemy-hint">
-          담아 둔 루틴과 적 설정을 <b>지금 환경</b>(무기 · 공명체인 · 에코 · 스킬 레벨)으로 다시
-          돌린 값입니다. 저장할 때와 환경이 다르면 그만큼 숫자도 달라집니다.
+          담아 둔 루틴과 적 설정을 <b>지금 환경</b>으로 돌린 값입니다. 여기서 에코를 바꿔 봐도
+          실제 장착은 그대로입니다 — 계산에만 갈아 끼워 봅니다.
         </p>
+
+        {slots.length === 0 ? (
+          <p className="enemy-hint">
+            {owner ? `${owner.name}에게 낀 에코가 없습니다.` : "이 사이클에 캐릭터가 없습니다."}{" "}
+            「캐릭터 관리」 탭에서 에코를 끼우면 여기서 바꿔 볼 수 있습니다.
+          </p>
+        ) : (
+          <div className="echo-swaps">
+            {slots.map((slot) => (
+              <label key={slot.index} className={swaps[slot.index] !== undefined ? "on" : ""}>
+                <em>{slot.index + 1}번 슬롯</em>
+                <small>{slot.echo?.name ?? "빈 슬롯"}</small>
+                <select
+                  value={swaps[slot.index] ?? slot.link.echoId}
+                  onChange={(event) => {
+                    const pk = Number(event.target.value);
+                    setSwaps((prev) => {
+                      const next = { ...prev };
+                      if (pk === slot.link.echoId) delete next[slot.index];
+                      else next[slot.index] = pk;
+                      return next;
+                    });
+                  }}
+                >
+                  {owned.map((e) => (
+                    <option key={e.pk} value={e.pk}>
+                      {e.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </div>
+        )}
 
         <div className="stat-bonus">
           <div>
-            <span>기준 사이클 총 기대 피해</span>
-            <b>{view ? num(view.base) : "—"}</b>
+            <span>바꾸기 전 총 기대 피해</span>
+            <b>{view ? num(view.total.before) : "—"}</b>
           </div>
           <div>
-            <span>담긴 공격</span>
-            <b>{preset.rotation.length}대</b>
+            <span>바꾼 뒤</span>
+            <b>{view ? num(view.total.after) : "—"}</b>
           </div>
           <div>
-            <span>적</span>
-            <b>Lv.{preset.enemy.level}</b>
+            <span>차이</span>
+            <b>
+              {view
+                ? `${sign(view.total.delta)}${num(Math.round(view.total.delta))} (${sign(
+                    view.total.rate,
+                  )}${view.total.rate.toFixed(2)}%)`
+                : "—"}
+            </b>
           </div>
         </div>
       </section>
 
-      {/* 계산 탭과 같은 딜 그래프를 좌우로 둘. 판 안은 도넛 위 · 막대 아래로 쌓는다. */}
+      {/* ── 아래: 왼쪽이 바꾸기 전, 오른쪽이 바꾼 뒤 ── */}
       {view && (
         <div className="compare-graphs">
           <DamageBreakdownSection
             stacked
-            results={view.baseResults}
-            title={`기준 — ${preset.name}`}
-            note={`총 기대 피해 ${num(view.base)}`}
+            results={view.before}
+            title="바꾸기 전"
+            note={`지금 낀 에코 그대로 · 총 ${num(view.total.before)}`}
           />
           <DamageBreakdownSection
             stacked
-            results={view.rivalResults}
-            title={`견줌 — ${rival ? rival.name : "없음"}`}
+            results={view.after}
+            title="바꾼 뒤"
             note={
-              !rival || rival.id === preset.id
-                ? "기준과 같은 사이클입니다 — 위에서 다른 것을 고르세요."
-                : `총 기대 피해 ${num(
-                    view.rivalResults.reduce((s, r) => s + r.damage.expectedDamage, 0),
+              view.changed
+                ? `총 ${num(view.total.after)} · ${sign(view.total.delta)}${num(
+                    Math.round(view.total.delta),
                   )}`
+                : "아직 바꾼 에코가 없습니다 — 위에서 슬롯을 갈아 끼워 보세요."
             }
           />
         </div>
       )}
 
       <section className="panel">
-        <h2>조건이 바뀌면 얼마나 오르나</h2>
+        <h2>캐릭터별로 얼마나 움직였나</h2>
         <p className="enemy-hint">
-          에코를 갈아 끼우면 결국 스탯이 바뀝니다. 바뀌는 스탯을 그대로 넣어 보면 그 교체의
-          값어치가 나옵니다 — 크리티컬 피해 21% 부옵션 한 줄이 더 붙는다면 맨 아래 칸에
-          「크리티컬 피해」 21을 넣으면 됩니다.
+          남의 에코를 바꿔도 파티 버프를 타고 내 피해가 움직입니다. 그래서 캐릭터마다 따로 적습니다.
         </p>
-
         <table className="buff-table">
           <thead>
             <tr>
-              <th>조건</th>
-              <th>사이클 총 피해</th>
-              <th>증가량</th>
-              <th>증가율</th>
+              <th>캐릭터</th>
+              <th>바꾸기 전</th>
+              <th>바꾼 뒤</th>
+              <th>차이</th>
             </tr>
           </thead>
           <tbody>
-            {view?.rows.map((row) => (
-              <tr key={row.id}>
-                <td>{row.label}</td>
-                <td>{num(row.total)}</td>
-                <td className="chain-value">
-                  {sign(row.delta)}
-                  {num(Math.round(row.delta))}
+            {view?.byCharacter.map((row) => (
+              <tr key={row.id} className={row.delta === 0 ? "off" : ""}>
+                <td>
+                  {row.name}
+                  {row.id === owner?.id && <span className="chain-mode">에코 바꾼 캐릭터</span>}
                 </td>
+                <td>{num(row.before)}</td>
+                <td>{num(row.after)}</td>
                 <td className="chain-value">
-                  {sign(row.rate)}
-                  {row.rate.toFixed(2)}%
+                  {row.delta === 0
+                    ? "—"
+                    : `${sign(row.delta)}${num(Math.round(row.delta))} (${sign(row.delta)}${(
+                        row.before > 0 ? (row.after / row.before - 1) * 100 : 0
+                      ).toFixed(2)}%)`}
                 </td>
               </tr>
             ))}
-            <tr>
-              <td>
-                <span className="compare-custom">
-                  <select
-                    value={customTarget}
-                    onChange={(event) => setCustomTarget(event.target.value as BuffTarget)}
-                  >
-                    {TARGETS.map((t) => (
-                      <option key={t.value} value={t.value}>
-                        {t.label}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    className="buff-stack"
-                    type="number"
-                    step="any"
-                    value={customAmount}
-                    onChange={(event) => setCustomAmount(event.target.value)}
-                  />
-                </span>
-              </td>
-              <td>{view ? num(view.custom.total) : "—"}</td>
-              <td className="chain-value">
-                {view ? `${sign(view.custom.delta)}${num(Math.round(view.custom.delta))}` : "—"}
-              </td>
-              <td className="chain-value">
-                {view ? `${sign(view.custom.rate)}${view.custom.rate.toFixed(2)}%` : "—"}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </section>
-
-      <section className="panel">
-        <h2>담아 둔 사이클끼리</h2>
-        <p className="enemy-hint">모두 같은 환경에서 돌린 값이고, 기준 사이클과의 차이를 적었습니다.</p>
-        <table className="buff-table">
-          <thead>
-            <tr>
-              <th>사이클</th>
-              <th>공격 수</th>
-              <th>총 피해</th>
-              <th>기준 대비</th>
-            </tr>
-          </thead>
-          <tbody>
-            {view?.others.map((row) => {
-              const diff = row.total - view.base;
-              return (
-                <tr key={row.id} className={row.id === preset.id ? "" : "off"}>
-                  <td>{row.name}</td>
-                  <td>{row.hits}대</td>
-                  <td>{num(row.total)}</td>
-                  <td className="chain-value">
-                    {row.id === preset.id
-                      ? "기준"
-                      : `${sign(diff)}${num(Math.round(diff))} (${sign(diff)}${(
-                          view.base > 0 ? (row.total / view.base - 1) * 100 : 0
-                        ).toFixed(2)}%)`}
-                  </td>
-                </tr>
-              );
-            })}
           </tbody>
         </table>
       </section>
