@@ -1318,3 +1318,9 @@
 .compare-custom select{padding:6px 8px;font:inherit;font-size:12px;color:#e9edf5;
   background:#2a3246;border:1px solid #3c455c;border-radius:8px}
 .compare-custom .buff-stack{width:72px}
+
+/* 두 딜 그래프 사이에 끼는 「견줄 사이클」 고르는 줄. */
+.compare-pick{display:flex;align-items:center;gap:10px}
+.compare-pick>span{color:#9aa3b3;font-size:12px;font-weight:800;letter-spacing:1px}
+.compare-pick select{flex:1;min-width:0;padding:9px 12px;font:inherit;color:#e9edf5;
+  background:#2a3246;border:1px solid #3c455c;border-radius:10px}

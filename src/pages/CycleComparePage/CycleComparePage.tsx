@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { usePartyConfig } from "../../context/PartyConfigContext";
 import { computeResults } from "../CalculatorPage/hooks/useCalculationResults";
+import type { CalculationResult } from "../CalculatorPage/hooks/useCalculationResults";
+import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreakdownSection";
 import { num } from "../../utils/format";
 import type { BuffTarget, ManualBuff, PartyConfig } from "../../types/game";
 
@@ -77,10 +79,16 @@ export function CycleComparePage() {
   } = usePartyConfig();
 
   const [baseId, setBaseId] = useState("");
+  const [otherId, setOtherId] = useState("");
   const [customTarget, setCustomTarget] = useState<BuffTarget>("critDamage");
   const [customAmount, setCustomAmount] = useState("21");
 
   const preset = cyclePresets.find((p) => p.id === baseId) ?? cyclePresets[0] ?? null;
+  // 견줄 상대. 담아 둔 사이클이 둘 이상이면 기본으로 다음 것을 잡는다.
+  const rival =
+    cyclePresets.find((p) => p.id === otherId) ??
+    cyclePresets.find((p) => p.id !== preset?.id) ??
+    preset;
   const customMeta = TARGETS.find((t) => t.value === customTarget) ?? TARGETS[0];
 
   const view = useMemo(() => {
@@ -93,13 +101,13 @@ export function CycleComparePage() {
       ...preset.manualBuffs.filter((b) => !allBuffs.some((a) => a.id === b.id)),
     ];
 
-    const totalWith = (
+    const resultsWith = (
       extra: ManualBuff | null,
       rotation = preset.rotation,
       enemy = preset.enemy,
-    ) => {
+    ): CalculationResult[] => {
       const cfg: PartyConfig = { ...config, rotation, enemy };
-      const results = computeResults(
+      return computeResults(
         cfg,
         characterWeapons,
         extra ? [...merged, extra] : merged,
@@ -108,8 +116,14 @@ export function CycleComparePage() {
         characterLevels,
         characterNodes,
       );
-      return results.reduce((sum, r) => sum + r.damage.expectedDamage, 0);
     };
+    const sum = (rows: CalculationResult[]) =>
+      rows.reduce((acc, r) => acc + r.damage.expectedDamage, 0);
+    const totalWith = (
+      extra: ManualBuff | null,
+      rotation = preset.rotation,
+      enemy = preset.enemy,
+    ) => sum(resultsWith(extra, rotation, enemy));
 
     const base = totalWith(null);
     const rate = (total: number) => (base > 0 ? (total / base - 1) * 100 : 0);
@@ -133,14 +147,22 @@ export function CycleComparePage() {
       total: totalWith(null, p.rotation, p.enemy),
     }));
 
+    // 딜 그래프용 — 기준과 견줄 상대를 각각 통째로 돌린 결과.
+    const baseResults = resultsWith(null);
+    const rivalResults =
+      rival && rival.id !== preset.id ? resultsWith(null, rival.rotation, rival.enemy) : baseResults;
+
     return {
       base,
       rows,
       custom: { total: customTotal, delta: customTotal - base, rate: rate(customTotal) },
       others,
+      baseResults,
+      rivalResults,
     };
   }, [
     preset,
+    rival,
     config,
     characterWeapons,
     allBuffs,
@@ -206,6 +228,38 @@ export function CycleComparePage() {
           </div>
         </div>
       </section>
+
+      {/* 계산 탭과 같은 딜 그래프를 둘 띄운다 — 위가 기준, 아래가 견줄 상대다. */}
+      {view && (
+        <DamageBreakdownSection
+          results={view.baseResults}
+          title={`피해 분석 · 기준 — ${preset.name}`}
+          note={`총 기대 피해 ${num(view.base)}`}
+        />
+      )}
+      {view && rival && (
+        <>
+          <section className="panel compare-pick">
+            <span>견줄 사이클</span>
+            <select value={rival.id} onChange={(event) => setOtherId(event.target.value)}>
+              {cyclePresets.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name} · {p.rotation.length}대
+                </option>
+              ))}
+            </select>
+          </section>
+          <DamageBreakdownSection
+            results={view.rivalResults}
+            title={`피해 분석 · 견줌 — ${rival.name}`}
+            note={
+              rival.id === preset.id
+                ? "기준과 같은 사이클입니다 — 위에서 다른 것을 고르면 견줄 수 있습니다."
+                : `총 기대 피해 ${num(view.rivalResults.reduce((s, r) => s + r.damage.expectedDamage, 0))}`
+            }
+          />
+        </>
+      )}
 
       <section className="panel">
         <h2>조건이 바뀌면 얼마나 오르나</h2>

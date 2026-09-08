@@ -7,6 +7,10 @@ import { num, pct } from "../../../utils/format";
 
 interface DamageBreakdownSectionProps {
   results: CalculationResult[];
+  /** 판 제목. 사이클 비교 탭에서 둘을 나란히 띄울 때 어느 쪽인지 적는다. */
+  title?: string;
+  /** 제목 아래 한 줄. 어느 사이클을 그린 것인지 같은 설명에 쓴다. */
+  note?: string;
 }
 
 /** 공격 분류 이름. 피해량을 묶는 기준이자 도넛 조각의 이름이다. */
@@ -94,7 +98,11 @@ function slicesOf(rows: CalculationResult[]): Slice[] {
  *   오른쪽 — 캐릭터별 피해량 가로 막대와 총 합산.
  * 숫자는 전부 기대 피해 기준이다. 공격을 담지 않아도 빈 도넛으로 자리를 지킨다.
  */
-export function DamageBreakdownSection({ results }: DamageBreakdownSectionProps) {
+export function DamageBreakdownSection({
+  results,
+  title = "피해 분석",
+  note,
+}: DamageBreakdownSectionProps) {
   const { config } = usePartyConfig();
   const [hover, setHover] = useState<string | null>(null);
 
@@ -122,7 +130,8 @@ export function DamageBreakdownSection({ results }: DamageBreakdownSectionProps)
     <section className="panel viz">
       <div className="row">
         <div>
-          <h2>피해 분석</h2>
+          <h2>{title}</h2>
+          {note && <span className="enemy-hint">{note}</span>}
         </div>
       </div>
 
