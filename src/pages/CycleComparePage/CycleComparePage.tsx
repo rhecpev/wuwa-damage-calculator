@@ -197,14 +197,27 @@ export function CycleComparePage() {
           <div>
             <h2>사이클 대미지 비교</h2>
           </div>
-          <div className="rotation-tools">
-            <select value={preset.id} onChange={(event) => setBaseId(event.target.value)}>
-              {cyclePresets.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} · {p.rotation.length}대
-                </option>
-              ))}
-            </select>
+          <div className="compare-picks">
+            <label>
+              <em>기준</em>
+              <select value={preset.id} onChange={(event) => setBaseId(event.target.value)}>
+                {cyclePresets.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} · {p.rotation.length}대
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <em>견줌</em>
+              <select value={rival?.id ?? ""} onChange={(event) => setOtherId(event.target.value)}>
+                {cyclePresets.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name} · {p.rotation.length}대
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
 
@@ -229,36 +242,28 @@ export function CycleComparePage() {
         </div>
       </section>
 
-      {/* 계산 탭과 같은 딜 그래프를 둘 띄운다 — 위가 기준, 아래가 견줄 상대다. */}
+      {/* 계산 탭과 같은 딜 그래프를 좌우로 둘. 판 안은 도넛 위 · 막대 아래로 쌓는다. */}
       {view && (
-        <DamageBreakdownSection
-          results={view.baseResults}
-          title={`피해 분석 · 기준 — ${preset.name}`}
-          note={`총 기대 피해 ${num(view.base)}`}
-        />
-      )}
-      {view && rival && (
-        <>
-          <section className="panel compare-pick">
-            <span>견줄 사이클</span>
-            <select value={rival.id} onChange={(event) => setOtherId(event.target.value)}>
-              {cyclePresets.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name} · {p.rotation.length}대
-                </option>
-              ))}
-            </select>
-          </section>
+        <div className="compare-graphs">
           <DamageBreakdownSection
+            stacked
+            results={view.baseResults}
+            title={`기준 — ${preset.name}`}
+            note={`총 기대 피해 ${num(view.base)}`}
+          />
+          <DamageBreakdownSection
+            stacked
             results={view.rivalResults}
-            title={`피해 분석 · 견줌 — ${rival.name}`}
+            title={`견줌 — ${rival ? rival.name : "없음"}`}
             note={
-              rival.id === preset.id
-                ? "기준과 같은 사이클입니다 — 위에서 다른 것을 고르면 견줄 수 있습니다."
-                : `총 기대 피해 ${num(view.rivalResults.reduce((s, r) => s + r.damage.expectedDamage, 0))}`
+              !rival || rival.id === preset.id
+                ? "기준과 같은 사이클입니다 — 위에서 다른 것을 고르세요."
+                : `총 기대 피해 ${num(
+                    view.rivalResults.reduce((s, r) => s + r.damage.expectedDamage, 0),
+                  )}`
             }
           />
-        </>
+        </div>
       )}
 
       <section className="panel">

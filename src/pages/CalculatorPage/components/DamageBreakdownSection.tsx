@@ -11,6 +11,11 @@ interface DamageBreakdownSectionProps {
   title?: string;
   /** 제목 아래 한 줄. 어느 사이클을 그린 것인지 같은 설명에 쓴다. */
   note?: string;
+  /**
+   * 세로로 쌓기. 도넛 줄이 위, 막대가 아래로 간다.
+   * 판 둘을 좌우로 나란히 놓을 때(사이클 비교) 폭이 절반이라 옆으로는 못 앉힌다.
+   */
+  stacked?: boolean;
 }
 
 /** 공격 분류 이름. 피해량을 묶는 기준이자 도넛 조각의 이름이다. */
@@ -102,6 +107,7 @@ export function DamageBreakdownSection({
   results,
   title = "피해 분석",
   note,
+  stacked = false,
 }: DamageBreakdownSectionProps) {
   const { config } = usePartyConfig();
   const [hover, setHover] = useState<string | null>(null);
@@ -127,7 +133,7 @@ export function DamageBreakdownSection({
   const barMax = members.reduce((max, m) => Math.max(max, m.value), 0) || 1;
 
   return (
-    <section className="panel viz">
+    <section className={stacked ? "panel viz viz-stacked" : "panel viz"}>
       <div className="row">
         <div>
           <h2>{title}</h2>

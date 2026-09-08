@@ -1319,8 +1319,17 @@
   background:#2a3246;border:1px solid #3c455c;border-radius:8px}
 .compare-custom .buff-stack{width:72px}
 
-/* 두 딜 그래프 사이에 끼는 「견줄 사이클」 고르는 줄. */
-.compare-pick{display:flex;align-items:center;gap:10px}
-.compare-pick>span{color:#9aa3b3;font-size:12px;font-weight:800;letter-spacing:1px}
-.compare-pick select{flex:1;min-width:0;padding:9px 12px;font:inherit;color:#e9edf5;
-  background:#2a3246;border:1px solid #3c455c;border-radius:10px}
+/* 사이클 비교 — 위 가로 판에서 기준·견줌 사이클을 고른다. */
+.compare-picks{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.compare-picks label{display:flex;align-items:center;gap:6px}
+.compare-picks em{font-style:normal;color:#9aa3b3;font-size:11px;font-weight:800;letter-spacing:1px}
+.compare-picks select{padding:8px 11px;font:inherit;font-size:13px;color:#e9edf5;
+  background:#2a3246;border:1px solid #3c455c;border-radius:10px;max-width:230px}
+/* 그래프 두 판을 좌우로. 좁아지면 위아래로 접힌다. */
+.compare-graphs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start}
+.compare-graphs>.panel{margin-top:0}
+@media(max-width:1200px){.compare-graphs{grid-template-columns:1fr}}
+/* 세로로 쌓는 그래프 — 도넛 줄이 위, 막대가 아래. 판이 절반 폭이라 옆으로는 못 앉는다. */
+.viz-stacked .viz-grid{grid-template-columns:minmax(0,1fr);gap:16px}
+.viz-stacked .viz-bars-fig{padding-left:0;padding-top:16px;border-left:none;border-top:1px solid #384155}
+.viz-stacked .viz-donuts{gap:8px}
