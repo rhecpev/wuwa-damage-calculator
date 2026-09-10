@@ -782,7 +782,7 @@
 .viz-donut-center em{font-style:normal;font-size:10px;color:#9aa3b3}
 
 .viz-legend{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
-.viz-legend li{display:grid;grid-template-columns:10px 1fr auto;align-items:center;gap:7px;padding:4px 5px;border-radius:7px;transition:opacity .15s}
+.viz-legend li{display:grid;grid-template-columns:10px 1fr auto auto;align-items:center;gap:7px;padding:4px 5px;border-radius:7px;transition:opacity .15s}
 .viz-legend li.dim{opacity:.4}
 .viz-legend li:hover{background:#2d3345}
 .viz-legend i{width:10px;height:10px;border-radius:3px}

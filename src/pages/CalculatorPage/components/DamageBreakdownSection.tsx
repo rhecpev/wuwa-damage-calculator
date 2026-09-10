@@ -230,6 +230,8 @@ export function DamageBreakdownSection({
                     >
                       <i style={{ background: s.color }} />
                       <span>{s.name}</span>
+                      {/* 비중만으로는 얼마였는지 모른다 — 실제 기대 피해를 비중 옆에 같이 적는다. */}
+                      <em>{num(s.value)}</em>
                       <b>{pct(s.value / m.value, 1)}</b>
                     </li>
                   ))}
