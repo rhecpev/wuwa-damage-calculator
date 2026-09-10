@@ -794,8 +794,12 @@
 .viz-bars li{display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px 10px}
 .viz-bar-name{grid-column:1 / -1;display:flex;align-items:center;gap:7px;font-size:12px;color:#c2c9d6}
 .viz-bar-name img{width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
-.viz-bar-track{grid-column:1;height:12px;border-radius:6px;background:#30394a;overflow:hidden}
+.viz-bar-track{grid-column:1;display:flex;gap:2px;height:12px;border-radius:6px;background:#30394a;overflow:hidden}
 .viz-bar-fill{display:block;height:100%;border-radius:6px;background:#3987e5}
+/* 캐릭터별 막대 안의 이상 효과 몫. 도넛 팔레트의 호박색이다. */
+.viz-bar-fill-anomaly{background:#c98500}
+.viz-bar-anomaly{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:#9aa3b3;font-variant-numeric:tabular-nums}
+.viz-bar-anomaly i{width:8px;height:8px;border-radius:2px;background:#c98500}
 .viz-bars b{font-size:13px;color:#e9edf5;font-variant-numeric:tabular-nums}
 .viz-bars em{font-style:normal;font-size:11px;color:#9aa3b3;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
 

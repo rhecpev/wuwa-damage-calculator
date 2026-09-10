@@ -145,6 +145,11 @@ export function DamageBreakdownSection({
     const character = characters.find((c) => c.id === config[slot].characterId);
     const rows = character ? results.filter((r) => r.character.id === character.id) : [];
     const value = rows.reduce((sum, r) => sum + r.damage.expectedDamage, 0);
+    // 그중 이 캐릭터가 담은 이상 효과 항목이 낸 몫. value 안에 이미 들어 있다.
+    const anomaly = rows.reduce(
+      (sum, r) => sum + (r.attack.anomaly ? r.damage.expectedDamage : 0),
+      0,
+    );
 
     return {
       key: character?.id ?? `slot-${index}`,
@@ -153,6 +158,7 @@ export function DamageBreakdownSection({
       empty: !character,
       slices: slicesOf(rows),
       value,
+      anomaly,
     };
   });
 
@@ -255,16 +261,35 @@ export function DamageBreakdownSection({
 
           <ul className="viz-bars">
             {members.map((m) => (
-              <li key={m.key} title={`${m.name} · ${num(m.value)}`}>
+              <li
+                key={m.key}
+                title={`${m.name} · ${num(m.value)}${
+                  m.anomaly > 0 ? ` (이상 효과 ${num(m.anomaly)})` : ""
+                }`}
+              >
                 <span className="viz-bar-name">
                   {m.icon && <img src={m.icon} alt="" loading="lazy" />}
                   {m.name}
+                  {/* 막대 안의 이상 효과 몫을 숫자로도 적는다 — 색만으로 구분하지 않게. */}
+                  {m.anomaly > 0 && (
+                    <small className="viz-bar-anomaly">
+                      <i />
+                      이상 효과 {num(m.anomaly)} · {pct(m.anomaly / m.value, 1)}
+                    </small>
+                  )}
                 </span>
+                {/* 공격 몫 뒤에 이상 효과 몫을 이어 붙인다. 둘을 합친 길이가 그 캐릭터의 피해량이다. */}
                 <span className="viz-bar-track">
                   <span
                     className="viz-bar-fill"
-                    style={{ width: `${(m.value / barMax) * 100}%` }}
+                    style={{ width: `${((m.value - m.anomaly) / barMax) * 100}%` }}
                   />
+                  {m.anomaly > 0 && (
+                    <span
+                      className="viz-bar-fill viz-bar-fill-anomaly"
+                      style={{ width: `${(m.anomaly / barMax) * 100}%` }}
+                    />
+                  )}
                 </span>
                 <b>{num(m.value)}</b>
                 <em>{total > 0 ? pct(m.value / total, 1) : "—"}</em>
