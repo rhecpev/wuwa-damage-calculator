@@ -193,6 +193,12 @@ export function appliesTo(buff: ManualBuff, attack: Attack, characterId?: string
   //   이상 효과 항목에는 그 효과(또는 "All")를 적은 이상 부스트 버프만 걸린다.
   //   일반 공격에는 이상 효과를 적은 버프가 절대 걸리지 않는다.
   if (attack.anomaly) {
+    // 스탯은 안 건드리고 이상 스택 상한만 올리는 버프(치사 반주 등)는 칸(target)과 상관없이 띄운다.
+    // 이상 항목의 스택 상한과 암흑 효과 방어력 감소의 상한이 이 버프로 오르므로
+    // 이상 항목에서도 켜고 끌 수 있어야 한다. 수치가 0이라 계산에 들어가도 바뀌는 건 없다.
+    if (buff.raisesAnomalyStacks && !buff.value) {
+      return !(buff.scope === "self" && buff.ownerId && characterId && buff.ownerId !== characterId);
+    }
     if (!ANOMALY_USABLE_TARGETS.has(buff.target)) return false;
     // 이상 전용 타깃만 「어느 효과인지」를 따진다. 방어·저항 디버프는 적에게 걸린 상태라
     // 효과를 가리지 않는다 — 암흑으로 깎인 방어력은 서리 피해에도 그대로 적용된다.

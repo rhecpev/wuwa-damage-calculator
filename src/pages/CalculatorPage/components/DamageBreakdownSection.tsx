@@ -2,6 +2,7 @@ import { useState } from "react";
 import type { CalculationResult } from "../hooks/useCalculationResults";
 import type { AttackType } from "../../../types/game";
 import { characters } from "../../../data/sampleData";
+import { ANOMALIES } from "../../../data/anomalies";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import { num, pct } from "../../../utils/format";
 
@@ -77,20 +78,40 @@ interface Slice {
   color: string;
 }
 
-/** 이 캐릭터의 공격을 분류별로 묶어 큰 것부터. 다섯 개까지만 제 색을 준다. */
+/**
+ * 이 캐릭터의 공격을 분류별로 묶어 큰 것부터. 다섯 개까지만 제 색을 준다.
+ *
+ * 이상 효과는 분류가 아니라 효과 이름(「서리 효과」)으로 따로 묶고 「기타」로 접지 않는다
+ * — 공격 모양만 빌린 항목이라 분류(type)가 에코로 잡혀 있어, 그대로 두면 에코 피해에 섞인다.
+ * 조화도 파괴도 같은 사정이라 「조화도 파괴」로 따로 묶는다.
+ */
 function slicesOf(rows: CalculationResult[]): Slice[] {
   const byCategory = new Map<string, number>();
+  const byAnomaly = new Map<string, number>();
   for (const r of rows) {
-    const key = CATEGORY_NAMES[r.attack.damageBonusType ?? r.attack.type] ?? "기타";
-    byCategory.set(key, (byCategory.get(key) ?? 0) + r.damage.expectedDamage);
+    const kind = r.attack.anomaly;
+    const bucket = kind || r.attack.discord ? byAnomaly : byCategory;
+    const key = kind
+      ? `${ANOMALIES[kind].name} 효과`
+      : r.attack.discord
+        ? "조화도 파괴"
+        : (CATEGORY_NAMES[r.attack.damageBonusType ?? r.attack.type] ?? "기타");
+    bucket.set(key, (bucket.get(key) ?? 0) + r.damage.expectedDamage);
   }
 
+  const anomalies = [...byAnomaly.entries()];
   const sorted = [...byCategory.entries()].sort((a, b) => b[1] - a[1]);
-  const head = sorted.slice(0, MAX_SLICES);
-  const tail = sorted.slice(MAX_SLICES);
+  // 이상 효과가 차지한 만큼 공격 분류 자리를 줄인다 — 색은 여전히 다섯 개까지다.
+  const room = Math.max(MAX_SLICES - anomalies.length, 0);
+  const head = [...sorted.slice(0, room), ...anomalies].sort((a, b) => b[1] - a[1]);
+  const tail = sorted.slice(room);
 
   return [
-    ...head.map(([name, value], i) => ({ name, value, color: SLICE_COLORS[i] })),
+    ...head.map(([name, value], i) => ({
+      name,
+      value,
+      color: SLICE_COLORS[i] ?? OTHER_COLOR,
+    })),
     ...(tail.length
       ? [{ name: "기타", value: tail.reduce((s, [, v]) => s + v, 0), color: OTHER_COLOR }]
       : []),
@@ -113,6 +134,11 @@ export function DamageBreakdownSection({
   const [hover, setHover] = useState<string | null>(null);
 
   const total = results.reduce((sum, r) => sum + r.damage.expectedDamage, 0);
+  // 총 피해량 중 이상 효과 몫. 누가 담았든 적에게 쌓인 상태가 낸 피해라 파티 전체로 한 번만 센다.
+  const anomalyTotal = results.reduce(
+    (sum, r) => sum + (r.attack.anomaly ? r.damage.expectedDamage : 0),
+    0,
+  );
 
   // 파티 세 자리를 그대로 쓴다 — 공격을 담지 않은 캐릭터도 빈 도넛으로 남는다.
   const members = PARTY_SLOTS.map((slot, index) => {
@@ -219,6 +245,12 @@ export function DamageBreakdownSection({
             <b className="viz-total">
               기대 총 피해량 <span>{num(total)}</span>
             </b>
+            {anomalyTotal > 0 && (
+              <b className="viz-total viz-total-sub" title="총 피해량 중 이상 효과 피해">
+                이상 효과 <span>{num(anomalyTotal)}</span>
+                <em>{pct(anomalyTotal / total, 1)}</em>
+              </b>
+            )}
           </figcaption>
 
           <ul className="viz-bars">
