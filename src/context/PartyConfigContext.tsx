@@ -40,16 +40,19 @@ import { isDiscordAttackId } from "../data/discord";
  * 같은 몬스터라도 어느 콘텐츠에서 만나느냐에 따라 저항이 다르게 잡힌다.
  *   baseRes        = 몬스터 속성과 다른 속성으로 때릴 때
  *   sameElementRes = 몬스터 속성과 같은 속성으로 때릴 때
+ *   fixedLevel     = 이 콘텐츠의 적 레벨이 정해져 있으면 그 값. 고르면 레벨이 여기로 묶인다.
  */
 export const ENEMY_RES_PRESETS: {
   id: EnemyResPreset;
   label: string;
   baseRes: number;
   sameElementRes: number;
+  fixedLevel?: number;
 }[] = [
   { id: "field", label: "필드", baseRes: 0.1, sameElementRes: 0.4 },
-  { id: "tower", label: "역경의 탑 · 종말 매트릭스", baseRes: 0.2, sameElementRes: 0.6 },
   { id: "hologram", label: "홀로그램", baseRes: 0.1, sameElementRes: 0.8 },
+  { id: "tower", label: "역경의 탑", baseRes: 0.2, sameElementRes: 0.6 },
+  { id: "matrix", label: "종말 매트릭스", baseRes: 0.2, sameElementRes: 0.6, fixedLevel: 100 },
 ];
 
 export const resPresetOf = (id: EnemyResPreset) =>
@@ -696,13 +699,19 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     if (config.mainDps.characterId) setCharacterMode(config.mainDps.characterId, mode);
   };
 
-  /** 몬스터 레벨. 슬라이더/입력 어느 쪽이든 1~200으로 잘라서 저장한다. */
+  /**
+   * 몬스터 레벨. 슬라이더/입력 어느 쪽이든 1~200으로 잘라서 저장한다.
+   * 레벨이 정해진 콘텐츠(종말 매트릭스)를 골라 두었으면 움직이지 않는다.
+   */
   const setEnemyLevel = (level: number) => {
     const clamped = Math.min(Math.max(Math.round(level), ENEMY_LEVEL_MIN), ENEMY_LEVEL_MAX);
-    setConfig((current) => ({
-      ...current,
-      enemy: { ...current.enemy, level: Number.isNaN(clamped) ? current.enemy.level : clamped },
-    }));
+    setConfig((current) => {
+      if (resPresetOf(current.enemy.resPreset ?? "field").fixedLevel) return current;
+      return {
+        ...current,
+        enemy: { ...current.enemy, level: Number.isNaN(clamped) ? current.enemy.level : clamped },
+      };
+    });
   };
 
   const setEnemyElement = (element: Element) => {
@@ -842,10 +851,17 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   };
 
   const setEnemyResPreset = (preset: EnemyResPreset) => {
-    const { baseRes, sameElementRes } = resPresetOf(preset);
+    const { baseRes, sameElementRes, fixedLevel } = resPresetOf(preset);
     setConfig((current) => ({
       ...current,
-      enemy: { ...current.enemy, resPreset: preset, baseRes, sameElementRes },
+      enemy: {
+        ...current.enemy,
+        resPreset: preset,
+        baseRes,
+        sameElementRes,
+        // 레벨이 정해진 콘텐츠면 레벨도 같이 옮긴다. 다른 콘텐츠로 돌아가도 그 레벨은 그대로 둔다.
+        ...(fixedLevel ? { level: fixedLevel } : {}),
+      },
     }));
   };
 

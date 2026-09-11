@@ -1,6 +1,7 @@
 import {
   ENEMY_LEVEL_MAX,
   ENEMY_LEVEL_MIN,
+  resPresetOf,
   usePartyConfig,
 } from "../../../context/PartyConfigContext";
 import type { Element } from "../../../types/game";
@@ -13,6 +14,9 @@ const ELEMENTS: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectro", "
 export function EnemySection() {
   const { config, setEnemyLevel, setEnemyElement } = usePartyConfig();
   const { enemy } = config;
+  // 적 레벨이 정해진 콘텐츠(종말 매트릭스)면 레벨 칸을 잠근다.
+  const presetInfo = resPresetOf(enemy.resPreset ?? "field");
+  const locked = presetInfo.fixedLevel !== undefined;
 
   return (
     <section className="panel">
@@ -66,6 +70,7 @@ export function EnemySection() {
               min={ENEMY_LEVEL_MIN}
               max={ENEMY_LEVEL_MAX}
               value={enemy.level}
+              disabled={locked}
               onChange={(event) => setEnemyLevel(Number(event.target.value))}
             />
             <input
@@ -74,11 +79,13 @@ export function EnemySection() {
               min={ENEMY_LEVEL_MIN}
               max={ENEMY_LEVEL_MAX}
               value={enemy.level}
+              disabled={locked}
               onChange={(event) => setEnemyLevel(Number(event.target.value))}
             />
           </div>
           <span className="enemy-hint">
             방어력 {num(792 + 8 * enemy.level)} (= 8 × 레벨 + 792)
+            {locked && ` · ${presetInfo.label} 레벨 ${presetInfo.fixedLevel} 고정`}
           </span>
         </div>
       </div>

@@ -174,9 +174,10 @@ export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:
 //   exclusiveGroup: 같은 이름끼리 하나만 켜지는 묶음. 「HP 60% 이상 / 미만」처럼
 //     동시에 성립할 수 없는 상태를 나눠 적을 때 쓴다.
 // 필드는 프로토타입이라 앞으로 추가·변경될 수 있다.
-export type EnemyResPreset="field"|"tower"|"hologram";
+export type EnemyResPreset="field"|"hologram"|"tower"|"matrix";
 // 콘텐츠별 속성 저항 프리셋. 수치는 PartyConfigContext의 ENEMY_RES_PRESETS에 있다.
-//   field=필드(10/40%), tower=역경의 탑(20/60%), hologram=홀로그램(10/80%).
+//   field=필드(10/40%), hologram=홀로그램(10/80%), tower=역경의 탑(20/60%),
+//   matrix=종말 매트릭스(20/60% · 적 레벨 100 고정).
 export interface Enemy{id:string;name:string;level:number;element:Element;resPreset?:EnemyResPreset;baseRes:number;sameElementRes:number;damageReduction:number;damageTakenBonus?:number;}
 // level: 적 레벨. 방어 배율에 쓰이며 적 방어력은 8×레벨+792로 유도된다(별도 데이터 불필요).
 // element: 이 몬스터의 속성. 같은 속성으로 때리면 저항이 더 높게 잡힌다.
