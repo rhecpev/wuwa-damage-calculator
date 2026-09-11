@@ -33,6 +33,39 @@ export interface CycleMember {
   echoIds: string[];
 }
 
+/**
+ * 담는 순간의 피해 — 「피해 분석」 그래프가 그리던 값을 그대로 적어 둔다.
+ *
+ * 사이클은 루틴과 버프 체크만 담으므로 나중에 열면 **그때의 자료**로 다시 계산된다.
+ * 계수·버프를 고치거나 장비를 바꾸면 숫자가 달라져 「저장할 때 얼마였는지」가 사라진다.
+ * 그래서 그래프 모양(도넛 조각 · 막대 · 총합)과 공격마다의 피해를 숫자로 박아 둔다.
+ */
+export interface DamageSnapshot {
+  /** 기대 총 피해량 */
+  total: number;
+  /** 그중 이상 효과 몫 */
+  anomalyTotal: number;
+  /** 파티 세 자리 순서. 빈 자리도 이름만 남는다. */
+  members: {
+    characterId: string | null;
+    name: string;
+    value: number;
+    anomaly: number;
+    /** 도넛 조각. 색까지 담아야 그때 그래프와 똑같이 그려진다. */
+    slices: { name: string; value: number; color: string }[];
+  }[];
+  /** 루틴 순서대로 공격 한 대씩의 피해. */
+  attacks: {
+    attackId: string;
+    characterId: string;
+    name: string;
+    cycle: number;
+    expected: number;
+    normal?: number;
+    critical?: number;
+  }[];
+}
+
 export interface CyclePreset {
   id: string;
   name: string;
@@ -44,6 +77,8 @@ export interface CyclePreset {
   manualBuffs: ManualBuff[];
   rotation: RotationAttack[];
   enemy: Enemy;
+  /** 담을 때의 피해. 이 필드가 생기기 전에 담은 사이클에는 없다. */
+  snapshot?: DamageSnapshot;
 }
 
 /** 추출물 겉포장. 형식이 바뀌면 version을 올려 옛 파일을 걸러낸다. */

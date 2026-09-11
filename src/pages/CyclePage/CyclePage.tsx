@@ -10,6 +10,8 @@ import {
   type CycleMember,
   type CyclePreset,
 } from "../../data/cyclePresets";
+import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreakdownSection";
+import { num } from "../../utils/format";
 
 /**
  * 사이클 관리 탭.
@@ -61,6 +63,8 @@ export function CyclePage() {
   const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
   /** 추출물을 띄운 사이클. 글자를 그대로 보여 주고 복사하게 한다. */
   const [exporting, setExporting] = useState<CyclePreset | null>(null);
+  /** 저장 당시 그래프를 띄운 사이클. */
+  const [graphing, setGraphing] = useState<CyclePreset | null>(null);
   /** 불러오기 창. 붙여넣은 글자와 읽다가 난 문제를 같이 들고 있다. */
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
@@ -242,6 +246,7 @@ export function CyclePage() {
                       <em>
                         {preset.rotation.length}대 · {cycles}사이클 ·{" "}
                         {new Date(preset.savedAt).toLocaleDateString("ko-KR")}
+                        {preset.snapshot && ` · 저장 당시 총 ${num(preset.snapshot.total)}`}
                         {preset.note && ` · ${preset.note}`}
                       </em>
                       {(orphans.length > 0 || diff.length > 0) && (
@@ -263,6 +268,18 @@ export function CyclePage() {
                     >
                       사이클 추출
                     </button>
+                    <button
+                      className="preset-quiet"
+                      disabled={!preset.snapshot}
+                      title={
+                        preset.snapshot
+                          ? "담을 때의 피해 분석 그래프를 봅니다"
+                          : "피해를 함께 담기 전에 저장된 사이클입니다 — 다시 저장하면 생깁니다"
+                      }
+                      onClick={() => setGraphing(preset)}
+                    >
+                      저장 당시 그래프
+                    </button>
                     <button className="preset-quiet" onClick={() => setExporting(preset)}>
                       내용 보기
                     </button>
@@ -282,6 +299,33 @@ export function CyclePage() {
           </ul>
         )}
       </section>
+
+      {/* ── 저장 당시 그래프 — 담을 때 박아 둔 값으로 그린다. 지금 자료로 다시 계산하지 않는다. ── */}
+      {graphing?.snapshot && (
+        <div className="formula-backdrop" onClick={() => setGraphing(null)} role="presentation">
+          <div className="formula-modal cycle-graph-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="formula-head">
+              <div>
+                <small>SNAPSHOT</small>
+                <h3>{graphing.name}</h3>
+                <span>
+                  {new Date(graphing.savedAt).toLocaleString("ko-KR")}에 담을 때의 피해입니다. 그
+                  뒤에 계수 · 버프 · 장비가 바뀌어도 이 숫자는 그대로입니다.
+                </span>
+              </div>
+              <button className="formula-close" onClick={() => setGraphing(null)}>
+                ×
+              </button>
+            </div>
+            <DamageBreakdownSection
+              stacked
+              snapshot={graphing.snapshot}
+              title="저장 당시 피해 분석"
+              note={`${graphing.snapshot.attacks.length}대 · 총 ${num(graphing.snapshot.total)}`}
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── 추출 ── */}
       {exporting && (

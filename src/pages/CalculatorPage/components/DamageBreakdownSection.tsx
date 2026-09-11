@@ -5,9 +5,13 @@ import { characters } from "../../../data/sampleData";
 import { ANOMALIES } from "../../../data/anomalies";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import { num, pct } from "../../../utils/format";
+import type { DamageSnapshot } from "../../../data/cyclePresets";
 
 interface DamageBreakdownSectionProps {
-  results: CalculationResult[];
+  /** 지금 계산한 결과. snapshot을 주면 쓰지 않는다. */
+  results?: CalculationResult[];
+  /** 담아 둔 그래프 값. 사이클 관리에서 「저장 당시 그래프」를 그릴 때 준다. */
+  snapshot?: DamageSnapshot;
   /** 판 제목. 사이클 비교 탭에서 둘을 나란히 띄울 때 어느 쪽인지 적는다. */
   title?: string;
   /** 제목 아래 한 줄. 어느 사이클을 그린 것인지 같은 설명에 쓴다. */
@@ -119,20 +123,14 @@ function slicesOf(rows: CalculationResult[]): Slice[] {
 }
 
 /**
- * 로테이션 결과를 두 각도로 보여준다.
- *   왼쪽 — 캐릭터마다 도넛 하나. 그 캐릭터의 피해를 공격 분류로 나눈 비중.
- *   오른쪽 — 캐릭터별 피해량 가로 막대와 총 합산.
- * 숫자는 전부 기대 피해 기준이다. 공격을 담지 않아도 빈 도넛으로 자리를 지킨다.
+ * 그래프가 그리는 값을 숫자로 뽑는다. 화면과 「사이클 저장」이 같이 쓴다
+ * — 저장할 때 그때 그래프와 똑같은 값이 담기도록 계산을 한 곳에 둔다.
+ * partyIds는 파티 세 자리의 캐릭터 id(빈 자리는 "")다.
  */
-export function DamageBreakdownSection({
-  results,
-  title = "피해 분석",
-  note,
-  stacked = false,
-}: DamageBreakdownSectionProps) {
-  const { config } = usePartyConfig();
-  const [hover, setHover] = useState<string | null>(null);
-
+export function buildDamageSnapshot(
+  results: CalculationResult[],
+  partyIds: string[],
+): DamageSnapshot {
   const total = results.reduce((sum, r) => sum + r.damage.expectedDamage, 0);
   // 총 피해량 중 이상 효과 몫. 누가 담았든 적에게 쌓인 상태가 낸 피해라 파티 전체로 한 번만 센다.
   const anomalyTotal = results.reduce(
@@ -141,26 +139,63 @@ export function DamageBreakdownSection({
   );
 
   // 파티 세 자리를 그대로 쓴다 — 공격을 담지 않은 캐릭터도 빈 도넛으로 남는다.
-  const members = PARTY_SLOTS.map((slot, index) => {
-    const character = characters.find((c) => c.id === config[slot].characterId);
+  const members = partyIds.map((id, index) => {
+    const character = characters.find((c) => c.id === id);
     const rows = character ? results.filter((r) => r.character.id === character.id) : [];
-    const value = rows.reduce((sum, r) => sum + r.damage.expectedDamage, 0);
-    // 그중 이 캐릭터가 담은 이상 효과 항목이 낸 몫. value 안에 이미 들어 있다.
-    const anomaly = rows.reduce(
-      (sum, r) => sum + (r.attack.anomaly ? r.damage.expectedDamage : 0),
-      0,
-    );
-
     return {
-      key: character?.id ?? `slot-${index}`,
+      characterId: character?.id ?? null,
       name: character?.name ?? `${index + 1}번 캐릭터`,
-      icon: character?.iconUrl,
-      empty: !character,
+      value: rows.reduce((sum, r) => sum + r.damage.expectedDamage, 0),
+      // 그중 이 캐릭터가 담은 이상 효과 항목이 낸 몫. value 안에 이미 들어 있다.
+      anomaly: rows.reduce((sum, r) => sum + (r.attack.anomaly ? r.damage.expectedDamage : 0), 0),
       slices: slicesOf(rows),
-      value,
-      anomaly,
     };
   });
+
+  const attacks = results.map((r) => ({
+    attackId: r.attack.id,
+    characterId: r.character.id,
+    name: r.attack.name,
+    cycle: r.item.cycle ?? 1,
+    expected: r.damage.expectedDamage,
+    ...("normalDamage" in r.damage ? { normal: r.damage.normalDamage } : {}),
+    ...("criticalDamage" in r.damage ? { critical: r.damage.criticalDamage } : {}),
+  }));
+
+  return { total, anomalyTotal, members, attacks };
+}
+
+/**
+ * 로테이션 결과를 두 각도로 보여준다.
+ *   왼쪽 — 캐릭터마다 도넛 하나. 그 캐릭터의 피해를 공격 분류로 나눈 비중.
+ *   오른쪽 — 캐릭터별 피해량 가로 막대와 총 합산.
+ * 숫자는 전부 기대 피해 기준이다. 공격을 담지 않아도 빈 도넛으로 자리를 지킨다.
+ */
+export function DamageBreakdownSection({
+  results = [],
+  snapshot,
+  title = "피해 분석",
+  note,
+  stacked = false,
+}: DamageBreakdownSectionProps) {
+  const { config } = usePartyConfig();
+  const [hover, setHover] = useState<string | null>(null);
+
+  // 담아 둔 값이 있으면 그걸로, 없으면 지금 결과로 그린다.
+  const data =
+    snapshot ??
+    buildDamageSnapshot(
+      results,
+      PARTY_SLOTS.map((slot) => config[slot].characterId),
+    );
+  const { total, anomalyTotal } = data;
+  // 얼굴은 담지 않고 그릴 때 찾는다 — 그림 주소가 바뀌어도 옛 사이클이 깨지지 않게.
+  const members = data.members.map((m, index) => ({
+    ...m,
+    key: m.characterId ?? `slot-${index}`,
+    icon: characters.find((c) => c.id === m.characterId)?.iconUrl,
+    empty: !m.characterId,
+  }));
 
   const barMax = members.reduce((max, m) => Math.max(max, m.value), 0) || 1;
 

@@ -2,8 +2,9 @@ import { Fragment, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
-import { usePartyConfig } from "../../../context/PartyConfigContext";
+import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import { DamageFormulaModal } from "./DamageFormulaModal";
+import { buildDamageSnapshot } from "./DamageBreakdownSection";
 import { BuffDialog } from "./BuffDialog";
 import { num } from "../../../utils/format";
 import { ANOMALIES } from "../../../data/anomalies";
@@ -20,7 +21,7 @@ interface RotationSectionProps {
  * 스킬 갈래(skillCategory)를 먼저 본다. 이상 효과·조화도 파괴는 피해식이 통째로 달라
  * 그쪽을 가장 먼저 가른다.
  */
-function cardKind(result: CalculationResult): string {
+export function cardKind(result: CalculationResult): string {
   if (result.damage.kind === "anomaly") return "anomaly";
   if (result.damage.kind === "discord") return "discord";
   if (result.skillCategory === "Circuit") return "circuit";
@@ -80,7 +81,7 @@ function attackGroups(character: CalculationResult["character"]) {
  * 카드에 적을 공격 이름. 끝에 붙은 「피해」를 뗀다 —
  * 좁은 카드에서 줄만 잡아먹고, 어차피 카드에 뜨는 숫자가 피해량이다.
  */
-const attackLabel = (name: string) => name.replace(/\s*피해$/, "");
+export const attackLabel = (name: string) => name.replace(/\s*피해$/, "");
 
 export function RotationSection({ results }: RotationSectionProps) {
   const { selectedId, setSelectedId } = useAppState();
@@ -98,6 +99,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     openCycle,
     saveCyclePreset,
     allBuffs,
+    config,
   } = usePartyConfig();
   // 상세보기를 연 항목의 id. 카드 선택(selectedId)과는 별개로 둔다 —
   // 카드를 눌러 히트별로 펼치는 것과 계산식을 여는 것은 다른 동작이다.
@@ -115,6 +117,20 @@ export function RotationSection({ results }: RotationSectionProps) {
   const swapResult = results.find((r) => r.item.id === swapId);
   // 버프 창은 루틴 오른쪽 자리(.rotation-dock)에 붙이고, 계산식은 화면 위에 창으로 띄운다.
   const selected = results.find((r) => r.item.id === selectedId) ?? null;
+
+  // 담는 순간의 피해를 그래프 값 그대로 같이 담는다 — 나중에 자료가 바뀌어도 그때 숫자로 다시 그린다.
+  const saveCycle = () => {
+    saveCyclePreset(
+      saveName || "이름 없는 사이클",
+      buildDamageSnapshot(
+        results,
+        PARTY_SLOTS.map((slot) => config[slot].characterId),
+      ),
+    );
+    setSaveName("");
+    setSaved(true);
+    setSaveOpen(false);
+  };
 
   return (
     <>
@@ -163,23 +179,13 @@ export function RotationSection({ results }: RotationSectionProps) {
             value={saveName}
             onChange={(event) => setSaveName(event.target.value)}
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
-                saveCyclePreset(saveName || "이름 없는 사이클");
-                setSaveName("");
-                setSaved(true);
-                setSaveOpen(false);
-              }
+              if (event.key === "Enter") saveCycle();
               if (event.key === "Escape") setSaveOpen(false);
             }}
           />
           <button
             className="primary"
-            onClick={() => {
-              saveCyclePreset(saveName || "이름 없는 사이클");
-              setSaveName("");
-              setSaved(true);
-              setSaveOpen(false);
-            }}
+            onClick={saveCycle}
           >
             담기
           </button>

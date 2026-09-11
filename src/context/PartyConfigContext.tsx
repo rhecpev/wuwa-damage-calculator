@@ -30,6 +30,7 @@ import {
 } from "../data/characterBuffOverrides";
 import { getEchoBuffOverrides, subscribeEchoBuffOverrides } from "../data/echoBuffOverrides";
 import { echoStoreVersion, subscribeEchoStore } from "../data/echoStore";
+import type { EchoLink } from "../data/echoStore";
 import { anomalyFromAttackId } from "../data/anomalies";
 import { anomalyStateBuffs } from "../data/anomalyBuffs";
 import { anomalyStackCap } from "../calculator/manualBuffs";
@@ -82,6 +83,16 @@ const defaultConfig: PartyConfig = {
 };
 
 export type PartySlot = "mainDps" | "subDps" | "support";
+
+/**
+ * 비교용으로 바꿔 끼운 환경. 비워 둔 칸은 지금 설정을 그대로 쓴다.
+ * 사이클 대미지 비교 탭이 「무기·체인·에코를 바꾸면」을 볼 때만 쓰고, 저장된 설정은 건드리지 않는다.
+ */
+export interface GearOverride {
+  weapons?: Record<string, CharacterWeaponConfig>;
+  chains?: Record<string, number>;
+  echoLinks?: EchoLink[];
+}
 
 /**
  * 저장해둔 파티 한 벌. 편성·로테이션·몬스터 설정을 통째로 담는다.
@@ -213,8 +224,11 @@ interface PartyConfigContextType {
 
   /** 담아둔 사이클(공격 루틴 한 벌). 사이클 관리 탭이 본다. */
   cyclePresets: CyclePreset[];
-  /** 지금 계산 탭의 루틴·버프·환경을 통째로 담는다. 루틴이 비어 있으면 담지 않는다. */
-  saveCyclePreset: (name: string, note?: string) => void;
+  /**
+   * 지금 계산 탭의 루틴·버프·환경을 통째로 담는다. 루틴이 비어 있으면 담지 않는다.
+   * snapshot은 담는 순간의 피해 분석 그래프 값 — 계산 결과는 화면 쪽에 있어서 넘겨받는다.
+   */
+  saveCyclePreset: (name: string, snapshot?: CyclePreset["snapshot"], note?: string) => void;
   /** 받은 사이클을 목록에 넣는다(불러오기·추출물 붙여넣기). */
   addCyclePreset: (preset: CyclePreset) => void;
   /**
@@ -233,6 +247,11 @@ interface PartyConfigContextType {
    * 다른 팀의 사이클은 그 팀 버프가 전부 없는 것으로 잡혀, 켜 둔 체크가 통째로 빠진다.
    */
   buffIdsFor: (characterIds: string[]) => Set<string>;
+  /**
+   * 이 캐릭터들이 앉고 무기·체인·에코를 override대로 바꿔 끼웠다고 칠 때의 버프 목록(손 버프 포함).
+   * 무기가 바뀌면 무기 버프가, 체인이 오르면 체인 버프가, 에코가 바뀌면 화음·어빌리티 버프가 따라 바뀐다.
+   */
+  buffsWith: (characterIds: string[], override?: GearOverride) => ManualBuff[];
 }
 
 const PartyConfigContext = createContext<PartyConfigContextType | undefined>(undefined);
@@ -780,7 +799,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     return rows.filter((m): m is NonNullable<typeof m> => m !== null);
   };
 
-  const saveCyclePreset = (name: string, note?: string) => {
+  const saveCyclePreset = (name: string, snapshot?: CyclePreset["snapshot"], note?: string) => {
     const label = name.trim();
     if (!label || config.rotation.length === 0) return;
     setCyclePresets((current) => [
@@ -789,6 +808,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         name: label,
         savedAt: new Date().toISOString(),
         ...(note?.trim() ? { note: note.trim() } : {}),
+        ...(snapshot ? { snapshot } : {}),
         members: currentCycleMembers(),
         // 손으로 넣은 버프는 통째로 옮긴다 — id가 그대로여야 켜둔 체크가 살아난다.
         manualBuffs: manualBuffs.map((b) => ({ ...b })),
@@ -1003,6 +1023,36 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   const buffIdsFor = (characterIds: string[]) =>
     new Set(deriveBuffsFor(characterIds).map((b) => b.id));
 
+  const buffsWith = (characterIds: string[], override: GearOverride = {}): ManualBuff[] => {
+    const weapons = override.weapons ?? characterWeapons;
+    const chains = override.chains ?? characterChains;
+    const members = characterIds
+      .map((id) => {
+        const character = characters.find((c) => c.id === id);
+        if (!character) return null;
+        return {
+          character,
+          config: {
+            characterId: id,
+            weaponId: weapons[id]?.weaponId ?? "",
+            echoIds: [],
+            resonanceChain: chains[id] ?? 0,
+            resonanceMode: characterModes[id] ?? character.resonanceModes?.[0],
+          },
+        };
+      })
+      .filter((m): m is NonNullable<typeof m> => m !== null);
+    const ids = members.map((m) => m.character.id);
+
+    return [
+      ...manualBuffs,
+      ...deriveCharacterBuffs(members, characterInherents),
+      ...deriveWeaponBuffs(weapons, ids),
+      ...(override.echoLinks ? deriveEchoBuffs(ids, override.echoLinks) : deriveEchoBuffs(ids)),
+      ...anomalyStateBuffs(),
+    ];
+  };
+
   // 파티에 앉은 캐릭터의 고유 버프와, 그 캐릭터가 낀 무기의 스킬 버프를 자동으로 합친다.
   // 편성·무기·정련·공명체인·공명 모드를 바꾸면 목록이 바로 따라온다.
   const allBuffs = useMemo(() => {
@@ -1121,6 +1171,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     removeCyclePreset,
     currentCycleMembers,
     buffIdsFor,
+    buffsWith,
   };
 
   return <PartyConfigContext.Provider value={value}>{children}</PartyConfigContext.Provider>;

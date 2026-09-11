@@ -659,6 +659,162 @@
 .party-load-modal .panel-head{margin-bottom:10px}
 .party-load-modal .panel-head h2{display:none}
 .party-load-modal .preset-list{max-height:min(52vh,420px)}
+/* 사이클 관리 · 저장 당시 그래프 — 도넛 셋과 막대가 들어가도록 넓게. */
+.cycle-graph-modal{width:min(1100px,100%)}
+.cycle-graph-modal .panel{margin:0}
+/* 사이클 대미지 비교 — 안쪽 탭 둘(사이클 VS 사이클 / 에코 · 무기 · 돌파). */
+.compare-tabs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.compare-tabs button{padding:8px 16px;font-size:13px;color:#a8b0bf;background:#2a3246;border:1px solid #3c455c;border-radius:999px;cursor:pointer}
+.compare-tabs button:hover{border-color:#8794aa}
+.compare-tabs button.on{color:#e9edf5;background:#3a4358;border-color:#8794aa;font-weight:600}
+/* 사이클 VS 사이클 — A 그래프 · 가운데 캐릭터 비교표 · B 그래프. */
+.compare-vs{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,380px) minmax(0,1fr);gap:12px;align-items:stretch}
+/* 세 칸 모두 「선택 칸 + 판」. 판이 남은 높이를 채워 그래프 둘과 가운데 표가 같은 높이가 된다. */
+.compare-side{display:flex;flex-direction:column;gap:8px;min-width:0}
+.compare-side>.panel{flex:1;margin:0}
+/* 사이클 고르는 칸 — 판(#282f41)과 한눈에 갈리도록 밝은 바탕 · 뚜렷한 테두리 · 이름표. */
+.compare-pick{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#353f58;border:1px solid #66728f;border-radius:12px}
+.compare-pick em{flex:none;padding:3px 10px;font-style:normal;font-size:12px;font-weight:700;color:#f1f4f9;background:#4a5570;border-radius:999px}
+.compare-pick select{flex:1;min-width:0;padding:7px 10px;font:inherit;font-size:13px;font-weight:600;color:#f5f7fb;background:#1d2332;border:1px solid #66728f;border-radius:8px}
+/* A는 파랑, B는 주황 — 그래프 제목의 A · B와 짝을 짓는다. */
+.compare-pick-a{background:rgba(57,135,229,.18);border-color:#3987e5}
+.compare-pick-a em{color:#dcebff;background:rgba(57,135,229,.5)}
+.compare-pick-a select{border-color:#3987e5}
+.compare-pick-b{background:rgba(217,89,38,.18);border-color:#d95926}
+.compare-pick-b em{color:#ffe3d6;background:rgba(217,89,38,.5)}
+.compare-pick-b select{border-color:#d95926}
+.compare-mid h2{margin-bottom:4px}
+.compare-mid .enemy-hint{display:block;margin-bottom:10px}
+.compare-table{width:100%;border-collapse:collapse;font-size:12.5px;font-variant-numeric:tabular-nums}
+.compare-table th{padding:0 6px 8px;color:#8791a4;font-size:11px;font-weight:600;text-align:right}
+.compare-table td{padding:5px 6px;text-align:right;color:#a8b0bf;border-top:1px solid #31394c;white-space:nowrap;vertical-align:top}
+.compare-table td:first-child{text-align:left;white-space:normal}
+.compare-table td small{display:block;font-size:10.5px;opacity:.85}
+.compare-char td{padding-top:10px;color:#e9edf5;font-weight:600;border-top:1px solid #4a5266}
+.compare-face{display:flex;align-items:center;gap:8px}
+.compare-face img{width:28px;height:28px;flex:none;border-radius:50%;object-fit:cover;border:1px solid #4a5266;background:#262d3f}
+.compare-cat td{padding-top:2px;padding-bottom:2px;font-size:11.5px;color:#9aa3b3;border-top:none}
+.compare-cat td:first-child{padding-left:42px}
+.compare-cat i{display:inline-block;width:8px;height:8px;margin-right:6px;border-radius:2px;vertical-align:middle}
+.compare-total td{padding-top:9px;color:#dce6f5;font-weight:700;border-top:1px solid #4a5266}
+.compare-table .up{color:#7fd1a8}
+.compare-table .down{color:#e58a8a}
+/* 가운데 비교표 — 양옆 그래프 판과 바탕을 달리하고 글자를 밝혀 숫자를 읽기 쉽게. */
+.compare-mid{background:#303a53;border-color:#505d7b}
+.compare-mid .enemy-hint{color:#bcc4d2}
+.compare-mid .compare-table th{color:#b8c1d0}
+.compare-mid .compare-table td{color:#e3e8ef;border-top-color:#435070}
+.compare-mid .compare-char td{color:#fff;border-top-color:#5f6c8b}
+.compare-mid .compare-cat td{color:#c8cfda}
+/* 총합 줄은 표에서 제일 먼저 읽히도록 크게. */
+.compare-mid .compare-total td{padding-top:12px;padding-bottom:6px;font-size:16px;color:#fff;border-top:2px solid #5f6c8b}
+.compare-mid .compare-total td small{font-size:12px}
+.compare-mid .compare-table .up{color:#93e4ba}
+.compare-mid .compare-table .down{color:#ffa3a3}
+/* 에코 · 무기 · 돌파 — 파티 세 자리를 가로로 삼등분. 아이콘을 크게, 이름만. */
+.gear-party{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:4px}
+.gear-member{display:flex;flex-direction:column;align-items:center;gap:10px;padding:18px 12px;background:#2d3345;border:1px solid #384155;border-radius:14px}
+.gear-head>img,.gear-face-blank{width:96px;height:96px;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:#262d3f;border:2px solid #4a5266;font-size:28px;font-weight:700;color:#78829a}
+.gear-member b{font-size:15px;color:#e9edf5;text-align:center}
+.gear-member.empty b{color:#8791a4;font-weight:500}
+@media(max-width:700px){.gear-party{grid-template-columns:minmax(0,1fr)}}
+/* 캐릭터 카드 안 — 얼굴 · 이름은 가운데, 그 아래 돌파 · 무기 · 에코는 칸 폭을 다 쓴다. */
+.gear-member{align-items:stretch}
+.gear-member.changed{border-color:#e8c66a}
+.gear-head{display:flex;flex-direction:column;align-items:center;gap:10px}
+.gear-label{display:block;margin-bottom:6px;font-style:normal;font-size:11px;letter-spacing:.4px;color:#9aa3b3}
+.gear-chain{display:flex;gap:6px}
+.gear-chain button{flex:1;min-width:0;padding:7px 0;font-size:13px;font-weight:700;color:#8791a4;background:#262d3f;border:1px solid #3c455c;border-radius:8px;cursor:pointer}
+.gear-chain button:hover{border-color:#8794aa}
+.gear-chain button.on{color:#1d2332;background:#e8c66a;border-color:#e8c66a}
+.gear-weapon{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#262d3f;border:1px solid #3c455c;border-radius:10px}
+.gear-weapon img,.gear-weapon-blank{width:42px;height:42px;flex:none;object-fit:contain;border-radius:8px;background:#30394a}
+.gear-weapon>span{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
+.gear-weapon b{font-size:13px;color:#e9edf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-weapon small{font-size:11px;color:#9aa3b3}
+.gear-weapon button{flex:none;padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer}
+/* 에코 다섯 줄 — 한 줄에 아이콘 · 이름 · 주옵션 · 화음 세트. 누르면 보유 에코로 교체. */
+.gear-echo-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.gear-echo-rows button{width:100%;display:flex;align-items:center;gap:8px;padding:5px 8px;text-align:left;font:inherit;color:inherit;background:#262d3f;border:1px solid #3c455c;border-radius:9px;cursor:pointer}
+.gear-echo-rows button:hover{border-color:#8794aa}
+.gear-echo-rows button.on{border-color:#e8c66a;background:#3f382b}
+.gear-echo-icon,.gear-echo-blank{width:30px;height:30px;flex:none;object-fit:contain;border-radius:6px;background:#30394a}
+.gear-echo-rows b{flex:1;min-width:0;font-size:12.5px;color:#e9edf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-main{flex:none;font-size:11px;color:#8fb4d9;white-space:nowrap}
+.gear-echo-set{display:flex;align-items:center;gap:3px;flex:none;max-width:40%}
+.gear-echo-set img{width:16px;height:16px;flex:none}
+.gear-echo-set small{font-size:10.5px;color:#b8c0ce;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 카드 위 — 왼쪽 큰 칸(얼굴 · 이름), 오른쪽 돌파 드롭다운 · 무기. */
+.gear-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:stretch}
+.gear-top .gear-head{justify-content:center;padding:12px 14px;background:#262d3f;border:1px solid #3c455c;border-radius:12px}
+.gear-top-side{display:flex;flex-direction:column;justify-content:center;gap:10px;min-width:0}
+.gear-chain-select{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#262d3f;border:1px solid #3c455c;border-radius:10px}
+.gear-chain-select.on{border-color:#e8c66a}
+.gear-chain-select em{flex:none;font-style:normal;font-size:12px;font-weight:600;color:#c2c9d6}
+.gear-chain-select select{flex:1;min-width:0;padding:6px 8px;font:inherit;font-size:13px;font-weight:600;color:#f1f4f9;background:#1d2332;border:1px solid #4a5570;border-radius:8px}
+.gear-weapon.on{border-color:#e8c66a}
+/* 에코 교체 창 — 에코마다 주옵션 · 메인 서브 · 부옵션 다섯 줄까지 자세히. */
+.gear-echo-modal{width:min(1040px,100%)}
+.gear-echo-detail{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px;max-height:min(62vh,600px);overflow-y:auto}
+.gear-echo-detail button{width:100%;height:100%;display:flex;flex-direction:column;gap:6px;padding:10px 12px;text-align:left;font:inherit;color:inherit;background:#2d3345;border:1px solid #384155;border-radius:11px;cursor:pointer}
+.gear-echo-detail button:hover:not(:disabled){border-color:#8794aa}
+.gear-echo-detail button.on{border-color:#e8c66a;background:#3f382b;cursor:default}
+.gear-echo-detail button.mine{border-color:#5f8fcf}
+.gear-echo-detail button.taken{opacity:.4;cursor:not-allowed}
+.gear-echo-detail-head{display:flex;align-items:center;gap:8px;min-width:0}
+.gear-echo-detail-head>b{flex:1;min-width:0;font-size:13px;color:#e9edf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-status{font-style:normal;font-size:11px;color:#e8c66a}
+.gear-echo-detail button.mine .gear-echo-status{color:#8fc0ff}
+.gear-echo-detail button.taken .gear-echo-status{color:#e58a8a}
+.gear-echo-detail-main{display:flex;align-items:baseline;justify-content:space-between;gap:8px;padding:5px 8px;background:#262d3f;border-radius:7px}
+.gear-echo-detail-main b{font-size:12.5px;color:#8fb4d9}
+.gear-echo-detail-main small{font-size:11px;color:#b8c0ce}
+.gear-echo-subs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px 10px;font-size:11.5px;color:#c8cfda}
+.gear-echo-subs span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-subs .none{color:#6f7890}
+/* 추가된 버프 · 추가된 공격 — 할 일은 금색 느낌표, 끝낸 것은 초록 체크. */
+.gear-added{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.gear-added li{display:flex;align-items:center;gap:8px;padding:6px 8px;background:#2f2c25;border:1px solid #6b5a33;border-radius:9px}
+.gear-added li.done{background:#243630;border-color:#3d6b54}
+.gear-added-mark{width:20px;height:20px;flex:none;display:grid;place-items:center;border-radius:50%;font-size:12px;font-weight:700;color:#1d2332;background:#e8c66a}
+.gear-added li.done .gear-added-mark{background:#7fd1a8}
+.gear-added-name{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.gear-added-name b{font-size:12px;color:#e9edf5;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-added-name small{font-size:10.5px;color:#9aa3b3}
+.gear-added button{flex:none;padding:5px 10px;font-size:11.5px;border-radius:8px;cursor:pointer;white-space:nowrap}
+/* 설정 창 — 왼쪽 루틴, 오른쪽 끼울 카드 · 버프 목록. */
+.gear-dialog{width:min(1200px,100%)}
+.gear-dialog-body{display:grid;grid-template-columns:minmax(0,1fr) 380px;gap:14px;align-items:start}
+.gear-routine-wrap{display:flex;flex-direction:column;gap:10px;max-height:min(64vh,640px);overflow-y:auto;padding-right:4px}
+.gear-cycle>b{display:block;margin-bottom:6px;font-size:11px;color:#9aa3b3}
+.gear-routine{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.gear-routine .card{cursor:pointer}
+.gear-routine .card.dim{opacity:.28;cursor:not-allowed}
+.gear-routine .card.selected{outline:2px solid #e8c66a;outline-offset:1px}
+.gear-routine .card.fresh{box-shadow:0 0 0 2px #7fd1a8}
+.gear-routine .card.over{box-shadow:-5px 0 0 #e8c66a}
+.gear-drop-end{display:grid;place-items:center;min-height:56px;font-size:11px;color:#8791a4;border:1px dashed #4a5266;border-radius:10px}
+.gear-drop-end.over{border-color:#e8c66a;color:#e8c66a}
+.gear-side{display:flex;flex-direction:column;gap:10px;min-width:0}
+.gear-side>.card{cursor:grab}
+.gear-side-empty{padding:14px;font-size:12px;line-height:1.6;color:#8791a4;background:#262d3f;border:1px dashed #3c455c;border-radius:10px}
+.gear-buffs{max-height:min(52vh,520px);overflow-y:auto}
+.gear-buffs label.focus{box-shadow:0 0 0 2px #7fd1a8}
+.gear-dialog-foot{display:flex;justify-content:flex-end;gap:8px;margin-top:14px}
+@media(max-width:900px){.gear-dialog-body{grid-template-columns:minmax(0,1fr)}}
+.gear-reset{align-self:center;padding:5px 12px;font-size:12px;border-radius:8px;cursor:pointer}
+/* 무기 변경 창 — 보유 무기 격자. */
+.gear-weapon-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;max-height:min(60vh,520px);overflow-y:auto}
+.gear-weapon-list button{width:100%;display:flex;align-items:center;gap:10px;padding:8px 10px;text-align:left;background:#2d3345;border:1px solid #384155;border-radius:10px;cursor:pointer}
+.gear-weapon-list button:hover{border-color:#8794aa}
+.gear-weapon-list button.on{border-color:#e8c66a;background:#3f382b}
+.gear-weapon-list img{width:42px;height:42px;flex:none;object-fit:contain}
+.gear-weapon-list span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gear-weapon-list b{font-size:13px;color:#e9edf5}
+.gear-weapon-list small{font-size:11px;color:#9aa3b3}
+.gear-weapon-tools{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px;color:#9aa3b3}
+/* 가운데 표는 스크롤 없이 다 펼친다. 줄 높이가 늘면 양옆 그래프 판도 같이 늘어난다(stretch). */
+@media(max-width:1200px){.compare-vs{grid-template-columns:minmax(0,1fr)}}
 
 .party-panel{display:flex;flex-direction:column}
 .party-panel .party{flex:1;min-height:0}
