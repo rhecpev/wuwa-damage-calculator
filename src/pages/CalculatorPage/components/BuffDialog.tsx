@@ -116,9 +116,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         </span>
       </div>
 
-    <div className="buff-dialog-split">
-    {/* 왼쪽 — 캐릭터 탭은 위에 붙여 두고 버프 목록만 스크롤한다. */}
-    <div className="buff-dialog-main">
+    {/* 캐릭터 탭 — 버프 목록과 히트별 값 위를 가로질러 붙박이로 둔다. 넘치면 줄을 바꾼다. */}
       {usable.length > 0 && (
         <div className="buff-tabs" role="tablist">
           {tabs.map((t) => (
@@ -138,6 +136,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
           ))}
         </div>
       )}
+    <div className="buff-dialog-split">
     <div className="buff-dialog-body">
       {usable.length === 0 ? (
         <p style={{ color: "#9ea7b7", margin: 0 }}>
@@ -262,7 +261,6 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         </div>
       )}
       </div>
-    </div>
 
       {/* 오른쪽 —이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
           버프를 켜고 끄면서 어느 타가 얼마나 움직이는지 그 자리에서 보려는 것이다. */}

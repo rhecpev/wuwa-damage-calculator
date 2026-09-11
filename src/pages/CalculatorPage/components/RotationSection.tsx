@@ -1,4 +1,5 @@
 import { Fragment, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
@@ -112,8 +113,7 @@ export function RotationSection({ results }: RotationSectionProps) {
   const [swapId, setSwapId] = useState<string | null>(null);
   const formulaResult = results.find((r) => r.item.id === formulaId);
   const swapResult = results.find((r) => r.item.id === swapId);
-  // 버프 창과 계산식 창은 루틴 오른쪽 자리(.rotation-dock)에 나란히 띄운다 —
-  // 화면 위에 떠서 루틴을 가리던 것을 옆으로 뺐다.
+  // 버프 창은 루틴 오른쪽 자리(.rotation-dock)에 붙이고, 계산식은 화면 위에 창으로 띄운다.
   const selected = results.find((r) => r.item.id === selectedId) ?? null;
 
   return (
@@ -456,20 +456,27 @@ export function RotationSection({ results }: RotationSectionProps) {
       )}
     </section>
 
-    {/* 루틴 오른쪽 자리 — 버프 창과 타수별 계산식 창이 여기에 뜬다.
+    {/* 루틴 오른쪽 자리 — 버프 창이 여기에 뜬다.
         아무것도 안 열려 있으면 무엇을 누르면 되는지만 적어 둔다. */}
     <aside className="rotation-dock">
-      {selected && <BuffDialog selected={selected} onClose={() => setSelectedId(null)} />}
-      {formulaResult && (
-        <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />
-      )}
-      {!selected && !formulaResult && (
+      {selected ? (
+        <BuffDialog selected={selected} onClose={() => setSelectedId(null)} />
+      ) : (
         <div className="rotation-dock-empty">
           <b>선택된 카드가 없습니다</b>
-          <span>카드를 누르면 버프 창이, 돋보기(⌕)를 누르면 타수별 계산식이 여기에 뜹니다.</span>
+          <span>카드를 누르면 버프 창이 여기에 뜹니다. 돋보기(⌕)는 타수별 계산식을 창으로 띄웁니다.</span>
         </div>
       )}
     </aside>
+
+    {/* 타수별 계산식 — 버프 창 아래에 붙이지 않고 화면 위에 창으로 띄운다.
+        루틴 판(.rotation-rail)이 sticky · z-index로 쌓임 맥락을 만들어서, 그 안에서 그리면
+        창이 판 높이에 갇혀 판 밖의 것에 가려진다. body로 빼서 그린다. */}
+    {formulaResult &&
+      createPortal(
+        <DamageFormulaModal result={formulaResult} onClose={() => setFormulaId(null)} />,
+        document.body,
+      )}
     </>
   );
 }
