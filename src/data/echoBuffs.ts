@@ -2317,8 +2317,10 @@ export const echoAbilityBuffs: Record<string, EchoBuffTemplate[]> = {
   // (echoAttackOverrides.ts — 추가타는 1회 · 8회 전부 두 갈래).
   //
   // 「암흑 효과」 적에게 이 추가 피해가 100% 증가하는 것은 핵심 붕괴 갈래(#1 · #2)에만 붙는
-  // 배율 상승 100%로 적었다 — 계수 × 2라, 전에 버프로 24.57%를 한 벌 더 얹던 것과 값이 같다.
-  // 본체(#0)에는 걸리지 않는다.
+  // **피해 보너스 +100%**(다른 피해 보너스와 합연산)다. 본체(#0)에는 걸리지 않는다.
+  //   계수 × 2로 읽으면 실측과 어긋난다 — 치사 풀버프(피해 보너스 228%)에서 게임 크리 6739,
+  //   계수 × 2는 9369, 피해 보너스 228 → 328%는 6738.76 → 6739로 맞는다
+  //   (docs/피해-실측-대조.md 「레비아탄 핵심 붕괴」).
   "6000167": [
     {
       label: "메인 슬롯 장착 시 인멸 피해 보너스",
@@ -2340,11 +2342,10 @@ export const echoAbilityBuffs: Record<string, EchoBuffTemplate[]> = {
     },
     {
       label: "핵심 붕괴 · 암흑 효과 적용 (피해 100% 증가)",
-      target: "motionValue",
-      damageType: "Echo",
+      target: "damageBonus",
+      damageType: "All",
       attackIds: ["echo:6000167#1", "echo:6000167#2"], // 핵심 붕괴 추가타 두 갈래에만
-      value: 1, // 계수 × (1 + 100%)
-      modifier: "amplify",
+      value: 1, // 피해 보너스 +100% — 다른 피해 보너스와 합연산
       uptime: "active",
       scope: "self",
       condition: "적이 「암흑 효과」 상태일 때",
