@@ -703,7 +703,15 @@
 .buff-dialog-tools .formula-json-copy{width:auto;height:auto;border-radius:8px}
 .buff-dialog-body{flex:1;min-height:0;overflow-y:auto;padding:14px 16px 16px}
 /* 버프 목록과 히트별 값을 나란히. 둘 다 길어지면 각자 스크롤한다. */
-.buff-dialog-split{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 158px}
+.buff-dialog-split{flex:1;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 158px;grid-template-rows:minmax(0,1fr)}
+.buff-dialog-main{display:flex;flex-direction:column;min-height:0}
+/* 캐릭터별 탭 — 목록 위에 붙박이. 넘치면 가로로 민다. */
+.buff-tabs{display:flex;gap:6px;flex:none;overflow-x:auto;padding:10px 16px 0}
+.buff-tabs button{display:flex;align-items:center;gap:5px;flex:none;padding:5px 10px;font-size:12px;white-space:nowrap;color:#a8b0bf;background:#2a3246;border:1px solid #3c455c;border-radius:999px;cursor:pointer}
+.buff-tabs button:hover{border-color:#8794aa}
+.buff-tabs button.on{color:#e9edf5;background:#3a4358;border-color:#8794aa;font-weight:600}
+.buff-tabs img{width:18px;height:18px;border-radius:50%;object-fit:cover}
+.buff-tabs em{font-style:normal;font-size:10.5px;color:#8791a4;font-variant-numeric:tabular-nums}
 .buff-dialog-hits{min-height:0;overflow-y:auto;padding:14px 14px 16px;border-left:1px solid #384155}
 .buff-dialog-hits>small{display:block;margin-bottom:8px;letter-spacing:.6px;color:#9aa3b3;font-size:10.5px}
 .buff-dialog-hits table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
@@ -836,8 +844,9 @@
 .rotation-dock{position:absolute;top:8px;right:8px;bottom:10px;width:var(--dock-w);
   display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:2px}
 /* 두 창은 원래 화면에 떠 있던 것이라 붙박이 자리에 맞게 위치·크기를 풀어 준다. */
-.rotation-dock .buff-dialog{position:static;transform:none;width:100%;max-height:none;
-  flex:none;box-shadow:none}
+/* 높이를 자리에 묶어야 버프 목록과 히트별 값이 각자 스크롤한다 — 풀어 두면 판 전체가 한 번에 밀린다. */
+.rotation-dock .buff-dialog{position:static;transform:none;width:100%;max-height:100%;
+  flex:0 1 auto;min-height:min(320px,100%);box-shadow:none}
 .rotation-dock .formula-backdrop{position:static;inset:auto;z-index:auto;display:block;
   padding:0;background:none;overflow:visible}
 .rotation-dock .formula-modal{width:100%;padding:16px}
@@ -852,6 +861,7 @@
 .rotation-rail>.panel{display:block;min-height:0;margin-right:0}
 .rotation-rail .rotation-wrap{flex:none;max-height:none;overflow:visible;padding-right:0}
 .rotation-dock{position:static;width:100%;margin-top:12px;overflow:visible}
+.rotation-dock .buff-dialog{max-height:70vh}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
 .panel-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}

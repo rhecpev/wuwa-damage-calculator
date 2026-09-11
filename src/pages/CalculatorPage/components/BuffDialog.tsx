@@ -1,6 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { CalculationResult } from "../hooks/useCalculationResults";
-import { usePartyConfig } from "../../../context/PartyConfigContext";
+import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import {
   anomalyStackCap,
   appliesTo,
@@ -37,6 +37,10 @@ function describe(buff: ManualBuff): string {
   return `${target} · ${damage} · ${how}`;
 }
 
+/** 탭 id — 캐릭터 id와 겹치지 않게 밑줄을 붙인다. */
+const ALL_TAB = "__all";
+const SHARED_TAB = "__shared";
+
 interface BuffDialogProps {
   selected: CalculationResult;
   onClose: () => void;
@@ -47,13 +51,45 @@ interface BuffDialogProps {
  * 화면을 덮지 않도록 오른쪽에 붙는 패널로 그린다 — 루틴을 보면서 버프를 켜고 끌 수 있다.
  */
 export function BuffDialog({ selected, onClose }: BuffDialogProps) {
-  const { toggleBuff, setBuffStacks, allBuffs } = usePartyConfig();
+  const { toggleBuff, setBuffStacks, allBuffs, config } = usePartyConfig();
+  // 고른 탭 — 카드를 바꿔도 남겨 둔다. 한 캐릭터의 버프를 여러 카드에 걸쳐 보는 일이 잦아서다.
+  const [tab, setTab] = useState(ALL_TAB);
 
   // 이 공격에 걸릴 수 있는 것만 남긴다. 분류·속성·개인 범위가 맞지 않는 버프는
   // 켜도 계산에 안 들어가므로 목록에 띄우지 않는다.
-  const usable = allBuffs.filter((buff: ManualBuff) =>
-    appliesTo(buff, selected.attack, selected.character.id),
+  // 상시 버프는 조건 없이 걸려 있어 손댈 일이 적다 — 조건부를 위로 두고 상시는 아래로 민다.
+  const usable = allBuffs
+    .filter((buff: ManualBuff) => appliesTo(buff, selected.attack, selected.character.id))
+    .sort((a, b) => Number(a.uptime === "passive") - Number(b.uptime === "passive"));
+
+  const isOn = (buff: ManualBuff) =>
+    buff.uptime === "passive"
+      ? !(selected.item.disabledBuffIds?.includes(buff.id) ?? false)
+      : selected.item.enabledBuffIds.includes(buff.id);
+
+  // 캐릭터별 탭 — 파티 자리 순서대로, 주인 없는 버프는 「공용」으로 맨 뒤에 모은다.
+  const partyOrder = PARTY_SLOTS.map((slot) => config[slot].characterId);
+  const rank = (id: string) => {
+    if (id === "") return Infinity;
+    const at = partyOrder.indexOf(id);
+    return at === -1 ? partyOrder.length : at;
+  };
+  const ownerIds = [...new Set(usable.map((buff) => buff.ownerId ?? ""))].sort(
+    (a, b) => rank(a) - rank(b),
   );
+  const tabs = [
+    { id: ALL_TAB, label: "전체", icon: undefined as string | undefined, list: usable },
+    ...ownerIds.map((id) => {
+      const owner = id ? characters.find((c) => c.id === id) : undefined;
+      return {
+        id: id || SHARED_TAB,
+        label: id ? (owner?.name ?? "파티에 없음") : "공용",
+        icon: owner?.iconUrl,
+        list: usable.filter((buff) => (buff.ownerId ?? "") === id),
+      };
+    }),
+  ];
+  const current = tabs.find((t) => t.id === tab) ?? tabs[0];
 
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
@@ -81,9 +117,28 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
       </div>
 
     <div className="buff-dialog-split">
+    {/* 왼쪽 — 캐릭터 탭은 위에 붙여 두고 버프 목록만 스크롤한다. */}
+    <div className="buff-dialog-main">
+      {usable.length > 0 && (
+        <div className="buff-tabs" role="tablist">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={t.id === current.id}
+              className={t.id === current.id ? "on" : ""}
+              onClick={() => setTab(t.id)}
+            >
+              {t.icon && <img src={t.icon} alt="" loading="lazy" />}
+              {t.label}
+              <em>
+                {t.list.filter(isOn).length}/{t.list.length}
+              </em>
+            </button>
+          ))}
+        </div>
+      )}
     <div className="buff-dialog-body">
-      
-
       {usable.length === 0 ? (
         <p style={{ color: "#9ea7b7", margin: 0 }}>
           {allBuffs.length === 0
@@ -92,12 +147,12 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         </p>
       ) : (
         <div className="buffs">
-          {usable.map((buff: ManualBuff) => {
+          {current.list.map((buff: ManualBuff) => {
             // 상시 버프는 조건이 없어 기본으로 걸린다. 다만 「이게 얼마나 보태는지」를 보려고
             // 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 뒀다 — 끈 것은 그 공격에만 남는다.
             const always = buff.uptime === "passive";
             const off = selected.item.disabledBuffIds?.includes(buff.id) ?? false;
-            const checked = always ? !off : selected.item.enabledBuffIds.includes(buff.id);
+            const checked = isOn(buff);
             // 스택형이면 이 공격에서 정한 스택을, 없으면 버프의 기본값을 쓴다.
             // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과의 방어력 감소 등)는 상한이 고정이 아니다
             // — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면 같이 올라간다.
@@ -207,8 +262,9 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         </div>
       )}
       </div>
+    </div>
 
-      {/* 오른쪽 — 이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
+      {/* 오른쪽 —이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
           버프를 켜고 끄면서 어느 타가 얼마나 움직이는지 그 자리에서 보려는 것이다. */}
       <div className="buff-dialog-hits">
         <small>히트별</small>
