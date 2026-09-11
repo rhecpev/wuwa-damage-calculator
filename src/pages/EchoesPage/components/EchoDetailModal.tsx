@@ -36,24 +36,32 @@ const formatValue = (val: number | string): string => {
   return String(val);
 };
 
+/**
+ * 드롭다운 항목과 같은 모양으로 맞춘 값. 항목은 전부 formatValue를 거쳐 "150.0"꼴인데,
+ * 표(echoOption.json)의 메인 서브옵션 · 일부 부옵션과 OCR로 담은 값은 "150"꼴이라
+ * 그대로 넣으면 어느 항목과도 안 맞아 「선택」으로 떠 버린다(세팅이 안 된 것처럼 보인다).
+ */
+const norm = (val?: number | string | null): string =>
+  val === undefined || val === null || val === "" ? "" : formatValue(val);
+
 export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onCancel }: EchoDetailModalProps) {
   const [mainOption, setMainOption] = useState<string>(
     echo.options?.mainOption?.type || ""
   );
   const [mainOptionValue, setMainOptionValue] = useState<string>(
-    echo.options?.mainOption?.value || ""
+    norm(echo.options?.mainOption?.value)
   );
   const [mainSubOption, setMainSubOption] = useState<string>(
     echo.options?.mainSubOption?.type || ""
   );
   const [mainSubOptionValue, setMainSubOptionValue] = useState<string>(
-    echo.options?.mainSubOption?.value || ""
+    norm(echo.options?.mainSubOption?.value)
   );
   const [mainSelects, setMainSelects] = useState<string[]>(
     echo.options?.mainSelects || Array(5).fill("")
   );
   const [subSelects, setSubSelects] = useState<string[]>(
-    echo.options?.subSelects || Array(5).fill("")
+    (echo.options?.subSelects || Array(5).fill("")).map((v) => norm(v))
   );
   const [selectedFetter, setSelectedFetter] = useState<string>(
     echo.options?.selectedFetter || ""
@@ -75,11 +83,11 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
     console.log("echo.options:", echo.options);
 
     setMainOption(echo.options?.mainOption?.type || "");
-    setMainOptionValue(echo.options?.mainOption?.value || "");
+    setMainOptionValue(norm(echo.options?.mainOption?.value));
     setMainSubOption(echo.options?.mainSubOption?.type || "");
-    setMainSubOptionValue(echo.options?.mainSubOption?.value || "");
+    setMainSubOptionValue(norm(echo.options?.mainSubOption?.value));
     setMainSelects(echo.options?.mainSelects || Array(5).fill(""));
-    setSubSelects(echo.options?.subSelects || Array(5).fill(""));
+    setSubSelects((echo.options?.subSelects || Array(5).fill("")).map((v) => norm(v)));
     setSelectedFetter(echo.options?.selectedFetter || "");
     setIsMainOptionApproximate((echo.options?.mainOption as any)?.isApproximate || false);
     setIsMainSubOptionApproximate((echo.options?.mainSubOption as any)?.isApproximate || false);
@@ -93,7 +101,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
 
     const newSubSelects = [...subSelects];
     const firstSubValue = (optionsData.sub as Record<string, (string | number)[]>)[value]?.[0];
-    newSubSelects[rowIdx] = firstSubValue ? String(firstSubValue) : "";
+    newSubSelects[rowIdx] = norm(firstSubValue);
     setSubSelects(newSubSelects);
     setError("");
   };
@@ -254,7 +262,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                 onChange={(e) => {
                   setMainOption(e.target.value);
                   const firstValue = (echoOptionData.mainOption as Record<string, string[]>)[e.target.value]?.[0];
-                  setMainOptionValue(firstValue ? String(firstValue) : "");
+                  setMainOptionValue(norm(firstValue));
                   setError("");
                 }}
                 style={{
@@ -328,7 +336,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                 onChange={(e) => {
                   setMainSubOption(e.target.value);
                   const firstValue = (echoOptionData.mainSubOption as Record<string, string[]>)[e.target.value]?.[0];
-                  setMainSubOptionValue(firstValue ? String(firstValue) : "");
+                  setMainSubOptionValue(norm(firstValue));
                   setError("");
                 }}
                 style={{
