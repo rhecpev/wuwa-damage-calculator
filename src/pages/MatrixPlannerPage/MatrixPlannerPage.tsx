@@ -1,7 +1,8 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { characters } from "../../data/sampleData";
-import { ELEMENT_COLORS, ELEMENT_NAMES } from "../../data/elements";
+import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
 import { isOwnedCharacter, ownedStoreVersion, subscribeOwnedStore } from "../../data/ownedStore";
+import { usePartyConfig } from "../../context/PartyConfigContext";
 import { usePersistedState } from "../../utils/usePersistedState";
 
 /**
@@ -29,8 +30,16 @@ const emptyParty = (id: number): PlannerParty => ({ id, memberIds: [] });
 /** 처음 열면 빈 파티 셋. 매트릭스가 보통 셋을 요구한다. */
 const INITIAL: PlannerParty[] = [emptyParty(1), emptyParty(2), emptyParty(3)];
 
+/**
+ * 캐릭터 셋을 「누가 앉았는지」만 남긴 열쇠로 바꾼다.
+ * 자리 순서는 빼고 본다 — 같은 셋이면 메인딜을 누구로 잡았든 같은 조합이다.
+ */
+const comboKey = (characterIds: string[]): string =>
+  [...new Set(characterIds.filter(Boolean))].sort().join("|");
+
 export function MatrixPlannerPage() {
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
+  const { cyclePresets } = usePartyConfig();
   const [parties, setParties] = usePersistedState<PlannerParty[]>("matrixParties", INITIAL);
   const [activeId, setActiveId] = useState(INITIAL[0].id);
   const [query, setQuery] = useState("");
@@ -66,6 +75,20 @@ export function MatrixPlannerPage() {
   }, [parties]);
 
   const byId = useMemo(() => new Map(characters.map((c) => [c.id, c] as const)), []);
+
+  /**
+   * 조합 열쇠 -> 그 조합으로 담아 둔 사이클 이름들.
+   * 사이클을 담을 때 빈 자리는 빼고 담으므로(currentCycleMembers) 셋만 비교하면 된다.
+   */
+  const cyclesByCombo = useMemo(() => {
+    const map = new Map<string, string[]>();
+    for (const preset of cyclePresets) {
+      const key = comboKey(preset.members.map((m) => m.characterId));
+      if (!key) continue;
+      map.set(key, [...(map.get(key) ?? []), preset.name]);
+    }
+    return map;
+  }, [cyclePresets]);
 
   /** 지금 채우는 파티. 지워졌으면 첫 파티로 되돌린다. */
   const active = parties.find((p) => p.id === activeId) ?? parties[0];
@@ -217,56 +240,80 @@ export function MatrixPlannerPage() {
           </div>
 
           <div className="matrix-parties">
-            {parties.map((party, index) => (
-              <article
-                key={party.id}
-                className={party.id === active?.id ? "matrix-party on" : "matrix-party"}
-                onClick={() => setActiveId(party.id)}
-              >
-                <header>
-                  <b>{index + 1}파티</b>
-                  <small>
-                    {party.memberIds.length}/{PARTY_SIZE}
-                  </small>
-                  <button
-                    className="matrix-drop"
-                    title={parties.length <= 1 ? "이 파티를 비웁니다" : "이 파티를 지웁니다"}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      dropParty(party.id);
-                    }}
-                  >
-                    ✕
-                  </button>
-                </header>
+            {parties.map((party, index) => {
+              // 메인딜은 첫 자리에 앉은 캐릭터로 본다 — 목록에서 먼저 누른 쪽이다.
+              const lead = byId.get(party.memberIds[0] ?? "");
+              const leadIcon = lead && elementIcon(lead.element);
+              const saved = cyclesByCombo.get(comboKey(party.memberIds)) ?? [];
 
-                <div className="matrix-slots">
-                  {Array.from({ length: PARTY_SIZE }, (_, slot) => {
-                    const char = byId.get(party.memberIds[slot] ?? "");
-                    if (!char)
-                      return <div key={slot} className="matrix-slot empty" aria-hidden="true" />;
+              return (
+                <article
+                  key={party.id}
+                  className={party.id === active?.id ? "matrix-party on" : "matrix-party"}
+                  onClick={() => setActiveId(party.id)}
+                >
+                  <header>
+                    <b>{index + 1}파티</b>
+                    <small>
+                      {party.memberIds.length}/{PARTY_SIZE}
+                    </small>
+                    <button
+                      className="matrix-drop"
+                      title={parties.length <= 1 ? "이 파티를 비웁니다" : "이 파티를 지웁니다"}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        dropParty(party.id);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </header>
 
-                    return (
-                      <button
-                        key={slot}
-                        className="matrix-slot"
-                        title={`${char.name} — 누르면 파티에서 빠집니다`}
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          remove(party.id, char.id);
-                        }}
-                      >
-                        {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
-                        <b>{char.name}</b>
-                        <em style={{ color: ELEMENT_COLORS[char.element] }}>
-                          {ELEMENT_NAMES[char.element]}
+                  {lead && (
+                    <div className="matrix-lead">
+                      <span style={{ color: ELEMENT_COLORS[lead.element] }}>
+                        {leadIcon && <img src={leadIcon} alt="" loading="lazy" />}
+                        메인딜 속성 : <b>{ELEMENT_NAMES[lead.element]}</b>
+                      </span>
+
+                      {saved.length > 0 && (
+                        <em
+                          className="matrix-saved"
+                          title={`이 조합으로 담아 둔 사이클 — ${saved.join(" · ")}`}
+                        >
+                          저장된 사이클 있음{saved.length > 1 ? ` ${saved.length}` : ""}
                         </em>
-                      </button>
-                    );
-                  })}
-                </div>
-              </article>
-            ))}
+                      )}
+                    </div>
+                  )}
+
+                  <div className="matrix-slots">
+                    {Array.from({ length: PARTY_SIZE }, (_, slot) => {
+                      const char = byId.get(party.memberIds[slot] ?? "");
+                      if (!char)
+                        return <div key={slot} className="matrix-slot empty" aria-hidden="true" />;
+
+                      return (
+                        <button
+                          key={slot}
+                          className="matrix-slot"
+                          title={`${char.name} — 누르면 파티에서 빠집니다`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            remove(party.id, char.id);
+                          }}
+                        >
+                          <b>{char.name}</b>
+                          <em style={{ color: ELEMENT_COLORS[char.element] }}>
+                            {ELEMENT_NAMES[char.element]}
+                          </em>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </article>
+              );
+            })}
           </div>
 
           <p className="matrix-hint">

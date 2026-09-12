@@ -1565,15 +1565,25 @@
   color:#8791a4;background:#262d3f;border:1px solid #3c455c;border-radius:7px;font-size:11px;cursor:pointer}
 .matrix-drop:hover{color:#d99a9a;border-color:#8a5a5a}
 
-.matrix-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
-.matrix-slot{display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 6px;
-  text-align:center;background:#262d3f;border:1px solid #3c455c;border-radius:10px;cursor:pointer}
+/* 메인딜 속성 — 첫 자리에 앉은 캐릭터의 속성. 조합을 훑을 때 이 줄만 봐도 되게 한다. */
+.matrix-lead{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px}
+.matrix-lead span{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#9aa3b3}
+.matrix-lead span b{font-size:12px;font-weight:700;color:inherit}
+.matrix-lead img{width:16px;height:16px;flex:none;object-fit:contain}
+/* 이 조합으로 담아 둔 사이클이 있다는 표. 제목(title)에 사이클 이름이 들어 있다. */
+.matrix-saved{font-style:normal;padding:2px 8px;border-radius:999px;font-size:11px;
+  color:#8fd6a8;background:#2a3a31;border:1px solid #3f5c4a;cursor:help}
+
+/* 이름·속성만 담는 작은 칸 — 아이콘을 빼고 줄여서 파티가 여러 개 붙어도 훑기 쉽게 한다. */
+.matrix-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.matrix-slot{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 5px;
+  text-align:center;background:#262d3f;border:1px solid #3c455c;border-radius:8px;cursor:pointer}
 .matrix-slot:hover{border-color:#8a5a5a}
-.matrix-slot img{width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid #4a5266}
-.matrix-slot b{font-size:12px;font-weight:600;color:#c2c9d6;line-height:1.25}
-.matrix-slot em{font-style:normal;font-size:10px}
+.matrix-slot b{font-size:12px;font-weight:600;color:#c2c9d6;line-height:1.3;
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.matrix-slot em{font-style:normal;font-size:10px;line-height:1.2}
 /* 빈 자리 — 점선만 남겨 몇 자리가 비었는지 세게 한다. */
-.matrix-slot.empty{min-height:88px;border-style:dashed;border-color:#384155;background:none;cursor:default}
+.matrix-slot.empty{min-height:44px;border-style:dashed;border-color:#384155;background:none;cursor:default}
 
 .matrix-hint{margin:12px 0 0;color:#8791a4;font-size:12px;line-height:1.6}
 .matrix-hint b{color:#c2c9d6}
