@@ -1545,14 +1545,14 @@
 /* 목록은 길어지므로 판 안에서만 스크롤한다 — 파티 줄이 늘 보이게. */
 .matrix-pool{grid-template-columns:repeat(auto-fill,minmax(76px,1fr));
   max-height:min(70vh,700px);overflow-y:auto;padding:2px 8px 2px 2px}
-.matrix-pool .pick-card{position:relative}
 .matrix-pool .pick-card:disabled{cursor:not-allowed}
 /* 쓸 만큼 다 쓴 캐릭터. 흐리게 하고 어느 파티에 있는지 노랗게 박는다. */
 .matrix-pool .pick-card.in{opacity:.4}
 .matrix-pool .pick-card.in em{color:#e8c66a}
-/* 겹쳐 쓸 수 있는 치유·보조 표. 한 번 썼어도 잠기지 않는다. */
-.matrix-pool .pick-card i{position:absolute;top:4px;right:4px;padding:1px 4px;border-radius:6px;
+/* 겹쳐 쓸 수 있는 치유·보조의 남은 횟수. 한 번 썼어도 잠기지 않는다. */
+.matrix-pool .pick-card i{width:100%;padding:1px 3px;border-radius:6px;text-align:center;
   font-style:normal;font-size:9px;font-weight:700;color:#8fd6a8;background:#2a3a31;border:1px solid #3f5c4a}
+.matrix-pool .pick-card i.spent{color:#9aa3b3;background:#2a3040;border-color:#3c455c}
 
 .matrix-actions{display:flex;gap:8px}
 .matrix-actions button{padding:7px 13px;font-size:12px;border-radius:9px;cursor:pointer}
@@ -1564,11 +1564,11 @@
 @media(max-width:520px){.matrix-columns{grid-template-columns:1fr}}
 
 .matrix-column{display:flex;flex-direction:column;gap:8px;min-width:0}
-.matrix-column>header{display:flex;align-items:center;gap:5px;padding:0 2px 6px;
-  border-bottom:2px solid #384155}
-.matrix-column>header img{width:16px;height:16px;flex:none;object-fit:contain}
-.matrix-column>header b{font-size:12px;font-weight:700;letter-spacing:.3px}
-.matrix-column>header small{margin-left:auto;color:#8791a4;font-size:11px}
+.matrix-column>header{display:flex;flex-direction:column;align-items:center;gap:2px;
+  padding:4px 2px 8px;text-align:center;border-bottom:2px solid #384155}
+.matrix-column>header img{width:80px;height:80px;max-width:100%;flex:none;object-fit:contain}
+.matrix-column>header b{font-size:14px;font-weight:700;letter-spacing:.3px}
+.matrix-column>header small{color:#8791a4;font-size:11px}
 
 .matrix-party{padding:9px 9px 10px;background:#2d3345;border:1px solid #384155;border-radius:12px;cursor:pointer}
 .matrix-party:hover{border-color:#4a5266}

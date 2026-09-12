@@ -321,7 +321,15 @@ export function MatrixPlannerPage() {
                     <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
                       {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
                     </em>
-                    {limit > 1 && <i title="두 파티까지 겹쳐 쓸 수 있습니다">2회</i>}
+                    {/* 겹쳐 쓸 수 있는 치유·보조는 쓸 때마다 남은 횟수를 깎아 보여준다. */}
+                    {limit > 1 && (
+                      <i
+                        className={spent ? "spent" : undefined}
+                        title={`두 파티까지 겹쳐 쓸 수 있습니다 — ${at.length}/${limit} 사용`}
+                      >
+                        {spent ? "다 씀" : `${limit - at.length}회 남음`}
+                      </i>
+                    )}
                   </button>
                 );
               })}
@@ -348,10 +356,11 @@ export function MatrixPlannerPage() {
 
               return (
                 <div className="matrix-column" key={element}>
+                  {/* 줄 머리 — 속성 아이콘을 크게 세우고 이름·파티 수를 그 아래 가운데에 둔다. */}
                   <header style={{ borderColor: ELEMENT_COLORS[element] }}>
                     {icon && <img src={icon} alt="" loading="lazy" />}
                     <b style={{ color: ELEMENT_COLORS[element] }}>{ELEMENT_NAMES[element]}</b>
-                    <small>{filled || ""}</small>
+                    <small>{filled > 0 ? `${filled}파티` : "비어 있음"}</small>
                   </header>
 
                   {column.map((party, index) => {
