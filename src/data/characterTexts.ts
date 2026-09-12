@@ -1,4 +1,5 @@
 import textData from "./characterTexts.json";
+import { baseCharacterId } from "./modeVariants";
 
 /**
  * 캐릭터 스킬·공명체인의 **원문**.
@@ -32,8 +33,9 @@ export interface CharacterText {
 
 const TEXTS = textData as Record<string, CharacterText>;
 
+/** 모드로 가른 캐릭터(lucila-frost 등)는 원래 id의 원문을 함께 본다. */
 export const characterTextOf = (characterId: string): CharacterText | undefined =>
-  TEXTS[characterId];
+  TEXTS[baseCharacterId(characterId)];
 
 /**
  * 이 문장에 **수치가 붙은 버프가 적혀 있는지**.

@@ -1,4 +1,5 @@
 import characterNodesData from "./characterNodes.json";
+import { baseCharacterId } from "./modeVariants";
 import type { Character, Skill, SkillCategory } from "../types/game";
 import type { Stats } from "../types/stats";
 
@@ -25,7 +26,10 @@ export interface CharacterNode {
 const byCharacter = characterNodesData as Record<string, CharacterNode[] | undefined>;
 
 /** 이 캐릭터의 노드 목록. 데이터가 없으면 빈 배열. */
-export const nodesOf = (characterId: string): CharacterNode[] => byCharacter[characterId] ?? [];
+/** 이 캐릭터의 노드 목록. 데이터가 없으면 빈 배열.
+ *  모드로 가른 캐릭터(lucila-frost 등)는 원래 id로 찾는다. */
+export const nodesOf = (characterId: string): CharacterNode[] =>
+  byCharacter[baseCharacterId(characterId)] ?? [];
 
 /**
  * 노드에 적힌 퍼센트는 표시값 그대로 쓴다.

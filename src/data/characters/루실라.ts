@@ -1,4 +1,5 @@
 import type { Attack, Character, CharacterBuffTemplate, Skill } from "../../types/game";
+import { modeVariants } from "../modeVariants";
 import { emptyStats } from "../../types/stats";
 
 /**
@@ -618,7 +619,7 @@ const skills: Skill[] = [
   passive5010,
 ];
 
-export const lucila: Character = {
+const lucila: Character = {
   id: "lucila",
   name: "루실라",
   level: 90,
@@ -638,3 +639,9 @@ export const lucila: Character = {
     "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_66_UI.webp",
   echoIds: [],
 };
+
+/**
+ * 공명 모드 둘을 각각 한 명으로 가른다 — 루실라 · 서리 / 루실라 · 에코.
+ * 고른 모드의 버프만 들고 있고, 스킬 트리 · 공명체인 · 원문은 「lucila」로 함께 찾는다.
+ */
+export const [lucilaFrost, lucilaEcho] = modeVariants(lucila);

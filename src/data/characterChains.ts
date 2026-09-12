@@ -1,4 +1,5 @@
 import characterChainsData from "./characterChains.json";
+import { baseCharacterId } from "./modeVariants";
 
 /**
  * 공명체인 6단계의 이름 · 설명 · 아이콘. 표시 전용이다.
@@ -20,4 +21,6 @@ const byCharacter = characterChainsData as Record<string, ChainNode[] | undefine
 export const CHAIN_MAX = 6;
 
 /** 이 캐릭터의 체인 6단계. 데이터가 없으면 빈 배열. */
-export const chainNodesOf = (characterId: string): ChainNode[] => byCharacter[characterId] ?? [];
+/** 이 캐릭터의 체인 6단계. 모드로 가른 캐릭터는 원래 id로 찾는다. */
+export const chainNodesOf = (characterId: string): ChainNode[] =>
+  byCharacter[baseCharacterId(characterId)] ?? [];

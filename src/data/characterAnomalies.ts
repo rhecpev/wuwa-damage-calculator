@@ -1,4 +1,5 @@
 import type { AnomalyKind } from "./anomalies";
+import { baseCharacterId } from "./modeVariants";
 
 /**
  * 이 캐릭터가 스킬로 붙일 수 있는 이상 효과.
@@ -42,6 +43,7 @@ export const CHARACTER_ANOMALIES: Record<string, AnomalyKind[]> = {
   chisa: ["HavocBane"],
 };
 
-/** 이 캐릭터가 붙일 수 있는 이상 효과. 없으면 빈 배열. */
+/** 이 캐릭터가 붙일 수 있는 이상 효과. 없으면 빈 배열.
+ *  모드로 가른 캐릭터는 원래 id로 찾는다 — 이상 효과는 모드를 가리지 않는다. */
 export const anomaliesOf = (characterId: string): AnomalyKind[] =>
-  CHARACTER_ANOMALIES[characterId] ?? [];
+  CHARACTER_ANOMALIES[baseCharacterId(characterId)] ?? [];

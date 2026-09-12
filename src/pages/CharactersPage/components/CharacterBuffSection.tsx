@@ -3,19 +3,12 @@ import { characters } from "../../../data/sampleData";
 import { CHAIN_MAX, chainNodesOf } from "../../../data/characterChains";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { DAMAGE_TYPE_OPTIONS, TARGET_OPTIONS } from "../../../calculator/manualBuffs";
-import type { CharacterBuffTemplate, ResonanceMode } from "../../../types/game";
+import type { CharacterBuffTemplate } from "../../../types/game";
+import { MODE_LABEL } from "../../../data/modeVariants";
 
 interface CharacterBuffSectionProps {
   characterId: string;
 }
-
-const MODE_LABEL: Record<ResonanceMode, string> = {
-  Discord: "조화 파동",
-  Flame: "불꽃",
-  Cluster: "조화 밀집",
-  Frost: "서리",
-  Echo: "에코",
-};
 
 /** 공격 id -> 공격 이름. 버프가 어느 공격에 걸리는지 이름으로 보여주려고 미리 만든다. */
 function attackNames(characterId: string): Map<string, string> {

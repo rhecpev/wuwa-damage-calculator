@@ -1,4 +1,5 @@
 import type { Attack, Character, CharacterBuffTemplate, Skill } from "../../types/game";
+import { modeVariants } from "../modeVariants";
 import { emptyStats } from "../../types/stats";
 
 /**
@@ -842,7 +843,7 @@ const skills: Skill[] = [
   passive5310,
 ];
 
-export const denia: Character = {
+const denia: Character = {
   id: "denia",
   name: "데니아",
   level: 90,
@@ -862,3 +863,9 @@ export const denia: Character = {
     "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_64_UI.webp",
   echoIds: [],
 };
+
+/**
+ * 공명 모드 둘을 각각 한 명으로 가른다 — 데니아 · 불꽃 / 데니아 · 조화 밀집.
+ * 고른 모드의 버프만 들고 있고, 스킬 트리 · 공명체인 · 원문은 「denia」로 함께 찾는다.
+ */
+export const [deniaFlame, deniaCluster] = modeVariants(denia);

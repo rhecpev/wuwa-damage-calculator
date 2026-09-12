@@ -1,4 +1,5 @@
 import type { Attack, Character, CharacterBuffTemplate, Skill } from "../../types/game";
+import { modeVariants } from "../modeVariants";
 import { emptyStats } from "../../types/stats";
 
 /**
@@ -818,7 +819,7 @@ const skills: Skill[] = [
   passive4509,
 ];
 
-export const linne: Character = {
+const linne: Character = {
   id: "linne",
   name: "린네",
   level: 90,
@@ -838,3 +839,9 @@ export const linne: Character = {
     "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_60_UI.webp",
   echoIds: [],
 };
+
+/**
+ * 공명 모드 둘을 각각 한 명으로 가른다 — 린네 · 조화 파동 / 린네 · 조화 밀집.
+ * 고른 모드의 버프만 들고 있고, 스킬 트리 · 공명체인 · 원문은 「linne」로 함께 찾는다.
+ */
+export const [linneDiscord, linneCluster] = modeVariants(linne);
