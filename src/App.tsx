@@ -11,6 +11,7 @@ import { PartyPage } from "./pages/PartyPage/PartyPage";
 import { ProfileImportPage } from "./pages/ProfileImportPage/ProfileImportPage";
 import { CyclePage } from "./pages/CyclePage/CyclePage";
 import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
+import { MatrixPlannerPage } from "./pages/MatrixPlannerPage/MatrixPlannerPage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -32,6 +33,7 @@ function AppContent() {
         {tab === "echoes" && <EchoesPage />}
         {tab === "cycles" && <CyclePage />}
         {tab === "cycleCompare" && <CycleComparePage />}
+        {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />

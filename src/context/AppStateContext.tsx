@@ -9,6 +9,7 @@ export type TabType =
   | "echoes"
   | "cycles"
   | "cycleCompare"
+  | "matrixPlanner"
   | "weapons"
   | "profileImport";
 

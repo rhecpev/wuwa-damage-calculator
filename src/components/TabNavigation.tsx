@@ -37,6 +37,19 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
+    id: "matrixPlanner",
+    label: "매트릭스 파티 플래너",
+    hint: "보유 캐릭터를 여러 파티로",
+    icon: icon(
+      <>
+        <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
+        <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
+        <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
+        <path d="M17.25 14.5v5.5M14.5 17.25h5.5" />
+      </>,
+    ),
+  },
+  {
     id: "characters",
     label: "캐릭터 관리",
     hint: "무기 · 에코 · 스킬",
