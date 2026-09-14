@@ -66,11 +66,17 @@ export const isNodeOn = (nodeId: string, enabled?: string[]) =>
 /**
  * 스킬 트리 가운데 줄(공명 회로) 위에 얹히는 고유 스킬.
  * 「요리의 달인」 같은 월드 스킬은 트리에 없어서 아이콘 경로로 걸러낸다.
+ * 캐릭터 전용 아이콘(SP_IconRun · SP_Icon…Y)을 쓰는 「요리의 달인」도 있어 이름으로도 거른다.
  * 데이터는 먼저 열리는 것부터 담겨 있고 화면은 위에서 아래로 그리므로 뒤집어 돌려준다.
  */
 export function inherentSkillsOf(character: Character | undefined): Skill[] {
   return (character?.skills ?? [])
-    .filter((s) => s.category === "Passive" && !(s.icon ?? "").includes("SP_IconWorld"))
+    .filter(
+      (s) =>
+        s.category === "Passive" &&
+        !(s.icon ?? "").includes("SP_IconWorld") &&
+        s.name !== "요리의 달인",
+    )
     .reverse();
 }
 
