@@ -3,6 +3,7 @@ import { getWeaponBuffOverrides, weaponBuffKey } from "../data/weaponBuffOverrid
 import { characterBuffKey, getCharacterBuffOverrides } from "../data/characterBuffOverrides";
 import { echoAbilityBuffs, echoSetBuffs } from "../data/echoBuffs";
 import { anomaliesOf } from "../data/characterAnomalies";
+import { baseCharacterId } from "../data/modeVariants";
 import { echoesById, fetterGroupByName } from "../data/echoes";
 import {
   echoAbilityOwnerId,
@@ -179,6 +180,13 @@ export function deriveCharacterBuffs(
   return out;
 }
 
+/**
+ * 「장착 캐릭터가 ○○일 경우」를 따지는 자리. 이중 모드 캐릭터는 모드마다 id가 갈라져 있어
+ * (aymes -> aymes-discord · aymes-flame) 원래 id로도 한 번 더 본다 — 에이메스 시길룸이 그랬다.
+ */
+const wornBy = (only: string[] | undefined, characterId: string) =>
+  !only || only.includes(characterId) || only.includes(baseCharacterId(characterId));
+
 /** 화음 세트 버프의 id. 캐릭터마다 따로 켜고 끌 수 있도록 캐릭터 id를 앞에 둔다. */
 export const echoSetBuffId = (characterId: string, setName: string, index: number) =>
   `echoset:${characterId}:${setName}:${index}`;
@@ -232,7 +240,7 @@ export function deriveEchoBuffs(
         // 맞춘 개수가 그 단계에 못 미치면 아직 열리지 않은 효과다.
         if (count < template.setKey) return;
         // 낀 사람을 가리는 효과라면 그 사람일 때만(어빌리티 쪽과 같은 규칙).
-        if (template.onlyCharacters && !template.onlyCharacters.includes(characterId)) return;
+        if (!wornBy(template.onlyCharacters, characterId)) return;
         // 「적에게 ○○ 효과 추가 시」가 조건인 줄은 그 효과를 붙일 수 있는 사람에게만 뜬다.
         if (
           template.requiresAnomaly &&
@@ -279,7 +287,7 @@ export function deriveEchoBuffs(
     abilityTemplates.forEach((template, index) => {
       // 「장착 캐릭터가 루시 혹은 레베카일 경우」처럼 낀 사람을 가리는 효과.
       // 조건 메모만으로는 걸러지지 않아 여기서 실제로 뺀다.
-      if (template.onlyCharacters && !template.onlyCharacters.includes(characterId)) return;
+      if (!wornBy(template.onlyCharacters, characterId)) return;
       // 세트 쪽과 같은 규칙 — 못 붙이는 이상 효과가 조건이면 이 줄은 서지 않는다.
       if (template.requiresAnomaly && !anomaliesOf(characterId).includes(template.requiresAnomaly))
         return;

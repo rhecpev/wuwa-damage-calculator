@@ -5,7 +5,6 @@ import { CharacterRoster } from "./components/CharacterRoster";
 import { EchoSelector } from "./components/EchoSelector";
 import { WeaponSelector } from "./components/WeaponSelector";
 import { CharacterBuffSection } from "./components/CharacterBuffSection";
-import { CharacterBuffReviewSection } from "./components/CharacterBuffReviewSection";
 import { SkillLevelSection } from "./components/SkillLevelSection";
 import { CharacterStatsSection } from "./components/CharacterStatsSection";
 import { loadEchoLinks, saveEchoLinks } from "../../data/echoStore";
@@ -18,8 +17,8 @@ const TABS = [
   { id: "skill", label: "스킬 노드 관리", hint: "스킬 레벨" },
   { id: "chain", label: "공명체인 관리", hint: "체인 단계 · 고유 버프" },
 ] as const;
-// 「버프 정리」는 탭에서 뺐다 — 위 창을 보면서 같이 대조해야 하는 내용이라
-// 아래쪽에 늘 펼쳐 둔다(탭으로 감춰두면 번갈아 눌러야 해서 비교가 안 된다).
+// 「버프 정리」는 전 캐릭터를 한 번에 훑도록 개발용 「캐릭터 버프 확인」 탭으로 옮겼다
+// (pages/CharacterBuffReviewPage).
 
 type TabId = (typeof TABS)[number]["id"];
 
@@ -135,11 +134,6 @@ export function CharactersPage() {
 
       <div className="char-content">
         {content()}
-
-        {/* 버프 정리는 늘 아래에 펼쳐 둔다 — 위 창과 같이 봐야 하는 내용이다. */}
-        {selectedCharacterId && (
-          <CharacterBuffReviewSection characterId={selectedCharacterId} />
-        )}
       </div>
 
       <CharacterRoster

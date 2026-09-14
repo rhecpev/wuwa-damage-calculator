@@ -14,6 +14,7 @@ import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
 import { MatrixPlannerPage } from "./pages/MatrixPlannerPage/MatrixPlannerPage";
 import { NicknamesPage } from "./pages/NicknamesPage/NicknamesPage";
 import { WeaponBuffReviewPage } from "./pages/WeaponBuffReviewPage/WeaponBuffReviewPage";
+import { CharacterBuffReviewPage } from "./pages/CharacterBuffReviewPage/CharacterBuffReviewPage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -38,6 +39,7 @@ function AppContent() {
         {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "nicknames" && <NicknamesPage />}
         {import.meta.env.DEV && tab === "weaponBuffReview" && <WeaponBuffReviewPage />}
+        {import.meta.env.DEV && tab === "characterBuffReview" && <CharacterBuffReviewPage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />

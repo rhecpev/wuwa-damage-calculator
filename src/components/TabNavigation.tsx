@@ -112,7 +112,7 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
       </>,
     ),
   },
-  // 개발 서버에서만 — 옮겨 적은 무기 버프를 대조하고 고치는 확인용 탭이다.
+  // 개발 서버에서만 — 옮겨 적은 무기 · 캐릭터 버프를 대조하고 고치는 확인용 탭이다.
   ...(import.meta.env.DEV
     ? [
         {
@@ -123,6 +123,18 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
             <>
               <path d="M14.5 3.5 20 9l-9.5 9.5H5v-5.5z" />
               <path d="m13 14 2 2 4-4" />
+            </>,
+          ),
+        },
+        {
+          id: "characterBuffReview" as const,
+          label: "캐릭터 버프 확인",
+          hint: "개발용 · 고유효과 · 체인 정리",
+          icon: icon(
+            <>
+              <circle cx="10" cy="8" r="3.2" />
+              <path d="M4 20c0-3.4 2.7-5.6 6-5.6 1.3 0 2.5.3 3.4.9" />
+              <path d="m15 18 2 2 4-4" />
             </>,
           ),
         },
