@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
+import { usePersistedState } from "./usePersistedState";
 
 /**
  * 「체크 완료」와 「나중에 처리」 — 목록을 하나씩 훑어보는 화면이 공통으로 쓰는 상태.
@@ -8,16 +9,12 @@ import { useMemo, useState } from "react";
  * 둘은 함께 설 수 없어서 하나를 누르면 다른 하나는 풀린다.
  * 표시한 항목은 목록에서 감추고, 화면 위쪽 토글을 켜면 다시 보인다.
  *
- * 표시는 **저장하지 않는다.** 화면을 새로 열면 비어 있다 — 계산에 쓰이는 값이 아니라
- * 한 자리에 앉아 훑는 동안만 필요한 흔적이라서다.
- * name은 화면을 구분하려고 남겨 둔 이름이다(지금은 쓰이지 않는다).
+ * 표시는 **저장한다.** 다른 탭에 다녀오거나 새로고침해도 이어서 훑을 수 있어야 한다.
+ * name이 저장 이름이 되어 화면마다 따로 담긴다.
  */
 export function useReviewStatus(name: string) {
-  // 저장하지 않는다 — 자료를 훑는 동안만 쓰는 표시라, 새로고침하면 비운다.
-  // 예전에는 localStorage에 담았는데 개인 저장이 검토 흔적으로만 15KB 넘게 불어났다.
-  void name;
-  const [checked, setChecked] = useState<string[]>([]);
-  const [deferred, setDeferred] = useState<string[]>([]);
+  const [checked, setChecked] = usePersistedState<string[]>(`review:${name}:checked`, []);
+  const [deferred, setDeferred] = usePersistedState<string[]>(`review:${name}:deferred`, []);
 
   const checkedSet = useMemo(() => new Set(checked), [checked]);
   const deferredSet = useMemo(() => new Set(deferred), [deferred]);
