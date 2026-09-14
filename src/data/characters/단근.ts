@@ -445,10 +445,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     inherentSkillId: "1000804",
     target: "damageBonus",
     damageType: "All",
-    // 주식 1단 · 2단 피해에만 걸린다.
+    // 주식 1단 · 2단 피해에만 걸린다. 지목한 공격에만 붙으므로 상시로 두어 주식에서 자동으로 켜진다.
     attackIds: ["1000802_2", "1000802_3"],
     value: 0.2, // 20% 증가
-    uptime: "active",
+    uptime: "passive",
     scope: "self",
   },
   {
@@ -503,30 +503,27 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 4,
     condition: "「단화」 60pt 이상 적립 시. 강공격 · 혼란 발동 시 모두 소모하고 분락까지 유지",
   },
-  // 5체인은 HP 구간에 따라 값이 갈린다. 원문은 "15% 증가 + HP 60% 미만이면 추가 15%"지만,
-  // 버프가 기본 전부 켜지는 구조라 그대로 두면 두 개가 겹쳐 항상 30%가 된다.
-  // 그래서 겹치지 않는 두 상태로 나눠 적어둔다 — 둘 중 하나만 켜고 나머지는 꺼야 한다.
+  // 5체인은 원문 그대로 "15% 증가 + HP 60% 미만이면 추가 15%"로 나눠 적는다.
+  //   기본 15%는 상시 — 조건이 없어 스탯창에도 찍힌다.
+  //   추가 15%는 발동 — HP 60% 미만일 때 켜면 기본과 합쳐 30%가 된다.
   {
     label: "5체인 · 인멸 피해 보너스 (HP 60% 이상)",
     target: "damageBonus",
     damageType: "Havoc",
     value: 0.15, // 기본 15%
-    uptime: "active",
+    uptime: "passive",
     scope: "self",
-    exclusiveGroup: "danjin-c5-hp", // 아래 「HP 60% 미만」과 하나만 켜진다
     resonanceChain: 5,
-    condition: "HP 60% 이상일 때. 아래 「HP 60% 미만」과 둘 중 하나만 켠다",
   },
   {
     label: "5체인 · 인멸 피해 보너스 (HP 60% 미만)",
     target: "damageBonus",
     damageType: "Havoc",
-    value: 0.3, // 기본 15% + 추가 15%
+    value: 0.15, // 추가 15% — 위 기본 15%와 합쳐 30%
     uptime: "active",
     scope: "self",
-    exclusiveGroup: "danjin-c5-hp", // 위 「HP 60% 이상」과 하나만 켜진다
     resonanceChain: 5,
-    condition: "HP 60% 미만일 때. 위 「HP 60% 이상」과 둘 중 하나만 켠다",
+    condition: "HP 60% 미만일 때 추가 15%. 위 기본 15%와 합쳐진다",
   },
   {
     label: "6체인 · 파티 공격력",

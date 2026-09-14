@@ -174,9 +174,11 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
                   <td>{targetLabel(buff)}</td>
                   <td>{how}</td>
                   <td>
-                    {buff.attackId
-                      ? (names.get(buff.attackId) ?? buff.attackId)
-                      : damageLabel(buff)}
+                    {buff.attackIds?.length
+                      ? buff.attackIds.map((id) => names.get(id) ?? id).join(" · ")
+                      : buff.attackId
+                        ? (names.get(buff.attackId) ?? buff.attackId)
+                        : damageLabel(buff)}
                   </td>
                   <td className="chain-value">
                     {(buff.value * 100).toFixed(0)}%
