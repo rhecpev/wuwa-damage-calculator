@@ -331,6 +331,8 @@ const BONUS_KEY_BY_DAMAGE_TYPE: Partial<Record<string, keyof Stats>> = {
 function panelStatKey(buff: ManualBuff): keyof Stats | null {
   switch (buff.target) {
     case "damageBonus":
+      // 「인멸 피해 보너스」를 damageType "All" + element로 적은 것도 있다(천괴중루 등 에코 어빌리티).
+      if (buff.damageType === "All" && buff.element) return ELEMENT_BONUS_KEY[buff.element];
       // "All"(전체 피해 보너스)과 "Chain"(협동 공격)은 게임 속성 창에도 칸이 없다.
       return BONUS_KEY_BY_DAMAGE_TYPE[buff.damageType] ?? null;
     case "critRate":
@@ -418,7 +420,12 @@ export function equippedPanelStats(
 
     // 무기의 「전체 속성 피해 보너스」는 게임 속성 창의 6속성 칸에 모두 찍힌다(물리는 제외).
     // 캐릭터 · 에코 쪽 "All"은 칸이 없는 전체 피해 보너스라 그대로 넘어간다.
-    if (buff.target === "damageBonus" && buff.damageType === "All" && weaponBuffs.includes(buff)) {
+    if (
+      buff.target === "damageBonus" &&
+      buff.damageType === "All" &&
+      !buff.element &&
+      weaponBuffs.includes(buff)
+    ) {
       const amount = buff.value * (buff.stacks || 1);
       for (const [element, key] of Object.entries(ELEMENT_BONUS_KEY)) {
         if (element === "Physical") continue;
