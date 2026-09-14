@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { characters } from "../../../data/sampleData";
 import { loadMyEchoes } from "../../../data/echoStore";
 import { echoAbility, echoesById, fetterEffects, fetterGroupByName } from "../../../data/echoes";
+import { EchoDetailDialog } from "./EchoDetailDialog";
 
 interface EchoSelectorProps {
   characterId: string;
@@ -39,6 +40,8 @@ export function EchoSelector({
   const [drag, setDrag] = useState<{ pk: number; from: number | null } | null>(null);
   // 드래그가 올라와 있는 슬롯. 테두리를 밝혀 어디에 놓이는지 보여준다.
   const [overSlot, setOverSlot] = useState<number | null>(null);
+  // 상세보기 다이얼로그에 띄운 에코의 pk.
+  const [detailPk, setDetailPk] = useState<number | null>(null);
   const found = characters.find((c) => c.id === characterId);
   const myEchoes = loadMyEchoes() as any[];
 
@@ -143,6 +146,38 @@ export function EchoSelector({
       equippedIds.filter((id) => id !== drag.pk),
     );
   }
+
+  /** 줄 · 슬롯이 버튼이라 안에 버튼을 못 넣는다 — span에 버튼 역할을 준다. */
+  const detailButton = (pk: number) => (
+    <span
+      role="button"
+      tabIndex={0}
+      className="echo-detail-btn"
+      title="상세보기"
+      draggable={false}
+      onClick={(event) => {
+        event.stopPropagation();
+        setDetailPk(pk);
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          event.stopPropagation();
+          setDetailPk(pk);
+        }
+      }}
+    >
+      상세
+    </span>
+  );
+
+  const detailEcho = detailPk !== null ? myEchoes.find((e) => e.pk === detailPk) : undefined;
+  const detailLink = characterEchoLinks.find((link) => link.echoId === detailPk);
+  const detailSlot = detailLink
+    ? characterEchoLinks
+        .filter((link) => link.characterId === detailLink.characterId)
+        .findIndex((link) => link.echoId === detailPk)
+    : undefined;
 
   const endDrag = () => {
     setDrag(null);
@@ -280,6 +315,7 @@ export function EchoSelector({
                       </i>
                     )}
                     {on && <i className="echo-row-check">✓</i>}
+                    {detailButton(e.pk)}
                   </span>
                 </button>
               );
@@ -400,6 +436,15 @@ export function EchoSelector({
           })}
         </div>
       </div>
+
+      {detailEcho && (
+        <EchoDetailDialog
+          echo={detailEcho}
+          ownerId={detailLink?.characterId}
+          slotIndex={detailSlot}
+          onClose={() => setDetailPk(null)}
+        />
+      )}
 
     </section>
   );

@@ -148,6 +148,8 @@ export function deriveCharacterBuffs(
         scope: override?.scope ?? template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
         // 파티 버프인데 본인은 빼는 것(치사 2체인) — 본인 몫이 따로 적혀 있다.
         ...(template.excludeOwner ? { excludeOwner: true } : {}),
+        // 상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극)
+        ...(template.hideFromPanel ? { hideFromPanel: true } : {}),
         ownerId: character.id,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
@@ -358,6 +360,7 @@ function panelStatKey(buff: ManualBuff): keyof Stats | null {
  *   uptime "active"   발동 조건이 있는 것. 끼고만 있어서는 걸리지 않는다.
  *   scope "party"     남에게 가는 것. 이 캐릭터의 속성 창에 찍힐 값이 아니다.
  *   scaleFrom 있는 것  수치가 스탯에서 나오는 것. 스탯을 확정하는 자리에서 그 스탯을 되읽을 수 없다.
+ *   hideFromPanel     상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극).
  * 스탯창에 칸이 없는 것(전체 피해 보너스 · 협동 공격 · 저항 무시 등)도 조용히 넘어간다.
  *
  * 이 값은 **보여주기 전용**이다. 피해 계산은 같은 효과를 ManualBuff 쪽에서 이미 받고 있으므로,
@@ -385,6 +388,7 @@ export function equippedPanelStats(
   for (const buff of [...weaponBuffs, ...characterBuffs, ...echoBuffs]) {
     if (buff.uptime === "active" || buff.scope === "party") continue;
     if (buff.scaleFrom) continue;
+    if (buff.hideFromPanel) continue;
 
     const key = panelStatKey(buff);
     if (!key) continue;

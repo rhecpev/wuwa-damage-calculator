@@ -406,6 +406,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     value: 0.2, // 20% 증가
     uptime: "passive", // 조건이 없어 늘 걸린다
     scope: "self",
+    hideFromPanel: true, // 게임 속성 창에는 안 찍힌다 — 스탯창에서만 뺀다
   },
 
   // ── 반주 스킬 「화경」 — 다음에 등장하는 캐릭터에게 걸린다 ──
