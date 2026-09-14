@@ -363,6 +363,7 @@ function panelStatKey(buff: ManualBuff): keyof Stats | null {
  *   scope "party"     남에게 가는 것. 이 캐릭터의 속성 창에 찍힐 값이 아니다.
  *   scaleFrom 있는 것  수치가 스탯에서 나오는 것. 스탯을 확정하는 자리에서 그 스탯을 되읽을 수 없다.
  *   hideFromPanel     상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극).
+ *   attackId(s) 있는 것 특정 공격에만 붙는 것(복링 1체인 귀일 크리티컬).
  * 스탯창에 칸이 없는 것(전체 피해 보너스 · 협동 공격 · 저항 무시 등)도 조용히 넘어간다.
  *
  * 이 값은 **보여주기 전용**이다. 피해 계산은 같은 효과를 ManualBuff 쪽에서 이미 받고 있으므로,
@@ -391,6 +392,8 @@ export function equippedPanelStats(
     if (buff.uptime === "active" || buff.scope === "party") continue;
     if (buff.scaleFrom) continue;
     if (buff.hideFromPanel) continue;
+    // 특정 공격에만 붙는 버프(복링 1체인 「귀일」 크리티컬 등)는 그 공격에서만 걸린다 — 스탯창 몫이 아니다.
+    if (buff.attackId || buff.attackIds?.length) continue;
 
     // 무기의 「전체 속성 피해 보너스」는 게임 속성 창의 6속성 칸에 모두 찍힌다(물리는 제외).
     // 캐릭터 · 에코 쪽 "All"은 칸이 없는 전체 피해 보너스라 그대로 넘어간다.

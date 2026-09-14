@@ -405,6 +405,16 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 1,
   },
+  {
+    // 원문: 「복링의 치료 효과 보너스가 20% 증가된다」 — 피해식에는 안 들어가고 스탯창에만 찍힌다.
+    label: "4체인 · 치료 효과 보너스",
+    target: "healingBonus",
+    damageType: "All",
+    value: 0.2, // 20% 증가
+    uptime: "passive", // 조건이 없다
+    scope: "self",
+    resonanceChain: 4,
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
@@ -412,8 +422,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 //   고유 「내가 바로 땅 위의 신선이다」 변주 스킬 피해 시 「전자 효과」 4스택 부여
 //   2체인 「부적 써서, 귀신 잡고」 음양상생 진입 시 공명 에너지 25pt 회복
 //   3체인 「신령 부려, 천기 보아」 오뢰 퇴마진 중 HP 50% 미만 파티원 즉시 회복
-//   4체인 「솔라리스, 기운 모아」 치료 효과 보너스 20% 증가
-//                              — 치료 보너스는 BuffTarget에 자리가 없다
 //   5체인 「차단 계정, 새로 가입」 오뢰 퇴마진 생성 시 「전자 효과」 6스택 부여
 //   반주 앞부분                 1초마다 공격력 18%의 HP 회복(16초)
 //   강공격 간위산 · 진위뢰       치료량만 있고 피해 배율이 없다
