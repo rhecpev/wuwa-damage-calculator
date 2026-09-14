@@ -38,8 +38,8 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
   },
   {
     id: "matrixPlanner",
-    label: "매트릭스 파티 플래너",
-    hint: "보유 캐릭터를 여러 파티로",
+    label: "매트릭스",
+    hint: "파티 플래너 · 도는 순서",
     icon: icon(
       <>
         <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
@@ -102,6 +102,32 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
       </>,
     ),
   },
+  {
+    id: "nicknames",
+    label: "별명",
+    hint: "공격 이름을 내 말로",
+    icon: icon(
+      <>
+        <path d="M20.5 10.5 13 18a3.5 3.5 0 0 1-5-5l7.5-7.5a2.5 2.5 0 0 1 3.5 3.5L11.5 16" />
+      </>,
+    ),
+  },
+  // 개발 서버에서만 — 옮겨 적은 무기 버프를 대조하고 고치는 확인용 탭이다.
+  ...(import.meta.env.DEV
+    ? [
+        {
+          id: "weaponBuffReview" as const,
+          label: "무기 버프 확인",
+          hint: "개발용 · 설명문과 대조",
+          icon: icon(
+            <>
+              <path d="M14.5 3.5 20 9l-9.5 9.5H5v-5.5z" />
+              <path d="m13 14 2 2 4-4" />
+            </>,
+          ),
+        },
+      ]
+    : []),
   {
     id: "profileImport",
     label: "디스코드 프로필 입력",

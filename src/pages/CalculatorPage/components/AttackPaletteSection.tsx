@@ -6,6 +6,12 @@ import { echoAbilityOf } from "../../../data/echoAttacks";
 import { ANOMALIES, anomalyAttackId } from "../../../data/anomalies";
 import { anomaliesOf } from "../../../data/characterAnomalies";
 import { DISCORD_ATTACK_ID, DISCORD_BASE, DISCORD_DEFAULT_RATE } from "../../../data/discord";
+import {
+  attackDisplayName,
+  attackNicknamesVersion,
+  subscribeAttackNicknames,
+} from "../../../data/attackNicknames";
+import { usePersistedState } from "../../../utils/usePersistedState";
 import type { Attack, SkillCategory } from "../../../types/game";
 
 interface AttackPaletteSectionProps {
@@ -52,6 +58,10 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
   // 에코를 갈아끼우면 쓸 수 있는 에코 어빌리티도 바뀐다. 저장소가 localStorage 한 벌이라
   // 저장될 때마다 올라가는 번호를 구독해 두고 다시 그린다.
   useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
+  // 별명도 같은 방식으로 구독한다 — 별명 탭에서 적는 즉시 이 목록의 이름이 바뀐다.
+  useSyncExternalStore(subscribeAttackNicknames, attackNicknamesVersion);
+  // 인게임 명칭으로 볼지 별명으로 볼지. 한 번 고르면 새로고침해도 그대로 둔다.
+  const [byNickname, setByNickname] = usePersistedState("attackNameMode", false);
 
   // 파티 슬롯 3개를 그대로 탭으로 만든다.
   // 비어 있으면 "N번 캐릭터", 편성돼 있으면 그 캐릭터 이름을 탭 이름으로 쓴다.
@@ -66,6 +76,12 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
   });
 
   const active = tabs[activeSlot];
+
+  /** 팔레트에 띄울 이름. 별명 모드라도 적어 둔 별명이 없으면 인게임 명칭 그대로다. */
+  const nameOf = (attackId: string, inGameName: string) =>
+    active.character
+      ? attackDisplayName(active.character.id, attackId, inGameName, byNickname)
+      : inGameName;
 
   // 스킬의 category 기준으로 공격을 구역별로 모은다.
   // 구역 제목 옆에 띄울 아이콘은 그 구역에 처음 등장한 스킬의 아이콘을 쓴다.
@@ -107,7 +123,25 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
 
   return (
     <section className="panel">
-      <h2>공격 추가</h2>
+      <div className="panel-head">
+        <h2>공격 추가</h2>
+        {/* 인게임 명칭 / 별명 — 별명은 「별명」 탭에서 공격마다 적어 둔다. */}
+        <div className="name-mode">
+          <button
+            className={byNickname ? "name-mode-btn" : "name-mode-btn on"}
+            onClick={() => setByNickname(false)}
+          >
+            인게임 명칭
+          </button>
+          <button
+            className={byNickname ? "name-mode-btn on" : "name-mode-btn"}
+            title="별명 탭에서 적어 둔 이름으로 봅니다 — 적어 둔 것이 없으면 인게임 명칭 그대로입니다"
+            onClick={() => setByNickname(true)}
+          >
+            별명
+          </button>
+        </div>
+      </div>
 
       {/* 왼쪽에 파티 세 자리를 아이콘과 이름으로 세우고, 오른쪽에 그 캐릭터의 공격을 편다. */}
       <div className="palette-layout">
@@ -156,9 +190,10 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
                 {section.attacks.map((attack) => (
                   <button
                     key={attack.id}
+                    title={attack.name}
                     onClick={() => onAddAttack(attack.id, active.character!.id)}
                   >
-                    {attack.name}
+                    {nameOf(attack.id, attack.name)}
                   </button>
                 ))}
               </div>
@@ -184,9 +219,9 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
                   <button
                     key={attack.id}
                     onClick={() => onAddAttack(attack.id, active.character!.id)}
-                    title={ability.text || undefined}
+                    title={ability.text || attack.name}
                   >
-                    {attack.name}
+                    {nameOf(attack.id, attack.name)}
                   </button>
                 ))}
               </div>

@@ -10,6 +10,8 @@ export type TabType =
   | "cycles"
   | "cycleCompare"
   | "matrixPlanner"
+  | "nicknames"
+  | "weaponBuffReview"
   | "weapons"
   | "profileImport";
 

@@ -1,20 +1,26 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
+import type { DragEvent } from "react";
 import { characters } from "../../data/sampleData";
 import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
 import { isOwnedCharacter, ownedStoreVersion, subscribeOwnedStore } from "../../data/ownedStore";
 import { usePartyConfig } from "../../context/PartyConfigContext";
+import { useAppState } from "../../context/AppStateContext";
 import { usePersistedState } from "../../utils/usePersistedState";
+import type { CyclePreset } from "../../data/cyclePresets";
 import type { Element } from "../../types/game";
 
 /**
- * 매트릭스 파티 플래너.
+ * 매트릭스.
  *
- * 종말 매트릭스는 여러 층을 **서로 다른 편성**으로 도는 콘텐츠라 한 캐릭터를 두 파티에
- * 겹쳐 넣을 수 없다. 그래서 이 화면은 피해를 계산하지 않고 「누구를 어느 파티에 넣을지」만
- * 본다 — 보유 캐릭터를 나눠 담아 보는 자리다.
+ * 종말 매트릭스는 여러 층을 **서로 다른 편성**으로 도는 콘텐츠다. 그래서 이 화면은 피해를
+ * 계산하지 않고 「누구를 어느 파티에 넣을지」와 「어느 파티부터 돌지」만 본다.
  *
- * 파티는 **메인딜 속성별로 세로줄 여섯 개**에 나눠 선다. 첫 자리에 앉은 캐릭터가 메인딜이고,
- * 그 속성의 줄로 파티가 옮겨 간다 — 어느 속성이 비었는지 한눈에 보이게.
+ * 세부 탭은 둘이다.
+ *   파티 플래너        보유 캐릭터를 파티에 담는다
+ *   파티 순서 구성하기  담아 둔 파티를 도는 순서대로 끌어 옮긴다
+ *
+ * 파티는 **담은 순서대로** 쭉 선다(속성으로 나누지 않는다) — 그 순서가 곧 도는 순서다.
+ * 한 캐릭터를 여러 파티에 넣는 것도 막지 않는다. 대신 몇 번 썼고 어느 파티에 있는지 늘 적어 둔다.
  *
  * 계산 탭 · 파티 관리 탭의 편성과는 **따로 논다.** 저장소도 따로고(matrixParties),
  * 여기서 자리를 옮겨도 계산 중인 파티는 그대로다.
@@ -23,12 +29,12 @@ import type { Element } from "../../types/game";
 /** 한 파티에 앉는 캐릭터 수. 명조는 셋이다. */
 const PARTY_SIZE = 3;
 
-/** 세로줄 순서. 게임 속성 표기 순서를 따른다. */
+/** 보유 목록을 세우는 속성 순서. 게임 속성 표기 순서를 따른다. */
 const ELEMENT_ORDER: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectro", "Havoc"];
 
 /**
- * 두 파티에 겹쳐 쓸 수 있는 캐릭터 — 치유·보조 다섯.
- * 적어 두지 않은 캐릭터는 한 번뿐이다.
+ * 콘텐츠 규칙상 겹쳐 쓸 수 있는 횟수 — 치유·보조 다섯만 둘이고 나머지는 하나다.
+ * 넘겨 담는 것을 **막지는 않는다.** 넘겼다는 것만 눈에 띄게 표시한다.
  */
 const USE_LIMIT: Record<string, number> = {
   shorekeeper: 2, // 파수인
@@ -41,95 +47,68 @@ const USE_LIMIT: Record<string, number> = {
 const useLimit = (characterId: string): number => USE_LIMIT[characterId] ?? 1;
 
 interface PlannerParty {
-  /** 파티를 지우고 더해도 섞이지 않게 붙이는 번호. 화면의 「N파티」는 줄 안의 순서로 센다. */
+  /** 파티를 지우고 더해도 섞이지 않게 붙이는 번호. 화면의 「N파티」는 목록 순서로 센다. */
   id: number;
-  /** 이 파티를 만든 세로줄. 메인딜이 앉으면 그 캐릭터의 속성이 자리를 대신 정한다. */
-  element: Element;
   memberIds: string[];
 }
 
-const isElement = (value: unknown): value is Element =>
-  typeof value === "string" && (ELEMENT_ORDER as string[]).includes(value);
+/** 세부 탭. 순서가 화면 순서다. */
+const VIEWS = [
+  { id: "planner", label: "파티 플래너", hint: "보유 캐릭터를 파티에 담기" },
+  { id: "order", label: "파티 순서 구성하기", hint: "도는 순서대로 끌어 옮기기" },
+] as const;
 
-/**
- * 캐릭터 셋을 「누가 앉았는지」만 남긴 열쇠로 바꾼다.
- * 자리 순서는 빼고 본다 — 같은 셋이면 메인딜을 누구로 잡았든 같은 조합이다.
- */
-const comboKey = (characterIds: string[]): string =>
-  [...new Set(characterIds.filter(Boolean))].sort().join("|");
+type ViewId = (typeof VIEWS)[number]["id"];
 
 export function MatrixPlannerPage() {
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
-  const { cyclePresets } = usePartyConfig();
+  const { cyclePresets, applyCyclePreset } = usePartyConfig();
+  const { setTab } = useAppState();
   const [stored, setParties] = usePersistedState<PlannerParty[]>("matrixParties", []);
+  const [view, setView] = useState<ViewId>("planner");
   const [activeId, setActiveId] = useState<number | null>(null);
   const [query, setQuery] = useState("");
+  // 끌고 있는 파티와, 지금 그 위에 올라가 있는 파티. 둘 다 화면 표시에만 쓴다.
+  const [dragId, setDragId] = useState<number | null>(null);
+  const [overId, setOverId] = useState<number | null>(null);
 
   const byId = useMemo(() => new Map(characters.map((c) => [c.id, c] as const)), []);
 
   /**
    * 저장된 것을 쓸 수 있는 모양으로 고친다.
    *
-   * 속성 세로줄이 생기기 전에 담긴 파티에는 element가 없다 — 첫 자리 캐릭터의 속성으로
-   * 옮기고, 사람도 속성도 없는 것은 버린다. 파티가 하나도 없는 속성에는 빈 파티를 놓아
-   * 어느 줄이든 바로 채울 수 있게 한다(더 필요하면 「+ 파티」로 늘린다).
+   * 속성 세로줄을 쓰던 시절의 파티에는 element가 붙어 있다 — 이제 줄이 없으므로 그냥 버리고
+   * 담긴 순서를 그대로 쓴다. 파티가 하나도 없으면 빈 파티 하나를 놓아 바로 채울 수 있게 한다.
    */
   const parties = useMemo(() => {
     const out: PlannerParty[] = [];
+    const seen = new Set<number>();
 
     for (const row of Array.isArray(stored) ? stored : []) {
       if (!row || typeof row !== "object") continue;
       const memberIds = (Array.isArray(row.memberIds) ? row.memberIds : []).filter(
         (id: unknown): id is string => typeof id === "string",
       );
-      const lead = byId.get(memberIds[0] ?? "");
-      const element = isElement(row.element) ? row.element : lead?.element;
-      if (!element) continue;
-      out.push({
-        id: typeof row.id === "number" ? row.id : out.length + 1,
-        element,
-        memberIds,
-      });
+      // id가 없거나 이미 쓴 번호면 새로 뗀다 — 번호가 겹치면 한쪽을 고칠 때 둘 다 바뀐다.
+      let id = typeof row.id === "number" ? row.id : 0;
+      if (!id || seen.has(id)) id = Math.max(0, ...seen) + 1;
+      seen.add(id);
+      out.push({ id, memberIds });
     }
 
-    // 줄이 텅 비면 고를 것이 없다 — 파티가 하나도 없는 속성에만 빈 파티를 놓는다.
-    // 어느 줄에 설지는 메인딜(첫 자리)이 정하므로 stored의 element가 아니라 그것으로 센다.
-    const columnOfRow = (p: PlannerParty) =>
-      byId.get(p.memberIds[0] ?? "")?.element ?? p.element;
-    let nextId = out.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-    for (const element of ELEMENT_ORDER) {
-      if (!out.some((p) => columnOfRow(p) === element)) {
-        out.push({ id: nextId++, element, memberIds: [] });
-      }
-    }
-    return out;
-  }, [stored, byId]);
+    return out.length > 0 ? out : [{ id: 1, memberIds: [] }];
+  }, [stored]);
 
-  /** 이 파티가 설 세로줄. 메인딜(첫 자리)이 있으면 그 속성이 이긴다. */
-  const columnOf = (party: PlannerParty): Element =>
-    byId.get(party.memberIds[0] ?? "")?.element ?? party.element;
-
-  /** 속성 -> 그 줄에 선 파티들. 담긴 순서를 그대로 지킨다. */
-  const columns = useMemo(() => {
-    const map = new Map<Element, PlannerParty[]>(ELEMENT_ORDER.map((e) => [e, []]));
-    for (const party of parties) map.get(columnOf(party))!.push(party);
-    return map;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parties, byId]);
-
-  /** 캐릭터 id -> 앉아 있는 자리들(「기류 1파티」 꼴). 목록을 잠그는 근거다. */
+  /** 캐릭터 id -> 앉아 있는 자리들(「1파티」 꼴). 목록에 몇 번 썼는지 적는 근거다. */
   const placedIn = useMemo(() => {
     const map = new Map<string, string[]>();
-    for (const element of ELEMENT_ORDER) {
-      (columns.get(element) ?? []).forEach((party, index) => {
-        for (const id of party.memberIds) {
-          const label = `${ELEMENT_NAMES[element]} ${index + 1}파티`;
-          map.set(id, [...(map.get(id) ?? []), label]);
-        }
-      });
-    }
+    parties.forEach((party, index) => {
+      for (const id of party.memberIds) {
+        map.set(id, [...(map.get(id) ?? []), `${index + 1}파티`]);
+      }
+    });
     return map;
-  }, [columns]);
+  }, [parties]);
 
   /** 보유한 캐릭터만. 속성으로 묶고 그 안에서 이름순 — 원소 구성이 눈에 들어오게. */
   const owned = useMemo(
@@ -155,46 +134,49 @@ export function MatrixPlannerPage() {
   );
 
   /**
-   * 조합 열쇠 -> 그 조합으로 담아 둔 사이클 이름들.
-   * 사이클을 담을 때 빈 자리는 빼고 담으므로(currentCycleMembers) 셋만 비교하면 된다.
+   * 이 파티의 캐릭터들**만으로** 담아 둔 사이클.
+   *
+   * 사이클은 빈 자리를 빼고 담기므로(currentCycleMembers) 셋을 다 쓰지 않은 사이클도 있다.
+   * 그래서 「같은 셋」이 아니라 「이 파티 안에 전부 들어 있는가」로 본다 —
+   * 둘만 쓰는 사이클도 그 파티로 돌 수 있는 사이클이 맞다.
    */
-  const cyclesByCombo = useMemo(() => {
-    const map = new Map<string, string[]>();
-    for (const preset of cyclePresets) {
-      const key = comboKey(preset.members.map((m) => m.characterId));
-      if (!key) continue;
-      map.set(key, [...(map.get(key) ?? []), preset.name]);
-    }
-    return map;
-  }, [cyclePresets]);
+  const cyclesFor = (memberIds: string[]): CyclePreset[] => {
+    if (memberIds.length === 0) return [];
+    const inParty = new Set(memberIds);
+    return cyclePresets.filter((preset) => {
+      const ids = preset.members.map((m) => m.characterId).filter(Boolean);
+      return ids.length > 0 && ids.every((id) => inParty.has(id));
+    });
+  };
+
+  /** 그 사이클을 계산 탭에 앉히고 그리로 넘어간다. 「연결」을 누르면 곧장 돌려볼 수 있게. */
+  const openCycle = (preset: CyclePreset) => {
+    applyCyclePreset(preset.id);
+    setTab("calculator");
+  };
 
   /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
   const active =
     parties.find((p) => p.id === activeId) ??
-    ELEMENT_ORDER.flatMap((e) => columns.get(e) ?? []).find(
-      (p) => p.memberIds.length < PARTY_SIZE,
-    );
+    parties.find((p) => p.memberIds.length < PARTY_SIZE);
 
-  /** 이 캐릭터를 지금 더 앉힐 수 있는지. 못 앉히는 까닭까지 같이 돌려준다. */
+  /**
+   * 이 캐릭터를 지금 더 앉힐 수 있는지. 못 앉히는 까닭까지 같이 돌려준다.
+   *
+   * 겹쳐 쓰는 횟수는 여기서 보지 않는다 — 넘겨 담는 것도 해 볼 수 있어야 해서,
+   * 막는 대신 목록에 「N회 사용」으로 적어 둔다. 한 파티 안의 중복만 막는다.
+   */
   const blockedReason = (characterId: string): string | null => {
-    const at = placedIn.get(characterId) ?? [];
-    const limit = useLimit(characterId);
-    if (at.length >= limit)
-      return limit > 1
-        ? `두 파티까지만 겹쳐 쓸 수 있습니다 — ${at.join(" · ")}`
-        : `${at.join(" · ")}에 있습니다 (그 파티에서 빼면 다시 고를 수 있습니다)`;
     if (!active) return "채울 파티가 없습니다";
+    if (active.memberIds.includes(characterId)) return "이미 이 파티에 있습니다";
     if (active.memberIds.length >= PARTY_SIZE)
       return "채우는 파티가 꽉 찼습니다 — 다른 파티를 고르세요";
-    if (active.memberIds.includes(characterId)) return "이미 이 파티에 있습니다";
     return null;
   };
 
   /**
    * 캐릭터를 지금 채우는 파티에 앉힌다.
-   *
-   * 꽉 채운 뒤에는 자리가 남은 다음 파티로 옮겨 준다. 목록을 계속 누르기만 해도
-   * 응결 -> 용융 -> … 순으로 차게 해서 파티를 일일이 고르지 않게 한다.
+   * 꽉 채운 뒤에는 자리가 남은 다음 파티로 옮겨 준다 — 목록을 계속 누르기만 해도 차게.
    */
   const place = (characterId: string) => {
     if (!active || blockedReason(characterId)) return;
@@ -205,12 +187,9 @@ export function MatrixPlannerPage() {
     setParties(next);
 
     if (active.memberIds.length + 1 >= PARTY_SIZE) {
-      // 화면에 보이는 순서(속성 줄 -> 줄 안의 순서)대로 다음 빈자리를 찾는다.
-      const seen = next.filter((p) => p.id !== active.id);
-      const order = ELEMENT_ORDER.flatMap((element) =>
-        seen.filter((p) => (byId.get(p.memberIds[0] ?? "")?.element ?? p.element) === element),
+      setActiveId(
+        next.find((p) => p.id !== active.id && p.memberIds.length < PARTY_SIZE)?.id ?? null,
       );
-      setActiveId(order.find((p) => p.memberIds.length < PARTY_SIZE)?.id ?? null);
     }
   };
 
@@ -221,14 +200,14 @@ export function MatrixPlannerPage() {
       ),
     );
 
-  /** 그 속성 줄에 빈 파티를 하나 더 놓는다. */
-  const addParty = (element: Element) => {
+  /** 맨 뒤에 빈 파티를 하나 더 놓는다. */
+  const addParty = () => {
     const id = parties.reduce((max, p) => Math.max(max, p.id), 0) + 1;
-    setParties([...parties, { id, element, memberIds: [] }]);
+    setParties([...parties, { id, memberIds: [] }]);
     setActiveId(id);
   };
 
-  /** 사람이 앉아 있으면 비우고, 이미 빈 파티면 줄에서 치운다. */
+  /** 사람이 앉아 있으면 비우고, 이미 빈 파티면 목록에서 치운다. */
   const dropParty = (partyId: number) => {
     const party = parties.find((p) => p.id === partyId);
     if (!party) return;
@@ -242,23 +221,111 @@ export function MatrixPlannerPage() {
 
   const clearAll = () => setParties(parties.map((p) => ({ ...p, memberIds: [] })));
 
+  /**
+   * 끌어다 놓아 순서를 바꾼다. beforeId가 가리키는 파티 **앞**에 끼우고,
+   * null이면 맨 뒤로 보낸다. 목록 순서가 곧 도는 순서라 여기서 층 차례가 정해진다.
+   */
+  const moveParty = (id: number, beforeId: number | null) => {
+    if (id === beforeId) return;
+    const moving = parties.find((p) => p.id === id);
+    if (!moving) return;
+    const rest = parties.filter((p) => p.id !== id);
+    const at = beforeId === null ? -1 : rest.findIndex((p) => p.id === beforeId);
+    setParties(at >= 0 ? [...rest.slice(0, at), moving, ...rest.slice(at)] : [...rest, moving]);
+  };
+
+  /** 파티 카드에 붙는 끌기 손잡이 한 벌. 두 세부 탭이 같은 조작을 쓴다. */
+  const dragProps = (partyId: number) => ({
+    draggable: true,
+    onDragStart: (event: DragEvent) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", String(partyId));
+      setDragId(partyId);
+    },
+    onDragEnd: () => {
+      setDragId(null);
+      setOverId(null);
+    },
+    onDragOver: (event: DragEvent) => {
+      if (dragId === null || dragId === partyId) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      if (overId !== partyId) setOverId(partyId);
+    },
+    onDragLeave: () => setOverId((cur) => (cur === partyId ? null : cur)),
+    onDrop: (event: DragEvent) => {
+      event.preventDefault();
+      if (dragId !== null) moveParty(dragId, partyId);
+      setDragId(null);
+      setOverId(null);
+    },
+  });
+
+  /** 목록 맨 뒤로 보내는 자리. 카드 사이에 놓을 곳이 없을 때 쓴다. */
+  const endDropProps = {
+    onDragOver: (event: DragEvent) => {
+      if (dragId === null) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+    },
+    onDrop: (event: DragEvent) => {
+      event.preventDefault();
+      if (dragId !== null) moveParty(dragId, null);
+      setDragId(null);
+      setOverId(null);
+    },
+  };
+
+  const dragClass = (partyId: number, base: string) =>
+    [base, dragId === partyId ? "dragging" : "", overId === partyId ? "over" : ""]
+      .filter(Boolean)
+      .join(" ");
+
   const placedCount = [...placedIn.values()].reduce((sum, at) => sum + at.length, 0);
   const usedCharacters = placedIn.size;
+  /** 겹쳐 쓸 수 있는 횟수를 넘겨 담은 사람 수. 넘겨도 막지 않으므로 세어서 알려만 준다. */
+  const overCount = [...placedIn.entries()].filter(
+    ([id, at]) => at.length > useLimit(id),
+  ).length;
+
+  /** 파티 하나에 딸린 사이클 줄. 두 세부 탭이 같은 모양으로 쓴다. */
+  const cycleRow = (party: PlannerParty) => {
+    if (party.memberIds.length === 0) return null;
+    const found = cyclesFor(party.memberIds);
+    if (found.length === 0) {
+      return <p className="matrix-cycles none">이 캐릭터들로 담아 둔 사이클이 없습니다</p>;
+    }
+    return (
+      <div className="matrix-cycles">
+        {found.map((preset) => (
+          <button
+            key={preset.id}
+            title={`${preset.members.map((m) => m.characterName).join(" · ")} — 누르면 계산 탭에 앉히고 넘어갑니다`}
+            onClick={(event) => {
+              event.stopPropagation();
+              openCycle(preset);
+            }}
+          >
+            ▶ {preset.name}
+          </button>
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="matrix-planner">
       <section className="panel matrix-intro">
         <div>
-          <small>MATRIX PARTY PLANNER</small>
-          <h2>매트릭스 파티 플래너</h2>
+          <small>MATRIX</small>
+          <h2>매트릭스</h2>
           <p>
-            보유 캐릭터를 메인딜 속성별로 나눠 담아 봅니다. 한 캐릭터는 <b>한 파티에만</b>{" "}
-            들어갑니다 — 치유·보조 다섯(파수인 · 벨리나 · 설지 · 복링 · 모니에)만 <b>두 파티</b>까지
-            겹쳐 쓸 수 있습니다.
+            보유 캐릭터를 파티로 나눠 담고, 도는 순서를 정합니다. 파티는 <b>담은 순서대로</b>{" "}
+            서고, 카드를 끌어 옮기면 순서가 바뀝니다.
           </p>
           <p className="matrix-note">
-            첫 자리에 앉은 캐릭터가 메인딜이고, 그 속성의 세로줄로 파티가 옮겨 갑니다. 계산 탭 ·
-            파티 관리 탭의 편성과는 따로 놉니다.
+            한 캐릭터를 여러 파티에 넣어도 막지 않습니다 — 몇 번 썼고 어느 파티에 있는지 목록에
+            적어 둡니다. 계산 탭 · 파티 관리 탭의 편성과는 따로 놉니다.
           </p>
         </div>
 
@@ -275,192 +342,257 @@ export function MatrixPlannerPage() {
             <b>{placedCount}</b>
             <em>배치</em>
           </span>
-          <span>
-            <b>{owned.length - usedCharacters}</b>
-            <em>남음</em>
+          <span className={overCount > 0 ? "over" : undefined}>
+            <b>{overCount}</b>
+            <em>초과</em>
           </span>
         </div>
       </section>
 
-      <div className="matrix-body">
-        <section className="panel">
-          <div className="panel-head">
-            <h2>보유 캐릭터</h2>
-            <input
-              type="text"
-              className="panel-search"
-              placeholder="이름 · 속성"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-            />
-          </div>
+      {/* 세부 탭 — 담는 화면과 순서 정하는 화면을 갈라 둔다. */}
+      <nav className="matrix-views">
+        {VIEWS.map((item) => (
+          <button
+            key={item.id}
+            className={item.id === view ? "matrix-view on" : "matrix-view"}
+            onClick={() => setView(item.id)}
+          >
+            <b>{item.label}</b>
+            <em>{item.hint}</em>
+          </button>
+        ))}
+      </nav>
 
-          {owned.length === 0 ? (
-            <p className="matrix-empty">
-              보유로 표시한 캐릭터가 없습니다. <b>캐릭터 관리</b> 탭 목록에서 줄 오른쪽의 ✓를 눌러
-              가지고 있는 캐릭터를 먼저 표시해 주세요.
-            </p>
-          ) : (
-            <div className="pick-grid matrix-pool">
-              {shown.map((char) => {
-                const at = placedIn.get(char.id) ?? [];
-                const limit = useLimit(char.id);
-                const blocked = blockedReason(char.id);
-                const spent = at.length >= limit;
+      {view === "planner" ? (
+        <div className="matrix-body">
+          <section className="panel">
+            <div className="panel-head">
+              <h2>보유 캐릭터</h2>
+              <input
+                type="text"
+                className="panel-search"
+                placeholder="이름 · 속성"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+              />
+            </div>
 
-                return (
-                  <button
-                    key={char.id}
-                    className={spent ? "pick-card in" : "pick-card"}
-                    disabled={blocked !== null}
-                    onClick={() => place(char.id)}
-                    title={blocked ?? `${ELEMENT_NAMES[char.element]} · ${char.weaponType}`}
-                  >
-                    {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
-                    <b>{char.name}</b>
-                    <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
-                      {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
-                    </em>
-                    {/* 겹쳐 쓸 수 있는 치유·보조는 쓸 때마다 남은 횟수를 깎아 보여준다. */}
-                    {limit > 1 && (
-                      <i
-                        className={spent ? "spent" : undefined}
-                        title={`두 파티까지 겹쳐 쓸 수 있습니다 — ${at.length}/${limit} 사용`}
+            {owned.length === 0 ? (
+              <p className="matrix-empty">
+                보유로 표시한 캐릭터가 없습니다. <b>캐릭터 관리</b> 탭 목록에서 줄 오른쪽의 ✓를
+                눌러 가지고 있는 캐릭터를 먼저 표시해 주세요.
+              </p>
+            ) : (
+              <div className="pick-grid matrix-pool">
+                {shown.map((char) => {
+                  const at = placedIn.get(char.id) ?? [];
+                  const limit = useLimit(char.id);
+                  const blocked = blockedReason(char.id);
+                  const over = at.length > limit;
+
+                  return (
+                    <button
+                      key={char.id}
+                      className={at.length > 0 ? "pick-card in" : "pick-card"}
+                      disabled={blocked !== null}
+                      onClick={() => place(char.id)}
+                      title={
+                        blocked ??
+                        (at.length > 0
+                          ? `${at.join(" · ")}에 있습니다 (${at.length}/${limit} 사용)`
+                          : `${ELEMENT_NAMES[char.element]} · ${char.weaponType}`)
+                      }
+                    >
+                      {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
+                      <b>{char.name}</b>
+                      <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
+                        {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
+                      </em>
+                      {/* 몇 번 썼는지 — 겹쳐 쓸 수 있는 횟수를 넘기면 붉게 센다. */}
+                      {at.length > 0 && (
+                        <i
+                          className={over ? "over" : undefined}
+                          title={
+                            over
+                              ? `겹쳐 쓸 수 있는 ${limit}회를 넘겼습니다 — ${at.join(" · ")}`
+                              : `${at.length}/${limit} 사용 — ${at.join(" · ")}`
+                          }
+                        >
+                          {at.length}회 사용{over ? ` · ${limit}회 초과` : ""}
+                        </i>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {shown.length === 0 && (
+                  <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
+                )}
+              </div>
+            )}
+          </section>
+
+          <section className="panel">
+            <div className="panel-head">
+              <h2>파티 구성</h2>
+              <div className="matrix-actions">
+                <button onClick={addParty}>+ 파티</button>
+                <button onClick={clearAll}>전체 비우기</button>
+              </div>
+            </div>
+
+            {/* 담은 순서대로 쭉. 좁아지면 한 줄에 서는 카드 수가 줄어든다. */}
+            <div className="matrix-list">
+              {parties.map((party, index) => (
+                <article
+                  key={party.id}
+                  className={dragClass(
+                    party.id,
+                    party.id === active?.id ? "matrix-party on" : "matrix-party",
+                  )}
+                  onClick={() => setActiveId(party.id)}
+                  {...dragProps(party.id)}
+                >
+                  <header>
+                    <span className="matrix-grip" title="끌어서 순서를 바꿉니다">
+                      ⠿
+                    </span>
+                    <b>{index + 1}파티</b>
+                    <small>
+                      {party.memberIds.length}/{PARTY_SIZE}
+                    </small>
+                    {(party.memberIds.length > 0 || parties.length > 1) && (
+                      <button
+                        className="matrix-drop"
+                        title={
+                          party.memberIds.length > 0 ? "이 파티를 비웁니다" : "이 파티를 치웁니다"
+                        }
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          dropParty(party.id);
+                        }}
                       >
-                        {spent ? "다 씀" : `${limit - at.length}회 남음`}
-                      </i>
+                        ✕
+                      </button>
                     )}
-                  </button>
-                );
-              })}
-
-              {shown.length === 0 && <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>}
-            </div>
-          )}
-        </section>
-
-        <section className="panel">
-          <div className="panel-head">
-            <h2>파티 구성</h2>
-            <div className="matrix-actions">
-              <button onClick={clearAll}>전체 비우기</button>
-            </div>
-          </div>
-
-          {/* 속성 여섯 세로줄. 좁아지면 셋 · 둘 · 하나로 접힌다. */}
-          <div className="matrix-columns">
-            {ELEMENT_ORDER.map((element) => {
-              const column = columns.get(element) ?? [];
-              const icon = elementIcon(element);
-              const filled = column.filter((p) => p.memberIds.length > 0).length;
-
-              return (
-                <div className="matrix-column" key={element}>
-                  {/* 줄 머리 — 속성 아이콘을 크게 세우고 이름·파티 수를 그 아래 가운데에 둔다. */}
-                  <header style={{ borderColor: ELEMENT_COLORS[element] }}>
-                    {icon && <img src={icon} alt="" loading="lazy" />}
-                    <b style={{ color: ELEMENT_COLORS[element] }}>{ELEMENT_NAMES[element]}</b>
-                    <small>{filled > 0 ? `${filled}파티` : "비어 있음"}</small>
                   </header>
 
-                  {column.map((party, index) => {
-                    const lead = byId.get(party.memberIds[0] ?? "");
-                    const leadIcon = lead && elementIcon(lead.element);
-                    const saved = cyclesByCombo.get(comboKey(party.memberIds)) ?? [];
+                  <div className="matrix-slots">
+                    {Array.from({ length: PARTY_SIZE }, (_, slot) => {
+                      const char = byId.get(party.memberIds[slot] ?? "");
+                      if (!char)
+                        return <div key={slot} className="matrix-slot empty" aria-hidden="true" />;
 
-                    return (
-                      <article
-                        key={party.id}
-                        className={party.id === active?.id ? "matrix-party on" : "matrix-party"}
-                        onClick={() => setActiveId(party.id)}
-                      >
-                        <header>
-                          <b>{index + 1}파티</b>
-                          <small>
-                            {party.memberIds.length}/{PARTY_SIZE}
-                          </small>
-                          {(party.memberIds.length > 0 || column.length > 1) && (
-                            <button
-                              className="matrix-drop"
-                              title={
-                                party.memberIds.length > 0
-                                  ? "이 파티를 비웁니다"
-                                  : "이 파티를 치웁니다"
-                              }
-                              onClick={(event) => {
-                                event.stopPropagation();
-                                dropParty(party.id);
-                              }}
-                            >
-                              ✕
-                            </button>
-                          )}
-                        </header>
+                      const used = (placedIn.get(char.id) ?? []).length;
+                      const over = used > useLimit(char.id);
 
-                        {lead && (
-                          <div className="matrix-lead">
-                            <span style={{ color: ELEMENT_COLORS[lead.element] }}>
-                              {leadIcon && <img src={leadIcon} alt="" loading="lazy" />}
-                              메인딜 속성 : <b>{ELEMENT_NAMES[lead.element]}</b>
-                            </span>
-                          </div>
-                        )}
-
-                        {saved.length > 0 && (
-                          <em
-                            className="matrix-saved"
-                            title={`이 조합으로 담아 둔 사이클 — ${saved.join(" · ")}`}
-                          >
-                            저장된 사이클 있음{saved.length > 1 ? ` ${saved.length}` : ""}
+                      return (
+                        <button
+                          key={slot}
+                          className="matrix-slot"
+                          title={`${char.name} — 누르면 파티에서 빠집니다${
+                            used > 1 ? ` (${used}개 파티에 있음)` : ""
+                          }`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            remove(party.id, char.id);
+                          }}
+                        >
+                          {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
+                          <b>{char.name}</b>
+                          <em style={{ color: ELEMENT_COLORS[char.element] }}>
+                            {ELEMENT_NAMES[char.element]}
                           </em>
-                        )}
+                          {/* 여러 파티에 든 캐릭터는 몇 번째로 쓰는 것인지 카드에도 적는다. */}
+                          {used > 1 && <i className={over ? "over" : undefined}>×{used}</i>}
+                        </button>
+                      );
+                    })}
+                  </div>
 
-                        <div className="matrix-slots">
-                          {Array.from({ length: PARTY_SIZE }, (_, slot) => {
-                            const char = byId.get(party.memberIds[slot] ?? "");
-                            if (!char)
-                              return (
-                                <div key={slot} className="matrix-slot empty" aria-hidden="true" />
-                              );
+                  {cycleRow(party)}
+                </article>
+              ))}
 
-                            return (
-                              <button
-                                key={slot}
-                                className="matrix-slot"
-                                title={`${char.name} — 누르면 파티에서 빠집니다`}
-                                onClick={(event) => {
-                                  event.stopPropagation();
-                                  remove(party.id, char.id);
-                                }}
-                              >
-                                {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
-                                <b>{char.name}</b>
-                                <em style={{ color: ELEMENT_COLORS[char.element] }}>
-                                  {ELEMENT_NAMES[char.element]}
-                                </em>
-                              </button>
-                            );
-                          })}
-                        </div>
-                      </article>
-                    );
-                  })}
+              {/* 맨 뒤로 보내는 자리이자 파티를 더 놓는 자리. */}
+              <button className="matrix-add" onClick={addParty} {...endDropProps}>
+                + 파티
+              </button>
+            </div>
 
-                  <button className="matrix-add" onClick={() => addParty(element)}>
-                    + 파티
-                  </button>
+            <p className="matrix-hint">
+              테두리가 밝은 파티가 <b>지금 채우는 파티</b>입니다. 파티를 눌러 옮기고, 왼쪽
+              목록에서 캐릭터를 누르면 그 파티에 들어갑니다. 파티의 캐릭터를 누르면 빠집니다.
+              카드를 끌어다 놓으면 <b>순서</b>가 바뀝니다.
+            </p>
+          </section>
+        </div>
+      ) : (
+        <section className="panel">
+          <div className="panel-head">
+            <h2>파티 순서 구성하기</h2>
+            <div className="matrix-actions">
+              <button onClick={addParty}>+ 파티</button>
+            </div>
+          </div>
+
+          <div className="matrix-order">
+            {parties.map((party, index) => (
+              <article
+                key={party.id}
+                className={dragClass(party.id, "matrix-row")}
+                {...dragProps(party.id)}
+              >
+                <span className="matrix-grip" title="끌어서 순서를 바꿉니다">
+                  ⠿
+                </span>
+                <b className="matrix-rank">{index + 1}</b>
+
+                <div className="matrix-row-body">
+                  <div className="matrix-row-members">
+                    {party.memberIds.length === 0 ? (
+                      <em className="matrix-row-empty">비어 있습니다</em>
+                    ) : (
+                      party.memberIds.map((id) => {
+                        const char = byId.get(id);
+                        if (!char) return null;
+                        const icon = elementIcon(char.element);
+                        return (
+                          <span key={id} className="matrix-chip">
+                            {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
+                            <b>{char.name}</b>
+                            {icon && <img className="matrix-chip-el" src={icon} alt="" />}
+                          </span>
+                        );
+                      })
+                    )}
+                  </div>
+
+                  {cycleRow(party)}
                 </div>
-              );
-            })}
+
+                <button
+                  className="matrix-drop"
+                  title={party.memberIds.length > 0 ? "이 파티를 비웁니다" : "이 파티를 치웁니다"}
+                  onClick={() => dropParty(party.id)}
+                >
+                  ✕
+                </button>
+              </article>
+            ))}
+
+            <div className="matrix-endzone" {...endDropProps}>
+              여기에 놓으면 맨 뒤로 갑니다
+            </div>
           </div>
 
           <p className="matrix-hint">
-            테두리가 밝은 파티가 <b>지금 채우는 파티</b>입니다. 파티를 눌러 옮기고, 왼쪽 목록에서
-            캐릭터를 누르면 그 파티에 들어갑니다. 파티의 캐릭터를 누르면 빠집니다. 메인딜을 바꾸면
-            파티가 그 속성 줄로 옮겨 갑니다.
+            위에서부터 도는 순서입니다. 줄을 끌어다 놓아 순서를 바꾸세요. 파티에 캐릭터를 담는
+            것은 <b>파티 플래너</b> 쪽에서 합니다. 사이클 이름을 누르면 그 사이클을 계산 탭에
+            앉히고 넘어갑니다.
           </p>
         </section>
-      </div>
+      )}
     </div>
   );
 }
