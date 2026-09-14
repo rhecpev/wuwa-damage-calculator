@@ -390,6 +390,17 @@ export function equippedPanelStats(
     if (buff.scaleFrom) continue;
     if (buff.hideFromPanel) continue;
 
+    // 무기의 「전체 속성 피해 보너스」는 게임 속성 창의 6속성 칸에 모두 찍힌다(물리는 제외).
+    // 캐릭터 · 에코 쪽 "All"은 칸이 없는 전체 피해 보너스라 그대로 넘어간다.
+    if (buff.target === "damageBonus" && buff.damageType === "All" && weaponBuffs.includes(buff)) {
+      const amount = buff.value * (buff.stacks || 1);
+      for (const [element, key] of Object.entries(ELEMENT_BONUS_KEY)) {
+        if (element === "Physical") continue;
+        out[key] = (out[key] ?? 0) + amount;
+      }
+      continue;
+    }
+
     const key = panelStatKey(buff);
     if (!key) continue;
     out[key] = (out[key] ?? 0) + buff.value * (buff.stacks || 1);
