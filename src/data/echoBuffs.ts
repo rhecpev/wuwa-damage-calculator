@@ -332,7 +332,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       label: "파티 조화도 파괴 증폭",
       target: "syncAmplify",
       damageType: "All",
-      value: 0.2, // 20pt. 스탯창 표시가 퍼센트라 소수 비율로 담는다
+      value: 20, // 20pt — 조화도 파괴 증폭은 퍼센트가 아닌 수치라 그대로 담는다
       uptime: "active",
       scope: "party",
       condition: "목표에게 「조화 파동 · 이탈」 혹은 「조화 밀집 · 이탈」 추가 시, 30초간",

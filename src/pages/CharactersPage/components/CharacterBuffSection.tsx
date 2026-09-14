@@ -181,7 +181,9 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
                         : damageLabel(buff)}
                   </td>
                   <td className="chain-value">
-                    {(buff.value * 100).toFixed(0)}%
+                    {buff.target === "syncAmplify"
+                      ? `${buff.value}pt` // 조화도 파괴 증폭은 퍼센트가 아닌 수치
+                      : `${(buff.value * 100).toFixed(0)}%`}
                     {stacks > 1 && (
                       <em>
                         ×{stacks} = {(buff.value * stacks * 100).toFixed(0)}%

@@ -257,7 +257,8 @@ const SCALE_SOURCES: Record<BuffScaleStat, (s: Stats) => number> = {
   // 부조화 수치 누적 효율은 공명 효율과 같은 꼴이다 — 누구나 기본 100%를 깔고 있고
   // Stats에는 그 위에 얹힌 보너스분만 담는다. 「1%당」이라고 적힌 효과는 표시값(=100+보너스)을 본다.
   DiscordEfficiency: (s) => (1 + s.discordEfficiency) * 100,
-  SyncAmplify: (s) => s.syncAmplify * 100,
+  // 조화도 파괴 증폭은 퍼센트가 아닌 수치(pt)로 담는다 — 그대로 읽는다.
+  SyncAmplify: (s) => s.syncAmplify,
   CritRate: (s) => s.critRate * 100,
 };
 

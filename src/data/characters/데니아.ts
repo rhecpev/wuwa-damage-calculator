@@ -34,6 +34,7 @@ const baseStats = {
   def: 1148.8868,
   critRate: 0.05, // 표시값 5%
   critDamage: 0.5, // 표시값 150% - 기본 100%
+  syncAmplify: 10, // 조화도 파괴 증폭 기본 10 — 퍼센트가 아닌 수치
 };
 
 // 기본 공격 — 「연극의 모습」과 「환멸의 모습」 두 형태의 공격이 한 스킬에 들어 있다.
@@ -660,7 +661,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "2체인 · 조화 밀집 이탈 후 파티 조화도 파괴 증폭",
     target: "syncAmplify",
     damageType: "All",
-    value: 0.2, // 20pt
+    value: 20, // 20pt
     uptime: "active",
     scope: "party",
     resonanceChain: 2,
@@ -771,7 +772,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     inherentSkillId: "1005305",
     target: "syncAmplify",
     damageType: "All",
-    value: 0.1, // 10pt
+    value: 10, // 10pt
     uptime: "active",
     scope: "party",
     resonanceMode: "Cluster",
@@ -784,10 +785,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     inherentSkillId: "1005305",
     target: "syncAmplify",
     damageType: "All",
-    value: 0.008, // 초과 10%당 8pt = 1%당 0.8pt
+    value: 0.8, // 초과 10%당 8pt = 1%당 0.8pt
     scaleFrom: "DiscordEfficiency",
     scaleOffset: 100,
-    maxValue: 0.4, // 최대 40pt
+    maxValue: 40, // 최대 40pt
     uptime: "active",
     scope: "party",
     resonanceMode: "Cluster",

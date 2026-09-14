@@ -59,7 +59,7 @@ const BONUS_ROWS: Row[] = [
   ["hp", "HP", "flat"],
   ["atk", "공격력", "flat"],
   ["def", "방어력", "flat"],
-  ["syncAmplify", "조화도 파괴 증폭", "pct"],
+  ["syncAmplify", "조화도 파괴 증폭", "flat"], // 퍼센트가 아닌 수치(pt)
   ["critRate", "크리티컬", "pct"],
   ["critDamage", "크리티컬 피해", "base"],
   ["energyRegen", "공명 효율", "base"],

@@ -203,11 +203,15 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                       {/* 스탯은 안 건드리고 이상 스택 상한만 올리는 버프는 퍼센트가 의미 없다. */}
                       {buff.raisesAnomalyStacks && !buff.value
                         ? `이상 스택 상한 +${buff.raisesAnomalyStacks}`
-                        : `${(amount * 100).toFixed(1)}%`}
+                        : buff.target === "syncAmplify"
+                          ? `${+amount.toFixed(1)}pt` // 조화도 파괴 증폭은 퍼센트가 아닌 수치
+                          : `${(amount * 100).toFixed(1)}%`}
                       {buff.scaleFrom
-                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom} × ${(
-                            buff.value * 100
-                          ).toFixed(1)}%)`
+                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom} × ${
+                            buff.target === "syncAmplify"
+                              ? `${buff.value}pt`
+                              : `${(buff.value * 100).toFixed(1)}%`
+                          })`
                         : stacks > 1 &&
                           buff.value > 0 &&
                           ` (${(buff.value * 100).toFixed(1)}% × ${stacks})`}

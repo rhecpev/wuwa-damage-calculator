@@ -772,7 +772,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "네 차례야! · 파티 조화도 파괴 증폭",
     target: "syncAmplify",
     damageType: "All",
-    value: 0.3, // 30pt. 스탯창 표시가 퍼센트라 소수 비율로 담는다
+    value: 30, // 30pt — 조화도 파괴 증폭은 퍼센트가 아닌 수치라 그대로 담는다
     uptime: "active",
     scope: "party",
     condition: "파티 내 캐릭터가 「해킹 · 이탈」을 붙인 뒤 30초간",

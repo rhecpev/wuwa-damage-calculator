@@ -3,7 +3,7 @@ import { dec, num, pct } from "../../../utils/format";
 import { STAT_NAMES } from "../../../utils/statNames";
 
 /** 깡수치 그대로 적는 칸. 나머지는 퍼센트로 적는다. */
-const FLAT_KEYS = new Set<keyof Stats>(["hp", "atk", "def"]);
+const FLAT_KEYS = new Set<keyof Stats>(["hp", "atk", "def", "syncAmplify"]);
 
 /**
  * 이 칸 하나를 설명하려면 같이 봐야 하는 칸들.

@@ -80,7 +80,8 @@ export function BuffSection() {
       target: draft.target,
       damageType: draft.damageType,
       ...(isResTarget(draft.target) && draft.element ? { element: draft.element } : {}),
-      value: percent / 100,
+      // 조화도 파괴 증폭은 퍼센트가 아닌 수치(pt)라 입력값을 그대로 담는다.
+      value: draft.target === "syncAmplify" ? percent : percent / 100,
       stacks: Math.round(stacks),
       modifier: draft.modifier,
       enabled: true,

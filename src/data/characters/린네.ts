@@ -777,7 +777,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "본연의 색 소모 · 파티 조화도 파괴 증폭",
     target: "syncAmplify",
     damageType: "All",
-    value: 0.4, // 40pt. 스탯창 표시가 퍼센트라 소수 비율로 담는다
+    value: 40, // 40pt — 조화도 파괴 증폭은 퍼센트가 아닌 수치라 그대로 담는다
     uptime: "active",
     scope: "party",
     condition: "공중에서 「본연의 색」 3pt를 소모하는 스킬 발동 후 30초간",

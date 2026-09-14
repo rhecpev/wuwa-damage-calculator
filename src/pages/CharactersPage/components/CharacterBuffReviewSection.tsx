@@ -48,6 +48,11 @@ function attackNames(characterId: string): Map<string, string> {
  */
 function formatValue(template: CharacterBuffTemplate): string {
   const scale = template.scaleFrom ? ` × ${template.scaleFrom}` : "";
+  // 조화도 파괴 증폭은 퍼센트가 아닌 수치(pt)다.
+  if (template.target === "syncAmplify") {
+    const max = template.maxValue !== undefined ? ` · 최대 ${template.maxValue}pt` : "";
+    return `${template.value}pt${scale}${max}`;
+  }
   const one =
     template.target === "motionValue" && template.modifier === "amplify"
       ? `×${(1 + template.value).toFixed(2)}`
