@@ -760,6 +760,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "passive", // 「파멸의 선」을 늘 두르고 있어 조건이 항상 선다
     scope: "self",
     resonanceChain: 2,
+    allElements: true, // 전체 속성 피해 보너스 — 속성 창 6칸에 모두 찍힌다
   },
   {
     label: "2체인 · 파티 전체 속성 피해 보너스",

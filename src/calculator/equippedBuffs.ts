@@ -166,6 +166,8 @@ export function deriveCharacterBuffs(
         ...(template.excludeOwner ? { excludeOwner: true } : {}),
         // 상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극)
         ...(template.hideFromPanel ? { hideFromPanel: true } : {}),
+        // 「전체 속성 피해 보너스」라 속성 창 6칸에 모두 찍히는 것(치사 2체인)
+        ...(template.allElements ? { allElements: true } : {}),
         // 발동 버프지만 속성 창에 늘 찍히는 것 — 보유 체인에 맞는 스택으로 풀어 둔다.
         ...(template.panelStacks !== undefined
           ? { panelStacks: panelStacksAt(template.panelStacks, chain) }
@@ -427,12 +429,13 @@ export function equippedPanelStats(
     if (buff.attackId || buff.attackIds?.length) continue;
 
     // 무기의 「전체 속성 피해 보너스」는 게임 속성 창의 6속성 칸에 모두 찍힌다(물리는 제외).
+    // 캐릭터 쪽도 allElements로 표시한 것은 같다(치사 2체인 「파멸의 선」 50%).
     // 캐릭터 · 에코 쪽 "All"은 칸이 없는 전체 피해 보너스라 그대로 넘어간다.
     if (
       buff.target === "damageBonus" &&
       buff.damageType === "All" &&
       !buff.element &&
-      weaponBuffs.includes(buff)
+      (weaponBuffs.includes(buff) || buff.allElements)
     ) {
       const amount = buff.value * (buff.stacks || 1);
       for (const [element, key] of Object.entries(ELEMENT_BONUS_KEY)) {

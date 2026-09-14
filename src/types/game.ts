@@ -60,7 +60,7 @@ export type SkillCategory="Basic"|"Skill"|"Circuit"|"Liberation"|"Variation"|"In
 //   공격 팔레트를 이 분류로 묶어서 보여준다.
 export interface SkillAttribute{attributeName:string;description:string;values:string[];}
 export interface Skill{id:string;name:string;category?:SkillCategory;attacks:Attack[];icon?:string;attributes?:SkillAttribute[];}
-export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;}
+export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
 // 캐릭터 고유효과·공명체인처럼 캐릭터가 스스로 들고 있는 버프를 계산 가능한 형태로 적어둔 것.
 //   무기 쪽 WeaponBuffTemplate과 같은 모양이되, 정련(values 5개) 대신 아래 두 조건을 쓴다.
 //   resonanceChain: 이 단계 이상 보유해야 걸린다. 생략하면 체인과 무관(고유효과 등).
@@ -77,6 +77,8 @@ export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType
 //   panelStacks: 발동 버프지만 게임 속성 창에는 늘 찍히는 것 — 스탯창에 이 스택으로 넣는다.
 //     숫자면 그 스택, {체인: 스택}이면 보유 체인 이하에서 가장 높은 칸(아우구스타 「왕관」은
 //     비전투 4초면 최대치로 채워져 속성 창에 보인다 — {0:1, 1:2, 6:4}).
+//   allElements: damageType "All"인 피해 보너스가 원문상 「전체 속성 피해 보너스」라 속성 창의
+//     6속성 칸에 모두 찍히는 것(치사 2체인). 계산에는 영향이 없고 스탯창 표시만 바뀐다.
 export interface Character{id:string;name:string;level:number;element:Element;weaponType:WeaponType;baseStats:Stats;skills:Skill[];chainEffects?:ChainEffect[];passiveBuffs?:CharacterBuffTemplate[];iconUrl?:string;artUrl?:string;echoIds?:string[];resonanceModes?:ResonanceMode[];}
 // passiveBuffs: 위 CharacterBuffTemplate 목록. 파티에 편성하면 버프 목록에 자동으로 잡힌다.
 // resonanceModes: 이 캐릭터가 고를 수 있는 공명 모드 목록. 모드가 있는 캐릭터만 채우고,
@@ -140,7 +142,7 @@ export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamag
 //   atkPercent / hpPercent / defPercent = 공격력·HP·방어력 % 증가
 //     이 셋은 기초 스탯에 곱해지기 전에 합산돼야 해서, 다른 타깃과 달리
 //     calculateFinalStats의 곱연산 이전 단계에 얹힌다(manualBuffDelta 참고).
-export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;}
+export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
 // 수기로 입력하는 버프 프로토타입.
 //   label: 메모용 이름(선택). 계산에는 쓰이지 않는다.
 //   target: 위 BuffTarget — 계산의 어느 자리에 붙는지
