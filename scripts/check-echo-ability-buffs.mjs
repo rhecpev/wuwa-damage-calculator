@@ -16,9 +16,7 @@ import { readFileSync } from "node:fs";
 
 /** 원문에 「메인 슬롯」이 있지만 피해식에 옮길 자리가 없어 비워 두는 것. 이유를 반드시 적는다. */
 const SKIP = {
-  "6000216": "치료 효과 보너스 — BuffTarget에 치료 자리가 없고 치료는 피해식에 들어가지 않는다",
-  "6010216": "봉정계유(6000216)와 같다",
-  "391090205": "봉정계유(6000216)와 같다",
+  // 봉정계유(치료 효과 보너스)는 healingBonus 자리가 생겨 옮겼다 — 지금은 비워 둔 것이 없다.
 };
 
 const details = JSON.parse(readFileSync("src/data/echoDetails.json", "utf8")).echoes;

@@ -195,6 +195,8 @@
 .char-level input[type=range]{flex:1;min-width:120px;max-width:320px;accent-color:#8d9ab0;cursor:pointer}
 .char-level b{color:#e9edf5;font-size:14px;min-width:26px;text-align:right;font-variant-numeric:tabular-nums}
 .char-level-warn{flex-basis:100%;font-style:normal;color:#e0a94d;font-size:12px}
+.char-ascension{display:inline-flex;align-items:center;gap:6px;color:#c2c9d6;font-size:12px;cursor:pointer}
+.char-ascension input{accent-color:#8d9ab0;cursor:pointer}
 .enemy-res{flex-basis:100%;font-style:normal;color:#9aa3b3;font-size:11px;font-variant-numeric:tabular-nums}
 .enemy-element.on .enemy-res{color:#c9ab6b}
 .card .card-dmg{display:grid;grid-template-columns:auto 1fr;gap:2px 8px;width:100%;margin-top:2px;padding-bottom:6px;border-bottom:1px solid #364054}

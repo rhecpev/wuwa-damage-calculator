@@ -18,7 +18,11 @@ import {
 } from "../calculator/equippedBuffs";
 import { characters } from "../data/sampleData";
 import { DEFAULT_WEAPON_LEVEL, WEAPON_LEVEL_MAX, WEAPON_LEVEL_MIN } from "../data/weapons";
-import { DEFAULT_CHARACTER_LEVEL, clampCharacterLevel } from "../data/characterStats";
+import {
+  DEFAULT_CHARACTER_LEVEL,
+  clampCharacterLevel,
+  setPreAscensionSource,
+} from "../data/characterStats";
 import { inherentSkillsOf, nodesOf } from "../data/characterNodes";
 import {
   getWeaponBuffOverrides,
@@ -115,12 +119,20 @@ interface PartyConfigContextType {
   config: PartyConfig;
   /** 캐릭터별로 고른 무기. 캐릭터 관리 탭에서 정하고 계산에서 그대로 쓴다. */
   characterWeapons: Record<string, CharacterWeaponConfig>;
-  setCharacterWeapon: (characterId: string, weaponId: string) => void;
+  /** copy를 주면 그 자루(보유 무기)를 끼운다 — 레벨 · 정련도 그 자루 값으로. */
+  setCharacterWeapon: (
+    characterId: string,
+    weaponId: string,
+    copy?: { pk: number; refine: number; level: number },
+  ) => void;
   setWeaponRefine: (characterId: string, refine: number) => void;
   setWeaponLevel: (characterId: string, level: number) => void;
   /** 캐릭터별 레벨(1~90). 기초 스탯과 방어저항 배율이 이 값을 본다. */
   characterLevels: Record<string, number>;
   setCharacterLevel: (characterId: string, level: number) => void;
+  /** 돌파 자리 레벨에서 아직 돌파하지 않은 캐릭터(true). 기초 스탯이 돌파 전 값이 된다. */
+  characterPreAscension: Record<string, boolean>;
+  setCharacterPreAscension: (characterId: string, pre: boolean) => void;
   /**
    * 캐릭터별로 켜둔 스킬 트리 노드 id 목록.
    * 값이 없는 캐릭터는 "손댄 적 없음"이라 전부 켠 것으로 본다(nodeStats 참고).
@@ -314,6 +326,22 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  // 돌파 자리 레벨(20 · 40 · … · 80)에서 아직 돌파하지 않은 캐릭터. 기초 스탯이 돌파 전 값이 된다.
+  const [characterPreAscension, setCharacterPreAscensionState] = usePersistedState<
+    Record<string, boolean>
+  >("characterPreAscension", {});
+  // characterAtLevel이 읽는 자리에 그리기 전에 넣어 둔다.
+  setPreAscensionSource(characterPreAscension);
+
+  const setCharacterPreAscension = (characterId: string, pre: boolean) => {
+    setCharacterPreAscensionState((current) => {
+      const { [characterId]: _removed, ...rest } = current;
+      return pre ? { ...rest, [characterId]: true } : rest;
+    });
+    // 레벨 표를 보고 다시 계산하는 화면들이 characterLevels로 새로 그리므로 모양만 바꿔 알린다.
+    setCharacterLevels((current) => ({ ...current }));
+  };
+
   // 스킬 트리 스탯 노드. 켠 것만 담는다.
   const [characterNodes, setCharacterNodes] = usePersistedState<Record<string, string[]>>(
     "characterNodes",
@@ -385,15 +413,26 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   };
 
   /** 같은 무기를 다시 고르면 해제한다. 무기를 바꾸면 정련은 1단계, 레벨은 90으로 돌아간다. */
-  const setCharacterWeapon = (characterId: string, weaponId: string) => {
+  const setCharacterWeapon = (
+    characterId: string,
+    weaponId: string,
+    copy?: { pk: number; refine: number; level: number },
+  ) => {
     setCharacterWeapons((current) => {
-      if (current[characterId]?.weaponId === weaponId) {
+      const worn = current[characterId];
+      // 이미 끼고 있는 것을 다시 누르면 해제. 자루를 골랐으면 같은 자루일 때만 해제로 본다.
+      const same = copy
+        ? worn?.weaponId === weaponId && worn?.pk === copy.pk
+        : worn?.weaponId === weaponId;
+      if (same) {
         const { [characterId]: _removed, ...rest } = current;
         return rest;
       }
       return {
         ...current,
-        [characterId]: { weaponId, refine: 1, level: DEFAULT_WEAPON_LEVEL },
+        [characterId]: copy
+          ? { weaponId, refine: copy.refine, level: copy.level, pk: copy.pk }
+          : { weaponId, refine: 1, level: DEFAULT_WEAPON_LEVEL },
       };
     });
   };
@@ -1107,6 +1146,8 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setWeaponLevel,
     characterLevels,
     setCharacterLevel,
+    characterPreAscension,
+    setCharacterPreAscension,
     characterNodes,
     toggleCharacterNode,
     setAllCharacterNodes,

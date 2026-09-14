@@ -77,6 +77,21 @@ export function deriveWeaponBuffs(
   return out;
 }
 
+/** panelStacks를 보유 체인에 맞는 스택 하나로. {체인: 스택}이면 체인 이하에서 가장 높은 칸. */
+function panelStacksAt(value: number | Record<number, number>, chain: number): number {
+  if (typeof value === "number") return value;
+  let best = 0;
+  let stacks = 0;
+  for (const [key, count] of Object.entries(value)) {
+    const at = Number(key);
+    if (at <= chain && at >= best) {
+      best = at;
+      stacks = count;
+    }
+  }
+  return stacks;
+}
+
 /** 캐릭터 고유 버프의 id. 캐릭터·효과 순서로 고정된다. */
 export const characterBuffId = (characterId: string, index: number) =>
   `character:${characterId}:${index}`;
@@ -150,6 +165,10 @@ export function deriveCharacterBuffs(
         ...(template.excludeOwner ? { excludeOwner: true } : {}),
         // 상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극)
         ...(template.hideFromPanel ? { hideFromPanel: true } : {}),
+        // 발동 버프지만 속성 창에 늘 찍히는 것 — 보유 체인에 맞는 스택으로 풀어 둔다.
+        ...(template.panelStacks !== undefined
+          ? { panelStacks: panelStacksAt(template.panelStacks, chain) }
+          : {}),
         ownerId: character.id,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
@@ -389,7 +408,9 @@ export function equippedPanelStats(
 
   const out: Partial<Stats> = {};
   for (const buff of [...weaponBuffs, ...characterBuffs, ...echoBuffs]) {
-    if (buff.uptime === "active" || buff.scope === "party") continue;
+    // 발동 버프라도 panelStacks가 있으면 속성 창에 늘 찍히는 것이라 그 스택으로 넣는다(아우구스타 「왕관」).
+    const panelStacks = typeof buff.panelStacks === "number" ? buff.panelStacks : undefined;
+    if ((buff.uptime === "active" && panelStacks === undefined) || buff.scope === "party") continue;
     if (buff.scaleFrom) continue;
     if (buff.hideFromPanel) continue;
     // 특정 공격에만 붙는 버프(복링 1체인 「귀일」 크리티컬 등)는 그 공격에서만 걸린다 — 스탯창 몫이 아니다.
@@ -408,7 +429,7 @@ export function equippedPanelStats(
 
     const key = panelStatKey(buff);
     if (!key) continue;
-    out[key] = (out[key] ?? 0) + buff.value * (buff.stacks || 1);
+    out[key] = (out[key] ?? 0) + buff.value * (panelStacks ?? (buff.stacks || 1));
   }
 
   return out;

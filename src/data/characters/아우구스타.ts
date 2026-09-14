@@ -508,6 +508,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     condition: "「만민의 염원, 영광의 왕관」 스택만큼. 상한은 기본 1 · 1체인 2 · 6체인 4",
+    panelStacks: { 0: 1, 1: 2, 6: 4 }, // 비전투 4초면 최대치로 채워져 속성 창에 찍힌다 — 스탯창은 체인별 최대 스택
   },
 
   // ── 공명체인 ──
@@ -522,6 +523,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 1,
     condition: "「왕관」 스택만큼. 1체인부터 상한이 2스택이 된다",
+    panelStacks: { 0: 1, 1: 2, 6: 4 }, // 비전투 4초면 최대치로 채워져 속성 창에 찍힌다 — 스탯창은 체인별 최대 스택
   },
   {
     label: "2체인 · 왕관 (크리티컬)",
@@ -534,6 +536,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 2,
     condition: "「왕관」 스택만큼",
+    panelStacks: { 0: 1, 1: 2, 6: 4 }, // 비전투 4초면 최대치로 채워져 속성 창에 찍힌다 — 스탯창은 체인별 최대 스택
   },
   // 3체인 — DamageList에 27% 옆에 33.75%(× 1.25), 71.28% 옆에 89.1%(× 1.25),
   // 90% 옆에 112.5%, 60% 옆에 75%, 450% 옆에 562.5%, 43.55% 옆에 54.44% 엔트리가 있다.

@@ -14,9 +14,26 @@ export const CHARACTER_LEVEL_MIN = 1;
 export const CHARACTER_LEVEL_MAX = 90;
 export const DEFAULT_CHARACTER_LEVEL = CHARACTER_LEVEL_MAX;
 
-type LevelTables = Partial<Record<"hp" | "atk" | "def", number[]>>;
+type StatKey = "hp" | "atk" | "def";
+type LevelTables = Partial<Record<StatKey, number[]>> & {
+  /** 돌파 전 값. 같은 레벨이 두 번 있는 자리(20 · 40 · 50 · 60 · 70 · 80)만 레벨 → 값으로 담는다. */
+  pre?: Partial<Record<StatKey, Record<string, number>>>;
+};
 
 const tables = characterStatsData as Record<string, LevelTables | undefined>;
+
+/** 돌파 자리 레벨들. 게임에서 이 레벨은 「80/80(돌파 전)」과 「80/90(돌파 후)」 두 상태가 있다. */
+export const ASCENSION_LEVELS = [20, 40, 50, 60, 70, 80];
+export const isAscensionLevel = (level: number) => ASCENSION_LEVELS.includes(level);
+
+/**
+ * 캐릭터별 「돌파 전」 표시. PartyConfigContext가 저장해 두고 그릴 때마다 여기로 넣어 준다 —
+ * characterAtLevel을 부르는 자리가 여러 화면에 흩어져 있어 인자로 다 넘기는 대신 이렇게 둔다.
+ */
+let preAscension: Record<string, boolean> = {};
+export const setPreAscensionSource = (value: Record<string, boolean>) => {
+  preAscension = value;
+};
 
 export const clampCharacterLevel = (level: number) =>
   Math.min(Math.max(Math.round(level), CHARACTER_LEVEL_MIN), CHARACTER_LEVEL_MAX);
@@ -31,9 +48,11 @@ export const hasLevelTable = (id: string) => tables[id] !== undefined;
 export function characterAtLevel(c: Character, level: number): Character {
   const lv = clampCharacterLevel(level);
   const t = tables[c.id];
-  const hp = t?.hp?.[lv - 1];
-  const atk = t?.atk?.[lv - 1];
-  const def = t?.def?.[lv - 1];
+  // 돌파 전으로 표시한 캐릭터가 돌파 자리 레벨이면 앞쪽(돌파 전) 값을 쓴다.
+  const pre = preAscension[c.id] ? t?.pre : undefined;
+  const hp = pre?.hp?.[lv] ?? t?.hp?.[lv - 1];
+  const atk = pre?.atk?.[lv] ?? t?.atk?.[lv - 1];
+  const def = pre?.def?.[lv] ?? t?.def?.[lv - 1];
 
   if (hp === undefined || atk === undefined || def === undefined) {
     return lv === c.level ? c : { ...c, level: lv };

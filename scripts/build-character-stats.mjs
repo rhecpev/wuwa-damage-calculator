@@ -39,6 +39,19 @@ function levelTable(prop) {
   });
 }
 
+/**
+ * 돌파 전 값. 같은 레벨이 두 번 들어 있는 자리(20 · 40 · 50 · 60 · 70 · 80)만 앞쪽 값을 담는다.
+ * 게임에서 80/80(아직 돌파 안 함)으로 멈춰 있으면 이 값이 뜬다 — 설지 Lv.80 HP 11265.
+ */
+function preAscensionTable(prop) {
+  const out = {};
+  for (let level = 1; level <= MAX_LEVEL; level += 1) {
+    const hits = prop.GrowthValues.filter((g) => g.level === level);
+    if (hits.length > 1) out[level] = Number(hits[0].value);
+  }
+  return out;
+}
+
 const out = {};
 const warnings = [];
 
@@ -48,7 +61,10 @@ for (const { id, file } of SOURCES) {
   const entry = {};
   for (const prop of role.Properties ?? []) {
     const key = PROP_MAP[prop.Name];
-    if (key) entry[key] = levelTable(prop);
+    if (!key) continue;
+    entry[key] = levelTable(prop);
+    entry.pre ??= {};
+    entry.pre[key] = preAscensionTable(prop);
   }
 
   const missing = Object.values(PROP_MAP).filter((k) => !entry[k]);

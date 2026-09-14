@@ -11,10 +11,11 @@ import {
 } from "../../../data/weapons";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
 import {
+  loadMyWeapons,
   ownedStoreVersion,
-  ownedWeaponCount,
   ownedWeaponIds,
   subscribeOwnedStore,
+  updateMyWeapon,
 } from "../../../data/ownedStore";
 import { flat } from "../../../utils/format";
 
@@ -84,26 +85,31 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
   // 표시도 계산과 같은 값을 보도록 고른 레벨의 공격력을 채운 사본을 쓴다.
   const selected = equippedEntry ? weaponAtLevel(equippedEntry, level) : undefined;
 
-  // 이 무기를 끼고 있는 캐릭터들. 무기 그림 왼쪽 아래에 아이콘으로 표시한다.
-  // 지금 보고 있는 캐릭터도 포함하고, 그 아이콘만 맨 앞에 세운다.
-  // 같은 무기를 여럿이 들고 있을 수도 있어 배열로 모은다.
-  const wearers = new Map<string, typeof characters>();
-  for (const other of characters) {
-    const worn = characterWeapons[other.id]?.weaponId;
-    if (!worn) continue;
-    const list = wearers.get(worn);
-    if (!list) wearers.set(worn, [other]);
-    else if (other.id === characterId) list.unshift(other);
-    else list.push(other);
-  }
+  void ownedVersion; // 보유 목록이 바뀌면 다시 그린다
+  const myWeapons = loadMyWeapons();
+  const owned = ownedWeaponIds();
 
   /**
-   * 카드에 늘 띄우는 정련 단계.
-   * 누군가 끼고 있으면 그 설정값(본인이 우선), 아무도 안 끼고 있으면 기본 1단계다.
+   * 카드 한 장이 가리키는 것. 「보유한 무기만」이면 **자루마다** 한 장이라 같은 무기를
+   * 두 자루 가졌으면 두 장이 뜬다(자루마다 레벨 · 정련이 다르다). 전체 보기는 도감 무기마다 한 장.
    */
-  const refineOf = (weaponId: string) => {
-    const owner = wearers.get(weaponId)?.[0];
-    return owner ? (characterWeapons[owner.id]?.refine ?? 1) : 1;
+  type Card = { key: string; weapon: WeaponEntry; pk?: number; refine: number; level: number };
+
+  /** 그 무기의 첫 자루. 자루를 지목하지 않은 옛 설정은 이 자루를 끼운 것으로 보여준다. */
+  const firstCopyOf = (weaponId: string) => myWeapons.find((w) => w.weaponId === weaponId)?.pk;
+
+  /** 이 카드를 끼고 있는 캐릭터들. 지금 보고 있는 캐릭터를 맨 앞에 세운다. */
+  const wearersOf = (card: Card): typeof characters => {
+    const list = characters.filter((other) => {
+      const worn = characterWeapons[other.id];
+      if (worn?.weaponId !== card.weapon.id) return false;
+      if (card.pk === undefined) return true; // 도감 카드 — 어느 자루로 끼웠든 모은다
+      return (worn.pk ?? firstCopyOf(card.weapon.id)) === card.pk;
+    });
+    return [
+      ...list.filter((c) => c.id === characterId),
+      ...list.filter((c) => c.id !== characterId),
+    ];
   };
 
   const compare = (a: WeaponEntry, b: WeaponEntry) => {
@@ -113,27 +119,43 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
   };
 
   // 캐릭터가 드는 무기 종류만. 그 안에서 보유 여부와 이름으로 한 번 더 거른다.
-  void ownedVersion; // 보유 목록이 바뀌면 다시 그린다
-  const owned = ownedWeaponIds();
   // 「보유한 무기만」을 켜 두었으면 담아둔 게 없어도 전체를 보여주지 않는다.
   // 예전에는 빈 화면을 피하려고 전체로 되돌렸는데, 그러면 안 가진 무기를 가진 것처럼
   // 골라 끼우게 된다 — 걸러진 결과가 비었다는 사실 자체를 보여주는 편이 맞다.
   // 이 캐릭터가 드는 종류 전체. 걸러서 비었을 때 종류 이름을 대려면 이쪽이 필요하다.
   const ofType = weaponsFor(character.weaponType);
   const typeName = ofType[0]?.typeName ?? character.weaponType;
-  const candidates = ofType
-    .filter((w) => (ownedOnly ? owned.has(w.id) : true))
-    .filter((w) => w.name.toLowerCase().includes(query.trim().toLowerCase()))
-    .sort(compare);
+  const q = query.trim().toLowerCase();
+  const ofTypeIds = new Set(ofType.map((w) => w.id));
+  const cards: Card[] = ownedOnly
+    ? myWeapons
+        .filter((copy) => ofTypeIds.has(copy.weaponId))
+        .map((copy) => ({
+          key: `pk:${copy.pk}`,
+          weapon: weaponsById.get(copy.weaponId)!,
+          pk: copy.pk,
+          refine: copy.refine,
+          level: copy.level,
+        }))
+    : ofType.map((weapon) => ({
+        key: `id:${weapon.id}`,
+        weapon,
+        refine: 1,
+        level: WEAPON_LEVEL_MAX,
+      }));
+  const candidates = cards
+    .filter((card) => card.weapon.name.toLowerCase().includes(q))
+    .sort((a, b) => compare(a.weapon, b.weapon) || (a.pk ?? 0) - (b.pk ?? 0));
 
-  /**
-   * 가진 자루보다 더 많은 캐릭터가 끼고 있는지.
-   * 무기 한 자루는 한 캐릭터만 낄 수 있어서, 둘에게 물리려면 두 자루가 있어야 한다.
-   */
-  const overEquipped = (weaponId: string) => {
-    const copies = ownedWeaponCount(weaponId);
-    return copies > 0 && (wearers.get(weaponId)?.length ?? 0) > copies;
+  /** 지금 캐릭터가 이 카드를 끼고 있는지. 자루 카드는 자루까지 같아야 한다. */
+  const isActive = (card: Card) => {
+    if (card.weapon.id !== selectedId) return false;
+    if (card.pk === undefined) return true;
+    return (equipped?.pk ?? firstCopyOf(card.weapon.id)) === card.pk;
   };
+
+  /** 한 자루를 둘 이상이 끼고 있는지 — 게임에선 불가능한 상태다. */
+  const overEquipped = (card: Card) => card.pk !== undefined && wearersOf(card).length > 1;
 
   return (
     <section className="panel">
@@ -186,23 +208,40 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
           )}
 
           <div className="weapon-grid">
-            {candidates.map((weapon) => {
-              const active = weapon.id === selectedId;
+            {candidates.map((card) => {
+              const { weapon } = card;
+              const active = isActive(card);
+              const cardWearers = wearersOf(card);
+              // 끼고 있으면 캐릭터 설정값. 자루 카드는 그 자루 값, 도감 카드는 낀 사람 값(없으면 1).
+              const shownRefine = active
+                ? refine
+                : card.pk !== undefined
+                  ? card.refine
+                  : (characterWeapons[cardWearers[0]?.id ?? ""]?.refine ?? 1);
+              const shownLevel = active ? level : card.level;
 
               return (
                 <button
-                  key={weapon.id}
+                  key={card.key}
                   className={active ? "weapon-card on" : "weapon-card"}
-                  onClick={() => setCharacterWeapon(characterId, weapon.id)}
+                  onClick={() =>
+                    setCharacterWeapon(
+                      characterId,
+                      weapon.id,
+                      card.pk !== undefined
+                        ? { pk: card.pk, refine: card.refine, level: card.level }
+                        : undefined,
+                    )
+                  }
                 >
                   <span className={`weapon-card-art r${weapon.rarity}`}>
                     <img src={weapon.icon} alt="" loading="lazy" />
                     <em className={active ? "weapon-card-refine on" : "weapon-card-refine"}>
-                      {refineOf(weapon.id)}
+                      {shownRefine}
                     </em>
-                    {(wearers.get(weapon.id) ?? []).length > 0 && (
+                    {cardWearers.length > 0 && (
                       <em className="weapon-card-wearers">
-                        {wearers.get(weapon.id)!.map((owner) => {
+                        {cardWearers.map((owner) => {
                           const self = owner.id === characterId;
                           const tip = `${owner.name} 장착 중`;
 
@@ -225,10 +264,10 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
                     )}
                   </span>
                   <span className="weapon-card-name">{weapon.name}</span>
-                  <span className="weapon-card-lv">Lv.{active ? level : WEAPON_LEVEL_MAX}</span>
+                  <span className="weapon-card-lv">Lv.{shownLevel}</span>
                   {/* 가진 자루보다 많은 캐릭터가 끼고 있으면 알려준다 — 게임에선 불가능한 상태다. */}
-                  {overEquipped(weapon.id) && (
-                    <span className="weapon-card-warn" title="가진 자루보다 많은 캐릭터가 끼고 있습니다">
+                  {overEquipped(card) && (
+                    <span className="weapon-card-warn" title="한 자루를 둘 이상의 캐릭터가 끼고 있습니다">
                       자루 부족
                     </span>
                   )}
@@ -291,7 +330,12 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
                   min={WEAPON_LEVEL_MIN}
                   max={WEAPON_LEVEL_MAX}
                   value={level}
-                  onChange={(event) => setWeaponLevel(characterId, Number(event.target.value))}
+                  onChange={(event) => {
+                    const next = Number(event.target.value);
+                    setWeaponLevel(characterId, next);
+                    // 자루를 끼웠으면 그 자루의 레벨도 같이 고친다 — 무기 관리 탭과 어긋나지 않게.
+                    if (equipped?.pk !== undefined) updateMyWeapon(equipped.pk, { level: next });
+                  }}
                 />
                 <b>{level}</b>
               </span>
@@ -302,7 +346,10 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
                   <button
                     key={step}
                     className={step === refine ? "on" : ""}
-                    onClick={() => setWeaponRefine(characterId, step)}
+                    onClick={() => {
+                      setWeaponRefine(characterId, step);
+                      if (equipped?.pk !== undefined) updateMyWeapon(equipped.pk, { refine: step });
+                    }}
                   >
                     {step}
                   </button>
@@ -333,7 +380,13 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
 
               <button
                 className="weapon-unequip"
-                onClick={() => setCharacterWeapon(characterId, selected.id)}
+                onClick={() =>
+                  setCharacterWeapon(
+                    characterId,
+                    selected.id,
+                    equipped?.pk !== undefined ? { pk: equipped.pk, refine, level } : undefined,
+                  )
+                }
               >
                 해제
               </button>

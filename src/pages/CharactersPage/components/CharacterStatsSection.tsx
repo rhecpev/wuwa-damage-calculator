@@ -7,6 +7,7 @@ import {
   DEFAULT_CHARACTER_LEVEL,
   characterAtLevel,
   hasLevelTable,
+  isAscensionLevel,
 } from "../../../data/characterStats";
 import { nodeStats } from "../../../data/characterNodes";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
@@ -98,7 +99,15 @@ export function CharacterStatsSection({
   characterId,
   characterEchoLinks,
 }: CharacterStatsSectionProps) {
-  const { characterWeapons, characterChains, characterLevels, setCharacterLevel, characterNodes } =
+  const {
+    characterWeapons,
+    characterChains,
+    characterLevels,
+    setCharacterLevel,
+    characterPreAscension,
+    setCharacterPreAscension,
+    characterNodes,
+  } =
     usePartyConfig();
   const found = characters.find((c) => c.id === characterId);
   // 고른 레벨의 기초 스탯을 채운 사본으로 계산·표시한다. 레벨이 없으면 90.
@@ -206,6 +215,17 @@ export function CharacterStatsSection({
           onChange={(event) => setCharacterLevel(characterId, Number(event.target.value))}
         />
         <b>{level}</b>
+        {/* 돌파 자리 레벨은 게임에서 「80/80」과 「80/90」 두 상태가 있어 기초 스탯이 다르다. */}
+        {isAscensionLevel(level) && hasLevelTable(characterId) && (
+          <label className="char-ascension">
+            <input
+              type="checkbox"
+              checked={Boolean(characterPreAscension[characterId])}
+              onChange={(event) => setCharacterPreAscension(characterId, event.target.checked)}
+            />
+            돌파 전 ({level}/{level})
+          </label>
+        )}
         {!hasLevelTable(characterId) && (
           <em className="char-level-warn">
             레벨별 기초 스탯 표가 없어 수치는 Lv.90 값 그대로입니다.
