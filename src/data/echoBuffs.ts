@@ -65,6 +65,13 @@ export interface EchoBuffTemplate {
    */
   attackIds?: string[];
   /**
+   * **이 캐릭터들이 끼면 상시**가 되는 발동 효과. 캐릭터 id 목록.
+   *
+   * 조건이 그 캐릭터에게는 늘 서는 경우에 쓴다 — 「공명 에너지가 0일 때」는 공명 에너지가 없는
+   * 플로로에게 항상 참이다. 목록에 든 캐릭터가 끼면 uptime이 passive로 바뀌어 스탯창에도 찍힌다.
+   */
+  passiveFor?: string[];
+  /**
    * **이 캐릭터들이 꼈을 때만** 걸리는 효과. 캐릭터 id 목록이며 생략하면 누구에게나 걸린다.
    *
    * 「장착 캐릭터가 루시 혹은 레베카일 경우」처럼 에코가 낀 사람을 가리는 문구가 근거다.
@@ -852,6 +859,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
   //
   // 3세트 하나로 끝나는 세트다(2/5 구성이 아니다).
   // 조건(공명 에너지 0)은 엔진이 자원을 다루지 않아 판정하지 못한다 — 조건부로 두고 사람이 켠다.
+  // 다만 플로로는 공명 에너지가 없어 조건이 늘 선다 — passiveFor로 플로로가 끼면 상시로 둔다.
   "뒤틀린 피안의 꿈": [
     {
       setKey: 3,
@@ -860,6 +868,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       damageType: "All",
       value: 0.2,
       uptime: "active",
+      passiveFor: ["phrolova"], // 플로로는 공명 에너지가 없어 늘 0이다 — 끼면 상시
       scope: "self",
       condition: "캐릭터의 공명 에너지가 0일 때",
     },
@@ -870,6 +879,7 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       damageType: "Echo",
       value: 0.35,
       uptime: "active",
+      passiveFor: ["phrolova"],
       scope: "self",
       condition: "캐릭터의 공명 에너지가 0일 때",
     },

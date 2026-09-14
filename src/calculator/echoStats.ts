@@ -113,6 +113,25 @@ const SUB_PANEL_PERCENT: Record<string, Record<string, number>> = {
   },
 };
 
+/**
+ * **메인 옵션** 퍼센트가 스탯창 버림에 들어갈 때 먹히는 값. 지금은 HP%만 있다.
+ *
+ * 파수인 HP 49915 — 기초 16712 · 스킬 트리 12% · 메인 HP 33 + 30 + 22.8 + 22.8 ·
+ * 부옵션 10.1×3 + 10.9 + 7.1 · 깡 4990. 에코 HP% 합이 156.819~156.825%여야 하는데
+ * 표시값 메인으로는 156.867%(49923)다. 부옵션은 다른 HP 실측 일곱 건에 묶여 합쳐서
+ * 0.022%p밖에 못 내리므로 메인 쪽이 표시값보다 낮아야 한다. 실측이 이 한 건뿐이라
+ * 세 값을 같은 비율(×0.99958)로 내렸다 — HP% 메인이 섞인 실측이 더 오면 값마다 다시 잡는다.
+ *
+ * 공격력% 메인은 표시값 그대로가 맞다 — 현령 공격력 2434(메인 30 · 18 · 18)가 확인했다.
+ */
+const MAIN_PANEL_PERCENT: Record<string, Record<string, number>> = {
+  hpPercent: {
+    "33.0": 32.986,
+    "30.0": 29.988,
+    "22.8": 22.79,
+  },
+};
+
 /** 표에 없는 값은 표시값 그대로 쓴다 — 실측이 없는 칸을 어림으로 깎지 않는다. */
 const SUB_PERCENT_ADJUST = 0;
 
@@ -142,6 +161,7 @@ function put(
   type: string,
   raw: string | number | undefined,
   fromSub = false,
+  fromMain = false,
 ) {
   const calType = ECHO_DMG_CAL_TYPES[type];
   const key = calType ? DMG_CAL_BUCKET[calType] : ECHO_STAT_KEYS[type];
@@ -150,7 +170,12 @@ function put(
   if (!Number.isFinite(value)) return;
   const isPercent = type.endsWith("(%)");
   // 부옵션 퍼센트 중 버림을 타는 칸만 표시값 대신 「먹히는 값」으로 바꿔 담는다.
-  const percent = fromSub && ADJUSTED_KEYS.has(key) ? subPanelPercent(key, value) : value;
+  const percent =
+    fromSub && ADJUSTED_KEYS.has(key)
+      ? subPanelPercent(key, value)
+      : fromMain && ADJUSTED_KEYS.has(key)
+        ? (MAIN_PANEL_PERCENT[key]?.[value.toFixed(1)] ?? value)
+        : value;
   const amount = isPercent ? percent / 100 : value;
   target[key] = (target[key] ?? 0) + amount;
 }
@@ -161,7 +186,7 @@ export function echoStats(echo: any): Partial<Stats> {
   const options = echo?.options;
   if (!options) return stats;
 
-  put(stats, options.mainOption?.type, options.mainOption?.value);
+  put(stats, options.mainOption?.type, options.mainOption?.value, false, true);
   put(stats, options.mainSubOption?.type, options.mainSubOption?.value);
 
   const mains: string[] = options.mainSelects ?? [];

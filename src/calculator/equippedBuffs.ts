@@ -189,6 +189,10 @@ export function deriveCharacterBuffs(
 const wornBy = (only: string[] | undefined, characterId: string) =>
   !only || only.includes(characterId) || only.includes(baseCharacterId(characterId));
 
+/** 이 캐릭터가 끼면 상시가 되는 효과인지(passiveFor). 모드로 갈린 id도 원래 id로 본다. */
+const passiveFor = (list: string[] | undefined, characterId: string) =>
+  !!list && (list.includes(characterId) || list.includes(baseCharacterId(characterId)));
+
 /** 화음 세트 버프의 id. 캐릭터마다 따로 켜고 끌 수 있도록 캐릭터 id를 앞에 둔다. */
 export const echoSetBuffId = (characterId: string, setName: string, index: number) =>
   `echoset:${characterId}:${setName}:${index}`;
@@ -267,7 +271,10 @@ export function deriveEchoBuffs(
           modifier: template.modifier ?? "increase",
           enabled: true,
           uptime:
-            override?.uptime ?? template.uptime ?? (template.condition ? "active" : "passive"),
+            override?.uptime ??
+            (passiveFor(template.passiveFor, characterId) ? "passive" : undefined) ??
+            template.uptime ??
+            (template.condition ? "active" : "passive"),
           scope: override?.scope ?? template.scope ?? "self",
           ownerId: characterId,
           ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
@@ -311,7 +318,11 @@ export function deriveEchoBuffs(
         stacks: template.stacks ?? 1,
         modifier: template.modifier ?? "increase",
         enabled: true,
-        uptime: override?.uptime ?? template.uptime ?? (template.condition ? "active" : "passive"),
+        uptime:
+          override?.uptime ??
+          (passiveFor(template.passiveFor, characterId) ? "passive" : undefined) ??
+          template.uptime ??
+          (template.condition ? "active" : "passive"),
         scope: override?.scope ?? template.scope ?? "self",
         ownerId: characterId,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),

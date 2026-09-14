@@ -16,7 +16,9 @@ import {
   ownedWeaponCount,
   removeMyWeapon,
   subscribeOwnedStore,
+  distinctWearers,
   updateMyWeapon,
+  wearersByCopy,
 } from "../../data/ownedStore";
 import { usePartyConfig } from "../../context/PartyConfigContext";
 import { flat } from "../../utils/format";
@@ -59,6 +61,8 @@ export function WeaponsPage() {
   const [query, setQuery] = useState("");
   const [type, setType] = useState<string | null>(null);
   const [rarity, setRarity] = useState<number | null>(null);
+  // 「내 무기」에서 고른 자루. 아래 편집 줄(레벨 · 정련 · 지우기)이 이 자루를 가리킨다.
+  const [pickedPk, setPickedPk] = useState<number | null>(null);
 
   const mine = useMemo(() => {
     // version이 바뀌면 보유 목록도 바뀐다.
@@ -80,9 +84,18 @@ export function WeaponsPage() {
       .sort((a, b) => b.rarity - a.rarity || a.name.localeCompare(b.name, "ko"));
   }, [query, type, rarity]);
 
-  /** 이 무기를 지금 끼고 있는 캐릭터들. 자루가 모자라면 경고를 띄우는 데 쓴다. */
-  const wearersOf = (weaponId: string) =>
-    characters.filter((c) => characterWeapons[c.id]?.weaponId === weaponId);
+  // 자루마다 누가 끼고 있는지 — 캐릭터 관리 무기 선택창과 같은 규칙(ownedStore.wearersByCopy).
+  const byCopy = useMemo(
+    () => wearersByCopy(mine, characterWeapons, characters.map((c) => c.id)),
+    [mine, characterWeapons],
+  );
+  // 모드로 갈린 같은 캐릭터는 한 명으로 센다 — 두 모드가 한 자루를 같이 쥐어도 「자루 부족」이 아니다.
+  const wearersOf = (pk: number) =>
+    distinctWearers(byCopy.get(pk) ?? [])
+      .map((id) => characters.find((c) => c.id === id))
+      .filter((c): c is (typeof characters)[number] => c !== undefined);
+
+  const picked = mine.find((w) => w.pk === pickedPk);
 
   return (
     <div className="data-page">
@@ -111,27 +124,81 @@ export function WeaponsPage() {
             아직 담은 무기가 없습니다. 아래 목록에서 무기를 눌러 담으세요.
           </p>
         ) : (
-          <div className="my-weapons">
-            {mine.map((item) => {
-              const wearers = wearersOf(item.weaponId);
-              const copies = ownedWeaponCount(item.weaponId);
-              return (
-                <div className="my-weapon" key={item.pk}>
-                  {item.entry.icon && <img src={item.entry.icon} alt="" loading="lazy" />}
+          <>
+            {/* 캐릭터 관리 무기 선택창과 같은 카드 — 그림 · 정련 · 낀 캐릭터 · 이름 · 레벨.
+                누르면 아래에 그 자루의 레벨 · 정련을 고치는 줄이 뜬다. */}
+            <div className="weapon-grid my-weapon-grid">
+              {mine.map((item) => {
+                const wearers = wearersOf(item.pk);
+                const on = item.pk === pickedPk;
+                return (
+                  <button
+                    key={item.pk}
+                    className={on ? "weapon-card on" : "weapon-card"}
+                    title={`${item.entry.name} — 눌러서 레벨 · 정련 고치기`}
+                    onClick={() => setPickedPk(on ? null : item.pk)}
+                  >
+                    <span className={`weapon-card-art r${item.entry.rarity}`}>
+                      {item.entry.icon && <img src={item.entry.icon} alt="" loading="lazy" />}
+                      <em className={on ? "weapon-card-refine on" : "weapon-card-refine"}>
+                        {item.refine}
+                      </em>
+                      {wearers.length > 0 && (
+                        <em className="weapon-card-wearers">
+                          {wearers.map((owner) =>
+                            owner.iconUrl ? (
+                              <img
+                                key={owner.id}
+                                src={owner.iconUrl}
+                                alt=""
+                                loading="lazy"
+                                title={`${owner.name} 장착 중`}
+                              />
+                            ) : (
+                              <b key={owner.id} title={`${owner.name} 장착 중`}>
+                                {owner.name[0]}
+                              </b>
+                            ),
+                          )}
+                        </em>
+                      )}
+                    </span>
+                    <span className="weapon-card-name">{item.entry.name}</span>
+                    <span className="weapon-card-lv">Lv.{item.level}</span>
+                    {/* 한 자루를 둘 이상이 끼고 있으면 알려준다 — 게임에서는 불가능한 상태다. */}
+                    {wearers.length > 1 && (
+                      <span className="weapon-card-warn" title="한 자루를 둘 이상의 캐릭터가 끼고 있습니다">
+                        자루 부족
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {picked && (
+              <div className="my-weapons">
+                <div className="my-weapon">
+                  {picked.entry.icon && <img src={picked.entry.icon} alt="" loading="lazy" />}
 
                   <div className="my-weapon-name">
-                    <b>{item.entry.name}</b>
+                    <b>{picked.entry.name}</b>
                     <span>
-                      <i className="weapon-stars">{stars(item.entry.rarity)}</i>{" "}
-                      {TYPE_LABEL[item.entry.weaponType] ?? item.entry.weaponType}
+                      <i className="weapon-stars">{stars(picked.entry.rarity)}</i>{" "}
+                      {TYPE_LABEL[picked.entry.weaponType] ?? picked.entry.weaponType}
                       {/* 부옵션은 레벨마다 값이 다르다 — 담아둔 레벨의 값을 보여준다. */}
-                      {item.entry.subStatName
-                        ? ` · ${item.entry.subStatName} ${formatSubStat(
-                            item.entry.subStatKey,
-                            item.entry.subStatLevels?.[item.level - 1] ?? item.entry.subStatValue,
+                      {picked.entry.subStatName
+                        ? ` · ${picked.entry.subStatName} ${formatSubStat(
+                            picked.entry.subStatKey,
+                            picked.entry.subStatLevels?.[picked.level - 1] ??
+                              picked.entry.subStatValue,
                           )}`
                         : ""}
-                      {` · 공격력 ${flat(weaponAtLevel(item.entry, item.level).baseAtk)}`}
+                      {` · 공격력 ${flat(weaponAtLevel(picked.entry, picked.level).baseAtk)}`}
+                      {wearersOf(picked.pk).length > 0 &&
+                        ` · ${wearersOf(picked.pk)
+                          .map((c) => c.name)
+                          .join(", ")} 장착 중`}
                     </span>
                   </div>
 
@@ -141,9 +208,9 @@ export function WeaponsPage() {
                       type="number"
                       min={WEAPON_LEVEL_MIN}
                       max={WEAPON_LEVEL_MAX}
-                      value={item.level}
+                      value={picked.level}
                       onChange={(e) =>
-                        updateMyWeapon(item.pk, {
+                        updateMyWeapon(picked.pk, {
                           level: Math.min(
                             Math.max(Number(e.target.value) || WEAPON_LEVEL_MIN, WEAPON_LEVEL_MIN),
                             WEAPON_LEVEL_MAX,
@@ -158,32 +225,28 @@ export function WeaponsPage() {
                     {REFINE_STEPS.map((step) => (
                       <button
                         key={step}
-                        className={step === item.refine ? "on" : undefined}
-                        onClick={() => updateMyWeapon(item.pk, { refine: step })}
+                        className={step === picked.refine ? "on" : undefined}
+                        onClick={() => updateMyWeapon(picked.pk, { refine: step })}
                       >
                         {step}
                       </button>
                     ))}
                   </div>
 
-                  {/* 자루보다 더 많은 캐릭터가 끼고 있으면 알려준다 — 게임에서는 불가능한 상태다. */}
-                  {wearers.length > copies && (
-                    <span className="my-weapon-warn">
-                      {wearers.length}명이 끼고 있는데 {copies}자루뿐입니다
-                    </span>
-                  )}
-
                   <button
                     className="my-weapon-remove"
                     title="이 자루를 목록에서 지웁니다"
-                    onClick={() => removeMyWeapon(item.pk)}
+                    onClick={() => {
+                      removeMyWeapon(picked.pk);
+                      setPickedPk(null);
+                    }}
                   >
                     ×
                   </button>
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            )}
+          </>
         )}
       </section>
 

@@ -1175,6 +1175,7 @@
    위쪽 「내 무기」는 한 줄에 한 자루씩, 아래 도감은 격자로 편다. */
 .weapon-dup-note{color:#e8c66a}
 .my-weapons{display:grid;gap:8px;margin-top:12px}
+.my-weapon-grid{margin-top:12px;max-height:none;grid-template-columns:repeat(auto-fill,minmax(104px,1fr))}
 .my-weapon{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:9px 12px;background:#2d3345;border:1px solid #384155;border-radius:11px}
 .my-weapon>img{width:40px;height:40px;flex:none;object-fit:contain;border-radius:8px;background:#262d3f;border:1px solid #3c455c}
 .my-weapon-name{flex:1;min-width:160px;display:flex;flex-direction:column;gap:2px}

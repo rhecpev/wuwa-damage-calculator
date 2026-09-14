@@ -15,7 +15,9 @@ import {
   ownedStoreVersion,
   ownedWeaponIds,
   subscribeOwnedStore,
+  distinctWearers,
   updateMyWeapon,
+  wearersByCopy,
 } from "../../../data/ownedStore";
 import { flat } from "../../../utils/format";
 
@@ -95,27 +97,39 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
    */
   type Card = { key: string; weapon: WeaponEntry; pk?: number; refine: number; level: number };
 
-  /** 그 무기의 첫 자루. 자루를 지목하지 않은 옛 설정은 이 자루를 끼운 것으로 보여준다. */
-  const firstCopyOf = (weaponId: string) => myWeapons.find((w) => w.weaponId === weaponId)?.pk;
+  // 자루마다 누가 끼고 있는지. 자루를 지목하지 않은 예전 설정은 빈 자루에 차례로 붙는다
+  // (무기 관리 탭과 같은 규칙 — ownedStore.wearersByCopy).
+  const byCopy = wearersByCopy(
+    myWeapons,
+    characterWeapons,
+    characters.map((c) => c.id),
+  );
+
+  /** 지금 캐릭터가 끼고 있는 자루. 자루를 지목하지 않았으면 위 규칙으로 붙은 자루다. */
+  const myCopyPk = [...byCopy.entries()].find(([, ids]) => ids.includes(characterId))?.[0];
 
   /** 이 카드를 끼고 있는 캐릭터들. 지금 보고 있는 캐릭터를 맨 앞에 세운다. */
   const wearersOf = (card: Card): typeof characters => {
-    const list = characters.filter((other) => {
-      const worn = characterWeapons[other.id];
-      if (worn?.weaponId !== card.weapon.id) return false;
-      if (card.pk === undefined) return true; // 도감 카드 — 어느 자루로 끼웠든 모은다
-      return (worn.pk ?? firstCopyOf(card.weapon.id)) === card.pk;
-    });
+    const raw =
+      card.pk !== undefined
+        ? (byCopy.get(card.pk) ?? [])
+        : // 도감 카드 — 어느 자루로 끼웠든 모은다
+          characters.filter((c) => characterWeapons[c.id]?.weaponId === card.weapon.id).map((c) => c.id);
+    // 모드로 갈린 같은 캐릭터는 한 명으로 — 지금 보고 있는 모드를 대표로 남긴다.
+    const ids = distinctWearers(raw, characterId);
+    const list = characters.filter((other) => ids.includes(other.id));
     return [
       ...list.filter((c) => c.id === characterId),
       ...list.filter((c) => c.id !== characterId),
     ];
   };
 
+  // 이름은 무기 관리 탭과 같은 한글 순서로 — 두 화면의 목록 순서가 어긋나지 않게.
+  const byName = (a: WeaponEntry, b: WeaponEntry) => a.name.localeCompare(b.name, "ko");
   const compare = (a: WeaponEntry, b: WeaponEntry) => {
-    if (sort === "atk") return b.baseAtk - a.baseAtk || a.name.localeCompare(b.name);
-    if (sort === "name") return a.name.localeCompare(b.name);
-    return b.rarity - a.rarity || a.name.localeCompare(b.name);
+    if (sort === "atk") return b.baseAtk - a.baseAtk || byName(a, b);
+    if (sort === "name") return byName(a, b);
+    return b.rarity - a.rarity || byName(a, b);
   };
 
   // 캐릭터가 드는 무기 종류만. 그 안에서 보유 여부와 이름으로 한 번 더 거른다.
@@ -151,7 +165,7 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
   const isActive = (card: Card) => {
     if (card.weapon.id !== selectedId) return false;
     if (card.pk === undefined) return true;
-    return (equipped?.pk ?? firstCopyOf(card.weapon.id)) === card.pk;
+    return myCopyPk === card.pk;
   };
 
   /** 한 자루를 둘 이상이 끼고 있는지 — 게임에선 불가능한 상태다. */
@@ -228,7 +242,8 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
                     setCharacterWeapon(
                       characterId,
                       weapon.id,
-                      card.pk !== undefined
+                      // 끼고 있는 카드를 다시 누르면 해제 — 자루를 지목하지 않은 예전 설정도 풀리게 자루 없이 넘긴다.
+                      card.pk !== undefined && !active
                         ? { pk: card.pk, refine: card.refine, level: card.level }
                         : undefined,
                     )

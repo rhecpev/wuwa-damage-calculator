@@ -463,6 +463,16 @@ const passive3110: Skill = {
 const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 고유 스킬 ──
   {
+    // 원문: 「치료 효과 보너스가 20% 증가된다」 — 피해식에는 안 들어가고 스탯창에만 찍힌다.
+    label: "「약」 · 치료 효과 보너스",
+    inherentSkillId: "1003104",
+    target: "healingBonus",
+    damageType: "All",
+    value: 0.2, // 20% 증가
+    uptime: "passive", // 조건이 없다
+    scope: "self",
+  },
+  {
     label: "「독」 · 인멸 피해 보너스",
     inherentSkillId: "1003105",
     target: "damageBonus",
@@ -563,8 +573,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
-//   고유 「약」          치료 효과 보너스 20% 증가
-//                      — 치료 보너스는 BuffTarget에 자리가 없다
 //   1체인 앞부분        공명 스킬 발동 시 「몽롱」 1pt 회복
 //   2체인 앞부분        함몰이 목표를 환몽 상태로 만든다
 //   3체인 뒷부분        함몰 발동 후 즉시 신기루 상태 진입

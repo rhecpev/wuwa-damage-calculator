@@ -1,4 +1,5 @@
 import { loadPersisted, savePersisted } from "../utils/persist";
+import { baseCharacterId } from "./modeVariants";
 
 /**
  * 「내가 가지고 있는 것」 — 캐릭터 보유 여부와 보유 무기.
@@ -96,4 +97,68 @@ export function updateMyWeapon(pk: number, patch: Partial<Pick<MyWeapon, "level"
   myWeapons = myWeapons.map((w) => (w.pk === pk ? { ...w, ...patch } : w));
   savePersisted(WEAPON_KEY, myWeapons);
   bump();
+}
+
+/**
+ * 자루마다 누가 끼고 있는지. 캐릭터 id 목록을 자루 pk별로 돌려준다.
+ *
+ * 무기 설정에 자루(pk)가 적혀 있으면 그 자루로 잡는다. 자루를 지목하지 않은 예전 설정은
+ * **그 무기의 비어 있는 자루에 차례로** 붙인다 — 첫 자루에 몰아 붙이면 두 자루를 가지고
+ * 두 캐릭터에게 물렸는데도 「자루 부족」이 뜬다. 빈 자루가 없을 때만 첫 자루에 겹쳐 붙인다
+ * (그때는 정말로 자루가 모자란 것이다).
+ *
+ * characterIds 순서가 곧 우선순위다 — 화면의 캐릭터 목록 순서를 넘기면 늘 같은 결과가 나온다.
+ *
+ * 모드로 갈린 같은 캐릭터(에이메스 · 조화 파동 / 불꽃)는 게임에서 한 명이다. 같은 무기를 끼웠으면
+ * 한 자루를 같이 쓰는 것으로 본다 — 먼저 붙은 모드의 자루에 나머지 모드도 붙인다.
+ * 그래서 한 자루에 id가 여럿 붙어도 원래 캐릭터로는 한 명일 수 있다(distinctWearers로 센다).
+ */
+export function wearersByCopy(
+  weaponsList: MyWeapon[],
+  characterWeapons: Record<string, { weaponId: string; pk?: number } | undefined>,
+  characterIds: string[],
+): Map<number, string[]> {
+  const out = new Map<number, string[]>();
+  const put = (pk: number, id: string) => out.set(pk, [...(out.get(pk) ?? []), id]);
+  const pending: string[] = [];
+
+  for (const id of characterIds) {
+    const worn = characterWeapons[id];
+    if (!worn?.weaponId) continue;
+    const copy =
+      worn.pk !== undefined
+        ? weaponsList.find((w) => w.pk === worn.pk && w.weaponId === worn.weaponId)
+        : undefined;
+    if (copy) put(copy.pk, id);
+    else pending.push(id);
+  }
+
+  for (const id of pending) {
+    const weaponId = characterWeapons[id]!.weaponId;
+    const copies = weaponsList.filter((w) => w.weaponId === weaponId);
+    if (copies.length === 0) continue; // 보유 목록에 없는 무기 — 붙일 자루가 없다
+    // 같은 캐릭터의 다른 모드가 이미 이 무기의 자루를 쥐고 있으면 그 자루를 같이 쓴다.
+    const base = baseCharacterId(id);
+    const sibling = copies.find((w) =>
+      (out.get(w.pk) ?? []).some((other) => baseCharacterId(other) === base),
+    );
+    // 빈 자루 = 다른 캐릭터가 아무도 안 쥔 자루.
+    const free = copies.find((w) => !out.has(w.pk));
+    put((sibling ?? free ?? copies[0]).pk, id);
+  }
+
+  return out;
+}
+
+/**
+ * 한 자루를 쥔 캐릭터 id 목록을 **원래 캐릭터 한 명씩**으로 줄인다.
+ * 모드로 갈린 같은 캐릭터는 한 명이다. preferId가 목록에 있으면 그 모드를 대표로 남긴다.
+ */
+export function distinctWearers(ids: string[], preferId?: string): string[] {
+  const out = new Map<string, string>();
+  for (const id of ids) {
+    const base = baseCharacterId(id);
+    if (!out.has(base) || id === preferId) out.set(base, id);
+  }
+  return [...out.values()];
 }
