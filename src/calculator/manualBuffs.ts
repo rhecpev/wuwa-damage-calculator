@@ -94,6 +94,11 @@ export const TARGET_OPTIONS: { value: BuffTarget; label: string; hint: string }[
     label: "부조화 효율",
     hint: "부조화 누적에만 영향 — 이 수치에 비례하는 버프(빛을 쫓는 별의 고리)의 재료가 된다",
   },
+  {
+    value: "healingBonus",
+    label: "치료 효과 보너스",
+    hint: "치료량에만 영향 — 스탯창에는 보이지만 피해식에는 들어가지 않는다",
+  },
   { value: "atkFlat", label: "공격력 (깡수치)", hint: "%가 아니라 그대로 더해지는 공격력" },
   { value: "atkPercent", label: "공격력 %", hint: "기초 공격력에 곱해지기 전 합산" },
   { value: "hpPercent", label: "HP %", hint: "기초 HP에 곱해지기 전 합산" },
@@ -475,6 +480,9 @@ export function statPatch(buff: ManualBuff, amount: number): Partial<Stats> | nu
       return { syncAmplify: amount };
     case "discordEfficiency":
       return { discordEfficiency: amount };
+    // 치료 효과 보너스 — 피해식에는 안 들어가고 스탯창에만 찍힌다(찬란한 광휘 2세트 등).
+    case "healingBonus":
+      return { healingBonus: amount };
     // 이상 효과 부스트 — 어느 효과인지는 damageType에 적혀 있다.
     // "All"이면 효과를 가리지 않는 칸에, 특정 효과면 그 효과 칸에 담는다.
     // 이상 효과의 크리티컬 · 배율 상승. 이상 피해식에서만 쓰인다.

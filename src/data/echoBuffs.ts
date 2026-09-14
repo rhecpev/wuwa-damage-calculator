@@ -568,8 +568,17 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
   //   (부조화 효율 30%면 6%, 125% 이상이면 상한 25%).
   //
   // 미반영 — 계산 엔진이 다루지 못하는 것
-  //   2세트 「치료 효과 10% 증가」 BuffTarget에 치료 자리가 없다(찬란한 광휘와 같은 이유).
+  //   (2세트 「치료 효과 10% 증가」는 healingBonus로 옮겨 스탯창에 찍는다)
   "빛을 쫓는 별의 고리": [
+    {
+      setKey: 2,
+      label: "치료 효과 증가",
+      target: "healingBonus",
+      damageType: "All",
+      value: 0.1,
+      uptime: "passive", // 세트만 맞추면 늘 걸린다 — 피해식에는 안 들어가고 스탯창에만 찍힌다
+      scope: "self",
+    },
     {
       setKey: 5,
       label: "치료 시 파티 공격력 (부조화 효율 비례)",
@@ -1209,10 +1218,17 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
   //   2세트 치료 효과가 10% 증가된다
   //   5세트 파티원 치료 시, 파티 전체의 공격력이 15% 증가하며, 30초간 지속된다
   //
-  // 미반영 — 계산 엔진이 다루지 못하는 것
-  //   2세트 「치료 효과 10% 증가」 BuffTarget에 치료 자리가 없다. Stats에는 healingBonus가
-  //   있지만 피해식에 들어가지 않아 버프로 옮길 대상이 아니다.
+  // 2세트 「치료 효과 10% 증가」는 피해식에 안 들어가지만 스탯창에 찍히도록 healingBonus로 옮긴다.
   "찬란한 광휘": [
+    {
+      setKey: 2,
+      label: "치료 효과 증가",
+      target: "healingBonus",
+      damageType: "All",
+      value: 0.1,
+      uptime: "passive", // 세트만 맞추면 늘 걸린다
+      scope: "self",
+    },
     {
       setKey: 5,
       label: "치료 시 파티 공격력",

@@ -324,6 +324,8 @@ function panelStatKey(buff: ManualBuff): keyof Stats | null {
       return "syncAmplify";
     case "discordEfficiency":
       return "discordEfficiency";
+    case "healingBonus":
+      return "healingBonus";
 
     // 공격력·HP·방어력 — 스탯창의 세 줄. 공격력만 있고 체력·방어력이 빠지면
     // 같은 무기·에코를 끼고도 한 줄만 맞는 화면이 된다.
