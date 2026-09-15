@@ -37,6 +37,8 @@ export interface BuffOverrideStore {
   clear(ownerId: string, index?: number): void;
   /** 전부 원래대로. */
   reset(): void;
+  /** 표를 통째로 바꾼다. 내보낸 파일을 불러올 때 쓴다. */
+  replace(next: BuffOverrideMap): void;
 }
 
 export function createBuffOverrideStore(storeName: string): BuffOverrideStore {
@@ -85,6 +87,10 @@ export function createBuffOverrideStore(storeName: string): BuffOverrideStore {
 
     reset() {
       commit({});
+    },
+
+    replace(next) {
+      commit({ ...next });
     },
   };
 }

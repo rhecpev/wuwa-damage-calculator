@@ -3,6 +3,7 @@ import { weapons, type WeaponEntry } from "../../data/weapons";
 import {
   clearWeaponBuffOverride,
   getWeaponBuffOverrides,
+  replaceWeaponBuffOverrides,
   resetWeaponBuffOverrides,
   setWeaponBuffOverride,
   subscribeWeaponBuffOverrides,
@@ -12,7 +13,7 @@ import type { WeaponBuffTemplate } from "../../data/weaponBuffs";
 import type { BuffScope, BuffUptime } from "../../types/game";
 import { DAMAGE_TYPE_LABEL, ELEMENT_LABEL, TARGET_LABEL, defaultsOf } from "../../utils/buffLabels";
 import { useReviewStatus } from "../../utils/useReviewStatus";
-import { ReviewActions } from "../../components";
+import { ReviewActions, ReviewTransfer } from "../../components";
 
 /**
  * 무기 버프 확인 탭 — 무기 스킬 설명문과, 그걸 계산용 버프로 옮긴 결과를 무기마다 나란히 놓고 대조하는 자리.
@@ -115,8 +116,8 @@ export function WeaponBuffReviewPage() {
   const laterCount = weapons.filter((w) => deferredSet.has(w.id)).length;
 
   /** 고친 줄만 무기 이름 · 효과 이름과 함께 뽑는다 — 소스에 옮겨 적을 때 찾기 쉽게. */
-  const exportJson = () => {
-    const out = editedKeys.map((key) => {
+  const edits = () =>
+    editedKeys.map((key) => {
       const [weaponId, index] = key.split(":");
       const weapon = weapons.find((w) => w.id === weaponId);
       const template = weapon?.passiveBuffs[Number(index)];
@@ -129,8 +130,7 @@ export function WeaponBuffReviewPage() {
         after: overrides[key],
       };
     });
-    return JSON.stringify(out, null, 2);
-  };
+  const exportJson = () => JSON.stringify(edits(), null, 2);
 
   return (
     <section className="panel data-page">
@@ -238,6 +238,18 @@ export function WeaponBuffReviewPage() {
           나중에 처리한 무기도 보기
         </label>
 
+        <ReviewTransfer
+          kind="weapon-buff"
+          overrides={overrides}
+          checked={review.checked}
+          deferred={review.deferred}
+          edits={edits()}
+          onImport={(s) => {
+            replaceWeaponBuffOverrides(s.overrides);
+            review.replaceAll(s);
+          }}
+        />
+
         {editedKeys.length > 0 && (
           <>
             <button
@@ -296,10 +308,7 @@ export function WeaponBuffReviewPage() {
                 </span>
               </div>
               {edited && (
-                <button
-                  className="data-reset"
-                  onClick={() => clearWeaponBuffOverride(weapon.id)}
-                >
+                <button className="data-reset" onClick={() => clearWeaponBuffOverride(weapon.id)}>
                   이 무기 되돌리기
                 </button>
               )}

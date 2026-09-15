@@ -18,3 +18,4 @@ export const subscribeWeaponBuffOverrides = store.subscribe;
 export const setWeaponBuffOverride = store.set;
 export const clearWeaponBuffOverride = store.clear;
 export const resetWeaponBuffOverrides = store.reset;
+export const replaceWeaponBuffOverrides = store.replace;

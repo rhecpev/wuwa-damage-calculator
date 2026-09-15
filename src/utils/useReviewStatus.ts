@@ -54,6 +54,11 @@ export function useReviewStatus(name: string) {
     deferredSet,
     toggleChecked,
     toggleDeferred,
+    /** 완료 · 나중에를 통째로 바꾼다. 내보낸 파일을 불러올 때 쓴다. */
+    replaceAll: (next: { checked: string[]; deferred: string[] }) => {
+      setChecked(next.checked);
+      setDeferred(next.deferred.filter((x) => !next.checked.includes(x)));
+    },
     clearChecked: () => setChecked([]),
     clearDeferred: () => setDeferred([]),
   };

@@ -4,6 +4,7 @@ import {
   characterBuffKey,
   clearCharacterBuffOverride,
   getCharacterBuffOverrides,
+  replaceCharacterBuffOverrides,
   resetCharacterBuffOverrides,
   setCharacterBuffOverride,
   subscribeCharacterBuffOverrides,
@@ -11,7 +12,7 @@ import {
 import type { BuffScope, BuffUptime, CharacterBuffTemplate } from "../../types/game";
 import { DAMAGE_TYPE_LABEL, ELEMENT_LABEL, TARGET_LABEL, defaultsOf } from "../../utils/buffLabels";
 import { useReviewStatus } from "../../utils/useReviewStatus";
-import { ReviewActions } from "../../components";
+import { ReviewActions, ReviewTransfer } from "../../components";
 
 /**
  * 캐릭터 버프 확인 탭 — 전 캐릭터의 고유효과 · 공명체인을 계산용 버프로 옮긴 결과를 한 자리에서 훑는다.
@@ -107,7 +108,11 @@ export function CharacterBuffReviewPage() {
       .map((c) => {
         const nameHit = q !== "" && c.name.toLowerCase().includes(q);
         const rows = (c.passiveBuffs ?? [])
-          .map((template, index) => ({ template, index, key: characterBuffKey(c.id, index) }))
+          .map((template, index) => ({
+            template,
+            index,
+            key: characterBuffKey(c.id, index),
+          }))
           .filter((r) => (showChecked ? true : !checkedSet.has(r.key)))
           .filter((r) => (showDeferred ? true : !deferredSet.has(r.key)))
           .filter((r) => (editedOnly ? overrides[r.key] !== undefined : true))
@@ -142,26 +147,23 @@ export function CharacterBuffReviewPage() {
   const laterCount = allKeys.filter((k) => deferredSet.has(k)).length;
 
   /** 고친 줄만 캐릭터 이름 · 효과 이름과 함께 뽑는다 — 소스에 옮겨 적을 때 찾기 쉽게. */
-  const exportJson = () =>
-    JSON.stringify(
-      editedKeys.map((key) => {
-        const cut = key.lastIndexOf(":");
-        const id = key.slice(0, cut);
-        const index = Number(key.slice(cut + 1));
-        const character = characters.find((c) => c.id === id);
-        const template = character?.passiveBuffs?.[index];
-        return {
-          key,
-          character: character?.name ?? id,
-          index,
-          label: template?.label ?? null,
-          before: template ? defaultsOf(template, "self") : null,
-          after: overrides[key],
-        };
-      }),
-      null,
-      2,
-    );
+  const edits = () =>
+    editedKeys.map((key) => {
+      const cut = key.lastIndexOf(":");
+      const id = key.slice(0, cut);
+      const index = Number(key.slice(cut + 1));
+      const character = characters.find((c) => c.id === id);
+      const template = character?.passiveBuffs?.[index];
+      return {
+        key,
+        character: character?.name ?? id,
+        index,
+        label: template?.label ?? null,
+        before: template ? defaultsOf(template, "self") : null,
+        after: overrides[key],
+      };
+    });
+  const exportJson = () => JSON.stringify(edits(), null, 2);
 
   return (
     <section className="panel data-page">
@@ -266,6 +268,18 @@ export function CharacterBuffReviewPage() {
           고친 줄만
         </label>
 
+        <ReviewTransfer
+          kind="character-buff"
+          overrides={overrides}
+          checked={review.checked}
+          deferred={review.deferred}
+          edits={edits()}
+          onImport={(s) => {
+            replaceCharacterBuffOverrides(s.overrides);
+            review.replaceAll(s);
+          }}
+        />
+
         {editedKeys.length > 0 && (
           <>
             <button
@@ -282,7 +296,9 @@ export function CharacterBuffReviewPage() {
             <button
               className="data-reset"
               onClick={() => {
-                if (confirm("캐릭터 버프의 상시/발동 · 본인/파티 수정분을 전부 원래대로 되돌립니다."))
+                if (
+                  confirm("캐릭터 버프의 상시/발동 · 본인/파티 수정분을 전부 원래대로 되돌립니다.")
+                )
                   resetCharacterBuffOverrides();
               }}
             >
@@ -300,7 +316,9 @@ export function CharacterBuffReviewPage() {
 
       {groups.map(({ character, rows }) => {
         const names = attackNames(character.id);
-        const keys = (character.passiveBuffs ?? []).map((_, i) => characterBuffKey(character.id, i));
+        const keys = (character.passiveBuffs ?? []).map((_, i) =>
+          characterBuffKey(character.id, i),
+        );
         const edited = keys.some((k) => overrides[k] !== undefined);
         const done = keys.filter((k) => checkedSet.has(k)).length;
 
@@ -326,7 +344,11 @@ export function CharacterBuffReviewPage() {
                 <button
                   className="data-reset"
                   onClick={() => {
-                    if (confirm(`${character.name}의 상시/발동 · 본인/파티를 전부 원래대로 되돌립니다.`))
+                    if (
+                      confirm(
+                        `${character.name}의 상시/발동 · 본인/파티를 전부 원래대로 되돌립니다.`,
+                      )
+                    )
                       clearCharacterBuffOverride(character.id);
                   }}
                 >
@@ -336,7 +358,12 @@ export function CharacterBuffReviewPage() {
               {rows.length > 0 && (
                 <button
                   className="data-check"
-                  onClick={() => review.checkMany(rows.map((r) => r.key), true)}
+                  onClick={() =>
+                    review.checkMany(
+                      rows.map((r) => r.key),
+                      true,
+                    )
+                  }
                 >
                   보이는 줄 전부 완료
                 </button>

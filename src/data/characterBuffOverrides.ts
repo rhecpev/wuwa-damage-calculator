@@ -18,3 +18,4 @@ export const subscribeCharacterBuffOverrides = store.subscribe;
 export const setCharacterBuffOverride = store.set;
 export const clearCharacterBuffOverride = store.clear;
 export const resetCharacterBuffOverrides = store.reset;
+export const replaceCharacterBuffOverrides = store.replace;
