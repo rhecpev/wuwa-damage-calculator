@@ -38,8 +38,8 @@ function AppContent() {
         {tab === "cycleCompare" && <CycleComparePage />}
         {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "nicknames" && <NicknamesPage />}
-        {import.meta.env.DEV && tab === "weaponBuffReview" && <WeaponBuffReviewPage />}
-        {import.meta.env.DEV && tab === "characterBuffReview" && <CharacterBuffReviewPage />}
+        {tab === "weaponBuffReview" && <WeaponBuffReviewPage />}
+        {tab === "characterBuffReview" && <CharacterBuffReviewPage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />
