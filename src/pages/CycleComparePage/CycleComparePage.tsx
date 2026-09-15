@@ -1163,14 +1163,17 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                       ) : (
                         <span className="gear-weapon-blank" />
                       )}
-                      {/* 이름 40% · 레벨 20% · 재련 20% · 변경 10% — 캐릭터마다 칸 위치가 맞는다. */}
-                      <b className="gear-weapon-name" title={entry?.name}>
-                        {entry?.name ?? "무기 없음"}
+                      {/* 이름 40% · 레벨 20% · 재련 20% · 변경 10% — 캐릭터마다 칸 위치가 맞는다.
+                          gear-lead: 글자 끝에서 다음 칸까지 선을 이어 한 줄임을 보인다. */}
+                      <b className={weapon ? "gear-weapon-name gear-lead" : "gear-weapon-name"} title={entry?.name}>
+                        <span>{entry?.name ?? "무기 없음"}</span>
                       </b>
-                      <small className="gear-weapon-level">
-                        {weapon ? `Lv.${weapon.level ?? DEFAULT_WEAPON_LEVEL}` : ""}
+                      <small className={weapon ? "gear-weapon-level gear-lead" : "gear-weapon-level"}>
+                        <span>{weapon ? `Lv.${weapon.level ?? DEFAULT_WEAPON_LEVEL}` : ""}</span>
                       </small>
-                      <small className="gear-weapon-refine">{weapon ? `${weapon.refine}재련` : ""}</small>
+                      <small className={weapon ? "gear-weapon-refine gear-lead" : "gear-weapon-refine"}>
+                        <span>{weapon ? `${weapon.refine}재련` : ""}</span>
+                      </small>
                       <button onClick={() => setPickingFor(id)}>변경</button>
                     </div>
                   </div>
@@ -1199,10 +1202,15 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                               <span className="gear-echo-blank" />
                             )}
                             {/* 칸이 1/3씩 고정이라 긴 이름은 잘린다 — 마우스를 올리면 전체가 보인다. */}
-                            <b title={echo?.name}>{echo?.name ?? (slot === 0 ? "메인 · 빈 슬롯" : "빈 슬롯")}</b>
+                            <b className={echo ? "gear-lead" : undefined} title={echo?.name}>
+                              <span>{echo?.name ?? (slot === 0 ? "메인 · 빈 슬롯" : "빈 슬롯")}</span>
+                            </b>
                             {echo && (
-                              <small className="gear-echo-main" title={mainOptionText(echo)}>
-                                {mainOptionText(echo)}
+                              <small
+                                className={set ? "gear-echo-main gear-lead" : "gear-echo-main"}
+                                title={mainOptionText(echo)}
+                              >
+                                <span>{mainOptionText(echo)}</span>
                               </small>
                             )}
                             {set && (

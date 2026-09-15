@@ -3,11 +3,14 @@ import type { DragEvent } from "react";
 import { characters } from "../../data/sampleData";
 import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
 import { isOwnedCharacter, ownedStoreVersion, subscribeOwnedStore } from "../../data/ownedStore";
-import { usePartyConfig } from "../../context/PartyConfigContext";
+import { PARTY_SLOTS, resPresetOf, usePartyConfig } from "../../context/PartyConfigContext";
+import { computeResults } from "../CalculatorPage/hooks/useCalculationResults";
 import { useAppState } from "../../context/AppStateContext";
 import { usePersistedState } from "../../utils/usePersistedState";
 import type { CyclePreset } from "../../data/cyclePresets";
-import type { Element } from "../../types/game";
+import type { Element, PartyConfig } from "../../types/game";
+import { MATRIX_BUFFS, MATRIX_MONSTERS, MATRIX_ROUND_COUNT, MATRIX_SEASON, matrixHpKey } from "../../data/matrixSeason";
+import type { MatrixBuff, MatrixMonster } from "../../data/matrixSeason";
 
 /**
  * 매트릭스.
@@ -288,6 +291,23 @@ export function MatrixPlannerPage() {
     ([id, at]) => at.length > useLimit(id),
   ).length;
 
+  /**
+   * 「메인딜러 : 속성」 — 파티의 1번 캐릭터를 메인딜러로 보고 그 속성을 적는다.
+   * 매트릭스는 속성별로 적을 고르므로 파티가 어느 속성으로 치는지 한눈에 보이게 한다. 두 세부 탭이 같이 쓴다.
+   */
+  const mainElement = (party: PlannerParty) => {
+    const main = byId.get(party.memberIds[0] ?? "");
+    if (!main) return null;
+    const icon = elementIcon(main.element);
+    return (
+      <span className="matrix-main" title={`메인딜러 ${main.name}`}>
+        메인딜러 :
+        {icon && <img src={icon} alt="" />}
+        <b style={{ color: ELEMENT_COLORS[main.element] }}>{ELEMENT_NAMES[main.element]}</b>
+      </span>
+    );
+  };
+
   /** 파티 하나에 딸린 사이클 줄. 두 세부 탭이 같은 모양으로 쓴다. */
   const cycleRow = (party: PlannerParty) => {
     if (party.memberIds.length === 0) return null;
@@ -310,6 +330,53 @@ export function MatrixPlannerPage() {
           </button>
         ))}
       </div>
+    );
+  };
+
+  // 파티 순서 구성하기에서 파티마다 드롭다운으로 고른 사이클. 안 골랐으면 첫 사이클.
+  const [pickedCycle, setPickedCycle] = useState<Record<number, string>>({});
+  // 파티마다 고른 매트릭스 스테이지 버프 id. 없으면 버프 없이 계산한다. 새로 고쳐도 남는다.
+  const [pickedBuff, setPickedBuff] = usePersistedState<Record<number, number>>("matrix.buffs", {});
+
+  /** 파티 순서대로, 파티마다 고른 사이클. 몬스터 체력 깎기가 이 순서로 돈다. */
+  const matrixRuns = useMemo(
+    () =>
+      parties.map((party, index) => {
+        const found = cyclesFor(party.memberIds);
+        return {
+          index,
+          cycle: found.find((p) => p.id === pickedCycle[party.id]) ?? found[0] ?? null,
+          buff: MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id]) ?? null,
+        };
+      }),
+    // cyclesFor는 cyclePresets로만 결과가 달라진다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [parties, pickedCycle, pickedBuff, cyclePresets],
+  );
+  const matrix = useMatrixSim(matrixRuns);
+
+  /** 파티 순서 줄의 사이클 고르개 — 캐릭터 오른쪽에 드롭다운 + 열기. 사이클이 여럿이어도 한 줄에 선다. */
+  const cyclePicker = (party: PlannerParty) => {
+    if (party.memberIds.length === 0) return null;
+    const found = cyclesFor(party.memberIds);
+    if (found.length === 0) {
+      return <span className="matrix-cycle-pick none">담아 둔 사이클 없음</span>;
+    }
+    const chosen = found.find((p) => p.id === pickedCycle[party.id]) ?? found[0];
+    return (
+      <span className="matrix-cycle-pick" onClick={(event) => event.stopPropagation()}>
+        <select
+          value={chosen.id}
+          title={chosen.members.map((m) => m.characterName).join(" · ")}
+          onChange={(event) => setPickedCycle((cur) => ({ ...cur, [party.id]: event.target.value }))}
+        >
+          {found.map((preset) => (
+            <option key={preset.id} value={preset.id}>
+              {preset.name}
+            </option>
+          ))}
+        </select>
+      </span>
     );
   };
 
@@ -461,6 +528,7 @@ export function MatrixPlannerPage() {
                     <small>
                       {party.memberIds.length}/{PARTY_SIZE}
                     </small>
+                    {mainElement(party)}
                     {(party.memberIds.length > 0 || parties.length > 1) && (
                       <button
                         className="matrix-drop"
@@ -528,6 +596,8 @@ export function MatrixPlannerPage() {
           </section>
         </div>
       ) : (
+        // 왼쪽 파티 순서 · 오른쪽 몬스터 체력 깎기
+        <div className="matrix-order-layout">
         <section className="panel">
           <div className="panel-head">
             <h2>파티 순서 구성하기</h2>
@@ -549,6 +619,9 @@ export function MatrixPlannerPage() {
                 <b className="matrix-rank">{index + 1}</b>
 
                 <div className="matrix-row-body">
+                  {mainElement(party)}
+                  {/* 캐릭터 줄 오른쪽에 사이클 드롭다운. 좁으면 아래로 내려간다. */}
+                  <div className="matrix-row-line">
                   <div className="matrix-row-members">
                     {party.memberIds.length === 0 ? (
                       <em className="matrix-row-empty">비어 있습니다</em>
@@ -558,26 +631,53 @@ export function MatrixPlannerPage() {
                         if (!char) return null;
                         const icon = elementIcon(char.element);
                         return (
-                          <span key={id} className="matrix-chip">
+                          <span key={id} className="matrix-chip matrix-chip-tall" title={char.name}>
                             {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
-                            <b>{char.name}</b>
                             {icon && <img className="matrix-chip-el" src={icon} alt="" />}
+                            <b>{char.name}</b>
                           </span>
                         );
                       })
                     )}
                   </div>
-
-                  {cycleRow(party)}
+                  {party.memberIds.length > 0 && (
+                    <select
+                      className="matrix-buff-pick"
+                      value={pickedBuff[party.id] ?? 0}
+                      title={MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id])?.desc ?? "매트릭스 스테이지 버프"}
+                      onChange={(event) => {
+                        const id = Number(event.target.value);
+                        setPickedBuff((cur) => {
+                          const next = { ...cur };
+                          if (id) next[party.id] = id;
+                          else delete next[party.id];
+                          return next;
+                        });
+                      }}
+                    >
+                      <option value={0}>버프 없음</option>
+                      {MATRIX_BUFFS.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                  {cyclePicker(party)}
+                  {/* 이 파티가 깎은 체력 — 색은 오른쪽 체력바의 이 파티 몫과 같다. */}
+                  {(() => {
+                    const run = matrixRuns[index];
+                    const r = matrix.sim.report[index];
+                    if (!run?.cycle) return null;
+                    return (
+                      <span className="matrix-row-result">
+                        <i style={{ background: partyColor(index) }} />
+                        <b>{Math.round(r.damage).toLocaleString()}</b>
+                      </span>
+                    );
+                  })()}
+                  </div>
                 </div>
-
-                <button
-                  className="matrix-drop"
-                  title={party.memberIds.length > 0 ? "이 파티를 비웁니다" : "이 파티를 치웁니다"}
-                  onClick={() => dropParty(party.id)}
-                >
-                  ✕
-                </button>
               </article>
             ))}
 
@@ -592,7 +692,295 @@ export function MatrixPlannerPage() {
             앉히고 넘어갑니다.
           </p>
         </section>
+        {/* 파티 순서대로 고른 사이클을 한 번씩 써서 매트릭스 몬스터 체력을 타수별로 깎아 본다. */}
+        <MatrixRounds runs={matrixRuns} matrix={matrix} />
+        </div>
       )}
     </div>
+  );
+}
+
+/**
+ * 매트릭스 몬스터 — 라운드마다 다섯(마지막이 미믹), 세 라운드. 체력을 정하고 파티 순서대로 깎아 본다.
+ *
+ * 깎는 규칙
+ *   - 파티 순서 목록의 위에서부터, 파티마다 고른 사이클을 **한 번** 쓴다. 공격을 다 쓰면 그 파티는 끝이다.
+ *   - 사이클의 타를 순서대로 지금 몬스터에 넣고, 쓰러지면 **다음 타부터** 다음 몬스터를 친다
+ *     — 1번 몬스터에서 2사이클 3번째 타까지 썼으면 2번 몬스터는 2사이클 4번째 타부터 맞는다.
+ *   - 넘친 피해는 다음 몬스터로 넘기지 않는다. 미믹을 잡으면 다음 라운드 첫 몬스터로 넘어간다.
+ *   - 다음 파티는 앞 파티가 멈춘 몬스터의 남은 체력부터 이어서 깎는다.
+ *   - 피해는 몬스터마다 따로 계산한다 — 그 몬스터의 레벨 · 속성과 매트릭스 저항(기본 20% · 같은 속성 60%).
+ *     한 타는 기대 피해(크리티컬 확률 반영), 고정 피해는 그 공격의 마지막 타에 붙인다.
+ *   - 매트릭스 스테이지 버프 · 몬스터 위기 진화는 넣지 않았다.
+ */
+
+/** 파티 순서별 색 — 순서가 넘치면 처음 색으로 돌아간다. 라이트 · 다크 둘 다 있는 변수만 쓴다. */
+const PARTY_COLORS = [
+  "var(--c-e8c66a)",
+  "var(--c-5f8fcf)",
+  "var(--c-7fc08a)",
+  "var(--c-c06a94)",
+  "var(--c-9b7ac2)",
+  "var(--c-e0a94d)",
+  "var(--c-4fa3a8)",
+  "var(--c-d55181)",
+];
+const partyColor = (index: number) => PARTY_COLORS[index % PARTY_COLORS.length];
+
+interface MatrixRun {
+  /** 파티 순서(0부터). */
+  index: number;
+  cycle: CyclePreset | null;
+  /** 이 파티에 고른 매트릭스 스테이지 버프. */
+  buff: MatrixBuff | null;
+}
+
+/** 매트릭스 체력 깎기 계산 — 파티 순서 줄(파티별 결과)과 몬스터 칸이 같이 쓰도록 위로 올린다. */
+function useMatrixSim(runs: MatrixRun[]) {
+  const [hpByKey, setHpByKey] = usePersistedState<Record<string, number>>("matrix.hp", {});
+  const [oldRound1] = usePersistedState<Record<number, number>>("matrix.round1.hp", {});
+  const {
+    config,
+    buffsWith,
+    characterWeapons,
+    characterChains,
+    characterSkillLevels,
+    characterLevels,
+    characterNodes,
+  } = usePartyConfig();
+
+  // 예전 「1라운드 몬스터」에서 고친 체력(웨이브 1~4)은 새 키가 없을 때 그대로 이어 쓴다.
+  const hpOf = (m: MatrixMonster) =>
+    hpByKey[matrixHpKey(m)] ?? (m.round === 1 ? oldRound1[m.slot] : undefined) ?? m.defaultHp;
+  const edited = Object.keys(hpByKey).length > 0;
+
+  const sim = useMemo(() => {
+    const matrix = resPresetOf("matrix");
+    const hp = MATRIX_MONSTERS.map(hpOf);
+    /** dealt[몬스터][파티] — 그 파티가 그 몬스터에서 깎은 체력(넘친 피해 제외). */
+    const dealt = MATRIX_MONSTERS.map(() => runs.map(() => 0));
+    const killedBy: (number | null)[] = MATRIX_MONSTERS.map(() => null);
+    const report = runs.map(() => ({ damage: 0, hits: 0, totalHits: 0, stoppedAt: -1 }));
+
+    // 파티 · 몬스터마다 타수별 피해 목록. 실제로 맞는 몬스터만 계산한다(계산이 무겁다).
+    const cache = new Map<string, number[]>();
+    const hitsFor = (run: MatrixRun, monsterIndex: number): number[] => {
+      const key = `${run.index}:${run.buff?.id ?? 0}:${monsterIndex}`;
+      const hit = cache.get(key);
+      if (hit) return hit;
+      const cycle = run.cycle!;
+      const m = MATRIX_MONSTERS[monsterIndex];
+      const partyIds = PARTY_SLOTS.map(
+        (slot) => cycle.members.find((x) => x.slot === slot)?.characterId ?? "",
+      );
+      const base = buffsWith(partyIds.filter(Boolean));
+      const buffs = [...base, ...cycle.manualBuffs.filter((b) => !base.some((a) => a.id === b.id))];
+      const cfg: PartyConfig = {
+        ...config,
+        ...Object.fromEntries(
+          PARTY_SLOTS.map((slot, i) => [slot, { ...config[slot], characterId: partyIds[i] }]),
+        ),
+        rotation: cycle.rotation,
+        enemy: {
+          ...config.enemy,
+          id: String(m.monsterId),
+          name: m.name,
+          level: m.level,
+          element: m.element,
+          resPreset: "matrix",
+          baseRes: matrix.baseRes,
+          sameElementRes: matrix.sameElementRes,
+          damageReduction: 0,
+        },
+      };
+      const list = computeResults(
+        cfg,
+        characterWeapons,
+        buffs,
+        characterChains,
+        characterSkillLevels,
+        characterLevels,
+        characterNodes,
+      ).flatMap((r) => {
+        // 스테이지 버프는 「최종적으로」라 공격마다 따로 곱한다.
+        const scale = run.buff
+          ? run.buff.multiplier({
+              category: r.attack.damageBonusType ?? r.attack.type,
+              element: r.attack.element,
+              anomaly: r.attack.anomaly,
+            })
+          : 1;
+        return r.damage.hits.map(
+          (h, i) =>
+            (h.expectedDamage + (i === r.damage.hits.length - 1 ? (r.damage.fixedDamage ?? 0) : 0)) * scale,
+        );
+      });
+      cache.set(key, list);
+      return list;
+    };
+
+    let cur = 0;
+    for (const run of runs) {
+      if (!run.cycle || cur >= MATRIX_MONSTERS.length) continue;
+      const total = hitsFor(run, cur).length;
+      report[run.index].totalHits = total;
+      for (let k = 0; k < total && cur < MATRIX_MONSTERS.length; k++) {
+        const damage = hitsFor(run, cur)[k] ?? 0;
+        const used = Math.min(damage, hp[cur]);
+        hp[cur] -= used;
+        dealt[cur][run.index] += used;
+        report[run.index].damage += used;
+        report[run.index].hits = k + 1;
+        if (hp[cur] <= 0) {
+          killedBy[cur] = run.index;
+          cur++;
+        }
+      }
+      report[run.index].stoppedAt = cur;
+    }
+
+    return { hp, dealt, killedBy, report, reached: cur };
+    // hpByKey가 바뀌면 hpOf도 달라진다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    runs,
+    hpByKey,
+    oldRound1,
+    config,
+    buffsWith,
+    characterWeapons,
+    characterChains,
+    characterSkillLevels,
+    characterLevels,
+    characterNodes,
+  ]);
+
+  return { sim, hpOf, setHpByKey, edited };
+}
+
+/** 파티가 멈춘 자리 이름. */
+const matrixPlaceOf = (index: number) => {
+  if (index >= MATRIX_MONSTERS.length) return "전부 처치";
+  const m = MATRIX_MONSTERS[index];
+  return `${m.round}라운드 ${m.slot}번 ${m.name}`;
+};
+
+function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<typeof useMatrixSim> }) {
+  const { sim, hpOf, setHpByKey, edited } = matrix;
+
+  return (
+    <section className="panel matrix-round">
+      <div className="panel-head">
+        <h2>매트릭스 몬스터</h2>
+        <div className="matrix-actions">
+          <small className="matrix-round-meta">
+            {MATRIX_SEASON.name} · {MATRIX_SEASON.level}
+          </small>
+          {edited && (
+            <button onClick={() => setHpByKey({})} title="체력을 도감 기준 기본값으로 되돌립니다">
+              기본값으로
+            </button>
+          )}
+        </div>
+      </div>
+
+
+      {Array.from({ length: MATRIX_ROUND_COUNT }, (_, r) => {
+        const round = r + 1;
+        const list = MATRIX_MONSTERS.map((m, index) => ({ m, index })).filter((x) => x.m.round === round);
+        return (
+          <div key={round} className="matrix-round-block">
+            <div className="matrix-round-title">
+              <b>{round}라운드</b>
+              <small>Lv.{list[0].m.level}</small>
+            </div>
+
+            <div className="matrix-monsters">
+              {list.map(({ m, index }) => {
+                const hp = hpOf(m);
+                const icon = elementIcon(m.element);
+                const killer = sim.killedBy[index];
+                return (
+                  <article key={m.wave} className={killer !== null ? "matrix-monster dead" : "matrix-monster"}>
+                    <img className="matrix-monster-face" src={m.icon} alt="" loading="lazy" />
+                    <div className="matrix-monster-body">
+                      <div className="matrix-monster-head">
+                        <em>{m.slot}</em>
+                        <b title={m.name}>{m.name}</b>
+                      </div>
+                      {/* 이름 아래 — 속성과 체력. 칸이 넉넉하면 한 줄, 좁으면 둘로 접힌다. */}
+                      <div className="matrix-monster-meta">
+                        <span className="matrix-monster-el" style={{ color: ELEMENT_COLORS[m.element] }}>
+                          {icon && <img src={icon} alt="" />}
+                          {ELEMENT_NAMES[m.element]}
+                        </span>
+                        <label className="matrix-hp-input">
+                          HP
+                          <input
+                            type="number"
+                            min={1}
+                            step={1000}
+                            value={hp}
+                            onChange={(event) => {
+                              const value = Math.round(Number(event.target.value));
+                              if (!Number.isFinite(value) || value <= 0) return;
+                              setHpByKey((cur) => ({ ...cur, [matrixHpKey(m)]: value }));
+                            }}
+                          />
+                        </label>
+                      </div>
+                      <small className="matrix-monster-state">
+                        {killer !== null ? (
+                          <span style={{ color: partyColor(killer) }}>{killer + 1}파티가 처치</span>
+                        ) : sim.hp[index] < hp ? (
+                          <>남은 체력 {Math.round(sim.hp[index]).toLocaleString()}</>
+                        ) : (
+                          <span className="muted">안 맞음</span>
+                        )}
+                      </small>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            {/* 다섯 마리 체력바를 한 줄로 잇는다. 칸마다 제 체력이 꽉 찬 길이이고, 파티 색으로 깎은 만큼 칠한다. */}
+            <div className="matrix-hpline">
+              {list.map(({ m, index }) => {
+                const hp = hpOf(m);
+                return (
+                  <div
+                    key={m.wave}
+                    className="matrix-hpline-seg"
+                    title={`${m.name} — 남은 체력 ${Math.round(sim.hp[index]).toLocaleString()} / ${hp.toLocaleString()}`}
+                  >
+                    {runs.map((run) =>
+                      sim.dealt[index][run.index] > 0 ? (
+                        <span
+                          key={run.index}
+                          className="matrix-hpline-dealt"
+                          style={{
+                            width: `${(sim.dealt[index][run.index] / hp) * 100}%`,
+                            background: partyColor(run.index),
+                          }}
+                        />
+                      ) : null,
+                    )}
+                    <span className="matrix-hpline-left" />
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+
+      <p className="matrix-hint">
+        기본 체력은 도감 몬스터 값으로 잡은 <b>추정치</b>입니다(매트릭스 전용 몬스터 체력은 API에
+        없음) — 게임에서 본 값으로 고쳐 주세요. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
+        기대 피해로 깎습니다. 몬스터가 쓰러지면 다음 타부터 다음 몬스터를 치고, 미믹을 잡으면 다음
+        라운드로 넘어갑니다. 넘친 피해 · 매트릭스 스테이지 버프는 넣지 않았습니다.
+      </p>
+    </section>
   );
 }
