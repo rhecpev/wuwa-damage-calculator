@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { useAppState, type TabType } from "../context/AppStateContext";
+import { useTheme } from "../utils/theme";
 
 /**
  * 사이드바 아이콘. 외부 파일 없이 굵기만 맞춘 선 아이콘으로 그린다.
@@ -158,6 +159,7 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
  */
 export function TabNavigation() {
   const { tab, setTab } = useAppState();
+  const { theme, toggle } = useTheme();
 
   return (
     <aside className="sidebar">
@@ -185,6 +187,14 @@ export function TabNavigation() {
           </button>
         ))}
       </nav>
+
+      <button
+        className="theme-toggle"
+        title={theme === "dark" ? "라이트 테마로 바꾸기" : "다크 테마로 바꾸기"}
+        onClick={toggle}
+      >
+        {theme === "dark" ? "☀ 라이트" : "☾ 다크"}
+      </button>
 
       <div className="sidebar-foot">
         <small>설정은 이 기기에만 저장됩니다</small>

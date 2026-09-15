@@ -529,7 +529,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     label: "서리 속에서 태어난 불빛 · 햇무리 참살 배율 상승",
     target: "motionValue",
-    damageType: "Skill",
+    // 햇무리 참살 계열은 판정이 일반 공격이라 damageType "Skill"로는 걸리지 않았다 — 공격을 직접 지목한다.
+    // DamageList: 13.36% → 28.06%(× 2.1), 178.12% → 374.04%(× 2.1).
+    damageType: "All",
+    attackIds: ["1004702_2", "1004702_3", "1004702_4"],
     modifier: "amplify",
     value: 1.1,
     uptime: "active",
@@ -539,7 +542,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     label: "서리 속에서 태어난 불빛 · 대지를 가르는 판결 · 이코르 배열 배율 상승",
     target: "motionValue",
-    damageType: "Aerial",
+    // 둘 다 판정이 일반 공격이라 damageType "Aerial"로는 걸리지 않았다 — 공격을 직접 지목한다.
+    // DamageList: 대지를 가르는 판결 154.37% → 324.17%(× 2.1).
+    damageType: "All",
+    attackIds: ["1004707_1", "1004702_6"],
     modifier: "amplify",
     value: 1.1,
     uptime: "active",
@@ -615,7 +621,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceChain: 3,
-    condition: "황금의 재량 상태에서. 회로 자체의 배율 상승과 더해진다",
+    // 「회로의 배율 상승과 서로 중첩된다」 = 같이 걸린다(합산). DamageList: 13.36% → 46.29%,
+    // 178.12% → 617.16%(× 3.465 ≈ 1 + 회로 1.1 + 3체인 1.36). 엔진이 상승을 더하므로 둘 다 켜면 맞는다.
+    condition: "황금의 재량 상태에서. 회로 배율 상승 버프와 같이 켠다(합산)",
   },
   {
     label: "4체인 · 파티 가하는 피해",
@@ -628,10 +636,11 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "파티원이 「조화도 파괴」 피해를 낸 뒤 20초간, 파티 전원",
   },
   {
-    label: "5체인 · 새벽빛을 주입하기 전에 피해 보너스",
+    label: "5체인 · 새벽빛을 주입하기 전에 · 죽음으로 내린 답 피해 보너스",
     target: "damageBonus",
     damageType: "All",
-    attackIds: ["1004706_1"],
+    // 원문: 「변주 스킬 새벽빛을 주입하기 전에와 반주 스킬 죽음으로 내린 답의 피해 보너스가 80% 증가」
+    attackIds: ["1004706_1", "1004709_1"],
     value: 0.8, // 80% 증가
     uptime: "passive", // 조건이 없어 늘 걸린다
     scope: "self",
@@ -690,16 +699,11 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「눈속에 묻힌 맥박」 「연이어 쓰여진 한낮」 스택을 「조화 밀집 · 간섭」으로 옮기는 규칙
-//   회로 「황금의 재량」 자체의 배율 상승 수치가 API 속성표에 없다.
-//        DamageList에는 햇무리 참살 계열에 ×2.1 짝이 들어 있어 회로 상승이 있는 것은 확실하나
-//        3체인(136%)과 분리할 근거가 없어 3체인만 넣었다. 실제 수치와 맞춰볼 필요가 있다
 //   해방 「최후의 해석」 배율 상승 DamageList에 ×1.25 · ×1.5 · ×1.75 짝이 있으나
 //                                속성표에 스택당 수치가 없어 뺐다(6체인의 피해 보너스만 반영)
 //   1체인 뒷부분 · 3체인 뒷부분 「햇살의 비호」 · 「연이어 쓰여진 한낮」 스택 상한 증가
 //   2체인 뒷부분      조화도 파괴 증폭 기반 부스트 강화
 //   회로 「부서진 이코르의 칼날」 속성표 값이 배율(%)이 아니다
-//   반주 「죽음으로 내린 답」 공격력 500%의 회절 피해
-//                          — 반주 스킬에 공격 데이터(SkillAttributes)가 없다
 //   고유 「요리의 달인」 요리 확률 효과
 
 const skills: Skill[] = [

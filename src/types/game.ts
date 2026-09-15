@@ -25,7 +25,7 @@ export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo";
 //   이중 모드 캐릭터는 넷이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
 //   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
-export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;anomaly?:AnomalyKind;discord?:boolean;}
+export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다
 //   — 공격력을 타지 않고 10027.14 고정값에서 출발하는 별도 피해식이다(data/discord.ts 참고).
 // anomaly: 이 항목이 공격이 아니라 「이상 효과 피해」일 때 어느 효과인지.
@@ -49,6 +49,16 @@ export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:A
 //   계산 마지막 단계에 그대로 더해지는 고정 추가 피해. 크리티컬 영향도 받지 않음.
 // resonanceMode: 특정 공명 모드에서만 발동하는 공격일 때 지정. 미지정 시 모드와 무관하게
 //   항상 사용 가능(형태 전환만으로 나오는 대부분의 공격이 여기 해당).
+// resonanceChain: 이 체인 이상에서만 생기는 공격(방랑자 인멸 5체인 추가타 등). 모자라면 공격 추가 팔레트에
+//   뜨지 않고, 루틴에 담아 둔 뒤 체인을 내리면 계산에서도 빠진다. 생략하면 체인과 무관.
+// extraHits: 이 공격에 딸려 나가는 추가타(상리요 1체인 회선 매트릭스 등). 조건(체인)이 맞으면 계산할 때 hits 뒤에 붙어
+//   이 공격의 버프를 그대로 받는다. 배율 「증가」 몫은 받지 않는다. 히트별 표에서 다른 색으로 보인다.
+// hitLabels: 계산용 사본에만 채워지는 히트별 이름(원래 히트는 null, 추가타는 그 이름). 데이터에는 적지 않는다.
+// extra: 스킬표에 없고 고유 스킬 등으로 따로 떨어지는 추가 타격(능양 「꾸준한 수행」 등). 체인 공격처럼 색을 달리해 보여 준다.
+export interface ExtraHit{label:string;resonanceChain?:number;hits:number[][];scaleHits?:{index:number;factor:number}[];fixed?:boolean;}
+// fixed: 설명문의 고정 배율(「공격력의 100%」)로 떨어지는 추가타 — 그 공격의 배율 상승(곱연산)을 받지 않는다(아우구스타 6체인 분노의 번개).
+//   hitFixed는 계산용 사본에만 채워지는 히트별 표시다.
+// scaleHits: 추가타와 함께 원래 히트의 배율을 바꾸는 것(카를로타 6체인 사격 강화 — 본체 한 발 ×3.14). 그 히트도 추가타 색으로 보인다.
 export interface ChainEffect{chain:number;name:string;description:string;stats?:Partial<Stats>;}
 // chain: 1~6 (공명체인 몇 돌파에서 열리는 효과인지)
 // stats: 계산 가능한 고정 스탯 보너스일 경우에만 채움. 스택형/조건부 버프처럼
@@ -60,7 +70,7 @@ export type SkillCategory="Basic"|"Skill"|"Circuit"|"Liberation"|"Variation"|"In
 //   공격 팔레트를 이 분류로 묶어서 보여준다.
 export interface SkillAttribute{attributeName:string;description:string;values:string[];}
 export interface Skill{id:string;name:string;category?:SkillCategory;attacks:Attack[];icon?:string;attributes?:SkillAttribute[];}
-export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
+export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
 // 캐릭터 고유효과·공명체인처럼 캐릭터가 스스로 들고 있는 버프를 계산 가능한 형태로 적어둔 것.
 //   무기 쪽 WeaponBuffTemplate과 같은 모양이되, 정련(values 5개) 대신 아래 두 조건을 쓴다.
 //   resonanceChain: 이 단계 이상 보유해야 걸린다. 생략하면 체인과 무관(고유효과 등).
@@ -71,7 +81,10 @@ export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType
 //   uptime / scope: 상시·조건부, 파티·본인 구분. 생략하면 passive / self.
 //   excludeOwner: 파티 버프이면서 본인은 빼는 것. 본인 몫이 따로 적혀 있을 때 쓴다
 //     (치사 2체인처럼 「본인은 상시, 남은 발동」으로 갈리는 효과). 목록에도 뜨지 않는다.
+//   onlyFor: 이 캐릭터들에게만 걸리는 파티 버프(캐릭터 id 목록, 모드로 갈린 id는 원래 id로 본다).
+//     파수인 「자아의 이끌림」의 방랑자 공명 효율처럼 특정 캐릭터 전용인 것. 다른 캐릭터 목록에는 뜨지 않는다.
 //   maxStacks / exclusiveGroup: 스택 선택과 배타 묶음. ManualBuff 쪽 설명 참고.
+//   maxStacksByChain: 체인에 따라 오르는 스택 상한 {체인: 상한}. 보유 체인 이하에서 가장 높은 칸을 쓴다(maxStacks보다 우선).
 //   hideFromPanel: 상시 버프지만 게임 속성 창에는 찍히지 않는 것(감심 형식 무극).
 //     캐릭터 스탯창에서만 빠지고 피해 계산에는 그대로 걸린다.
 //   panelStacks: 발동 버프지만 게임 속성 창에는 늘 찍히는 것 — 스탯창에 이 스택으로 넣는다.
@@ -142,7 +155,7 @@ export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamag
 //   atkPercent / hpPercent / defPercent = 공격력·HP·방어력 % 증가
 //     이 셋은 기초 스탯에 곱해지기 전에 합산돼야 해서, 다른 타깃과 달리
 //     calculateFinalStats의 곱연산 이전 단계에 얹힌다(manualBuffDelta 참고).
-export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
+export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
 // 수기로 입력하는 버프 프로토타입.
 //   label: 메모용 이름(선택). 계산에는 쓰이지 않는다.
 //   target: 위 BuffTarget — 계산의 어느 자리에 붙는지

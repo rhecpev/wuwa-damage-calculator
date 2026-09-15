@@ -549,13 +549,13 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 공명 해방 「서리 단조 · 납도」 소모 보정 ──
   // 납도는 「서리 단조 · 납도」 1pt마다 배율 합계에 400%p가 더해진다.
   // DamageList로 확인된다: 기본 100%+400% = 500%가 1pt에 900%(180%+720%),
-  // 2pt에 1300%, 3pt에 1700%로 늘어난다. 2히트라 pt당 200%p씩 나눠 넣는다.
+  // 2pt에 1300%, 3pt에 1700%로 늘어난다. 엔진이 400%p를 2히트에 계수 비율(1:4)대로 나눈다 — 180% · 720%와 맞는다.
   {
     label: "서리 단조 · 납도 (배율 증가, 1pt당)",
     target: "motionValue",
     damageType: "All",
     attackIds: ["1005203_2"],
-    value: 2, // 400%p ÷ 2히트
+    value: 4, // 400%p (엔진이 2히트에 계수 비율대로 나눈다)
     modifier: "increase",
     stacks: 3, // 기본값 — DamageList에 3pt까지 실려 있다
     maxStacks: 3,

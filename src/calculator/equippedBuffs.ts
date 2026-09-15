@@ -164,6 +164,8 @@ export function deriveCharacterBuffs(
         scope: override?.scope ?? template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
         // 파티 버프인데 본인은 빼는 것(치사 2체인) — 본인 몫이 따로 적혀 있다.
         ...(template.excludeOwner ? { excludeOwner: true } : {}),
+        // 특정 캐릭터 전용 파티 버프(파수인 「자아의 이끌림」의 방랑자 몫)
+        ...(template.onlyFor ? { onlyFor: template.onlyFor } : {}),
         // 상시지만 게임 속성 창에는 안 찍히는 것(감심 형식 무극)
         ...(template.hideFromPanel ? { hideFromPanel: true } : {}),
         // 「전체 속성 피해 보너스」라 속성 창 6칸에 모두 찍히는 것(치사 2체인)
@@ -173,7 +175,15 @@ export function deriveCharacterBuffs(
           ? { panelStacks: panelStacksAt(template.panelStacks, chain) }
           : {}),
         ownerId: character.id,
-        ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
+        // 체인에 따라 상한이 오르는 스택(시그리카 「타고난 재능?」 기본 2 · 3체인 4)은 보유 체인의 상한으로 풀어 둔다.
+        ...(template.maxStacksByChain
+          ? { maxStacks: panelStacksAt(template.maxStacksByChain, chain) }
+          : template.maxStacks
+            ? { maxStacks: template.maxStacks }
+            : {}),
+        ...(template.maxStacksByChain
+          ? { stacks: Math.min(template.stacks ?? 1, panelStacksAt(template.maxStacksByChain, chain)) }
+          : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
       });
     });

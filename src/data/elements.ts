@@ -20,13 +20,13 @@ export const ELEMENT_NAMES: Record<DamageElement, string> = {
 
 /** 화면 강조에 쓰는 속성 색. 아이콘이 없을 때의 대체 표시에도 쓴다. */
 export const ELEMENT_COLORS: Record<DamageElement, string> = {
-  Glacio: "#6ad6f0",
-  Fusion: "#ff9a4d",
-  Electro: "#c07df0",
-  Aero: "#35e0a1",
-  Spectro: "#f5e56b",
-  Havoc: "#f0577f",
-  Physical: "#c8cede",
+  Glacio: "var(--c-6ad6f0)",
+  Fusion: "var(--c-ff9a4d)",
+  Electro: "var(--c-c07df0)",
+  Aero: "var(--c-35e0a1)",
+  Spectro: "var(--c-f5e56b)",
+  Havoc: "var(--c-f0577f)",
+  Physical: "var(--c-c8cede)",
 };
 
 /** 한국어 속성 이름 -> 아이콘 URL. 도감을 한 번 훑어 이름당 하나만 남긴다. */

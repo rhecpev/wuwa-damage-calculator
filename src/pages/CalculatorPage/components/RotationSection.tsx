@@ -7,6 +7,8 @@ import { DamageFormulaModal } from "./DamageFormulaModal";
 import { buildDamageSnapshot } from "./DamageBreakdownSection";
 import { BuffDialog } from "./BuffDialog";
 import { num } from "../../../utils/format";
+import { DAMAGE_TYPE_LABEL } from "../../../utils/buffLabels";
+import { isExtraAttack } from "./AttackPaletteSection";
 import { ANOMALIES } from "../../../data/anomalies";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
 
@@ -50,10 +52,22 @@ export function cardKind(result: CalculationResult): string {
 }
 
 /**
+ * 카드 맨 아래 꼬리표에 적을 피해 타입. 갈래(cardKind)와 달리 공격 자체의 타입을 그대로 쓴다 —
+ * 공명 회로에 든 공격도 강공격이면 강공격 피해다. 이상 효과 · 조화도 파괴는 피해식이 달라 따로 적는다.
+ */
+function damageTypeOf(result: CalculationResult): { key: string; label: string } {
+  if (result.damage.kind === "anomaly") return { key: "anomaly", label: "이상 효과 피해" };
+  if (result.damage.kind === "discord") return { key: "discord", label: "조화도 파괴 피해" };
+  // 「해당 피해는 ○○ 피해로 적용된다」처럼 판정이 따로 적힌 공격은 그 판정을 적는다.
+  const type = result.attack.damageBonusType ?? result.attack.type;
+  return { key: type, label: `${DAMAGE_TYPE_LABEL[type] ?? type} 피해` };
+}
+
+/**
  * 「공격 바꾸기」 목록에 세울 공격들. 스킬 갈래로 묶는다 — 공격 추가 팔레트와 같은 순서다.
  * 이상 효과·조화도 파괴는 스킬이 아니라 상태·별도 항목이라 여기 나오지 않는다(위 팔레트에서 담는다).
  */
-function attackGroups(character: CalculationResult["character"]) {
+function attackGroups(character: CalculationResult["character"], chain: number) {
   const order: { category: string; label: string }[] = [
     { category: "Basic", label: "기본 공격" },
     { category: "Skill", label: "공명 스킬" },
@@ -67,6 +81,8 @@ function attackGroups(character: CalculationResult["character"]) {
   for (const skill of character.skills) {
     const key = skill.category ?? "Basic";
     for (const attack of skill.attacks) {
+      // 체인이 모자라 생기지 않는 공격은 바꿀 후보에서도 뺀다(공격 추가 팔레트와 같은 규칙).
+      if ((attack.resonanceChain ?? 0) > chain) continue;
       const rows = bucket.get(key);
       if (rows) rows.push(attack);
       else bucket.set(key, [attack]);
@@ -100,6 +116,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     saveCyclePreset,
     allBuffs,
     config,
+    characterChains,
   } = usePartyConfig();
   // 상세보기를 연 항목의 id. 카드 선택(selectedId)과는 별개로 둔다 —
   // 카드를 눌러 히트별로 펼치는 것과 계산식을 여는 것은 다른 동작이다.
@@ -263,7 +280,9 @@ export function RotationSection({ results }: RotationSectionProps) {
               {/* 카드 안에 스택·횟수 입력칸이 들어가서 button으로 둘 수 없다
                   — button 안의 input은 표준이 아니고 누르는 판정도 엉킨다. */}
               <div
-                className={`card kind-${cardKind(result)} ${open ? "selected" : ""}`}
+                className={`card kind-${cardKind(result)} ${open ? "selected" : ""} ${
+                  isExtraAttack(result.attack) ? "card-extra" : ""
+                }`}
                 role="button"
                 tabIndex={0}
                 title={`${result.character.name} · ${result.attack.name}`}
@@ -357,6 +376,24 @@ export function RotationSection({ results }: RotationSectionProps) {
                     </label>
                   </div>
                 )}
+
+                {/* 어떤 타입의 피해인지 — 카드 맨 아래. 타입마다 색이 다르다. */}
+                {(() => {
+                  const type = damageTypeOf(result);
+                  return (
+                    <span className="card-tags">
+                      <span className={`card-type type-${type.key}`}>{type.label}</span>
+                      {/* 체인으로 생기는 추가 공격 — 원래 스킬 공격과 다른 것임을 꼬리표로도 알린다. */}
+                      {isExtraAttack(result.attack) && (
+                        <span className="card-type type-extra">
+                          {result.attack.resonanceChain !== undefined
+                            ? `${result.attack.resonanceChain}체인 추가`
+                            : "추가 타격"}
+                        </span>
+                      )}
+                    </span>
+                  );
+                })()}
               </div>
 
               <span className="item-tools">
@@ -436,14 +473,22 @@ export function RotationSection({ results }: RotationSectionProps) {
             </div>
 
             <div className="swap-list">
-              {attackGroups(swapResult.character).map((group) => (
+              {attackGroups(
+                swapResult.character,
+                characterChains[swapResult.character.id] ?? 0,
+              ).map((group) => (
                 <div key={group.label} className="card-add-group">
                   <em>{group.label}</em>
                   <div>
                     {group.attacks.map((attack) => (
                       <button
                         key={attack.id}
-                        className={attack.id === swapResult.item.attackId ? "on" : ""}
+                        className={[
+                          attack.id === swapResult.item.attackId ? "on" : "",
+                          isExtraAttack(attack) ? "attack-extra" : "",
+                        ]
+                          .filter(Boolean)
+                          .join(" ")}
                         title={attack.name}
                         onClick={() => {
                           setAttackId(swapResult.item.id, attack.id);

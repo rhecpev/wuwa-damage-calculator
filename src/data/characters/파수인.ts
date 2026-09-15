@@ -396,14 +396,17 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "별의 영역 안에 있을 때",
   },
   // ── 별의 영역이 공명 효율에 비례해 파티에 주는 것 ──
-  // scaleFrom이 공명 효율의 스탯창 표시값(100% + 보너스분)을 그대로 준다.
-  // 문턱이 없는 순수 비례라 그대로 담을 수 있다.
+  // scaleFrom이 공명 효율의 스탯창 표시값(100% + 보너스분)을 준다 — 파티 버프라 파수인의 스탯창이다.
+  // 그 스탯창에는 늘 걸리는 것만 들어 있어서, 별의 영역 안이면 늘 켜지는 「자아의 이끌림」
+  // 공명 효율 10%가 빠져 있다. 영역 버프는 영역 안에서만 쓰이므로 scaleOffset -10으로 그 몫을 더한다.
+  // 상한: 심층 12.5% · 해금 25% 둘 다 공명 효율 250%에서 찬다.
   {
     label: "별의 영역 · 심층 파티 크리티컬 (공명 효율 비례)",
     target: "critRate",
     damageType: "All",
     value: 0.0005, // 공명 효율 0.2%마다 0.01% = 1%당 0.05%
     scaleFrom: "EnergyRegen",
+    scaleOffset: -10, // 「자아의 이끌림」 공명 효율 +10%를 더해서 잰다
     maxValue: 0.125, // 최대 12.5%
     uptime: "active",
     scope: "party",
@@ -415,10 +418,24 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0.001, // 공명 효율 0.1%마다 0.01% = 1%당 0.1%
     scaleFrom: "EnergyRegen",
+    scaleOffset: -10, // 「자아의 이끌림」 공명 효율 +10%를 더해서 잰다
     maxValue: 0.25, // 최대 25%
     uptime: "active",
     scope: "party",
     condition: "별의 영역 · 해금 범위 안에 있는 파티원에게",
+  },
+  // 고유 「자아의 이끌림」 뒷부분 — 방랑자가 같은 파티에 있으면 방랑자의 공명 효율 10% 증가.
+  // 방랑자 넷(기류 · 인멸 · 전도 · 회절)에게만 걸리고 목록에도 그들에게만 뜬다.
+  // 버프 확인 탭의 수정분 키가 배열 순번이라, 위 자아의 이끌림 줄 옆에 끼우지 않고 맨 뒤에 붙였다.
+  {
+    label: "자아의 이끌림 · 방랑자 공명 효율",
+    target: "energyRegen",
+    damageType: "All",
+    value: 0.1, // 10% 증가
+    uptime: "passive", // 같은 파티에 있기만 하면 걸린다
+    scope: "party",
+    onlyFor: ["rover-aero", "rover-havoc", "rover-electro", "rover-spectro"],
+    condition: "방랑자가 같은 파티에 있을 때, 방랑자에게만",
   },
 ];
 

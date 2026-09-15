@@ -45,10 +45,10 @@ const CATEGORY_NAMES: Record<AttackType, string> = {
  * 색은 분류 이름으로 고정하므로 캐릭터 셋의 도넛에서 같은 분류가 같은 색으로 나온다.
  * 이 다섯 색은 앱 표면(#282f41)에서 색각 이상 판별·명도·대비 검사를 통과한 조합이다.
  */
-const SLICE_COLORS = ["#3987e5", "#d95926", "#199e70", "#c98500", "#d55181"];
+const SLICE_COLORS = ["var(--c-3987e5)", "var(--c-d95926)", "var(--c-199e70)", "var(--c-c98500)", "var(--c-d55181)"];
 /** 여섯 번째부터는 색을 새로 만들지 않고 「기타」로 접는다. */
-const OTHER_COLOR = "#9199a8";
-const EMPTY_COLOR = "#364054";
+const OTHER_COLOR = "var(--c-9199a8)";
+const EMPTY_COLOR = "var(--c-364054)";
 const MAX_SLICES = 5;
 
 const RADIUS = 52;

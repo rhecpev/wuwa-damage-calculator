@@ -492,7 +492,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "damageTaken",
     damageType: "All",
     attackId: "1003309_1", // 반주 피해에만 — 「피해를 입히기 전」 스택을 센다
-    maxStacks: 10,
+    maxStacks: 60, // 「강렬한 불기운」 스택 최대치 60(회로 속성표) — 받는 피해는 최대 600%
     value: 0.1,
     uptime: "active",
     scope: "party", // 반주로 등장하는 「다음 캐릭터」에게 걸린다
@@ -659,8 +659,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「고통에 대한 저항」 준비 태세 중 받는 피해 40% 감소
-//   반주 「미래 목표」 앞부분 공격력 150%의 회절 피해와 「강렬한 불기운」 스택당 받는 피해 증가
-//                          — 반주 스킬에 공격 데이터(SkillAttributes)가 없다
 //   1체인 뒷부분            중참 · 온밤이 중단되지 않는다
 //   6체인 뒷부분            화염 형태 중 「불빛」 70pt 이하면 즉시 70pt 회복, 8초 내 사망 방지
 //   회로 「잉여 에너지 · 불빛 · 강렬한 불기운」 자원 수급 규칙

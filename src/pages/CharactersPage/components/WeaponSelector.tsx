@@ -178,7 +178,7 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
           <small>WEAPON</small>
           <h2>
             {character.name} - 무기 교체
-            <span style={{ color: "#9ea7b7", fontSize: 14, marginLeft: 8 }}>
+            <span style={{ color: "var(--c-9ea7b7)", fontSize: 14, marginLeft: 8 }}>
               {typeName}
             </span>
           </h2>
@@ -291,7 +291,7 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
             })}
 
             {candidates.length === 0 && (
-              <p style={{ color: "#9ea7b7" }}>조건에 맞는 무기가 없습니다.</p>
+              <p style={{ color: "var(--c-9ea7b7)" }}>조건에 맞는 무기가 없습니다.</p>
             )}
           </div>
 

@@ -1,4 +1,5 @@
 import { ANOMALIES, type AnomalyKind } from "../data/anomalies";
+import { baseCharacterId } from "../data/modeVariants";
 import type {
   Attack,
   BuffDamageType,
@@ -193,6 +194,8 @@ export function appliesTo(buff: ManualBuff, attack: Attack, characterId?: string
   // 본인은 빼는 파티 버프. 본인 몫이 따로 적힌 효과라 여기서 걸러야 두 번 걸리지 않는다.
   // 이 함수는 화면 목록에도 쓰여서, 걸러진 버프는 그 캐릭터의 버프 목록에 뜨지도 않는다.
   if (buff.excludeOwner && buff.ownerId && characterId && buff.ownerId === characterId) return false;
+  // 특정 캐릭터 전용 버프 — 그 캐릭터가 아니면 걸리지도, 목록에 뜨지도 않는다.
+  if (buff.onlyFor && characterId && !buff.onlyFor.includes(baseCharacterId(characterId))) return false;
 
   // 이상 효과 피해와 일반 공격은 피해식이 통째로 다르다 — 버프가 서로 넘어가면 안 된다.
   //   이상 효과 항목에는 그 효과(또는 "All")를 적은 이상 부스트 버프만 걸린다.

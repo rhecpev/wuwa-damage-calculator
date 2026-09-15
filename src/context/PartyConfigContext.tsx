@@ -659,6 +659,13 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     const siblings = group
       ? allBuffs.filter((b) => b.exclusiveGroup === group && b.id !== buffId).map((b) => b.id)
       : [];
+    // 같은 묶음에 상시 버프가 섞여 있으면(브렌트 「극중 인생」 상시 ↔ 「나」의 인생 발동)
+    // 발동 쪽을 켤 때 상시 쪽을 꺼 둔 목록에 넣고, 끌 때 다시 풀어 기본(켜짐)으로 돌린다.
+    const passiveSiblings = group
+      ? allBuffs
+          .filter((b) => b.exclusiveGroup === group && b.id !== buffId && b.uptime === "passive")
+          .map((b) => b.id)
+      : [];
 
     setConfig((current) => ({
       ...current,
@@ -666,12 +673,20 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         if (item.id !== rotationId) return item;
 
         const on = item.enabledBuffIds.includes(buffId);
+        const off = item.disabledBuffIds ?? [];
 
         return {
           ...item,
           enabledBuffIds: on
             ? item.enabledBuffIds.filter((id) => id !== buffId)
             : [...item.enabledBuffIds.filter((id) => !siblings.includes(id)), buffId],
+          ...(passiveSiblings.length > 0
+            ? {
+                disabledBuffIds: on
+                  ? off.filter((id) => !passiveSiblings.includes(id))
+                  : [...off.filter((id) => !passiveSiblings.includes(id)), ...passiveSiblings],
+              }
+            : {}),
         };
       }),
     }));

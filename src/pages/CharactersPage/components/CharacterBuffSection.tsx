@@ -59,7 +59,7 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
           <small>RESONANCE CHAIN</small>
           <h2>{character.name} - 공명체인 · 고유 버프</h2>
         </div>
-        <span style={{ color: "#9aa3b3", fontSize: 12 }}>
+        <span style={{ color: "var(--c-9aa3b3)", fontSize: 12 }}>
           {buffs.length === 0
             ? "등록된 버프 없음"
             : `${buffs.length}개 중 ${activeCount}개 적용 중`}
@@ -135,7 +135,7 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
       </div>
 
       {buffs.length === 0 ? (
-        <p style={{ color: "#9ea7b7", margin: 0 }}>
+        <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>
           이 캐릭터에는 아직 옮겨 적은 공명체인 버프가 없습니다.
         </p>
       ) : (

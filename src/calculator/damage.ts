@@ -193,7 +193,8 @@ export function calculateDamage(
   const hits = a.hits.map((levels, i) => {
     const base = levelOf(levels);
     const share = weightTotal > 0 ? (weights[i] ?? 0) / weightTotal : 0;
-    const mv = base * mvAmplify + mvIncrease * share;
+    // 고정 배율 추가타(ExtraHit.fixed)는 배율 상승을 받지 않는다 — 「공격력의 100%」 그대로다.
+    const mv = base * (a.hitFixed?.[i] ? 1 : mvAmplify) + mvIncrease * share;
     const raw = attr * mv * multiplierChain;
 
     const hitNormal = ceilDamage(raw);
@@ -209,6 +210,8 @@ export function calculateDamage(
       normalDamage: hitNormal,
       criticalDamage: hitCrit,
       expectedDamage: ceilDamage(hitNormal * (1 - rate) + hitCrit * rate),
+      /** 추가타(Attack.extraHits)면 그 이름. 원래 히트는 없다. 히트별 표가 색을 달리하는 데 쓴다. */
+      extraLabel: a.hitLabels?.[i] ?? undefined,
     };
   });
 

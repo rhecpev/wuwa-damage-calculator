@@ -577,7 +577,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scaleOffset: 100, // 「공명 효율이 100%를 초과할 경우」
     maxValue: 0.32, // 최대 32%
     resonanceChain: 2,
-    uptime: "passive",
+    uptime: "active", // 간섭 표기가 있는 목표에게만 — 켜서 쓴다
     scope: "party",
     condition: "목표에 「간섭」 표기가 있을 때",
   },

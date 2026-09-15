@@ -360,6 +360,20 @@ const circuitSkillAttacks: Attack[] = [
       [1.6338, 1.7678, 1.9018, 2.0894, 2.2233, 2.3774, 2.5917, 2.8061, 3.0205, 3.2482],
     ],
   },
+  // 6체인 — 멸망과 죽음의 악장 · 영원히 사라지지 않는 잠꼬대 중 「뒤얽힌 세계의 환상 · 헤카테」 1회, 공격력 216.42%. 레벨과 무관한 고정값.
+  {
+    id: "1003707_c6",
+    name: "6체인 · 뒤얽힌 세계의 환상 · 헤카테 피해",
+    type: "Skill",
+    damageBonusType: "Echo", // 「해당 피해는 에코 어빌리티 피해로 적용된다」
+    element: "Havoc",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceChain: 6,
+    hits: [
+      [2.1642, 2.1642, 2.1642, 2.1642, 2.1642, 2.1642, 2.1642, 2.1642, 2.1642, 2.1642],
+    ],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -430,8 +444,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "공명 해방 발동 후",
   },
   // ── 고유 스킬 「팔중주」 ──
-  // 잔음 1스택당 크리티컬 피해 2.5%. 스택 최대치가 API 어디에도 없어
-  // 전투 진입 시 받는 10스택을 기본값으로 두고 상한은 넉넉히 잡았다.
+  // 잔음 1스택당 크리티컬 피해 2.5%. 스택 최대치는 공명 회로 「잔음 획득 규칙」의 24스택이고,
+  // 전투 진입 시 받는 10스택을 기본값으로 둔다.
   {
     label: "팔중주 · 잔음 (크리티컬 피해)",
     inherentSkillId: "1003705",
@@ -439,10 +453,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0.025, // 스택당 2.5% 증가
     stacks: 10, // 전투 진입 시 받는 스택
-    maxStacks: 50,
+    maxStacks: 24, // 잔음 최대 누적 24스택
     uptime: "active",
     scope: "self",
-    condition: "보유한 「잔음」 스택만큼. 상한은 API에 없어 넉넉히 잡았다",
+    condition: "보유한 「잔음」 스택만큼, 최대 24스택",
   },
   {
     label: "팔중주 · 초과 잔음 (크리티컬 피해)",
@@ -454,7 +468,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     maxStacks: 100,
     uptime: "active",
     scope: "self",
-    condition: "잔음이 최대치를 넘겼을 때 초과 1스택당 1%, 최대 100%",
+    condition: "잔음이 24스택을 넘겨 더 얻었을 때 초과 1스택당 1%, 최대 100%",
   },
 
   // ── 반주 스킬 「미완의 멜로디」 — 다음에 등장하는 캐릭터에게 걸린다 ──
@@ -480,30 +494,29 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 기본 공격 「마지막 작곡」의 잔음 보정 ──
   // 속성표의 「잔음 1스택 당 배율 증가량」(레벨 10 기준 82.55%p)이다.
   // 배율 「증가」는 스킬의 배율 합계에 %p를 더하는 형태라(구원 · 유노 · 데니아에서
-  // DamageList로 확인) 히트 수로 나눠 넣으면 합계가 맞는다.
-  // 마지막 작곡은 11히트이므로 82.55 ÷ 11 = 7.5045%p씩 얹는다.
+  // DamageList로 확인) 합계를 그대로 적는다 — 엔진이 11히트에 계수 비율대로 나눈다.
   {
     label: "잔음 · 마지막 작곡 배율 증가 (1스택당)",
     target: "motionValue",
     damageType: "All",
     attackIds: ["1003701_5"],
-    value: 0.075045, // 82.55%p ÷ 11히트
+    value: 0.8255, // 1스택당 82.55%p (레벨 10)
     modifier: "increase",
     stacks: 10, // 전투 진입 시 받는 스택
-    maxStacks: 50,
+    maxStacks: 24, // 잔음 최대 누적 24스택
     uptime: "active",
     scope: "self",
-    condition: "보유한 「잔음」 스택만큼. 상한은 API에 없어 넉넉히 잡았다",
+    condition: "보유한 「잔음」 스택만큼, 최대 24스택",
   },
   {
     label: "2체인 · 잔음 배율 증가 강화 (1스택당)",
     target: "motionValue",
     damageType: "All",
     attackIds: ["1003701_5"],
-    value: 0.056284, // 82.55%p × 75% ÷ 11히트
+    value: 0.619125, // 1스택당 82.55%p × 75%
     modifier: "increase",
     stacks: 10, // 위 「잔음」 버프와 같은 스택으로 맞춘다
-    maxStacks: 50,
+    maxStacks: 24,
     uptime: "active",
     scope: "self",
     resonanceChain: 2,
@@ -592,10 +605,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
-//   고유 「팔중주」 잔음 스택 상한이 API 어디에도 없어 50으로 잡았다
 //   고유 「변음 기호」  에코 어빌리티 후 경직 저항 증가 · 받는 피해 30% 감소
 //   3체인 뒷부분       카덴차 · 헤카테 명중 시 적 공격력 20% 감소
 //   5체인 「삶의 관건을 가로지르는 갈림길」 정체 영역 · 받는 피해 30% 감소
+//   (6체인 가운데 헤카테 216.42%는 공명 회로 공격 1003707_c6로 반영 — 아래는 원래 메모)
 //   6체인 가운데       멸망과 죽음의 악장 · 잠꼬대 중 헤카테가 공격력 216.42%의
 //                     추가 공격(에코 어빌리티 판정) — 공격이 새로 생기는 형태라 속성표에 없다
 //   고유 「요리의 달인」 요리 확률 효과

@@ -144,6 +144,20 @@ const resonanceSkillAttacks: Attack[] = [
       [0.3614, 0.391, 0.4206, 0.4621, 0.4918, 0.5258, 0.5732, 0.6206, 0.668, 0.7184],
     ],
   },
+  // 3체인 — 공명 스킬이 「대나무숲의 은둔자」로 대체되어 공격력 500% 기류 피해(에코 어빌리티 판정).
+  {
+    id: "1004102_c3",
+    name: "3체인 · 대나무숲의 은둔자 피해",
+    type: "Skill",
+    damageBonusType: "Echo", // 에코 어빌리티 판정
+    element: "Aero",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceChain: 3,
+    hits: [
+      [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+    ],
+  },
   {
     id: "1004102_2",
     name: "멀다 하지 않는 마음 피해",
@@ -342,6 +356,20 @@ const circuitSkillAttacks: Attack[] = [
       [1.095, 1.1848, 1.2746, 1.4003, 1.4901, 1.5934, 1.737, 1.8807, 2.0244, 2.177],
     ],
   },
+  // 6체인 — 「묵향에 물들어」가 끝날 때 공격력 600% 기류 피해(에코 어빌리티 판정, DamageList 1411900008).
+  {
+    id: "1004107_c6",
+    name: "6체인 · 묵향에 물들어 종료 피해",
+    type: "Skill",
+    damageBonusType: "Echo", // 에코 어빌리티 판정
+    element: "Aero",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceChain: 6,
+    hits: [
+      [6, 6, 6, 6, 6, 6, 6, 6, 6, 6],
+    ],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -389,7 +417,34 @@ const passive4109: Skill = {
   category: "Intro",
   name: "달아나지 않는 마음",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanT.webp",
-  attacks: [],
+  // DamageList: 100%(1411900009)와 3체인 대체 반주 500%(1411900019). 둘 다 에코 어빌리티 판정.
+  attacks: [
+    {
+      id: "1004109_1",
+      name: "반주 스킬 피해",
+      type: "Intro",
+      damageBonusType: "Echo", // 에코 어빌리티 판정
+      element: "Aero",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      ],
+    },
+    {
+      id: "1004109_c3",
+      name: "3체인 · 새로이 드러난 푸르름 피해",
+      type: "Intro",
+      damageBonusType: "Echo", // 에코 어빌리티 판정
+      element: "Aero",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      resonanceChain: 3,
+      hits: [
+        [5, 5, 5, 5, 5, 5, 5, 5, 5, 5],
+      ],
+    },
+  ],
 };
 
 const passive4110: Skill = {
@@ -408,7 +463,7 @@ const SWORD_REPLY_IDS = ["1004107_5", "1004107_6", "1004107_7"];
  * 3체인의 「배율 N% 증가」는 곱연산 상승이 아니라 그 스킬의 배율 합계에 N%p를 더하는
  * 형태다. DamageList로 확인된다 — 진중한 한 수 400% 옆에 900%(= 400 + 500)가 있고,
  * 끝없는 음률은 45.99%×5 = 229.95%에 600%p를 더한 829.95%가 히트당 165.99%로 나뉘어 있다.
- * 우리 엔진의 increase는 히트마다 더하므로, 히트 수로 나눈 값을 넣어야 합계가 맞는다.
+ * 엔진은 increase를 합계 %p로 받아 히트에 계수 비율대로 나누므로(calculator/damage.ts) 합계를 그대로 적는다.
  */
 const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 스킬에서 오는 것 (설명문에서 옮김) ──
@@ -501,7 +556,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 3,
   },
   // 3체인 뒷부분 — 검의 회답 셋의 배율에 600%p가 더해진다.
-  // 히트 수가 서로 달라 세 개로 나눠 적었다(600%p ÷ 히트 수).
+  // 엔진이 증가량(합계 %p)을 히트에 계수 비율대로 나누므로 셋 다 600%p를 그대로 적는다.
   // DamageList 확인: 끝없는 음률 45.99% -> 165.99%(= 45.99 + 600/5),
   // 헌신의 서약 19.34% -> 129.32% · 15.82% -> 105.82%(합계에 600%p를 비율대로 나눈 값),
   // 변치않는 충절 109.5% -> 709.5%(= 109.5 + 600).
@@ -510,7 +565,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004107_5"],
-    value: 1.2, // 600%p ÷ 5히트
+    value: 6, // 600%p (엔진이 5히트에 나눈다)
     modifier: "increase",
     uptime: "active",
     scope: "self",
@@ -522,7 +577,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1004107_6"],
-    value: 1, // 600%p ÷ 6히트
+    value: 6, // 600%p (엔진이 6히트에 계수 비율대로 나눈다)
     modifier: "increase",
     uptime: "active",
     scope: "self",
@@ -569,27 +624,26 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 6,
     condition: "공명 스킬 대나무숲의 은둔자 발동 후 6초간",
   },
+  // 출처가 없는 줄이다 — API 스킬 · 체인 설명 어디에도 「에코 어빌리티 발동 시 파티 크리티컬 피해」가 없고,
+  // 수치(50% 초과 1%당 2% · 최대 30%)가 맨 위 해방 「진중한 한 수」 버프와 똑같아 그걸 한 번 더 적은 것으로 보인다.
+  // 둘 다 켜면 두 번 걸리므로 효과를 뺀다. 줄은 지우지 않는다(버프 확인 탭 수정분 키가 배열 순번).
   {
-    label: "에코 어빌리티 발동 · 파티 크리티컬 피해 (크리티컬 50% 초과분)",
+    label: "에코 어빌리티 발동 · 파티 크리티컬 피해 (출처 없음 · 효과 없음 — 해방 줄과 중복)",
     target: "critDamage",
     damageType: "All",
-    value: 0.02, // 초과 1%당 2%
+    value: 0,
     scaleFrom: "CritRate",
     scaleOffset: 50,
-    maxValue: 0.3, // 최대 30%
+    maxValue: 0,
     uptime: "active",
     scope: "party",
-    condition: "에코 어빌리티 발동 후 30초",
+    condition: "맨 위 「진중한 한 수 · 파티 크리티컬 피해」를 켠다",
   },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「고요한 걸음으로」 뒷부분 변치않는 충절 명중 시 협주 에너지 30pt 회복
-//   3체인 가운데 「대나무숲의 은둔자」 공격력 500%의 기류 피해(에코 어빌리티 판정)
-//   3체인 끝 「새로이 드러난 푸르름」 반주 대체, 공격력 500%의 기류 피해
-//   6체인 가운데 「묵향에 물들어」 종료 시 공격력 600%의 기류 피해
-//                — 셋 다 공격이 새로 생기는 형태라 속성표에 없다
-//   반주 앞부분   공격력 100%의 기류 피해(에코 어빌리티 판정)
+//   (3체인 대나무숲의 은둔자 · 새로이 드러난 푸르름, 6체인 묵향 종료 피해, 반주 100%는 체인 조건 공격으로 반영)
 //   6체인 앞부분  변치않는 충절의 정체 효과
 //   고유 「요리의 달인」 요리 확률 효과
 

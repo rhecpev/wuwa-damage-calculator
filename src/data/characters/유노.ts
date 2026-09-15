@@ -494,7 +494,20 @@ const passive3809: Skill = {
   category: "Intro",
   name: "밤을 건너 새벽으로",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoT.webp",
-  attacks: [],
+  // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치(100% 기류 피해, 공격력 기준으로 봄)를 옮겼다.
+  attacks: [
+    {
+      id: "1003809_1",
+      name: "반주 스킬 피해",
+      type: "Intro",
+      element: "Aero",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      ],
+    },
+  ],
 };
 
 const passive3810: Skill = {

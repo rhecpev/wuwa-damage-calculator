@@ -114,7 +114,7 @@ export function BuffSection() {
         <div>
           <h2>버프 직접 입력</h2>
         </div>
-        <span style={{ color: "#949dae", fontSize: 12 }}>
+        <span style={{ color: "var(--c-949dae)", fontSize: 12 }}>
           프로토타입 — 필드는 바뀔 수 있습니다
         </span>
       </div>
@@ -284,7 +284,7 @@ export function BuffSection() {
       </div>
 
       {manualBuffs.length === 0 ? (
-        <p style={{ color: "#9ea7b7", margin: "14px 0 0" }}>
+        <p style={{ color: "var(--c-9ea7b7)", margin: "14px 0 0" }}>
           입력된 버프가 없습니다. 위에서 하나 추가해보세요.
         </p>
       ) : (
@@ -314,11 +314,11 @@ export function BuffSection() {
                     onChange={() => updateManualBuff(buff.id, { enabled: !buff.enabled })}
                   />
                 </td>
-                <td>{buff.label || <span style={{ color: "#8d97ac" }}>—</span>}</td>
+                <td>{buff.label || <span style={{ color: "var(--c-8d97ac)" }}>—</span>}</td>
                 <td>
                   {targetLabelOf(buff.target)}
                   {buff.element && (
-                    <span style={{ color: "#9aa3b3" }}> · {elementLabelOf(buff.element)}</span>
+                    <span style={{ color: "var(--c-9aa3b3)" }}> · {elementLabelOf(buff.element)}</span>
                   )}
                 </td>
                 <td>{labelOf(buff.damageType)}</td>
@@ -327,12 +327,12 @@ export function BuffSection() {
                   {scopeLabelOf(buff.scope)}
                   {buff.scope === "self" &&
                     (buff.ownerId ? (
-                      <span style={{ color: "#9aa3b3" }}>
+                      <span style={{ color: "var(--c-9aa3b3)" }}>
                         {" "}
                         · {memberName(buff.ownerId) ?? "파티에 없음"}
                       </span>
                     ) : (
-                      <span style={{ color: "#e0a94d" }}> · 주인 없음</span>
+                      <span style={{ color: "var(--c-e0a94d)" }}> · 주인 없음</span>
                     ))}
                 </td>
                 <td>{(buff.value * 100).toFixed(1)}%</td>
@@ -353,7 +353,7 @@ export function BuffSection() {
                   {buff.target === "motionValue" ? (
                     buff.modifier === "increase" ? "증가" : "상승"
                   ) : (
-                    <span style={{ color: "#8d97ac" }}>가산</span>
+                    <span style={{ color: "var(--c-8d97ac)" }}>가산</span>
                   )}
                 </td>
                 <td>{(buff.value * buff.stacks * 100).toFixed(1)}%</td>

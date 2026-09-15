@@ -51,6 +51,13 @@ function formatValue(template: CharacterBuffTemplate): string {
       ? `×${(1 + template.value).toFixed(2)}`
       : `${+(template.value * 100).toFixed(2)}%${scale}`;
 
+  // 체인별 상한이 있으면 칸마다 적는다(「기본 2스택 60% · 3체인 4스택 120%」).
+  if (template.maxStacksByChain) {
+    const steps = Object.entries(template.maxStacksByChain)
+      .map(([chain, n]) => `${Number(chain) ? `${chain}체인 ` : ""}최대 ${+(template.value * n * 100).toFixed(2)}%`)
+      .join(" · ");
+    return `${one} / 스택 · ${steps}${scale}`;
+  }
   const max = template.maxStacks ?? 1;
   if (max <= 1) return one;
   return `${one} / 스택 · 최대 ${+(template.value * max * 100).toFixed(2)}%${scale}`;

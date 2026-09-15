@@ -377,7 +377,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "4체인 · 안개탄 피해",
     target: "damageBonus",
     damageType: "All",
-    attackId: "1001002_1",
+    // 공명 스킬 안개탄과 회로 「안개의 잠복」에서 나가는 안개탄 둘 다 「안개탄」이다.
+    attackIds: ["1001002_1", "1001007_1"],
     value: 0.3, // 30% 증가
     uptime: "passive", // 조건이 없다
     scope: "self",
@@ -413,6 +414,17 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 6,
     condition: "강공격이 「허공의 문」을 통과할 때",
   },
+  // 공명 해방 속성표 「허공의 문에서 증가하는 공격」 10% — 설명문 「공격이 허공의 문을 통과할 때 공격력이 증가」.
+  // 버프 확인 탭의 수정분 키가 배열 순번이라, 해방 자리에 끼우지 않고 맨 뒤에 붙였다.
+  {
+    label: "안개속의 꽃구경 · 공격력 (「허공의 문」 통과)",
+    target: "atkPercent",
+    damageType: "All",
+    value: 0.1, // 10% 증가
+    uptime: "active",
+    scope: "self",
+    condition: "공격이 「허공의 문」을 통과할 때(문은 10초간 유지)",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
@@ -420,7 +432,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 //   1체인 「장난의 시작」  공명 스킬 쿨타임 4초 감소
 //   2체인 앞부분        「안개 분신」 계승 HP 100% 증가
 //   4체인 뒷부분        안개의 잠복 중 받는 피해 30% 감소
-//   속성표의 「안개 팬텀 HP」·「허공의 문에서 증가하는 공격」·「이동 속도 증가」는 공격이 아니다
+//   속성표의 「안개 팬텀 HP」·「이동 속도 증가」는 공격이 아니다
+//   (「허공의 문에서 증가하는 공격」은 passiveBuffs 맨 뒤에 공격력 10%로 반영)
 
 const skills: Skill[] = [
   basicSkill,

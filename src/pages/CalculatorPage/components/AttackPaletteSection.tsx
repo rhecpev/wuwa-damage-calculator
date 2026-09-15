@@ -29,6 +29,10 @@ const SECTIONS: { category: SkillCategory; label: string }[] = [
   { category: "Sync", label: "조화도 파괴" },
 ];
 
+/** 스킬표에 없던 추가 공격인지 — 체인으로 생기거나(resonanceChain) 따로 표시한 추가 타격(extra). */
+export const isExtraAttack = (attack: Attack) =>
+  attack.resonanceChain !== undefined || attack.extra === true;
+
 /** category가 없는 옛 데이터는 공격 타입으로 구역을 추정한다. */
 function fallbackCategory(attack: Attack): SkillCategory {
   switch (attack.type) {
@@ -53,7 +57,7 @@ function fallbackCategory(attack: Attack): SkillCategory {
 }
 
 export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps) {
-  const { config } = usePartyConfig();
+  const { config, characterChains } = usePartyConfig();
   const [activeSlot, setActiveSlot] = useState(0);
   // 에코를 갈아끼우면 쓸 수 있는 에코 어빌리티도 바뀐다. 저장소가 localStorage 한 벌이라
   // 저장될 때마다 올라가는 번호를 구독해 두고 다시 그린다.
@@ -86,8 +90,11 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
   // 스킬의 category 기준으로 공격을 구역별로 모은다.
   // 구역 제목 옆에 띄울 아이콘은 그 구역에 처음 등장한 스킬의 아이콘을 쓴다.
   const grouped = new Map<SkillCategory, { attacks: Attack[]; icon?: string }>();
+  // 체인이 모자라 아직 생기지 않는 공격(방랑자 인멸 5체인 추가타 등)은 띄우지 않는다.
+  const chain = active.character ? (characterChains[active.character.id] ?? 0) : 0;
   for (const skill of active.character?.skills ?? []) {
     for (const attack of skill.attacks) {
+      if ((attack.resonanceChain ?? 0) > chain) continue;
       const category = skill.category ?? fallbackCategory(attack);
       const bucket = grouped.get(category);
       if (bucket) {
@@ -167,11 +174,11 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
 
         <div className="palette-main">
       {!active.character ? (
-        <p style={{ color: "#9ea7b7" }}>
+        <p style={{ color: "var(--c-9ea7b7)" }}>
           {activeSlot + 1}번 자리가 비어 있습니다. 캐릭터 선택에서 편성하세요.
         </p>
       ) : sections.length === 0 && !ability ? (
-        <p style={{ color: "#9ea7b7" }}>
+        <p style={{ color: "var(--c-9ea7b7)" }}>
           {active.character.name}의 공격 데이터가 아직 등록되지 않았습니다.
         </p>
       ) : (
@@ -190,7 +197,15 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
                 {section.attacks.map((attack) => (
                   <button
                     key={attack.id}
-                    title={attack.name}
+                    // 체인 · 고유 스킬로 생기는 추가 공격은 색을 달리해 원래 스킬 공격과 구별한다.
+                    className={isExtraAttack(attack) ? "attack-extra" : undefined}
+                    title={
+                      attack.resonanceChain !== undefined
+                        ? `${attack.name} — ${attack.resonanceChain}체인 추가 공격`
+                        : attack.extra
+                          ? `${attack.name} — 추가 타격`
+                          : attack.name
+                    }
                     onClick={() => onAddAttack(attack.id, active.character!.id)}
                   >
                     {nameOf(attack.id, attack.name)}

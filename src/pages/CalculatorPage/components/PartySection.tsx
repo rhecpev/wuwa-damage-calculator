@@ -118,7 +118,7 @@ export function CharacterPickerSection({ config, scope = "calc" }: PartySectionP
         })}
 
         {availableCharacters.length === 0 && (
-          <p style={{ color: "#9ea7b7", gridColumn: "1 / -1", margin: 0 }}>
+          <p style={{ color: "var(--c-9ea7b7)", gridColumn: "1 / -1", margin: 0 }}>
             이름에 맞는 캐릭터가 없습니다.
           </p>
         )}

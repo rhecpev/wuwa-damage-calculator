@@ -419,7 +419,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 공명 회로 「길조」 조합 ──
   // 시의 형상화는 들고 있던 「길조」 조합에 따라 자기 피해가 커진다.
   // 동시에 성립할 수 없는 상태라 하나만 켜지도록 묶는다.
-  // 2체인이 있으면 이 증가가 한 번 더 붙어 값이 두 배가 되므로, 그 경우도 같은 묶음에 넣는다.
+  // 2체인이 있으면 이 증가가 한 번 더 붙는다 — 그 몫은 아래 2체인 줄로 따로 켠다.
   {
     label: "대우(對偶) · 같은 길조 1쌍",
     target: "damageBonus",
@@ -442,29 +442,31 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     exclusiveGroup: "youhu-jiljo",
     condition: "「길조」가 3개 같거나(연주) 4개 모두 같을 때(합설)",
   },
+  // 2체인은 「한 번 더 발생하는 몫」만 적는다 — 위 대우 · 연주 줄과 **같이** 켠다.
+  // 2체인 줄끼리는 하나만 켜지게 따로 묶는다(위 조합 묶음과는 별개라 함께 켤 수 있다).
   {
-    label: "2체인 · 대우(對偶) 2회 적용",
+    label: "2체인 · 대우(對偶) 추가 1회",
     target: "damageBonus",
     damageType: "All",
     attackIds: ["1002407_1"],
-    value: 1.4, // 70% × 2회
+    value: 0.7, // 대우 70%가 한 번 더
     uptime: "active",
     scope: "self",
-    exclusiveGroup: "youhu-jiljo",
+    exclusiveGroup: "youhu-jiljo-c2",
     resonanceChain: 2,
-    condition: "2체인 보유 시 대우 — 피해 증가가 한 번 더 발생한다",
+    condition: "위 「대우」 줄과 같이 켠다 — 피해 증가가 한 번 더 발생한다",
   },
   {
-    label: "2체인 · 연주(聯珠) · 합설(合說) 2회 적용",
+    label: "2체인 · 연주(聯珠) · 합설(合說) 추가 1회",
     target: "damageBonus",
     damageType: "All",
     attackIds: ["1002407_1"],
-    value: 3.5, // 175% × 2회
+    value: 1.75, // 연주 175%가 한 번 더
     uptime: "active",
     scope: "self",
-    exclusiveGroup: "youhu-jiljo",
+    exclusiveGroup: "youhu-jiljo-c2",
     resonanceChain: 2,
-    condition: "2체인 보유 시 연주 · 합설 — 피해 증가가 한 번 더 발생한다",
+    condition: "위 「연주 · 합설」 줄과 같이 켠다 — 피해 증가가 한 번 더 발생한다",
   },
 
   // ── 공명체인 ──

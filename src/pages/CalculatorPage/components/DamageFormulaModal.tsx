@@ -208,7 +208,7 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
         <p className="formula-top">
           피해 = ⌈ Σ(계수<sub>히트</sub>) × ⌊{statLabel}⌋ × 배율 합계 ⌉ + 고정 피해
           <br />
-          <span style={{ color: "#9aa3b3" }}>
+          <span style={{ color: "var(--c-9aa3b3)" }}>
             ⌊{statLabel}⌋ = ⌊ ⌊기초 × (1 + 스탯창 %)⌋ + 기초 × 버프 % + 깡수치 ⌋
           </span>
         </p>
@@ -353,6 +353,7 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
           </tbody>
         </table>
 
+        {/* 추가타(상리요 1체인 회선 매트릭스 등)는 색을 달리하고 이름을 붙인다. */}
         <small className="formula-section">4 · 히트별</small>
         <table className="formula-table formula-hits">
           <thead>
@@ -367,8 +368,11 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
           </thead>
           <tbody>
             {damage.hits.map((hit, index) => (
-              <tr key={index}>
-                <td>{index + 1}타</td>
+              <tr key={index} className={hit.extraLabel ? "hit-extra" : undefined}>
+                <td>
+                  {index + 1}타
+                  {hit.extraLabel && <em className="hit-extra-label">{hit.extraLabel}</em>}
+                </td>
                 <td>{pct(hit.baseMotionValue)}</td>
                 <td>{pct(hit.motionValue)}</td>
                 <td>{dec(hit.raw)}</td>
@@ -467,7 +471,7 @@ function AnomalyFormulaModal({
           <p className="formula-top">
             이상 피해 = ⌈ 기초값 × 발생횟수 × 부스트 × 이상 치명 × 방어저항 × 속성저항 × 최종피해 ⌉
             <br />
-            <span style={{ color: "#9aa3b3" }}>
+            <span style={{ color: "var(--c-9aa3b3)" }}>
               공격력 · 스킬 계수 · 크리티컬 · 피해 보너스는 이상 피해에 들어가지 않습니다.
             </span>
           </p>

@@ -275,6 +275,22 @@ const circuitSkillAttacks: Attack[] = [
       [1.8, 1.9476, 2.0952, 2.3019, 2.4495, 2.6192, 2.8554, 3.0915, 3.3277, 3.5786],
     ],
   },
+  // 6체인 — 해방 후 12초 내, 3단 착지 뒤 비약의 환상에서 짧게 누르는 「현실 구축」.
+  // 현실에 비추는 환상 3단 피해량의 100%(강공격 판정)라 3단과 같은 배율이다.
+  // DamageList에도 180%(= 3단 레벨 1 값) 엔트리가 따로 있다. 누를 때마다 1장씩 담는다.
+  {
+    id: "1002707_c6",
+    name: "6체인 · 현실 구축 피해",
+    type: "Basic",
+    damageBonusType: "Heavy", // 「해당 피해는 강공격 피해로 적용된다」
+    element: "Havoc",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceChain: 6,
+    hits: [
+      [1.8, 1.9476, 2.0952, 2.3019, 2.4495, 2.6192, 2.8554, 3.0915, 3.3277, 3.5786],
+    ],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -476,19 +492,18 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 6,
     condition: "공명 해방 발동 후 12초간",
   },
-  // 6체인의 「현실 구축」은 3단 피해량의 100%가 한 번 더 나가는 형태다(강공격 판정).
-  // 새 공격을 만들 자리가 없어 3단에 100%를 얹는 것으로 대신한다 — 총량은 같다.
-  // DamageList에도 180%(= 3단과 같은 값) 엔트리가 따로 들어 있다.
+  // 6체인 「현실 구축」은 공격 카드(1002707_c6)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
+  // 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이다. 수정분 JSON을 반영한 뒤에 지운다.
   {
-    label: "6체인 · 현실 구축 추가 타격",
+    label: "6체인 · 현실 구축 추가 타격 (공격 카드로 옮김 · 효과 없음)",
     target: "damageBonus",
     damageType: "All",
     attackIds: ["1002707_3"],
-    value: 1, // 3단 피해량의 100%가 한 번 더
+    value: 0,
     uptime: "active",
     scope: "self",
     resonanceChain: 6,
-    condition: "해방 후 12초 내, 3단 착지 뒤 비약의 환상에서 일반 공격을 눌렀을 때",
+    condition: "공격 카드 「6체인 · 현실 구축 피해」를 담는다",
   },
 ];
 

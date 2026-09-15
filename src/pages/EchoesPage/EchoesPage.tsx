@@ -314,7 +314,7 @@ export function EchoesPage() {
             onClick={() => setShowEchoSearch(true)}
             style={{
               padding: "8px 16px",
-              background: "#4a9eff",
+              background: "var(--c-4a9eff)",
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -330,7 +330,7 @@ export function EchoesPage() {
             onClick={() => document.getElementById("singleImageUpload")?.click()}
             style={{
               padding: "8px 16px",
-              background: "#6a7aef",
+              background: "var(--c-6a7aef)",
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -346,7 +346,7 @@ export function EchoesPage() {
             disabled={batchProcessing}
             style={{
               padding: "8px 16px",
-              background: batchProcessing ? "#727272" : "#f0ad4e",
+              background: batchProcessing ? "var(--c-727272)" : "var(--c-f0ad4e)",
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -423,7 +423,7 @@ export function EchoesPage() {
           zIndex: 1001,
         }}>
           <div style={{
-            background: "#434343",
+            background: "var(--c-434343)",
             padding: "20px",
             borderRadius: "8px",
             width: "90%",
@@ -435,10 +435,10 @@ export function EchoesPage() {
             boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-              <h3 style={{ margin: 0, color: "#fff" }}>에코 검색</h3>
+              <h3 style={{ margin: 0, color: "var(--c-ffffff)" }}>에코 검색</h3>
               <button
                 onClick={() => setEchoSearchForBatch(null)}
-                style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#ccc" }}
+                style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--c-cccccc)" }}
               >
                 ✕
               </button>
@@ -454,25 +454,25 @@ export function EchoesPage() {
                 width: "100%",
                 padding: "10px",
                 marginBottom: "0",
-                border: "1px solid #585858",
+                border: "1px solid var(--c-585858)",
                 borderTopLeftRadius: "4px",
                 borderTopRightRadius: "4px",
                 boxSizing: "border-box",
                 fontSize: "14px",
-                background: "#505050",
-                color: "#fff",
+                background: "var(--c-505050)",
+                color: "var(--c-ffffff)",
               }}
             />
 
             <div
               style={{
-                border: "1px solid #585858",
+                border: "1px solid var(--c-585858)",
                 borderTop: "none",
                 borderBottomLeftRadius: "4px",
                 borderBottomRightRadius: "4px",
                 maxHeight: "300px",
                 overflowY: "auto",
-                background: "#4a4a4a",
+                background: "var(--c-4a4a4a)",
               }}
             >
               {echoes
@@ -506,15 +506,15 @@ export function EchoesPage() {
                     }}
                     style={{
                       padding: "12px",
-                      borderBottom: "1px solid #585858",
+                      borderBottom: "1px solid var(--c-585858)",
                       cursor: "pointer",
                       transition: "background 0.2s",
                       display: "flex",
                       alignItems: "center",
                       gap: "10px",
                     }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#505050")}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = "#4a4a4a")}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "var(--c-505050)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = "var(--c-4a4a4a)")}
                   >
                     {echo.iconUrl && (
                       <img
@@ -524,7 +524,7 @@ export function EchoesPage() {
                       />
                     )}
                     <div style={{ flex: 1 }}>
-                      <strong style={{ color: "#fff" }}>{echo.name}</strong>
+                      <strong style={{ color: "var(--c-ffffff)" }}>{echo.name}</strong>
                       {(() => {
                         const rawEcho = (echoData as any).Echo.find((e: any) => String(e.Id) === echo.id);
                         const fetterGroups = rawEcho?.FetterGroups?.map((fg: any) => ({name: fg.Name, icon: fg.Icon})) || [];
@@ -537,7 +537,7 @@ export function EchoesPage() {
                                   display: "flex",
                                   alignItems: "center",
                                   gap: "4px",
-                                  background: "#585858",
+                                  background: "var(--c-585858)",
                                   padding: "4px 8px",
                                   borderRadius: "3px",
                                   fontSize: "12px",
@@ -546,7 +546,7 @@ export function EchoesPage() {
                                 {fg.icon && (
                                   <img src={fg.icon} alt="" style={{ width: "16px", height: "16px" }} />
                                 )}
-                                <span style={{ color: "#ccc" }}>{fg.name}</span>
+                                <span style={{ color: "var(--c-cccccc)" }}>{fg.name}</span>
                               </div>
                             ))}
                           </div>
@@ -556,7 +556,7 @@ export function EchoesPage() {
                   </div>
                 ))}
               {echoes.filter((echo) => echo.name.toLowerCase().includes((echoSearchForBatch.searchQuery || "").toLowerCase())).length === 0 && (
-                <div style={{ padding: "12px", color: "#727272", textAlign: "center" }}>
+                <div style={{ padding: "12px", color: "var(--c-727272)", textAlign: "center" }}>
                   검색 결과가 없습니다
                 </div>
               )}
@@ -579,9 +579,9 @@ export function EchoesPage() {
           zIndex: 1001,
         }}>
           <div style={{
-            background: "#2d3a52",
+            background: "var(--c-2d3a52)",
             borderRadius: "8px",
-            border: "1px solid #4a5266",
+            border: "1px solid var(--c-4a5266)",
             padding: "24px",
             width: "min(820px, 92vw)",
             maxHeight: "min(680px, 90vh)",
@@ -589,10 +589,10 @@ export function EchoesPage() {
             flexDirection: "column",
             gap: "16px",
           }}>
-            <div style={{ fontSize: "18px", fontWeight: "bold", color: "#4a9eff" }}>
+            <div style={{ fontSize: "18px", fontWeight: "bold", color: "var(--c-4a9eff)" }}>
               에코 선택
             </div>
-            <div style={{ fontSize: "14px", color: "#9a9a9a" }}>
+            <div style={{ fontSize: "14px", color: "var(--c-9a9a9a)" }}>
               "{multipleEchoDialog.extracted?.name || '알 수 없음'}"과 일치하는 에코를 고르세요.
               왼쪽은 이미지에서 추린 후보, 오른쪽은 전체 목록입니다.
             </div>
@@ -611,10 +611,10 @@ export function EchoesPage() {
                   onClick={() => handleSelectEchoForBatch(multipleEchoDialog.batchIndex, echo)}
                   style={{
                     padding: "8px 10px",
-                    background: highlight ? "#3f4d68" : "#3c455c",
-                    border: `1px solid ${highlight ? "#4a9eff" : "#4a5266"}`,
+                    background: highlight ? "var(--c-3f4d68)" : "var(--c-3c455c)",
+                    border: `1px solid ${highlight ? "var(--c-4a9eff)" : "var(--c-4a5266)"}`,
                     borderRadius: "4px",
-                    color: "#4a9eff",
+                    color: "var(--c-4a9eff)",
                     cursor: "pointer",
                     fontSize: "13px",
                     fontWeight: 500,
@@ -625,16 +625,16 @@ export function EchoesPage() {
                     transition: "all 0.2s",
                   }}
                   onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "#4a5266";
-                    (e.currentTarget as HTMLButtonElement).style.borderColor = "#4a9eff";
+                    (e.currentTarget as HTMLButtonElement).style.background = "var(--c-4a5266)";
+                    (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--c-4a9eff)";
                   }}
                   onMouseLeave={(e) => {
                     (e.currentTarget as HTMLButtonElement).style.background = highlight
-                      ? "#3f4d68"
-                      : "#3c455c";
+                      ? "var(--c-3f4d68)"
+                      : "var(--c-3c455c)";
                     (e.currentTarget as HTMLButtonElement).style.borderColor = highlight
-                      ? "#4a9eff"
-                      : "#4a5266";
+                      ? "var(--c-4a9eff)"
+                      : "var(--c-4a5266)";
                   }}
                 >
                   {echo.iconUrl && (
@@ -658,7 +658,7 @@ export function EchoesPage() {
                 overflowY: "auto" as const,
                 paddingRight: "4px",
               };
-              const head = { fontSize: "12px", color: "#808080", fontWeight: 700 as const };
+              const head = { fontSize: "12px", color: "var(--c-808080)", fontWeight: 700 as const };
 
               return (
                 <div style={{ display: "grid", gridTemplateColumns: "240px 1fr", gap: "16px" }}>
@@ -668,7 +668,7 @@ export function EchoesPage() {
                     <div style={listBox}>
                       {candidates.map((echo) => row(echo, true))}
                       {candidates.length === 0 && (
-                        <div style={{ padding: "12px", color: "#808080", fontSize: "12px" }}>
+                        <div style={{ padding: "12px", color: "var(--c-808080)", fontSize: "12px" }}>
                           추린 후보가 없습니다.
                         </div>
                       )}
@@ -689,10 +689,10 @@ export function EchoesPage() {
                       }
                       style={{
                         padding: "9px 12px",
-                        background: "#3c455c",
-                        border: "1px solid #4a5266",
+                        background: "var(--c-3c455c)",
+                        border: "1px solid var(--c-4a5266)",
                         borderRadius: "4px",
-                        color: "#fff",
+                        color: "var(--c-ffffff)",
                         fontSize: "13px",
                         boxSizing: "border-box",
                       }}
@@ -703,7 +703,7 @@ export function EchoesPage() {
                     <div style={listBox}>
                       {all.map((echo: any) => row(echo, false))}
                       {all.length === 0 && (
-                        <div style={{ padding: "12px", color: "#808080", fontSize: "12px" }}>
+                        <div style={{ padding: "12px", color: "var(--c-808080)", fontSize: "12px" }}>
                           찾는 에코가 없습니다. 이름 일부만 입력해 보세요.
                         </div>
                       )}
@@ -717,10 +717,10 @@ export function EchoesPage() {
               onClick={() => setMultipleEchoDialog(null)}
               style={{
                 padding: "10px 16px",
-                background: "#4a5266",
-                border: "1px solid #585f72",
+                background: "var(--c-4a5266)",
+                border: "1px solid var(--c-585f72)",
                 borderRadius: "4px",
-                color: "#ccc",
+                color: "var(--c-cccccc)",
                 cursor: "pointer",
                 fontSize: "14px",
                 fontWeight: "500",
@@ -746,9 +746,9 @@ export function EchoesPage() {
           zIndex: 1000,
         }}>
           <div style={{
-            background: "#2d3a52",
+            background: "var(--c-2d3a52)",
             borderRadius: "8px",
-            border: "1px solid #4a5266",
+            border: "1px solid var(--c-4a5266)",
             padding: "24px",
             maxWidth: "95vw",
             maxHeight: "90vh",
@@ -758,7 +758,7 @@ export function EchoesPage() {
             gap: "16px",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ color: "#4a9eff", margin: 0 }}>에코 일괄 등록 ({batchEchos.filter(b => b.success).length}개)</h3>
+              <h3 style={{ color: "var(--c-4a9eff)", margin: 0 }}>에코 일괄 등록 ({batchEchos.filter(b => b.success).length}개)</h3>
               <button
                 onClick={() => { setShowBatchDialog(false); setBatchEchos([]); }}
                 style={{
@@ -766,7 +766,7 @@ export function EchoesPage() {
                   border: "none",
                   fontSize: "24px",
                   cursor: "pointer",
-                  color: "#ccc"
+                  color: "var(--c-cccccc)"
                 }}
               >
                 ✕
@@ -788,9 +788,9 @@ export function EchoesPage() {
               {batchEchos.map((item, idx) => (
                 <div key={idx} style={{
                   padding: "16px",
-                  border: "1px solid #4a5266",
+                  border: "1px solid var(--c-4a5266)",
                   borderRadius: "6px",
-                  background: item.success ? "#3c455c" : "#603b3b",
+                  background: item.success ? "var(--c-3c455c)" : "var(--c-603b3b)",
                   display: "flex",
                   flexDirection: "column",
                   gap: "12px",
@@ -802,7 +802,7 @@ export function EchoesPage() {
                 }}>
                   {item.success ? (
                     <>
-                      <div style={{ color: "#7fc3ff", fontWeight: "bold", fontSize: "16px" }}>
+                      <div style={{ color: "var(--c-7fc3ff)", fontWeight: "bold", fontSize: "16px" }}>
                         {item.echo.name}
                       </div>
 
@@ -815,7 +815,7 @@ export function EchoesPage() {
                             height: "80px",
                             objectFit: "cover",
                             borderRadius: "4px",
-                            border: "1px solid #4a5266"
+                            border: "1px solid var(--c-4a5266)"
                           }}
                         />
                       )}
@@ -823,7 +823,7 @@ export function EchoesPage() {
                       {/* 세트 선택 */}
                       {item.echo.fetterGroups && item.echo.fetterGroups.length > 0 && (
                         <div>
-                          <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "8px" }}>
+                          <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "8px" }}>
                             세트
                           </label>
                           <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
@@ -834,11 +834,11 @@ export function EchoesPage() {
                                   display: "flex",
                                   alignItems: "center",
                                   gap: "6px",
-                                  background: item.options?.selectedFetter === fg.name ? "#476176" : "#3c455c",
+                                  background: item.options?.selectedFetter === fg.name ? "var(--c-476176)" : "var(--c-3c455c)",
                                   padding: "8px 12px",
                                   borderRadius: "6px",
                                   cursor: "pointer",
-                                  border: item.options?.selectedFetter === fg.name ? "1px solid #4a9eff" : "1px solid #4a5266",
+                                  border: item.options?.selectedFetter === fg.name ? "1px solid var(--c-4a9eff)" : "1px solid var(--c-4a5266)",
                                   transition: "all 0.2s"
                                 }}
                               >
@@ -857,7 +857,7 @@ export function EchoesPage() {
                                 {fg.icon && (
                                   <img src={fg.icon} alt="" style={{ width: "16px", height: "16px" }} />
                                 )}
-                                <span style={{ fontSize: "12px", color: item.options?.selectedFetter === fg.name ? "#fff" : "#ccc" }}>{fg.name}</span>
+                                <span style={{ fontSize: "12px", color: item.options?.selectedFetter === fg.name ? "var(--c-ffffff)" : "var(--c-cccccc)" }}>{fg.name}</span>
                               </label>
                             ))}
                           </div>
@@ -866,7 +866,7 @@ export function EchoesPage() {
 
                       {/* 주옵션 선택 */}
                       <div>
-                        <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "6px" }}>
+                        <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "6px" }}>
                           주옵션
                         </label>
                         <select
@@ -890,10 +890,10 @@ export function EchoesPage() {
                           style={{
                             width: "100%",
                             padding: "8px",
-                            background: "#2d3a52",
-                            border: !item.options?.mainOption?.isMatched ? "2px solid #ff6b6b" : "1px solid #4a5266",
+                            background: "var(--c-2d3a52)",
+                            border: !item.options?.mainOption?.isMatched ? "2px solid var(--c-ff6b6b)" : "1px solid var(--c-4a5266)",
                             borderRadius: "4px",
-                            color: "#7fc3ff",
+                            color: "var(--c-7fc3ff)",
                             fontSize: "12px"
                           }}
                         >
@@ -906,7 +906,7 @@ export function EchoesPage() {
                           <div style={{
                             marginTop: "6px",
                             fontSize: "12px",
-                            color: "#ff6b6b",
+                            color: "var(--c-ff6b6b)",
                             fontWeight: "600"
                           }}>
                             ⚠️ 수동입력이 필요합니다
@@ -918,7 +918,7 @@ export function EchoesPage() {
                       {/* 확신이 없을 때야말로 사람이 골라야 한다 — isMatched로 숨기지 않는다. */}
                       {item.options?.mainOption?.type && (
                         <div>
-                          <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "6px" }}>
+                          <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "6px" }}>
                             {item.options.mainOption.type} 값
                           </label>
                           <select
@@ -932,10 +932,10 @@ export function EchoesPage() {
                             style={{
                               width: "100%",
                               padding: "8px",
-                              background: "#2d3a52",
-                              border: "1px solid #4a5266",
+                              background: "var(--c-2d3a52)",
+                              border: "1px solid var(--c-4a5266)",
                               borderRadius: "4px",
-                              color: "#7fc3ff",
+                              color: "var(--c-7fc3ff)",
                               fontSize: "12px"
                             }}
                           >
@@ -953,7 +953,7 @@ export function EchoesPage() {
 
                       {/* 메인 서브옵션 */}
                       <div>
-                        <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "6px" }}>
+                        <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "6px" }}>
                           메인 서브옵션
                         </label>
                         <select
@@ -977,10 +977,10 @@ export function EchoesPage() {
                           style={{
                             width: "100%",
                             padding: "8px",
-                            background: "#2d3a52",
-                            border: !item.options?.mainSubOption?.isMatched ? "2px solid #ff6b6b" : "1px solid #4a5266",
+                            background: "var(--c-2d3a52)",
+                            border: !item.options?.mainSubOption?.isMatched ? "2px solid var(--c-ff6b6b)" : "1px solid var(--c-4a5266)",
                             borderRadius: "4px",
-                            color: "#7fc3ff",
+                            color: "var(--c-7fc3ff)",
                             fontSize: "12px"
                           }}
                         >
@@ -993,7 +993,7 @@ export function EchoesPage() {
                           <div style={{
                             marginTop: "6px",
                             fontSize: "12px",
-                            color: "#ff6b6b",
+                            color: "var(--c-ff6b6b)",
                             fontWeight: "600"
                           }}>
                             ⚠️ 수동입력이 필요합니다
@@ -1004,7 +1004,7 @@ export function EchoesPage() {
                       {/* 메인 서브옵션 값 */}
                       {item.options?.mainSubOption?.type && (
                         <div>
-                          <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "6px" }}>
+                          <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "6px" }}>
                             {item.options.mainSubOption.type} 값
                           </label>
                           <select
@@ -1018,10 +1018,10 @@ export function EchoesPage() {
                             style={{
                               width: "100%",
                               padding: "8px",
-                              background: "#2d3a52",
-                              border: "1px solid #4a5266",
+                              background: "var(--c-2d3a52)",
+                              border: "1px solid var(--c-4a5266)",
                               borderRadius: "4px",
-                              color: "#7fc3ff",
+                              color: "var(--c-7fc3ff)",
                               fontSize: "12px"
                             }}
                           >
@@ -1038,8 +1038,8 @@ export function EchoesPage() {
                       )}
 
                       {/* 부옵션 */}
-                      <div style={{ borderTop: "1px solid #4a5266", paddingTop: "12px" }}>
-                        <label style={{ display: "block", fontSize: "12px", color: "#9a9a9a", marginBottom: "8px", fontWeight: "bold" }}>
+                      <div style={{ borderTop: "1px solid var(--c-4a5266)", paddingTop: "12px" }}>
+                        <label style={{ display: "block", fontSize: "12px", color: "var(--c-9a9a9a)", marginBottom: "8px", fontWeight: "bold" }}>
                           부옵션 (최대 5개)
                         </label>
                         {[0, 1, 2, 3, 4].map(subIdx => (
@@ -1068,10 +1068,10 @@ export function EchoesPage() {
                               style={{
                                 flex: 2,
                                 padding: "6px",
-                                background: "#2d3a52",
-                                border: "1px solid #4a5266",
+                                background: "var(--c-2d3a52)",
+                                border: "1px solid var(--c-4a5266)",
                                 borderRadius: "4px",
-                                color: "#7fc3ff",
+                                color: "var(--c-7fc3ff)",
                                 fontSize: "11px"
                               }}
                             >
@@ -1094,10 +1094,10 @@ export function EchoesPage() {
                               style={{
                                 flex: 1,
                                 padding: "6px",
-                                background: !item.options?.mainSelects?.[subIdx] ? "#4a4a4a" : "#2d3a52",
-                                border: "1px solid #4a5266",
+                                background: !item.options?.mainSelects?.[subIdx] ? "var(--c-4a4a4a)" : "var(--c-2d3a52)",
+                                border: "1px solid var(--c-4a5266)",
                                 borderRadius: "4px",
-                                color: "#7fc3ff",
+                                color: "var(--c-7fc3ff)",
                                 fontSize: "11px",
                                 cursor: !item.options?.mainSelects?.[subIdx] ? "not-allowed" : "pointer"
                               }}
@@ -1113,22 +1113,22 @@ export function EchoesPage() {
 
                       <div style={{
                         padding: "8px",
-                        background: "#2d3a52",
+                        background: "var(--c-2d3a52)",
                         borderRadius: "4px",
                         fontSize: "12px",
-                        color: "#9a9a9a",
+                        color: "var(--c-9a9a9a)",
                         textAlign: "center"
                       }}>
                         ✅ 준비됨
                       </div>
                     </>
                   ) : (
-                    <div style={{ color: "#ff6b6b", textAlign: "center", padding: "20px 0" }}>
+                    <div style={{ color: "var(--c-ff6b6b)", textAlign: "center", padding: "20px 0" }}>
                       <div style={{ marginBottom: "8px" }}>
                         ❌ {item.error === "not_found" ? "에코를 찾지 못했습니다" : "복수 에코 발견 - 클릭해서 선택"}
                       </div>
                       {item.extracted?.name && (
-                        <div style={{ fontSize: "12px", color: "#9a9a9a" }}>{item.extracted.name}</div>
+                        <div style={{ fontSize: "12px", color: "var(--c-9a9a9a)" }}>{item.extracted.name}</div>
                       )}
                       {item.error === "multiple" && (
                         <button
@@ -1142,9 +1142,9 @@ export function EchoesPage() {
                           style={{
                             marginTop: "8px",
                             padding: "6px 12px",
-                            background: "#4a5266",
-                            color: "#4a9eff",
-                            border: "1px solid #4a5266",
+                            background: "var(--c-4a5266)",
+                            color: "var(--c-4a9eff)",
+                            border: "1px solid var(--c-4a5266)",
                             borderRadius: "4px",
                             cursor: "pointer",
                             fontSize: "12px"
@@ -1164,9 +1164,9 @@ export function EchoesPage() {
                           style={{
                             marginTop: "8px",
                             padding: "6px 12px",
-                            background: "#4a5266",
-                            color: "#4a9eff",
-                            border: "1px solid #4a5266",
+                            background: "var(--c-4a5266)",
+                            color: "var(--c-4a9eff)",
+                            border: "1px solid var(--c-4a5266)",
                             borderRadius: "4px",
                             cursor: "pointer",
                             fontSize: "12px"
@@ -1187,7 +1187,7 @@ export function EchoesPage() {
                 disabled={isSaving || batchEchos.filter(b => b.success).length === 0}
                 style={{
                   padding: "10px 20px",
-                  background: isSaving || batchEchos.filter(b => b.success).length === 0 ? "#727272" : "#4a9eff",
+                  background: isSaving || batchEchos.filter(b => b.success).length === 0 ? "var(--c-727272)" : "var(--c-4a9eff)",
                   color: "white",
                   border: "none",
                   borderRadius: "4px",
@@ -1201,7 +1201,7 @@ export function EchoesPage() {
                 onClick={() => { setShowBatchDialog(false); setBatchEchos([]); }}
                 style={{
                   padding: "10px 20px",
-                  background: "#4a5266",
+                  background: "var(--c-4a5266)",
                   color: "white",
                   border: "none",
                   borderRadius: "4px",
@@ -1247,11 +1247,11 @@ export function EchoesPage() {
                     display: "flex",
                     alignItems: "center",
                     gap: "6px",
-                    background: selectedFetterFilter === "" ? "#476176" : "#3c455c",
+                    background: selectedFetterFilter === "" ? "var(--c-476176)" : "var(--c-3c455c)",
                     padding: "8px 12px",
                     borderRadius: "6px",
                     cursor: "pointer",
-                    border: selectedFetterFilter === "" ? "1px solid #4a9eff" : "1px solid #4a5266",
+                    border: selectedFetterFilter === "" ? "1px solid var(--c-4a9eff)" : "1px solid var(--c-4a5266)",
                     transition: "all 0.2s"
                   }}
                 >
@@ -1263,7 +1263,7 @@ export function EchoesPage() {
                     onChange={(e) => setSelectedFetterFilter(e.target.value)}
                     style={{ display: "none" }}
                   />
-                  <span style={{ fontSize: "12px", color: selectedFetterFilter === "" ? "#fff" : "#9a9a9a" }}>전체</span>
+                  <span style={{ fontSize: "12px", color: selectedFetterFilter === "" ? "var(--c-ffffff)" : "var(--c-9a9a9a)" }}>전체</span>
                 </label>
                 {Array.from(allFettersWithIcons).map((fetter, idx) => (
                   <label
@@ -1272,11 +1272,11 @@ export function EchoesPage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: selectedFetterFilter === fetter.name ? "#476176" : "#3c455c",
+                      background: selectedFetterFilter === fetter.name ? "var(--c-476176)" : "var(--c-3c455c)",
                       padding: "8px 12px",
                       borderRadius: "6px",
                       cursor: "pointer",
-                      border: selectedFetterFilter === fetter.name ? "1px solid #4a9eff" : "1px solid #4a5266",
+                      border: selectedFetterFilter === fetter.name ? "1px solid var(--c-4a9eff)" : "1px solid var(--c-4a5266)",
                       transition: "all 0.2s"
                     }}
                   >
@@ -1291,7 +1291,7 @@ export function EchoesPage() {
                     {fetter.icon && (
                       <img src={fetter.icon} alt="" style={{ width: "16px", height: "16px" }} />
                     )}
-                    <span style={{ fontSize: "12px", color: selectedFetterFilter === fetter.name ? "#fff" : "#ccc" }}>{fetter.name}</span>
+                    <span style={{ fontSize: "12px", color: selectedFetterFilter === fetter.name ? "var(--c-ffffff)" : "var(--c-cccccc)" }}>{fetter.name}</span>
                   </label>
                 ))}
               </div>
@@ -1304,13 +1304,13 @@ export function EchoesPage() {
               key={echo.pk}
               style={{
                 padding: "12px 16px",
-                border: "1px solid #4a5266",
+                border: "1px solid var(--c-4a5266)",
                 borderRadius: "6px",
                 display: "flex",
                 alignItems: "center",
                 gap: "16px",
-                background: "linear-gradient(135deg, #344059 0%, #2d3a52 100%)",
-                color: "#fff",
+                background: "linear-gradient(135deg, var(--c-344059) 0%, var(--c-2d3a52) 100%)",
+                color: "var(--c-ffffff)",
               }}
             >
               <div style={{ flex: 5, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -1323,7 +1323,7 @@ export function EchoesPage() {
                       height: "40px",
                       objectFit: "cover",
                       borderRadius: "4px",
-                      border: "1px solid #4a5266",
+                      border: "1px solid var(--c-4a5266)",
                     }}
                   />
                 )}
@@ -1337,23 +1337,23 @@ export function EchoesPage() {
                         <img src={selectedGroup.icon} alt="" style={{ width: "16px", height: "16px", flexShrink: 0 }} />
                       ) : null;
                     })()}
-                    <span style={{ fontSize: "12px", color: "#8d8d8d", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.options.selectedFetter}</span>
+                    <span style={{ fontSize: "12px", color: "var(--c-8d8d8d)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.options.selectedFetter}</span>
                   </div>
                 )}
               </div>
               <div style={{ flex: 10, minWidth: 0 }}>
-                <strong style={{ color: "#4a9eff", fontSize: "14px", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.name}</strong>
+                <strong style={{ color: "var(--c-4a9eff)", fontSize: "14px", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.name}</strong>
                 {echo.options?.mainOption?.type && (
-                  <div style={{ fontSize: "12px", color: "#9a9a9a", marginTop: "4px" }}>
-                    {echo.options.mainOption.type}: <span style={{ color: "#7fc3ff" }}>{echo.options.mainOption.value}</span>
+                  <div style={{ fontSize: "12px", color: "var(--c-9a9a9a)", marginTop: "4px" }}>
+                    {echo.options.mainOption.type}: <span style={{ color: "var(--c-7fc3ff)" }}>{echo.options.mainOption.value}</span>
                   </div>
                 )}
                 {/* 메인 서브 옵션 — 코스트로 정해지는 고정 옵션(4코스트 공격력 150 · 1코스트 HP 2280).
                     스탯에 그대로 더해지는 값이라 목록에서도 보여야 어떤 에코인지 가늠할 수 있다. */}
                 {echo.options?.mainSubOption?.type && (
-                  <div style={{ fontSize: "12px", color: "#9a9a9a", marginTop: "2px" }}>
+                  <div style={{ fontSize: "12px", color: "var(--c-9a9a9a)", marginTop: "2px" }}>
                     {echo.options.mainSubOption.type}:{" "}
-                    <span style={{ color: "#7fc3ff" }}>{echo.options.mainSubOption.value}</span>
+                    <span style={{ color: "var(--c-7fc3ff)" }}>{echo.options.mainSubOption.value}</span>
                   </div>
                 )}
               </div>
@@ -1361,8 +1361,8 @@ export function EchoesPage() {
                 <div style={{ display: "flex", gap: "8px", flex: 60, justifyContent: "space-around" }}>
                   {echo.options.mainSelects.map((opt: string, idx: number) => (
                     opt ? (
-                      <div key={idx} style={{ fontSize: "12px", color: "#aaa", textAlign: "center", flex: 1 }}>
-                        <div style={{ color: "#7fc3ff", fontWeight: "500", fontSize: "11px" }}>{opt}</div>
+                      <div key={idx} style={{ fontSize: "12px", color: "var(--c-aaaaaa)", textAlign: "center", flex: 1 }}>
+                        <div style={{ color: "var(--c-7fc3ff)", fontWeight: "500", fontSize: "11px" }}>{opt}</div>
                         <div style={{ fontSize: "11px" }}>{echo.options.subSelects?.[idx]}</div>
                       </div>
                     ) : null
@@ -1374,7 +1374,7 @@ export function EchoesPage() {
                   onClick={() => setSelectedEcho(echo as any)}
                   style={{
                     padding: "6px 12px",
-                    background: "#4a9eff",
+                    background: "var(--c-4a9eff)",
                     color: "white",
                     border: "none",
                     borderRadius: "4px",
@@ -1389,7 +1389,7 @@ export function EchoesPage() {
                   onClick={() => handleDeleteEcho(echo.pk)}
                   style={{
                     padding: "6px 12px",
-                    background: "#ff4444",
+                    background: "var(--c-ff4444)",
                     color: "white",
                     border: "none",
                     borderRadius: "4px",

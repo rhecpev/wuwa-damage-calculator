@@ -139,7 +139,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
     <div className="buff-dialog-split">
     <div className="buff-dialog-body">
       {usable.length === 0 ? (
-        <p style={{ color: "#9ea7b7", margin: 0 }}>
+        <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>
           {allBuffs.length === 0
             ? "버프 목록이 비어 있습니다. 위 「버프 직접 입력」에서 추가하거나 장착 무기 버프를 담아보세요."
             : "이 공격에 걸릴 수 있는 버프가 없습니다."}
@@ -280,7 +280,11 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
           </thead>
           <tbody>
             {selected.damage.hits.map((hit, index) => (
-              <tr key={index}>
+              <tr
+                key={index}
+                className={"extraLabel" in hit && hit.extraLabel ? "hit-extra" : undefined}
+                title={"extraLabel" in hit && hit.extraLabel ? hit.extraLabel : undefined}
+              >
                 <td>{index + 1}</td>
                 <td>{num(hit.normalDamage)}</td>
                 <td>{num(hit.criticalDamage)}</td>

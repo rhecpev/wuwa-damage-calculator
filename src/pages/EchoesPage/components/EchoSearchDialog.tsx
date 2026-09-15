@@ -65,7 +65,7 @@ export function EchoSearchDialog({
     >
       <div
         style={{
-          background: "#434343",
+          background: "var(--c-434343)",
           padding: "20px",
           borderRadius: "8px",
           width: "90%",
@@ -79,10 +79,10 @@ export function EchoSearchDialog({
         onClick={(e) => e.stopPropagation()}
       >
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-          <h3 style={{ margin: 0, color: "#fff" }}>에코 검색</h3>
+          <h3 style={{ margin: 0, color: "var(--c-ffffff)" }}>에코 검색</h3>
           <button
             onClick={onClose}
-            style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#ccc" }}
+            style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--c-cccccc)" }}
           >
             ✕
           </button>
@@ -98,25 +98,25 @@ export function EchoSearchDialog({
             width: "100%",
             padding: "10px",
             marginBottom: "0",
-            border: "1px solid #585858",
+            border: "1px solid var(--c-585858)",
             borderTopLeftRadius: "4px",
             borderTopRightRadius: "4px",
             boxSizing: "border-box",
             fontSize: "14px",
-            background: "#505050",
-            color: "#fff",
+            background: "var(--c-505050)",
+            color: "var(--c-ffffff)",
           }}
         />
 
         <div
           style={{
-            border: "1px solid #585858",
+            border: "1px solid var(--c-585858)",
             borderTop: "none",
             borderBottomLeftRadius: "4px",
             borderBottomRightRadius: "4px",
             maxHeight: "300px",
             overflowY: "auto",
-            background: "#4a4a4a",
+            background: "var(--c-4a4a4a)",
           }}
         >
           {echoes
@@ -137,15 +137,15 @@ export function EchoSearchDialog({
                 }}
                 style={{
                   padding: "12px",
-                  borderBottom: "1px solid #585858",
+                  borderBottom: "1px solid var(--c-585858)",
                   cursor: "pointer",
                   transition: "background 0.2s",
                   display: "flex",
                   alignItems: "center",
                   gap: "10px",
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#505050")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#4a4a4a")}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--c-505050)")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--c-4a4a4a)")}
               >
                 {echo.iconUrl && (
                   <img
@@ -155,10 +155,10 @@ export function EchoSearchDialog({
                   />
                 )}
                 <div style={{ flex: 1 }}>
-                  <strong style={{ color: "#fff" }}>{echo.name}</strong>
+                  <strong style={{ color: "var(--c-ffffff)" }}>{echo.name}</strong>
                   {/* 같은 이름이 여러 벌인 에코가 있다 — 어느 것인지 도감 id로 가른다.
                       목록에서 뺀 것과 남은 것이 이름만 같은 경우가 많아 id가 없으면 헷갈린다. */}
-                  <span style={{ color: "#9aa3b3", fontSize: "11px", marginLeft: "6px" }}>
+                  <span style={{ color: "var(--c-9aa3b3)", fontSize: "11px", marginLeft: "6px" }}>
                     #{echo.id}
                   </span>
                   {echo.fetterGroups && echo.fetterGroups.length > 0 && (
@@ -170,7 +170,7 @@ export function EchoSearchDialog({
                             display: "flex",
                             alignItems: "center",
                             gap: "4px",
-                            background: "#585858",
+                            background: "var(--c-585858)",
                             padding: "4px 8px",
                             borderRadius: "3px",
                             fontSize: "12px",
@@ -179,7 +179,7 @@ export function EchoSearchDialog({
                           {fg.icon && (
                             <img src={fg.icon} alt="" style={{ width: "16px", height: "16px" }} />
                           )}
-                          <span style={{ color: "#ccc" }}>{fg.name}</span>
+                          <span style={{ color: "var(--c-cccccc)" }}>{fg.name}</span>
                         </div>
                       ))}
                     </div>
@@ -188,7 +188,7 @@ export function EchoSearchDialog({
               </div>
             ))}
           {echoes.filter((echo) => echo.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-            <div style={{ padding: "12px", color: "#727272", textAlign: "center" }}>
+            <div style={{ padding: "12px", color: "var(--c-727272)", textAlign: "center" }}>
               검색 결과가 없습니다
             </div>
           )}

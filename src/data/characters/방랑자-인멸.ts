@@ -379,6 +379,21 @@ const circuitSkillAttacks: Attack[] = [
       [0.05, 0.0541, 0.0582, 0.064, 0.0681, 0.0728, 0.0794, 0.0859, 0.0925, 0.0995],
     ],
   },
+  // 5체인 「만물의 경청」 — 다크 서지 중 일반 공격 5단이 「5단 피해의 50%」 인멸 피해를 한 번 더 가한다.
+  // 따로 뜨는 한 방이라 공격 카드로 둔다. 배율은 어둠의 흐름 5단 총 배율(×4 + 마지막)의 절반.
+  // 5체인 미만이면 공격 추가 팔레트에 뜨지 않는다.
+  {
+    id: "1001707_c5",
+    name: "5체인 · 어둠의 흐름 5단 추가 피해",
+    type: "Basic",
+    element: "Havoc",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceChain: 5,
+    hits: [
+      [0.5739, 0.6208, 0.66795, 0.7339, 0.7808, 0.83505, 0.9103, 0.98555, 1.06075, 1.14075],
+    ],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -434,7 +449,23 @@ const passive1709: Skill = {
   category: "Intro",
   name: "소리의 부름",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkT.webp",
-  attacks: [],
+  // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치를 옮겼다 — 인멸 필드가 2초마다
+  // 공격력 143.3%, 6초간. 6 ÷ 2 = 3번으로 봤다(적이 범위 안에 계속 있을 때). 레벨과 무관한 고정값.
+  attacks: [
+    {
+      id: "1001709_1",
+      name: "인멸 필드 피해",
+      type: "Intro",
+      element: "Havoc",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [
+        [1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433],
+        [1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433],
+        [1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433, 1.433],
+      ],
+    },
+  ],
 };
 
 const passive1710: Skill = {
@@ -484,19 +515,19 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 4,
     condition: "강공격 멸음 · 공명 해방 임연사적 명중 후 20초간",
   },
-  // 5체인의 「일반 공격 5단」은 다크 서지 상태 한정이라
-  // 기본 공격 5단이 아니라 어둠의 흐름 · 일반 공격 5단에 붙는다.
-  // 추가 피해가 원래 피해의 50%라 그 공격에 50%를 얹는 것으로 총량이 맞는다.
+  // 5체인 추가 타격은 공격 카드(1001707_c5)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
+  // 그래도 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이라, 빼면 6체인 키가 한 칸 당겨진다.
+  // 수정분 JSON을 소스에 반영한 뒤에 이 줄을 지운다.
   {
-    label: "5체인 · 어둠의 흐름 5단 추가 타격",
+    label: "5체인 · 어둠의 흐름 5단 추가 타격 (공격 카드로 옮김 · 효과 없음)",
     target: "damageBonus",
     damageType: "All",
     attackIds: ["1001707_6"],
-    value: 0.5, // 원래 피해의 50%가 한 번 더
+    value: 0,
     uptime: "active",
     scope: "self",
     resonanceChain: 5,
-    condition: "다크 서지 상태일 때",
+    condition: "공격 카드 「5체인 · 어둠의 흐름 5단 추가 피해」를 담는다",
   },
   {
     label: "6체인 · 크리티컬",
@@ -514,8 +545,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 //   고유 「음향 전달 효과」 다크 서지 중 일반 공격 명중 시 공명 에너지 1pt 회복(초당 1회)
 //   2체인 「낮과 밤」      멸음으로 다크 서지 진입 시 공명 스킬 쿨타임 리셋
 //   3체인 「만물의 울림」   다크 서지 중 일반 공격 5단 명중 시 잃은 HP의 10% 회복
-//   반주 「소리의 부름」    2초마다 공격력 143.3%의 인멸 피해(6초)
-//                        — 반주 스킬에 공격 데이터(SkillAttributes)가 없다
 
 const skills: Skill[] = [
   basicSkill,

@@ -316,7 +316,20 @@ const introSkill: Skill = {
   category: "Intro",
   name: "도약의 불빛",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangT.webp",
-  attacks: [],
+  // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치(공격력 530%)를 옮겼다. 레벨과 무관한 고정값.
+  attacks: [
+    {
+      id: "1000209_1",
+      name: "도약의 불빛 피해",
+      type: "Intro",
+      element: "Fusion",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [
+        [5.3, 5.3, 5.3, 5.3, 5.3, 5.3, 5.3, 5.3, 5.3, 5.3],
+      ],
+    },
+  ],
 };
 
 

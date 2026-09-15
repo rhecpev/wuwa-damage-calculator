@@ -1,5 +1,6 @@
 import { useMemo, useSyncExternalStore } from "react";
 import { calculateDamage } from "../../../calculator/damage";
+import { withExtraHits } from "../../../calculator/extraHits";
 import { calculateFinalStats } from "../../../calculator/stats";
 import { characters } from "../../../data/sampleData";
 import { buffs } from "../../../data/buffs";
@@ -183,11 +184,16 @@ export function computeResults(
       : (findAttack(character, item.attackId) ??
         findEchoAttack(character.id, item.attackId, links, owned));
     if (!found) continue;
+    // 체인 조건이 있는 공격을 담아 둔 뒤 체인을 내리면 그 공격은 생기지 않는다 — 계산에서 뺀다.
+    if ((found.attack.resonanceChain ?? 0) > (characterChains[character.id] ?? 0)) continue;
 
     // 캐릭터 관리 탭에서 정한 스킬 레벨을 걸어준다. 없으면 데이터 기본값(보통 10).
     const level = characterSkillLevels[character.id]?.[found.skill.id] ?? found.attack.skillLevel;
-    const leveledAttack =
-      level === found.attack.skillLevel ? found.attack : { ...found.attack, skillLevel: level };
+    // 체인 조건이 맞는 추가타(상리요 1체인 회선 매트릭스 등)는 이 공격의 히트 뒤에 붙인다.
+    const leveledAttack = withExtraHits(
+      level === found.attack.skillLevel ? found.attack : { ...found.attack, skillLevel: level },
+      characterChains[character.id] ?? 0,
+    );
 
     const memberEchoes = equippedEchoes(character.id, links, owned);
 
@@ -208,9 +214,18 @@ export function computeResults(
     // 조건부(active) 버프는 반대로 켜둔 것만 넣는다.
     // 공격 분류가 맞는지는 manualBuffDelta 안의 appliesTo가 다시 본다.
     const off = new Set(item.disabledBuffIds ?? []);
+    // 배타 묶음은 계산에서도 한 번 더 막는다 — 같은 묶음의 발동 버프가 켜져 있으면 상시 버프는 뺀다
+    // (브렌트 「극중 인생」 상시 ↔ 「나」의 인생 발동). 켜기 동작 밖에서 들어온 설정에도 안전하다.
+    const activeGroups = new Set(
+      manualBuffs
+        .filter((b) => b.uptime !== "passive" && b.exclusiveGroup && item.enabledBuffIds.includes(b.id))
+        .map((b) => b.exclusiveGroup),
+    );
     const itemBuffs = manualBuffs
       .filter((buff) =>
-        buff.uptime === "passive" ? !off.has(buff.id) : item.enabledBuffIds.includes(buff.id),
+        buff.uptime === "passive"
+          ? !off.has(buff.id) && !(buff.exclusiveGroup && activeGroups.has(buff.exclusiveGroup))
+          : item.enabledBuffIds.includes(buff.id),
       )
       // 스택형 버프는 이 공격에서 정한 스택이 있으면 그 값으로 바꿔 넣는다.
       .map((buff) => {

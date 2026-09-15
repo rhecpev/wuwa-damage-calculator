@@ -477,6 +477,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "드넓고 깊은 아득함 속에 · 룬 배율 상승",
     target: "motionValue",
     damageType: "All",
+    // 원문은 룬 셋에만 걸린다. 대상을 적지 않아 시그리카의 모든 공격에 걸리고 있었다.
+    attackIds: ["1005107_2", "1005107_3", "1005107_4"],
     modifier: "amplify",
     value: 0.5,
     uptime: "active",
@@ -496,7 +498,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     attackIds: RUNE_IDS,
     value: 0.3, // 스택당 30% 부스트
     stacks: 2, // 기본 상한이 2스택
-    maxStacks: 4, // 3체인이면 4스택까지
+    maxStacksByChain: { 0: 2, 3: 4 }, // 기본 2스택(최대 60%), 3체인이면 4스택(최대 120%)
     uptime: "active",
     scope: "self",
     condition: "「타고난 재능?」 스택만큼 (기본 상한 2스택, 3체인이면 4스택)",
@@ -508,7 +510,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "드넓고 깊은 아득함 속에 · 태양의 정령 에너지 10pt당 룬 피해 부스트",
     target: "boost",
     damageType: "All",
-    attackIds: RUNE_IDS,
+    // 원문은 룬 셋에만 — 「나 곧 함의이니」는 들어가지 않는다(타고난 재능?과 달리).
+    attackIds: ["1005107_2", "1005107_3", "1005107_4"],
     value: 0.15, // 10pt당 15% 부스트
     stacks: 2, // 기본값 — 30pt 미만이므로 최대 2번(20pt)
     maxStacks: 2,

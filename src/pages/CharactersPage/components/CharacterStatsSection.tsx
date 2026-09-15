@@ -198,7 +198,7 @@ export function CharacterStatsSection({
           <small>STATS</small>
           <h2>
             {character.name} - 스탯
-            <span style={{ color: "#9ea7b7", fontSize: 14, marginLeft: 8 }}>
+            <span style={{ color: "var(--c-9ea7b7)", fontSize: 14, marginLeft: 8 }}>
               Lv.{character.level} · {ELEMENT_NAMES[character.element]} · 공명체인 {chain}단계
             </span>
           </h2>

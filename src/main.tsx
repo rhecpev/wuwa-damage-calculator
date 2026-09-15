@@ -1,7 +1,11 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { hydrate } from "./utils/persist";
+import { initTheme } from "./utils/theme";
 import "./styles.css";
+
+// 테마는 저장값을 기다리지 않고 바로 정한다 — 화면이 한 번 다른 색으로 번쩍이지 않게.
+initTheme();
 
 /**
  * 저장된 설정을 메모리에 올린 **뒤에** App을 불러온다.

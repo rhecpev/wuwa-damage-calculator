@@ -183,7 +183,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
         <h2 style={{ margin: 0 }}>에코 저장</h2>
         <button
           onClick={onCancel}
-          style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "#ccc" }}
+          style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--c-cccccc)" }}
         >
           ✕
         </button>
@@ -201,7 +201,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                 height: "250px",
                 borderRadius: "8px",
                 objectFit: "cover",
-                border: "1px solid #3b4457",
+                border: "1px solid var(--c-3b4457)",
               }}
             />
           )}
@@ -216,7 +216,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
           {/* 세트 효과 */}
           {echo.fetterGroups && echo.fetterGroups.length > 0 && (
             <div style={{ marginBottom: "20px" }}>
-              <small style={{ color: "#9a9a9a", display: "block", marginBottom: "8px" }}>세트 효과</small>
+              <small style={{ color: "var(--c-9a9a9a)", display: "block", marginBottom: "8px" }}>세트 효과</small>
               <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
                 {echo.fetterGroups.map((fg: any, idx: number) => (
                   <label
@@ -225,11 +225,11 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                       display: "flex",
                       alignItems: "center",
                       gap: "6px",
-                      background: selectedFetter === fg.name ? "#476176" : "#3c455c",
+                      background: selectedFetter === fg.name ? "var(--c-476176)" : "var(--c-3c455c)",
                       padding: "8px 12px",
                       borderRadius: "6px",
                       cursor: "pointer",
-                      border: selectedFetter === fg.name ? "1px solid #4a9eff" : "1px solid #4a5266",
+                      border: selectedFetter === fg.name ? "1px solid var(--c-4a9eff)" : "1px solid var(--c-4a5266)",
                       transition: "all 0.2s"
                     }}
                   >
@@ -244,7 +244,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                     {fg.icon && (
                       <img src={fg.icon} alt="" style={{ width: "20px", height: "20px" }} />
                     )}
-                    <span style={{ color: "#ccc" }}>{fg.name}</span>
+                    <span style={{ color: "var(--c-cccccc)" }}>{fg.name}</span>
                   </label>
                 ))}
               </div>
@@ -254,7 +254,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
           {/* 주옵션 */}
           <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "#9a9a9a" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "var(--c-9a9a9a)" }}>
                 주옵션
               </label>
               <select
@@ -268,9 +268,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                 style={{
                   width: "100%",
                   padding: "8px",
-                  background: "#3c455c",
-                  color: "#fff",
-                  border: "1px solid #4a5266",
+                  background: "var(--c-3c455c)",
+                  color: "var(--c-ffffff)",
+                  border: "1px solid var(--c-4a5266)",
                   borderRadius: "4px",
                   fontSize: "13px",
                 }}
@@ -285,7 +285,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
             </div>
             {mainOption && (
               <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "#9a9a9a" }}>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "var(--c-9a9a9a)" }}>
                   수치
                 </label>
                 <select
@@ -297,9 +297,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                   style={{
                     width: "100%",
                     padding: "8px",
-                    background: "#3c455c",
-                    color: "#fff",
-                    border: "1px solid #4a5266",
+                    background: "var(--c-3c455c)",
+                    color: "var(--c-ffffff)",
+                    border: "1px solid var(--c-4a5266)",
                     borderRadius: "4px",
                     fontSize: "13px",
                   }}
@@ -315,7 +315,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                   <div style={{
                     marginTop: "4px",
                     fontSize: "12px",
-                    color: "#ff6b6b",
+                    color: "var(--c-ff6b6b)",
                     fontWeight: "600"
                   }}>
                     ⚠️ 수치를 확인해주세요
@@ -328,7 +328,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
           {/* 메인 서브옵션 */}
           <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
             <div style={{ flex: 1 }}>
-              <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "#9a9a9a" }}>
+              <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "var(--c-9a9a9a)" }}>
                 메인 서브옵션
               </label>
               <select
@@ -342,9 +342,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                 style={{
                   width: "100%",
                   padding: "8px",
-                  background: "#3c455c",
-                  color: "#fff",
-                  border: "1px solid #4a5266",
+                  background: "var(--c-3c455c)",
+                  color: "var(--c-ffffff)",
+                  border: "1px solid var(--c-4a5266)",
                   borderRadius: "4px",
                   fontSize: "13px",
                 }}
@@ -359,7 +359,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
             </div>
             {mainSubOption && (
               <div style={{ flex: 1 }}>
-                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "#9a9a9a" }}>
+                <label style={{ display: "block", marginBottom: "4px", fontSize: "13px", color: "var(--c-9a9a9a)" }}>
                   값
                 </label>
                 <select
@@ -371,9 +371,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                   style={{
                     width: "100%",
                     padding: "8px",
-                    background: "#3c455c",
-                    color: "#fff",
-                    border: "1px solid #4a5266",
+                    background: "var(--c-3c455c)",
+                    color: "var(--c-ffffff)",
+                    border: "1px solid var(--c-4a5266)",
                     borderRadius: "4px",
                     fontSize: "13px",
                   }}
@@ -389,7 +389,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                   <div style={{
                     marginTop: "4px",
                     fontSize: "12px",
-                    color: "#ff6b6b",
+                    color: "var(--c-ff6b6b)",
                     fontWeight: "600"
                   }}>
                     ⚠️ 수치를 확인해주세요
@@ -399,7 +399,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
             )}
           </div>
 
-          <hr style={{ border: "none", borderTop: "1px solid #4a5266", margin: "16px 0" }} />
+          <hr style={{ border: "none", borderTop: "1px solid var(--c-4a5266)", margin: "16px 0" }} />
 
           {/* 셀렉트박스 2개씩 5개 (메인옵션 + 부옵션) */}
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
@@ -407,7 +407,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
               <div key={`row-${rowIdx}`} style={{ display: "contents" }}>
                 {/* 메인옵션 */}
                 <div>
-                  <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", color: "#9a9a9a" }}>
+                  <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", color: "var(--c-9a9a9a)" }}>
                     부옵션 {rowIdx + 1}
                   </label>
                   <select
@@ -416,9 +416,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                     style={{
                       width: "100%",
                       padding: "8px",
-                      background: "#3c455c",
-                      color: "#fff",
-                      border: "1px solid #4a5266",
+                      background: "var(--c-3c455c)",
+                      color: "var(--c-ffffff)",
+                      border: "1px solid var(--c-4a5266)",
                       borderRadius: "4px",
                       fontSize: "14px",
                     }}
@@ -443,9 +443,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                     style={{
                       width: "100%",
                       padding: "8px",
-                      background: "#3c455c",
-                      color: "#fff",
-                      border: "1px solid #4a5266",
+                      background: "var(--c-3c455c)",
+                      color: "var(--c-ffffff)",
+                      border: "1px solid var(--c-4a5266)",
                       borderRadius: "4px",
                       fontSize: "14px",
                       opacity: !mainSelects[rowIdx] || mainSelects[rowIdx] === "선택" ? 0.5 : 1,
@@ -462,7 +462,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
                     <div style={{
                       marginTop: "4px",
                       fontSize: "11px",
-                      color: "#ff6b6b",
+                      color: "var(--c-ff6b6b)",
                       fontWeight: "600"
                     }}>
                       ⚠️ 수치를 확인해주세요
@@ -479,10 +479,10 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
         <div style={{
           padding: "12px",
           marginBottom: "12px",
-          background: "#553e3e",
-          border: "1px solid #966262",
+          background: "var(--c-553e3e)",
+          border: "1px solid var(--c-966262)",
           borderRadius: "6px",
-          color: "#ff6b6b",
+          color: "var(--c-ff6b6b)",
           fontSize: "14px",
         }}>
           {error}
@@ -495,7 +495,7 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
           style={{
             flex: 1,
             padding: "14px",
-            background: "#4a9eff",
+            background: "var(--c-4a9eff)",
             color: "white",
             border: "none",
             borderRadius: "6px",
@@ -511,9 +511,9 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
           style={{
             flex: 1,
             padding: "14px",
-            background: "#3c455c",
-            color: "#ccc",
-            border: "1px solid #4a5266",
+            background: "var(--c-3c455c)",
+            color: "var(--c-cccccc)",
+            border: "1px solid var(--c-4a5266)",
             borderRadius: "6px",
             cursor: "pointer",
             fontWeight: "bold",

@@ -544,12 +544,26 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 6,
     condition: "강공격 · 변주 스킬 · 공명 스킬 사용마다 1스택, 최대 2스택 · 처형 발동 시 전부 소모",
   },
+  // 5체인 앞부분 — 반주 스킬 「극기의 각오」 피해 배율 +120%.
+  // DamageList에 313.4% 옆에 433.4%(= 313.4 + 120)가 있어 곱연산 상승이 아니라 %p 가산이다.
+  // 버프 확인 탭의 수정분 키가 배열 순번이라, 5체인 자리에 끼우지 않고 맨 뒤에 붙였다.
+  {
+    label: "5체인 · 극기의 각오 배율 증가",
+    target: "motionValue",
+    damageType: "All",
+    modifier: "increase",
+    attackIds: ["1001109_1"],
+    value: 1.2, // 배율 120%p 가산
+    uptime: "passive", // 조건이 없어 늘 걸린다
+    scope: "self",
+    resonanceChain: 5,
+  },
 ];
 
 // 미반영 — 피해 계산과 무관해서 뺀 것들
 //   1체인 「구원」   공명 스킬 사용 횟수 +1 · 「파진치」 소모 15pt 감소
 //   2체인 앞부분    「파진치」 30pt 획득
-//   5체인 앞부분    반주 스킬 피해 배율 +120% (반주 스킬에 공격 데이터가 없다)
+//   (5체인 앞부분 반주 배율 +120%는 passiveBuffs 맨 뒤에 반영)
 
 const skills: Skill[] = [
   basicSkill,

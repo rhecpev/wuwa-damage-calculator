@@ -697,7 +697,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // — 배율 1200%p와 판정 전환은 같은 조건에서 같이 일어나므로 한 버프가 맞다.
   // DamageList로 확인된다: 연극의 모습 4단 64.38% 옆에 1264.38%(= 64.38 + 1200),
   // 흉내낸 거품은 합계 52.56%에 1200%p가 비율대로 나뉘어 8.76% -> 208.76%, 26.28% -> 626.28%.
-  // 히트 수가 달라 둘로 나눠 적었다(1200%p ÷ 히트 수).
+  // 엔진이 증가량(합계 %p)을 히트에 계수 비율대로 나누므로 둘 다 1200%p를 그대로 적는다.
   {
     label: "3체인 · 연극의 모습 4단 배율 증가 + 공명 해방 판정",
     target: "motionValue",
@@ -716,7 +716,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1005302_1"],
-    value: 3, // 1200%p ÷ 4히트
+    value: 12, // 1200%p (엔진이 4히트에 계수 비율대로 나눈다)
     modifier: "increase",
     switchesDamageBonusType: "Liberation",
     uptime: "active",
