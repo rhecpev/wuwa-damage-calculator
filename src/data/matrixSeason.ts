@@ -1,4 +1,4 @@
-import type { Element } from "../types/game";
+import type { DamageElement, Element } from "../types/game";
 
 /**
  * 지금 매트릭스 시즌의 몬스터 배치.
@@ -115,7 +115,8 @@ export const matrixHpKey = (m: Pick<MatrixMonster, "round" | "slot">) => `${m.ro
 export interface MatrixHitInfo {
   /** 피해 판정 분류(damageBonusType ?? type). */
   category: string;
-  element: Element;
+  /** 공격 속성 — 물리(Physical)도 들어올 수 있다. */
+  element: DamageElement;
   anomaly?: string;
 }
 
