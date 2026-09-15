@@ -1056,14 +1056,14 @@ function GearCompare() {
                       ) : (
                         <span className="gear-weapon-blank" />
                       )}
-                      <span>
-                        <b>{entry?.name ?? "무기 없음"}</b>
-                        {weapon && (
-                          <small>
-                            {weapon.refine}재련 · Lv.{weapon.level ?? DEFAULT_WEAPON_LEVEL}
-                          </small>
-                        )}
-                      </span>
+                      {/* 이름 40% · 레벨 20% · 재련 20% · 변경 10% — 캐릭터마다 칸 위치가 맞는다. */}
+                      <b className="gear-weapon-name" title={entry?.name}>
+                        {entry?.name ?? "무기 없음"}
+                      </b>
+                      <small className="gear-weapon-level">
+                        {weapon ? `Lv.${weapon.level ?? DEFAULT_WEAPON_LEVEL}` : ""}
+                      </small>
+                      <small className="gear-weapon-refine">{weapon ? `${weapon.refine}재련` : ""}</small>
                       <button onClick={() => setPickingFor(id)}>변경</button>
                     </div>
                   </div>
@@ -1091,10 +1091,15 @@ function GearCompare() {
                             ) : (
                               <span className="gear-echo-blank" />
                             )}
-                            <b>{echo?.name ?? (slot === 0 ? "메인 · 빈 슬롯" : "빈 슬롯")}</b>
-                            {echo && <small className="gear-echo-main">{mainOptionText(echo)}</small>}
+                            {/* 칸이 1/3씩 고정이라 긴 이름은 잘린다 — 마우스를 올리면 전체가 보인다. */}
+                            <b title={echo?.name}>{echo?.name ?? (slot === 0 ? "메인 · 빈 슬롯" : "빈 슬롯")}</b>
+                            {echo && (
+                              <small className="gear-echo-main" title={mainOptionText(echo)}>
+                                {mainOptionText(echo)}
+                              </small>
+                            )}
                             {set && (
-                              <span className="gear-echo-set">
+                              <span className="gear-echo-set" title={set.name}>
                                 {set.icon && <img src={set.icon} alt="" loading="lazy" />}
                                 <small>{set.name}</small>
                               </span>

@@ -784,23 +784,24 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .gear-chain button{flex:1;min-width:0;padding:7px 0;font-size:13px;font-weight:700;color:var(--c-8791a4);background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:8px;cursor:pointer}
 .gear-chain button:hover{border-color:var(--c-8794aa)}
 .gear-chain button.on{color:var(--c-1d2332);background:var(--c-e8c66a);border-color:var(--c-e8c66a)}
-.gear-weapon{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:10px}
+/* 무기 한 줄 — 아이콘 뒤로 이름 40% · 레벨 20% · 재련 20% · 변경 버튼 10%(나머지는 칸 사이 간격). */
+.gear-weapon{display:grid;grid-template-columns:42px minmax(0,4fr) minmax(0,2fr) minmax(0,2fr) minmax(max-content,1fr);align-items:center;gap:10px;padding:8px 10px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:10px}
 .gear-weapon img,.gear-weapon-blank{width:42px;height:42px;flex:none;object-fit:contain;border-radius:8px;background:var(--c-30394a)}
-.gear-weapon>span{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1}
-.gear-weapon b{font-size:13px;color:var(--c-e9edf5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gear-weapon small{font-size:11px;color:var(--c-9aa3b3)}
-.gear-weapon button{flex:none;padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer}
+.gear-weapon b{min-width:0;font-size:13px;color:var(--c-e9edf5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-weapon small{min-width:0;font-size:12px;color:var(--c-9aa3b3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-weapon button{justify-self:stretch;padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer}
 /* 에코 다섯 줄 — 한 줄에 아이콘 · 이름 · 주옵션 · 화음 세트. 누르면 보유 에코로 교체. */
 .gear-echo-rows{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
-.gear-echo-rows button{width:100%;display:flex;align-items:center;gap:8px;padding:5px 8px;text-align:left;font:inherit;color:inherit;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:9px;cursor:pointer}
+/* 에코 한 줄 — 아이콘 고정 폭 뒤로 이름 · 주옵션 · 화음 세트가 1/3씩. 세트 이름 길이가 달라도 줄끼리 칸이 맞는다. */
+.gear-echo-rows button{width:100%;display:grid;grid-template-columns:30px repeat(3,minmax(0,1fr));align-items:center;gap:8px;padding:5px 8px;text-align:left;font:inherit;color:inherit;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:9px;cursor:pointer}
 .gear-echo-rows button:hover{border-color:var(--c-8794aa)}
 .gear-echo-rows button.on{border-color:var(--c-e8c66a);background:var(--c-3f382b)}
 .gear-echo-icon,.gear-echo-blank{width:30px;height:30px;flex:none;object-fit:contain;border-radius:6px;background:var(--c-30394a)}
-.gear-echo-rows b{flex:1;min-width:0;font-size:12.5px;color:var(--c-e9edf5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.gear-echo-main{flex:none;font-size:11px;color:var(--c-8fb4d9);white-space:nowrap}
-.gear-echo-set{display:flex;align-items:center;gap:3px;flex:none;max-width:40%}
+.gear-echo-rows b{grid-column:2;min-width:0;font-size:12.5px;color:var(--c-e9edf5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-main{grid-column:3;min-width:0;font-size:11px;color:var(--c-8fb4d9);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-set{grid-column:4;min-width:0;display:flex;align-items:center;gap:3px}
 .gear-echo-set img{width:16px;height:16px;flex:none}
-.gear-echo-set small{font-size:10.5px;color:var(--c-b8c0ce);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gear-echo-set small{min-width:0;font-size:10.5px;color:var(--c-b8c0ce);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 /* 카드 위 — 왼쪽 큰 칸(얼굴 · 이름), 오른쪽 돌파 드롭다운 · 무기. */
 .gear-top{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:stretch}
 .gear-top .gear-head{justify-content:center;padding:12px 14px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:12px}
