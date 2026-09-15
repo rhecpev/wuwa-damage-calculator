@@ -5,7 +5,15 @@ import { anomalyStackCap, appliesTo } from "../../calculator/manualBuffs";
 import { echoSkillOf } from "../../data/echoAttacks";
 import { attackLabel, cardKind } from "../CalculatorPage/components/RotationSection";
 import type { CalculationResult } from "../CalculatorPage/hooks/useCalculationResults";
-import { PARTY_SLOTS, usePartyConfig } from "../../context/PartyConfigContext";
+import {
+  ENEMY_LEVEL_MAX,
+  ENEMY_LEVEL_MIN,
+  ENEMY_RES_PRESETS,
+  PARTY_SLOTS,
+  resPresetOf,
+  usePartyConfig,
+} from "../../context/PartyConfigContext";
+import { ELEMENT_NAMES } from "../../data/elements";
 import type { GearOverride } from "../../context/PartyConfigContext";
 import { computeResults } from "../CalculatorPage/hooks/useCalculationResults";
 import {
@@ -29,6 +37,8 @@ import { characters } from "../../data/sampleData";
 import { num } from "../../utils/format";
 import type {
   CharacterWeaponConfig,
+  Element,
+  Enemy,
   ManualBuff,
   PartyConfig,
   RotationAttack,
@@ -48,6 +58,9 @@ import type {
 export function CycleComparePage() {
   // 탭을 오가도(바깥 탭으로 나갔다 와도) 보던 안쪽 탭이 남도록 저장해 둔다.
   const [tab, setTab] = usePersistedState<"cycles" | "gear">("compare.tab", "cycles");
+  // 이 탭에서만 쓰는 몬스터 설정. null이면 따로 정하지 않은 것 — 사이클은 저장 당시 몬스터, 지금 루틴은 계산 탭 몬스터.
+  // 계산 탭의 몬스터는 건드리지 않는다.
+  const [enemy, setEnemy] = usePersistedState<Enemy | null>("compare.enemy", null);
 
   return (
     <>
@@ -69,8 +82,96 @@ export function CycleComparePage() {
           에코 · 무기 · 돌파 비교
         </button>
       </div>
-      {tab === "cycles" ? <CycleVsCycle /> : <GearCompare />}
+      <CompareEnemyBar enemy={enemy} onChange={setEnemy} />
+      {tab === "cycles" ? <CycleVsCycle enemy={enemy} /> : <GearCompare enemy={enemy} />}
     </>
+  );
+}
+
+const ENEMY_ELEMENTS: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectro", "Havoc"];
+
+/**
+ * 비교 탭 몬스터 설정 — 콘텐츠 · 속성 · 레벨.
+ * 「따로 정하지 않음」이면 각 사이클이 저장해 둔 몬스터(지금 루틴은 계산 탭 몬스터)로 계산한다.
+ * 무엇이든 하나 바꾸면 그때부터 이 값으로 양쪽을 같은 몬스터에 대고 견준다.
+ */
+function CompareEnemyBar({
+  enemy,
+  onChange,
+}: {
+  enemy: Enemy | null;
+  onChange: (enemy: Enemy | null) => void;
+}) {
+  const { config } = usePartyConfig();
+  // 처음 손댈 때는 계산 탭 몬스터에서 출발한다.
+  const current = enemy ?? config.enemy;
+  const preset = resPresetOf(current.resPreset ?? "field");
+  const locked = preset.fixedLevel !== undefined;
+  const set = (patch: Partial<Enemy>) => onChange({ ...current, ...patch });
+
+  return (
+    <section className={enemy ? "panel compare-enemy on" : "panel compare-enemy"}>
+      <b>몬스터</b>
+
+      <span className="chips">
+        {ENEMY_RES_PRESETS.map((p) => (
+          <button
+            key={p.id}
+            className={enemy && current.resPreset === p.id ? "chip chip-active" : "chip"}
+            onClick={() =>
+              set({
+                resPreset: p.id,
+                baseRes: p.baseRes,
+                sameElementRes: p.sameElementRes,
+                ...(p.fixedLevel ? { level: p.fixedLevel } : {}),
+              })
+            }
+          >
+            {p.label}
+          </button>
+        ))}
+      </span>
+
+      <select
+        className="data-select"
+        value={current.element}
+        onChange={(event) => set({ element: event.target.value as Element })}
+      >
+        {ENEMY_ELEMENTS.map((element) => (
+          <option key={element} value={element}>
+            {ELEMENT_NAMES[element]}
+          </option>
+        ))}
+      </select>
+
+      <label className="compare-enemy-level">
+        Lv.
+        <input
+          type="number"
+          min={ENEMY_LEVEL_MIN}
+          max={ENEMY_LEVEL_MAX}
+          value={current.level}
+          disabled={locked}
+          onChange={(event) => {
+            const level = Math.round(Number(event.target.value));
+            if (Number.isNaN(level)) return;
+            set({ level: Math.min(Math.max(level, ENEMY_LEVEL_MIN), ENEMY_LEVEL_MAX) });
+          }}
+        />
+      </label>
+
+      <span className="enemy-hint">
+        {enemy
+          ? `이 탭에서만 쓰는 몬스터 · 저항 ${Math.round(current.baseRes * 100)}% / 같은 속성 ${Math.round(current.sameElementRes * 100)}%${locked ? ` · ${preset.label} 레벨 고정` : ""}`
+          : "따로 정하지 않음 — 사이클은 저장 당시 몬스터, 지금 루틴은 계산 탭 몬스터로 계산합니다"}
+      </span>
+
+      {enemy && (
+        <button className="data-reset" onClick={() => onChange(null)}>
+          원래대로
+        </button>
+      )}
+    </section>
   );
 }
 
@@ -197,7 +298,7 @@ function CompareTable({
  * 사이클 한 벌을 돌리는 도구. 담아 둔 사이클이면 **그때 앉았던 파티**로 돌린다
  * — 지금 파티로 돌리면 다른 팀의 사이클은 캐릭터가 통째로 비어 버린다.
  */
-function useCycleRunner() {
+function useCycleRunner(enemyOverride: Enemy | null = null) {
   const {
     config,
     allBuffs,
@@ -240,7 +341,8 @@ function useCycleRunner() {
         PARTY_SLOTS.map((slot, i) => [slot, { ...config[slot], characterId: partyIds[i] }]),
       ),
       rotation: rotation ?? preset?.rotation ?? config.rotation,
-      enemy: preset?.enemy ?? config.enemy,
+      // 비교 탭에서 몬스터를 정했으면 그걸로, 아니면 사이클이 저장한 몬스터 · 계산 탭 몬스터.
+      enemy: enemyOverride ?? preset?.enemy ?? config.enemy,
     };
     const buffs = buffsOf(preset, override);
     const results = computeResults(
@@ -261,7 +363,7 @@ function useCycleRunner() {
 
 // ── 사이클 VS 사이클 ─────────────────────────────────────────────
 
-function CycleVsCycle() {
+function CycleVsCycle({ enemy }: { enemy: Enemy | null }) {
   const {
     cyclePresets,
     config,
@@ -272,7 +374,7 @@ function CycleVsCycle() {
     characterLevels,
     characterNodes,
   } = usePartyConfig();
-  const { run } = useCycleRunner();
+  const { run } = useCycleRunner(enemy);
 
   // 탭을 오가도 고른 것이 남도록 저장해 둔다. 지워진 사이클 id는 「지금 루틴」으로 떨어진다.
   /** "" 이면 지금 계산 중인 루틴. */
@@ -315,6 +417,7 @@ function CycleVsCycle() {
     characterSkillLevels,
     characterLevels,
     characterNodes,
+    enemy,
   ]);
 
   const options = (
@@ -342,6 +445,9 @@ function CycleVsCycle() {
           {mode === "saved"
             ? "담아 둔 사이클은 저장할 때 박아 둔 피해로 견줍니다 — 그 뒤에 계수 · 버프 · 장비가 바뀌어도 그때 숫자 그대로입니다."
             : "담아 둔 사이클도 지금 무기 · 체인 · 에코로 다시 계산합니다 — 같은 장비에서 루틴만 견줄 때 씁니다."}
+          {mode === "saved" &&
+            enemy &&
+            " 위에서 정한 몬스터는 다시 계산하는 쪽에만 걸립니다 — 저장 당시 값은 그때 몬스터 그대로이니, 같은 몬스터로 견주려면 「지금 환경으로 다시 계산」을 고르세요."}
           {cyclePresets.length === 0 &&
             " 담아 둔 사이클이 없습니다. 계산 탭에서 「사이클 저장」을 누르면 여기서 고를 수 있습니다."}
         </p>
@@ -607,7 +713,7 @@ function ScenarioBuffs({
   );
 }
 
-function GearCompare() {
+function GearCompare({ enemy }: { enemy: Enemy | null }) {
   const {
     config,
     allBuffs,
@@ -618,7 +724,7 @@ function GearCompare() {
     characterNodes,
     cyclePresets,
   } = usePartyConfig();
-  const { run, partyOf } = useCycleRunner();
+  const { run, partyOf } = useCycleRunner(enemy);
 
   // 에코 · 보유 무기 저장소는 React 상태가 아니라 localStorage 한 벌이다 — 바뀌면 다시 읽는다.
   const echoVersion = useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
@@ -797,6 +903,7 @@ function GearCompare() {
     characterSkillLevels,
     characterLevels,
     characterNodes,
+    enemy,
   ]);
 
   // ── 바꾼 뒤 루틴 편집 — 버프 켜기 · 스택 · 공격 끼워 넣기 ──
