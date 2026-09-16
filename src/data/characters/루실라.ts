@@ -439,7 +439,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "critDamage",
     damageType: "Echo",
     value: 0.1,
-    maxStacks: 5,
+    // 「줌」은 기본이 1스택이고, 고유 스킬 「명심」이 상한을 4스택까지 올린다.
+    // 고유 스킬은 기본으로 켜져 있으므로 4를 상한으로 둔다(최대 40%).
+    // 예전에 5로 적혀 있어 「최대 50%」로 떴다 — 원문에 없는 수다.
+    maxStacks: 4,
     uptime: "active",
     scope: "party",
     resonanceMode: "Echo", // 「줌」은 에코 모드에서만 쌓인다(기시감)
@@ -600,7 +603,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
-//   고유 「명심」   필름 · 줌 스택 상한 증가
+//   고유 「명심」   「필름」 상한 10스택(필름은 버프로 담긴 것이 없다). 「줌」 상한 4스택은 위 버프의 maxStacks로 담았다
 //   1체인 앞부분   포커스 링 자동 완성, 중단 저항
 //   4체인 뒷부분   플래시 백 3단 중 받는 피해 30% 감소
 //   6체인 뒷부분   「그리움」으로 「인상」 회복
