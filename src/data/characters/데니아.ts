@@ -548,6 +548,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0.0012, // 증폭 1pt당 0.12% — 늘어난 간섭 1스택 몫
     scaleFrom: "SyncAmplify",
+    // 조화 밀집 모드에서만 — 불꽃 모드의 데니아는 대응 능력이 없다.
+    resonanceMode: "Cluster",
     uptime: "passive",
     scope: "party",
     onlyFor: ["luke", "qingchao", "linne", "denia", "monie"],
@@ -683,6 +685,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "syncAmplify",
     damageType: "All",
     value: 20, // 20pt
+    // 원문이 「공명 모드 · 조화 밀집」에 있을 시로 못 박았다.
+    resonanceMode: "Cluster",
     uptime: "active",
     scope: "party",
     resonanceChain: 2,

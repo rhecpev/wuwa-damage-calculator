@@ -653,6 +653,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "All",
     value: 0.0012, // 증폭 1pt당 0.12% — 늘어난 간섭 1스택 몫
     scaleFrom: "SyncAmplify",
+    // 조화 밀집 모드에서만 — 조화 파동 모드의 린네는 밀집 대응이 없다.
+    resonanceMode: "Cluster",
     uptime: "passive",
     scope: "party",
     onlyFor: ["luke", "qingchao", "linne", "denia", "monie"],

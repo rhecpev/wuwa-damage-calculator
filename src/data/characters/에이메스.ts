@@ -803,6 +803,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "FusionBurst",
     value: 0.8,
     resonanceChain: 6,
+    // 원문이 「공명 모드 · 불꽃」에 있는 동시에로 못 박았다.
+    resonanceMode: "Flame",
     uptime: "active",
     scope: "party",
     condition: "불꽃 모드 + 전투 상태. 아래 크리티컬 피해와 같이 켠다",
@@ -813,6 +815,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "FusionBurst",
     value: 1.75, // 275% 중 100%를 넘는 부분
     resonanceChain: 6,
+    // 원문이 「공명 모드 · 불꽃」에 있는 동시에로 못 박았다.
+    resonanceMode: "Flame",
     uptime: "active",
     scope: "party",
     condition: "불꽃 모드 + 전투 상태. 위 확률과 같이 켠다",
