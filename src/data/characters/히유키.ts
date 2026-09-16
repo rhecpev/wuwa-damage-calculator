@@ -647,16 +647,17 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // 원문: 「「냉해 효과」는 동시에 「서리 효과」로 간주된다. 「냉해 효과」 피해는 동시에
   //        「서리 효과」 피해로 간주된다」 — 히유키가 파티에 있으면 파티원이 붙이는 서리가
   //        전부 냉해로 바뀌므로, 이 부스트는 계산기의 「서리 효과」에 그대로 걸린다.
-  // 「목표가 받는」 피해를 올리는 디버프라 히유키가 아닌 캐릭터의 서리 피해도 오른다.
+  // 원문이 「자신이 파티 내 등장 캐릭터일 시」로 못 박았다 — 히유키가 나와 있는 동안만 걸리므로
+  // 계산에서는 히유키 자신의 공격에만 붙는다(scope: self). 검수에서 바로잡은 자리다(2026-09-16).
   {
     label: "눈의 침식 1스택 · 목표가 받는 서리(냉해) 피해 부스트",
     inherentSkillId: "1005204",
     target: "anomalyBoost",
     damageType: "FrostChafe",
     value: 0.3, // 30% 부스트
-    uptime: "active",
-    scope: "party",
-    condition: "히유키가 「눈의 침식」 1스택 이상 · 파티 내 등장 캐릭터일 때",
+    uptime: "passive",
+    scope: "self",
+    condition: "히유키가 「눈의 침식」 1스택 이상 · 히유키가 나와 있는 동안",
   },
   {
     label: "눈의 침식 3스택 · 목표가 받는 서리(냉해) 피해 부스트",
@@ -664,8 +665,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "anomalyBoost",
     damageType: "FrostChafe",
     value: 0.3, // 3스택에서 30%가 더 붙는다(1스택분과 합쳐 60%)
-    uptime: "active",
-    scope: "party",
+    uptime: "passive",
+    scope: "self",
     condition: "히유키가 「눈의 침식」 3스택 · 파티 내 등장 캐릭터일 때. 1스택분과 같이 켠다",
   },
   {
