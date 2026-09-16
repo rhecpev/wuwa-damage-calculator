@@ -365,6 +365,8 @@ const circuitSkillAttacks: Attack[] = [
     element: "Fusion",
     scalingStat: "ATK",
     skillLevel: 10,
+    // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
+    noCrit: true,
     hits: [
       [1.5, 1.623, 1.746, 1.9182, 2.0412, 2.1827, 2.3795, 2.5763, 2.7731, 2.9822],
     ],

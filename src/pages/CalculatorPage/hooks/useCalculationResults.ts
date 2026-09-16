@@ -323,8 +323,13 @@ export function computeResults(
       ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", ownerPanels),
     );
 
+    // 크리티컬이 아예 없는 공격(조화 파동 피해)은 장비 크리티컬을 타지 않는다 — 여기서 0으로 내린다.
+    if (attack.noCrit) {
+      stats.critRate = 0;
+      stats.critDamage = 0;
+    }
     // 「이 공격의 크리티컬은 N%로 고정된다」 — 더하는 것이 아니라 덮어쓴다.
-    // 에이메스 6체인의 조화 파동 피해(확률 80% · 피해 275%)가 그렇다. 스탯이 다 나온 뒤에 못 박는다.
+    // 에이메스 6체인의 조화 파동 피해(확률 80% · 피해 275%)가 그렇다. 위의 0도 이 값이 덮는다.
     const fixedCrit = critOverrides(attack, itemBuffs, character.id);
     if (fixedCrit.critRate !== undefined) stats.critRate = fixedCrit.critRate;
     if (fixedCrit.critDamage !== undefined) stats.critDamage = fixedCrit.critDamage;

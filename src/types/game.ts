@@ -26,7 +26,7 @@ export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo";
 //   이중 모드 캐릭터는 넷이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
 //   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
-export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;trigger?:AttackTrigger[];}
+export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;noCrit?:boolean;trigger?:AttackTrigger[];}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다
 //   — 공격력을 타지 않고 10027.14 고정값에서 출발하는 별도 피해식이다(data/discord.ts 참고).
 // anomaly: 이 항목이 공격이 아니라 「이상 효과 피해」일 때 어느 효과인지.
@@ -55,6 +55,9 @@ export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:A
 // extraHits: 이 공격에 딸려 나가는 추가타(상리요 1체인 회선 매트릭스 등). 조건(체인)이 맞으면 계산할 때 hits 뒤에 붙어
 //   이 공격의 버프를 그대로 받는다. 배율 「증가」 몫은 받지 않는다. 히트별 표에서 다른 색으로 보인다.
 // hitLabels: 계산용 사본에만 채워지는 히트별 이름(원래 히트는 null, 추가타는 그 이름). 데이터에는 적지 않는다.
+// noCrit: 크리티컬이 아예 붙지 않는 공격(「조화 파동 피해」가 그렇다). 장비 크리티컬을 타지 않고
+//   기대값 = 일반 피해다. 「이 공격의 크리티컬을 N%로 고정한다」는 버프(critRateFix)가 걸리면
+//   그때만 그 값으로 살아난다 — 에이메스 6체인이 조화 파동 피해를 80% · 275%로 못 박는 것이 그 경우다.
 // trigger: 그 공격이 피해 말고 **따로 일으키는 일**(이상 효과 추가·소모, 조화 밀집·파동 부여,
 //   방어력 감소, 자원 수급 등). 캐릭터 파일에 적지 않는다 — data/attackTriggers.ts의 표를
 //   sampleData가 불러올 때 공격마다 붙여 준다. 피해 계산은 이 값을 보지 않는다.

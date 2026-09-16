@@ -565,6 +565,8 @@ const syncSkillAttacks: Attack[] = [
     element: "Spectro",
     scalingStat: "ATK",
     skillLevel: 10,
+    // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
+    noCrit: true,
     hits: [
       [9.46, 10.2358, 11.0115, 12.0975, 12.8732, 13.7653, 15.0064, 16.2476, 17.4888, 18.8075],
     ],
