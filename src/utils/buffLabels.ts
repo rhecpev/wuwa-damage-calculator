@@ -26,6 +26,8 @@ export const TARGET_LABEL: Record<BuffTarget, string> = {
   syncAmplify: "조화도 파괴 증폭",
   discordEfficiency: "부조화 효율",
   healingBonus: "치료 효과 보너스",
+  critRateFix: "크리티컬 확률(고정)",
+  critDamageFix: "크리티컬 피해(고정)",
   atkFlat: "공격력(깡)",
   atkPercent: "공격력",
   hpPercent: "HP",

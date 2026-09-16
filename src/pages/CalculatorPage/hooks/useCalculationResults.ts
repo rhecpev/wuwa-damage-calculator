@@ -23,6 +23,7 @@ import { calculateDiscordDamage } from "../../../calculator/discord";
 import { DISCORD_ATTACK_ID, discordAttack, isDiscordAttackId } from "../../../data/discord";
 import {
   anomalyStackCap,
+  critOverrides,
   applyDamageTypeSwitch,
   buffContributions,
   manualBuffDelta,
@@ -321,6 +322,12 @@ export function computeResults(
     stats.contributions.push(
       ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", ownerPanels),
     );
+
+    // 「이 공격의 크리티컬은 N%로 고정된다」 — 더하는 것이 아니라 덮어쓴다.
+    // 에이메스 6체인의 조화 파동 피해(확률 80% · 피해 275%)가 그렇다. 스탯이 다 나온 뒤에 못 박는다.
+    const fixedCrit = critOverrides(attack, itemBuffs, character.id);
+    if (fixedCrit.critRate !== undefined) stats.critRate = fixedCrit.critRate;
+    if (fixedCrit.critDamage !== undefined) stats.critDamage = fixedCrit.critDamage;
 
     output.push({
       item,

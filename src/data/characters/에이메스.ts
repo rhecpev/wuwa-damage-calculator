@@ -566,6 +566,9 @@ const CHARGE_ATTACK_IDS = [
  * 공명 모드에 따라 값이 갈리는 것은 resonanceMode로 구분하고,
  * 같은 자리를 두고 다투는 것은 exclusiveGroup으로 묶었다.
  */
+/** 「조화 파동 피해」로 떨어지는 공격들 — 6체인이 이 둘의 크리티컬을 못 박는다. */
+const WAVE_DAMAGE_IDS = ["1004607_3", "1004607_4"];
+
 const passiveBuffs: CharacterBuffTemplate[] = [
   // ── 스킬에서 오는 것 (설명문에서 옮김) ──
   {
@@ -823,6 +826,34 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "party",
     condition: "불꽃 모드 + 전투 상태. 위 확률과 같이 켠다",
   },
+  // 6체인 앞부분 — 「공명 모드 · 조화 파동」에서 **조화 파동 피해가 크리티컬을 낼 수 있게 되고,
+  // 확률 80% · 피해 275%로 고정된다」. 더하는 것이 아니라 못 박는 값이라 고정 칸(…Fix)을 쓴다.
+  // 조화 파동 피해는 이상 효과가 아니라 일반 피해로 담겨 있다(AttackType에 칸이 없어 Ultimate를 빌렸다) —
+  // 그래서 불꽃 쪽(anomalyCrit…)과 자리가 다르다.
+  {
+    label: "6체인 · 조화 파동 피해 크리티컬 확률 (80% 고정)",
+    target: "critRateFix",
+    damageType: "All",
+    attackIds: WAVE_DAMAGE_IDS,
+    value: 0.8,
+    resonanceChain: 6,
+    resonanceMode: "Discord",
+    uptime: "active",
+    scope: "self",
+    condition: "조화 파동 모드. 아래 크리티컬 피해와 같이 켠다",
+  },
+  {
+    label: "6체인 · 조화 파동 피해 크리티컬 피해 (275% 고정)",
+    target: "critDamageFix",
+    damageType: "All",
+    attackIds: WAVE_DAMAGE_IDS,
+    value: 1.75, // 275% 중 100%를 넘는 부분
+    resonanceChain: 6,
+    resonanceMode: "Discord",
+    uptime: "active",
+    scope: "self",
+    condition: "조화 파동 모드. 위 확률과 같이 켠다",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
@@ -831,9 +862,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
 //                — 「조화 파동 피해」는 이상 효과가 아닌 별도 지속 피해라 붙일 자리가 없다
 //                (불꽃 효과 쪽 강화는 위 버프로 반영했다)
 //   5체인 「별바다 끝에 닿은 영원의 여정」 실드 · 부활 · 회복
-//   6체인 뒷부분  「조화 파동 피해」 쪽 크리티컬 고정 — 조화 파동은 이상 효과가 아니라
-//                별도 피해라 anomaly 쪽 자리를 못 쓴다(불꽃 효과 쪽은 반영했다)
-//                궤적 스택 두 배 · 상한 60스택
+//   6체인 뒷부분  궤적 스택 두 배(채우는 속도라 피해식에 자리가 없다. 상한 60스택은 반영했다)
+//                — 조화 파동 쪽 크리티컬 고정은 2026-09-16에 고정 칸(critRateFix · critDamageFix)으로 담았다
 //   고유 「요리의 달인」 요리 확률 효과
 
 const skills: Skill[] = [

@@ -135,7 +135,7 @@ export type BuffDamageType="All"|AttackType|Element|AnomalyKind;
 //   지금은 이 넷을 한 필드에 섞어 담는 프로토타입 형태다.
 //   이상 효과는 일반 공격과 피해식이 통째로 달라서, AnomalyKind로 적은 버프는
 //   이상 효과 피해에만 걸리고 일반 공격에는 절대 걸리지 않는다(그 반대도 같다).
-export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamage"|"defIgnore"|"defReduction"|"resPen"|"resReduction"|"damageTaken"|"totalDamage"|"anomalyBoost"|"anomalyCritRate"|"anomalyCritDamage"|"anomalyAmplify"|"energyRegen"|"syncAmplify"|"discordEfficiency"|"healingBonus"|"atkFlat"|"atkPercent"|"hpPercent"|"defPercent";
+export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamage"|"critRateFix"|"critDamageFix"|"defIgnore"|"defReduction"|"resPen"|"resReduction"|"damageTaken"|"totalDamage"|"anomalyBoost"|"anomalyCritRate"|"anomalyCritDamage"|"anomalyAmplify"|"energyRegen"|"syncAmplify"|"discordEfficiency"|"healingBonus"|"atkFlat"|"atkPercent"|"hpPercent"|"defPercent";
 // 이 버프가 계산의 어느 자리에 붙는지.
 //   motionValue = 스킬 배율(증가/상승 구분이 여기서만 의미가 있다)
 //   damageBonus = 피해 보너스 그룹(1+Σ로 묶여 곱해지는 자리)

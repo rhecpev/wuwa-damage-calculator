@@ -54,6 +54,8 @@ export const TARGET_OPTIONS: { value: BuffTarget; label: string; hint: string }[
   { value: "boost", label: "부스트", hint: "피해증가와 별개인 독립 곱연산 그룹" },
   { value: "critRate", label: "크리티컬 확률", hint: "치명타 확률에 가산" },
   { value: "critDamage", label: "크리티컬 피해", hint: "기본 100%를 뺀 보너스분에 가산" },
+  { value: "critRateFix", label: "크리티컬 확률(고정)", hint: "그 공격의 치명타 확률을 이 값으로 못 박는다" },
+  { value: "critDamageFix", label: "크리티컬 피해(고정)", hint: "그 공격의 치명타 피해를 이 값으로 못 박는다(100%를 뺀 분)" },
   { value: "damageTaken", label: "받는 피해", hint: "적이 받는 피해를 늘리는 독립 배율" },
   {
     value: "totalDamage",
@@ -573,4 +575,26 @@ export function applyDamageTypeSwitch(attack: Attack, buffs: ManualBuff[]): Atta
     return { ...attack, damageBonusType: buff.switchesDamageBonusType };
   }
   return attack;
+}
+
+/**
+ * 「이 공격의 크리티컬은 N%로 **고정**된다」를 읽어 준다.
+ *
+ * 보통 버프는 값을 더하지만 이건 덮어쓴다(에이메스 6체인의 조화 파동 피해 80% · 275%).
+ * 더하는 자리(statPatch)에서는 아무 일도 하지 않고, 최종 스탯이 나온 뒤 화면 쪽에서 이 값으로
+ * 못 박는다. 여러 줄이 걸리면 마지막 줄이 이긴다 — 같은 공격에 둘을 겹쳐 적을 일이 없다.
+ */
+export function critOverrides(
+  attack: Attack,
+  buffs: ManualBuff[],
+  characterId?: string,
+): { critRate?: number; critDamage?: number } {
+  const out: { critRate?: number; critDamage?: number } = {};
+  for (const buff of buffs) {
+    if (buff.target !== "critRateFix" && buff.target !== "critDamageFix") continue;
+    if (!appliesTo(buff, attack, characterId)) continue;
+    if (buff.target === "critRateFix") out.critRate = buff.value;
+    else out.critDamage = buff.value;
+  }
+  return out;
 }
