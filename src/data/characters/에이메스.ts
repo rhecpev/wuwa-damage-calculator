@@ -710,25 +710,21 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
 
   // ── 반주 스킬 「보이지 않는 기다림」 — 파티에 걸리는 부스트가 두 단계다 ──
+  // 반주 「보이지 않는 기다림」 — 기본 10%이고, 그 캐릭터가 「조화 파동 · 이탈」 / 「불꽃 효과」를
+  // 붙이면 20%로 커진다. 예전에는 10%와 20% 두 줄을 배타로 묶어 두었는데, 같은 효과가 한 칸
+  // 커지는 것이라 **스택 한 줄**로 담는다 — 1스택 10% · 2스택 20%.
+  // 원문이 「에이메스를 **제외한** 파티 내 캐릭터」라 자신에게는 걸리지 않는다(excludeOwner).
   {
-    label: "보이지 않는 기다림 · 파티 전체 피해 부스트",
+    label: "보이지 않는 기다림 · 파티 전체 피해 부스트 (스택당 10%)",
     target: "boost",
     damageType: "All",
-    value: 0.1, // 10% 부스트
+    value: 0.1,
+    stacks: 1, // 기본값 — 효과를 붙인 캐릭터는 2스택(20%)으로 올려 켠다
+    maxStacks: 2,
     uptime: "active",
     scope: "party",
-    exclusiveGroup: "aymes-intro",
-    condition: "반주 후 20초간. 아래 20% 쪽과 하나만 켠다",
-  },
-  {
-    label: "보이지 않는 기다림 · 파티 전체 피해 부스트(효과 부여 후)",
-    target: "boost",
-    damageType: "All",
-    value: 0.2, // 10% -> 20%로 커진다
-    uptime: "active",
-    scope: "party",
-    exclusiveGroup: "aymes-intro",
-    condition: "그 캐릭터가 「조화 파동 · 이탈」 또는 「불꽃 효과」를 붙인 뒤",
+    excludeOwner: true,
+    condition: "반주 후 20초간 · 그 캐릭터가 「조화 파동 · 이탈」 또는 「불꽃 효과」를 붙였으면 2스택",
   },
 
   // ── 공명체인 ──
