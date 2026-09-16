@@ -1799,6 +1799,9 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 잡은 만큼 쌓인 점수 — 매트릭스 성적은 결국 이 숫자다. */
 .matrix-score-total{font-size:11.5px;color:var(--c-9aa3b3);white-space:nowrap}
 .matrix-score-total b{color:var(--c-e8c66a);font-size:13px}
+/* 그 몬스터에만 걸린 매트릭스 전용 시스템 — 사이클이 실제로 켠 것(on)은 진하게. */
+.matrix-innate.on{color:var(--c-c6a3e0);border-color:var(--c-7a63a2);background:var(--c-3a2440)}
+.matrix-innate{flex:none;padding:1px 6px;font-size:10px;color:var(--c-8791a4);background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:999px;white-space:nowrap}
 /* 몬스터 줄에 붙는 처치 점수. */
 .matrix-monster-score{flex:none;font-size:11px;color:var(--c-c9ab6b);white-space:nowrap}
 .matrix-monsters{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
@@ -1844,7 +1847,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-legend i{width:14px;height:14px;flex:none;border-radius:4px}
 .matrix-legend b{color:var(--c-e9edf5)}
 .matrix-legend span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.matrix-legend .muted,.matrix-monster-state .muted,.matrix-round-title .muted{color:var(--c-6d7689)}
+.matrix-legend .muted,.matrix-monster-state .muted,.matrix-round-title .muted,.matrix-monster-el.muted{color:var(--c-6d7689)}
 .matrix-round-block{margin-bottom:14px}
 .matrix-round-title{display:flex;align-items:baseline;gap:6px;margin-bottom:6px}
 .matrix-round-title b{font-size:13px;color:var(--c-e9edf5)}

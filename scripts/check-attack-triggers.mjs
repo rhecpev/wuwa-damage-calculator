@@ -78,7 +78,10 @@ const owners = buildOwners();
 const declaredAnomalies = buildDeclaredAnomalies();
 const addedAnomalies = new Map();
 const corpus = buildCorpus(JSON.parse(fs.readFileSync("src/data/characterTexts.json", "utf8")));
-const data = fs.readFileSync("src/data/attackTriggers.ts", "utf8");
+// 줄 끝이 CRLF인 채로 체크아웃되는 파일이다. 캐리지 리턴을 털지 않으면 아래 정규식이
+// 트리거를 한 줄도 못 읽어 검사가 통째로 헛돈다 — 실제로 그렇게 오래 0개로 세고 있었다.
+const CR = String.fromCharCode(13);
+const data = fs.readFileSync("src/data/attackTriggers.ts", "utf8").split(CR).join("");
 
 const problems = { unknownId: [], weakSource: [], amountMismatch: [], anomalyNotDeclared: [], duplicate: [], bareContradiction: [] };
 let attacks = 0;
@@ -95,7 +98,7 @@ for (const [, attackId, body] of data.matchAll(/\n {2}"(\d+_\d+)": \[(.*?)\n {2}
     const byName = new Map();
     for (const [, ent] of body.matchAll(/\{\n(.*?)\n {4}\},/gs)) {
       const act = ent.match(/action: "(\w+)"/)?.[1];
-      const name = ent.match(/\n {6}(?:resource|status|anomaly): "(.*?)",/)?.[1];
+      const name = ent.match(/\n {6}(?:resource|status|anomaly|debuff): "(.*?)",/)?.[1];
       if (!name) continue;
       const cond = ent.match(/\n {6}condition: "(.*?)",/)?.[1] ?? "";
       const key = `${act}|${name}|${cond}`;
@@ -120,7 +123,7 @@ for (const [, attackId, body] of data.matchAll(/\n {2}"(\d+_\d+)": \[(.*?)\n {2}
   for (const [, entry] of body.matchAll(/\{\n(.*?)\n {4}\},/gs)) {
     triggers += 1;
     const source = entry.match(/\n {6}source: "(.*?)",/)?.[1];
-    const amount = entry.match(/\n {6}amount: (\d+),/)?.[1];
+    const amount = entry.match(/\n {6}amount: ([\d.]+),/)?.[1];
 
     // ② 근거가 그 캐릭터 원문에 실제로 있는가.
     //    우리가 붙인 「— 스킬 이름」 같은 꼬리표 때문에 통째로는 안 맞으므로
@@ -138,7 +141,10 @@ for (const [, attackId, body] of data.matchAll(/\n {2}"(\d+_\d+)": \[(.*?)\n {2}
     //    원문에 수치가 없어 사람이 읽어 넣은 자리는 condition에 그 사실을 적어 두었다 —
     //    그런 자리까지 매번 걸리면 진짜 오타가 그 사이에 묻힌다. 그래서 건너뛴다.
     const inferred = /원문에 (횟수|수치|개수)가 없어/.test(entry);
-    if (source && amount && !inferred && !new RegExp(`(?<!\\d)${amount}(?!\\d)`).test(source)) {
+    // 디버프 수치는 비율로 적는다(0.1 = 10%) — 근거 문장에는 퍼센트로 쓰여 있어 둘 다 본다.
+    const asPercent = Number(amount) < 1 ? String(Math.round(Number(amount) * 1000) / 10) : null;
+    const seen = (n) => new RegExp(String.raw`(?<!\d)` + n.replace(".", String.raw`\.`) + String.raw`(?!\d)`).test(source);
+    if (source && amount && !inferred && !seen(amount) && !(asPercent && seen(asPercent))) {
       problems.amountMismatch.push(`${owner.file} ${attackId} amount=${amount} — ${source.slice(0, 80)}`);
     }
   }
@@ -152,6 +158,35 @@ for (const [key, kinds] of addedAnomalies) {
 }
 
 console.log(`공격 ${attacks}개 · 트리거 ${triggers}개`);
+
+// 캐릭터를 묶어 적은 줄(`캐릭터id:공격id`)도 본다 — 공용 항목(조화도 파괴)에 붙는 것들이다.
+// 공격 id로만 세는 위 고리가 이 줄들을 지나쳐서 여기서 따로 훑는다.
+let sharedAttacks = 0;
+let sharedTriggers = 0;
+const SHARED_BLOCK = new RegExp(String.raw`
+  "([a-z0-9-]+):([a-z]+:[a-z]+)": \[([\s\S]*?)
+  \],`, "g");
+const SHARED_ENTRY = new RegExp(String.raw`\{
+([\s\S]*?)
+    \},`, "g");
+const SHARED_SOURCE = new RegExp(String.raw`
+      source: "(.*?)",`);
+for (const m of data.matchAll(SHARED_BLOCK)) {
+  sharedAttacks += 1;
+  const text = corpus.get(m[1]);
+  if (!text) {
+    problems.unknownId.push(`${m[1]} — 캐릭터 텍스트가 없다`);
+    continue;
+  }
+  for (const e of m[3].matchAll(SHARED_ENTRY)) {
+    sharedTriggers += 1;
+    const source = e[1].match(SHARED_SOURCE)?.[1];
+    if (source && longestCommon(strip(source), text) < 15) {
+      problems.weakSource.push(`${m[1]} 공용 항목 — ${source.slice(0, 80)}`);
+    }
+  }
+}
+console.log(`캐릭터를 묶어 적은 줄 ${sharedAttacks}자리 · 트리거 ${sharedTriggers}개`);
 let failed = 0;
 for (const [name, label] of [
   ["unknownId", "캐릭터 자료에 없는 공격 id"],

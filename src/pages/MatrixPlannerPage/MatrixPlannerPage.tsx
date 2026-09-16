@@ -10,6 +10,7 @@ import { usePersistedState } from "../../utils/usePersistedState";
 import type { CyclePreset } from "../../data/cyclePresets";
 import type { Element, PartyConfig } from "../../types/game";
 import { MATRIX_BUFFS, MATRIX_MONSTERS, MATRIX_ROUND_COUNT, MATRIX_SEASON, matrixHpKey } from "../../data/matrixSeason";
+import { triggersFor } from "../../data/attackTriggers";
 import type { MatrixBuff, MatrixMonster } from "../../data/matrixSeason";
 
 /**
@@ -760,6 +761,8 @@ function useMatrixSim(runs: MatrixRun[]) {
     /** dealt[몬스터][파티] — 그 파티가 그 몬스터에서 깎은 체력(넘친 피해 제외). */
     const dealt = MATRIX_MONSTERS.map(() => runs.map(() => 0));
     const killedBy: (number | null)[] = MATRIX_MONSTERS.map(() => null);
+    /** 몬스터마다 사이클이 실제로 켠 전용 시스템 배수(1이면 조건을 못 채운 것). */
+    const featureUp = MATRIX_MONSTERS.map(() => 1);
     const report = runs.map(() => ({ damage: 0, hits: 0, totalHits: 0, stoppedAt: -1 }));
 
     // 파티 · 몬스터마다 타수별 피해 목록. 실제로 맞는 몬스터만 계산한다(계산이 무겁다).
@@ -791,11 +794,12 @@ function useMatrixSim(runs: MatrixRun[]) {
           element: m.element,
           resPreset: "matrix",
           baseRes: matrix.baseRes,
-          sameElementRes: matrix.sameElementRes,
+          // 저항이 모두 같은 몬스터(미믹)는 같은 속성으로 때려도 오르지 않는다 — 둘을 같은 값으로 둔다.
+          sameElementRes: m.uniformRes ? matrix.baseRes : matrix.sameElementRes,
           damageReduction: 0,
         },
       };
-      const list = computeResults(
+      const results = computeResults(
         cfg,
         characterWeapons,
         buffs,
@@ -803,7 +807,54 @@ function useMatrixSim(runs: MatrixRun[]) {
         characterSkillLevels,
         characterLevels,
         characterNodes,
-      ).flatMap((r) => {
+      );
+
+      /**
+       * 그 몬스터에만 걸린 매트릭스 전용 시스템을 **공격 트리거로 켠다.**
+       *
+       * 만와뢰는 암흑을 걸수록(스택당 5% · 최대 5), 걸어 둔 암흑을 태우면(+20%) 받는 피해가 오른다.
+       * 천둥의 비늘은 조화 밀집을 붙인 뒤부터 20% 오른다. 어느 공격이 무엇을 걸고 태우는지는
+       * 공격 자료의 trigger가 알고 있으므로(data/attackTriggers.ts) 사이클을 훑으며 그대로 따라간다.
+       *
+       * 배수는 **그 공격 앞의 상태**로 매긴다 — 스택을 붙이는 그 타는 아직 덕을 보지 않는다.
+       * 지속 시간(30초)은 보지 않는다. 사이클 한 벌 안에서는 유지되는 것으로 본다.
+       */
+      const rule = m.feature?.rule;
+      let stacks = 0;
+      let consumed = false;
+      let statusOn = false;
+      const featureScale = (syncAmplify: number) => {
+        if (!rule) return 1;
+        if (rule.kind === "anomaly") {
+          return (1 + rule.perStack * Math.min(stacks, rule.maxStacks)) * (consumed ? 1 + rule.onConsume : 1);
+        }
+        if (!statusOn) return 1;
+        // 상한이 늘면 그만큼 간섭을 더 쌓을 수 있다 — 스택마다 「증폭 1pt당 0.12%」가 더 붙는다.
+        // 늘어난 상한을 실제로 채운다고 보고 곱한다(채우려면 조화도 파괴를 그만큼 더 써야 한다).
+        const extra =
+          rule.extraStacks && rule.perStackPerAmp
+            ? rule.perStackPerAmp * syncAmplify * rule.extraStacks
+            : 0;
+        return (1 + rule.bonus) * (1 + extra);
+      };
+      /** 이 공격이 걸거나 태운 것을 상태에 반영한다. */
+      const follow = (characterId: string, attackId: string) => {
+        if (!rule) return;
+        // 공용 항목(조화도 파괴)은 누가 썼느냐로 달라진다 — 캐릭터를 묶은 줄까지 함께 본다.
+        for (const t of triggersFor(characterId, attackId)) {
+          if (rule.kind === "anomaly") {
+            if (t.anomaly !== rule.anomaly) continue;
+            // 개수를 안 적어 둔 줄(「최대 스택까지」)은 상한까지 채운 것으로 본다.
+            const n = t.amount ?? rule.maxStacks;
+            stacks = t.action === "add" ? stacks + n : Math.max(0, stacks - n);
+            if (t.action === "consume") consumed = true;
+          } else if (t.action === "add" && t.status && rule.statuses.includes(t.status)) {
+            statusOn = true;
+          }
+        }
+      };
+
+      const list = results.flatMap((r) => {
         // 스테이지 버프는 「최종적으로」라 공격마다 따로 곱한다.
         const scale = run.buff
           ? run.buff.multiplier({
@@ -812,9 +863,14 @@ function useMatrixSim(runs: MatrixRun[]) {
               anomaly: r.attack.anomaly,
             })
           : 1;
+        const feature = featureScale(r.stats.syncAmplify);
+        featureUp[monsterIndex] = Math.max(featureUp[monsterIndex], feature);
+        follow(r.item.characterId, r.attack.id);
         return r.damage.hits.map(
           (h, i) =>
-            (h.expectedDamage + (i === r.damage.hits.length - 1 ? (r.damage.fixedDamage ?? 0) : 0)) * scale,
+            (h.expectedDamage + (i === r.damage.hits.length - 1 ? (r.damage.fixedDamage ?? 0) : 0)) *
+            scale *
+            feature,
         );
       });
       cache.set(key, list);
@@ -841,7 +897,7 @@ function useMatrixSim(runs: MatrixRun[]) {
       report[run.index].stoppedAt = cur;
     }
 
-    return { hp, dealt, killedBy, report, reached: cur };
+    return { hp, dealt, killedBy, report, featureUp, reached: cur };
     // hpByKey가 바뀌면 hpOf도 달라진다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -928,10 +984,35 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                       </div>
                       {/* 이름 아래 — 속성과 체력. 칸이 넉넉하면 한 줄, 좁으면 둘로 접힌다. */}
                       <div className="matrix-monster-meta">
-                        <span className="matrix-monster-el" style={{ color: ELEMENT_COLORS[m.element] }}>
-                          {icon && <img src={icon} alt="" />}
-                          {ELEMENT_NAMES[m.element]}
-                        </span>
+                        {/* 그 몬스터에만 걸린 매트릭스 전용 시스템. 파티가 조건을 채워야 성립한다. */}
+                        {m.feature && (
+                          <span
+                            className={sim.featureUp[index] > 1 ? "matrix-innate on" : "matrix-innate"}
+                            title={`${m.feature.name} — ${m.feature.desc}${
+                              sim.featureUp[index] > 1
+                                ? ` (이 파티가 켰습니다 — 최대 ×${sim.featureUp[index].toFixed(2)})`
+                                : " (이 파티는 조건을 채우지 못했습니다)"
+                            }`}
+                          >
+                            {m.feature.name}
+                            {sim.featureUp[index] > 1
+                              ? ` ×${sim.featureUp[index].toFixed(2)}`
+                              : m.feature.damageTaken
+                                ? ` 최대 ×${m.feature.damageTaken}`
+                                : ""}
+                          </span>
+                        )}
+                        {m.uniformRes ? (
+                          // 저항이 전부 같아 「어느 속성으로 때리든 같다」만 알리면 된다.
+                          <span className="matrix-monster-el muted" title="속성 저항이 모두 같습니다 — 어느 속성으로 때려도 20%">
+                            저항 같음
+                          </span>
+                        ) : (
+                          <span className="matrix-monster-el" style={{ color: ELEMENT_COLORS[m.element] }}>
+                            {icon && <img src={icon} alt="" />}
+                            {ELEMENT_NAMES[m.element]}
+                          </span>
+                        )}
                         {/* 잡으면 받는 점수 — 어느 몬스터를 먼저 눕힐지 고르는 기준이다. */}
                         <span className="matrix-monster-score">{m.score.toLocaleString()}점</span>
                         <label className="matrix-hp-input">
@@ -998,7 +1079,10 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
       <p className="matrix-hint">
         기본 체력 · 점수는 인게임 <b>실측표</b>(s2.2 매트릭스 혈량 · 분수표)를 그대로 옮긴 값입니다 —
         다르면 게임에서 본 값으로 고쳐 주세요. 라운드 레벨(110 · 120)은 <b>표기일 뿐</b>이라 체력에만
-        걸립니다. 방어력은 라운드와 상관없이 <b>레벨 100</b>으로 계산합니다. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
+        걸립니다. 방어력은 라운드와 상관없이 <b>레벨 100</b>으로 계산합니다. 만와뢰(<b>이상 효과 시스템</b>)와 천둥의 비늘
+        (<b>조화도 파괴 시스템</b>)의 전용 시스템은 <b>공격 트리거를 보고 켭니다</b> — 사이클의 공격이
+        암흑 · 조화 밀집을 걸면 그때부터 받는 피해 배수가 붙고, 암흑을 태우는 공격이 나오면 20%가 더
+        붙습니다. 조건을 못 채우는 파티에는 걸리지 않습니다(꼬리표에 마우스를 올리면 보입니다). 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
         기대 피해로 깎습니다. 몬스터가 쓰러지면 다음 타부터 다음 몬스터를 치고, 미믹을 잡으면 다음
         라운드로 넘어갑니다. 넘친 피해 · 매트릭스 스테이지 버프는 넣지 않았습니다.
       </p>

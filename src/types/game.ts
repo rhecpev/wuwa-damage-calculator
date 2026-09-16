@@ -1,5 +1,6 @@
 import type {Stats} from "./stats";
 import type {AnomalyKind} from "../data/anomalies";
+import type {AttackTrigger} from "../data/attackTriggers";
 export type Element="Aero"|"Glacio"|"Electro"|"Fusion"|"Havoc"|"Spectro";
 export type DamageElement=Element|"Physical";
 // 공격이 가진 속성. 캐릭터·몬스터는 6속성 중 하나지만(Element), 피해 자체에는
@@ -25,7 +26,7 @@ export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo";
 //   이중 모드 캐릭터는 넷이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
 //   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
-export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;}
+export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;trigger?:AttackTrigger[];}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다
 //   — 공격력을 타지 않고 10027.14 고정값에서 출발하는 별도 피해식이다(data/discord.ts 참고).
 // anomaly: 이 항목이 공격이 아니라 「이상 효과 피해」일 때 어느 효과인지.
@@ -54,6 +55,9 @@ export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:A
 // extraHits: 이 공격에 딸려 나가는 추가타(상리요 1체인 회선 매트릭스 등). 조건(체인)이 맞으면 계산할 때 hits 뒤에 붙어
 //   이 공격의 버프를 그대로 받는다. 배율 「증가」 몫은 받지 않는다. 히트별 표에서 다른 색으로 보인다.
 // hitLabels: 계산용 사본에만 채워지는 히트별 이름(원래 히트는 null, 추가타는 그 이름). 데이터에는 적지 않는다.
+// trigger: 그 공격이 피해 말고 **따로 일으키는 일**(이상 효과 추가·소모, 조화 밀집·파동 부여,
+//   방어력 감소, 자원 수급 등). 캐릭터 파일에 적지 않는다 — data/attackTriggers.ts의 표를
+//   sampleData가 불러올 때 공격마다 붙여 준다. 피해 계산은 이 값을 보지 않는다.
 // extra: 스킬표에 없고 고유 스킬 등으로 따로 떨어지는 추가 타격(능양 「꾸준한 수행」 등). 체인 공격처럼 색을 달리해 보여 준다.
 export interface ExtraHit{label:string;resonanceChain?:number;hits:number[][];scaleHits?:{index:number;factor:number}[];fixed?:boolean;}
 // fixed: 설명문의 고정 배율(「공격력의 100%」)로 떨어지는 추가타 — 그 공격의 배율 상승(곱연산)을 받지 않는다(아우구스타 6체인 분노의 번개).

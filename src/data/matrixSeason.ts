@@ -1,4 +1,5 @@
 import type { DamageElement, Element } from "../types/game";
+import type { AnomalyKind } from "./anomalies";
 
 /**
  * 지금 매트릭스 시즌의 몬스터 배치.
@@ -16,6 +17,10 @@ import type { DamageElement, Element } from "../types/game";
  * (ENEMY_RES_PRESETS의 matrix.fixedLevel = 100. 계산 탭 · 비교 탭 · 파티 순서 탭 모두 이 값으로 묶인다).
  *
  * 3라운드 미믹은 표에서 체력이 나머지 넷과 같고 점수만 높다. 표를 고치지 않고 그대로 옮겼다.
+ *
+ * 몬스터마다 붙는 **매트릭스 전용 시스템**(feature)은 API의 `Waves[].RecommendTeamFeature`에서
+ * 그대로 옮겼다. 몹이 디버프를 달고 나오는 것이 아니라, 파티가 암흑 · 조화 밀집을 걸면 그 몬스터가
+ * 받는 피해가 오르는 규칙이다. 미믹의 「전체 속성 저항 동일」도 같은 자리에 적혀 있다.
  * 화면에서 체력을 직접 고칠 수 있게 두고, 이 값은 처음 채워 넣는 기본값으로만 쓴다.
  */
 export interface MatrixMonster {
@@ -31,12 +36,58 @@ export interface MatrixMonster {
   handbookId: number;
   name: string;
   level: number;
-  /** 저항 속성 — 이 속성으로 때리면 저항이 높다. */
+  /** 저항 속성 — 이 속성으로 때리면 저항이 높다. uniformRes면 뜻이 없고 아이콘 색에만 쓴다. */
   element: Element;
   icon: string;
   defaultHp: number;
   /** 이 몬스터를 잡고 받는 점수(표의 分数). */
   score: number;
+  /**
+   * 속성 저항이 전부 같은 몬스터. 「매트릭스 미믹」이 그렇다 —
+   * 어느 속성으로 때려도 기본 저항(20%)이고, 같은 속성이라고 60%로 오르지 않는다.
+   */
+  uniformRes?: true;
+  /**
+   * 그 몬스터에만 걸린 **매트릭스 전용 시스템**(API의 `Waves[].RecommendTeamFeature`).
+   * 몬스터가 스스로 디버프를 달고 나오는 것이 **아니라**, 파티가 특정 상태를 걸면 그 몬스터가
+   * 받는 최종 피해가 오르는 규칙이다. 그래서 파티 구성에 따라 걸리기도 하고 안 걸리기도 한다.
+   *
+   *   name       화면에 띄울 이름(「이상 효과 시스템」 · 「조화도 파괴 시스템」)
+   *   desc       원문 그대로. 조건과 수치가 다 들어 있다.
+   *   damageTaken 조건을 다 채웠을 때의 받는 최종 피해 배수. 계산에 자동으로 걸지는 않는다 —
+   *              파티가 그 상태를 걸 수 있어야 성립해서다.
+   */
+  feature?: {
+    name: string;
+    desc: string;
+    /** 조건을 다 채웠을 때의 받는 최종 피해 배수. 꼬리표에 적는 값이다. */
+    damageTaken?: number;
+    /**
+     * 그 배수를 **공격 트리거로 켜는 규칙**(data/attackTriggers.ts의 trigger를 본다).
+     *   anomaly 그 이상 효과를 붙이면 스택마다 오르고, 태우면 onConsume이 따로 붙는다
+     *   status  그 상태를 붙인 뒤부터 bonus가 붙는다
+     * 파티 순서 탭이 사이클을 훑으며 이 규칙대로 배수를 켠다.
+     */
+    rule?:
+      | { kind: "anomaly"; anomaly: AnomalyKind; perStack: number; maxStacks: number; onConsume: number }
+      | {
+          kind: "status";
+          statuses: string[];
+          /** 그 상태를 붙인 뒤부터 붙는 받는 피해 증가. */
+          bonus: number;
+          /**
+           * 이 몬스터가 늘려 주는 「조화 밀집 · 간섭」 스택 상한.
+           * 간섭은 곧 피해다 — 스택 1마다 「조화도 파괴 증폭 1pt당 최종 피해 perStackPerAmp」가 붙는다.
+           * 늘어난 상한만큼 실제로 채운다고 보고 그 몫을 같이 곱한다.
+           */
+          extraStacks?: number;
+          perStackPerAmp?: number;
+        };
+  };
+  /** 그 몬스터를 잡을 때만 따로 붙는 점수(API의 KillScore). 미믹만 1000이다. */
+  killScore?: number;
+  /** 피해 점수 환산 배율(API의 DamegaRate, 1000 = ×1.0). 라운드마다 오른다. */
+  scoreRate?: number;
 }
 
 export const MATRIX_SEASON = {
@@ -65,6 +116,13 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     handbookId: 340000300,
     name: "만와뢰 · 잔해",
     element: "Fusion",
+    // 암흑을 **걸면** 받는 피해가 오르는 몬스터다(몹이 달고 나오는 것이 아니다).
+    feature: {
+      name: "이상 효과 시스템",
+      desc: "암흑 효과 추가 시 받는 최종 피해 +5%(최대 5스택 · 30초), 추가한 암흑 효과가 소모될 시 받는 최종 피해 +20%(30초)",
+      damageTaken: 1.25,
+      rule: { kind: "anomaly", anomaly: "HavocBane", perStack: 0.05, maxStacks: 5, onConsume: 0.2 },
+    },
     icon: `${BOSS_ICON}T_Boss_34030.webp`,
     hp: [5612519, 9541514, 19388951, 20358399],
     score: [4677, 9144, 20197, 21207],
@@ -83,6 +141,19 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     handbookId: 330000010,
     name: "천둥의 비늘",
     element: "Electro",
+    // 조화 밀집을 **걸면** 받는 피해가 오르는 몬스터다.
+    feature: {
+      name: "조화도 파괴 시스템",
+      desc: "「조화 밀집 · 이탈」 또는 「조화 밀집 · 간섭」 보유 중 받는 피해 +20%, 「조화 밀집 · 간섭」 스택 상한 +2, 「조화 밀집 · 이탈」 상태에서 조화도 파괴에 맞으면 「조화 밀집 · 간섭」 2스택 추가(전투당 1회)",
+      damageTaken: 1.2,
+      rule: {
+        kind: "status",
+        statuses: ["조화 밀집 · 이탈", "조화 밀집 · 간섭"],
+        bonus: 0.2,
+        extraStacks: 2,
+        perStackPerAmp: 0.0012,
+      },
+    },
     icon: `${BOSS_ICON}T_Boss_33010.webp`,
     hp: [5612519, 9541514, 19388951, 20358399],
     score: [4677, 9144, 20197, 21207],
@@ -91,7 +162,12 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     monsterId: 401800000,
     handbookId: 310000480,
     name: "매트릭스 미믹",
+    // 속성 저항이 넷 다 같다 — 어느 속성으로 때려도 20%다. element는 아이콘 색으로만 남는다.
+    // API도 그렇게 적어 두었다: 「매트릭스 미믹의 전체 속성 저항은 동일하며, 해당 적에게 피해를
+    // 입힐 시 1.1배의 포인트를 획득한다. 격파 시 추가로 1000pt를 획득한다」
     element: "Spectro",
+    uniformRes: true,
+    killScore: 1000,
     icon: `${BOSS_ICON}T_Boss_35220.webp`,
     hp: [6173771, 12756094, 19388951, 20358399],
     score: [6659, 14447, 23217, 24327],
