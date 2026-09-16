@@ -574,7 +574,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "Skill",
     modifier: "amplify",
     value: 0.04,
-    maxStacks: 10,
+    // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
+    // 예전에는 한 번에 붙는 양(10스택)을 상한으로 잘못 적어 두었다(2026-09-16 고침).
+    maxStacksByChain: { 0: 30, 6: 60 },
     uptime: "active",
     scope: "self",
     resonanceMode: "Discord",
@@ -586,7 +588,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "FusionBurst",
     modifier: "amplify",
     value: 0.1,
-    maxStacks: 10,
+    // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
+    // 예전에는 한 번에 붙는 양(10스택)을 상한으로 잘못 적어 두었다(2026-09-16 고침).
+    maxStacksByChain: { 0: 30, 6: 60 },
     uptime: "active",
     scope: "self",
     resonanceMode: "Flame",
@@ -629,7 +633,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     damageType: "FusionBurst",
     modifier: "amplify",
     value: 0.05, // 10% -> 15%
-    maxStacks: 10,
+    // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
+    // 예전에는 한 번에 붙는 양(10스택)을 상한으로 잘못 적어 두었다(2026-09-16 고침).
+    maxStacksByChain: { 0: 30, 6: 60 },
     uptime: "active",
     scope: "self",
     resonanceMode: "Flame",
