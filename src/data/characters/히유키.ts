@@ -460,6 +460,21 @@ const circuitSkillAttacks: Attack[] = [
       [0.238, 0.2575, 0.277, 0.3043, 0.3238, 0.3463, 0.3775, 0.4087, 0.4399, 0.4731],
     ],
   },
+  // 고유 「속삭이는 눈」 2스택 — 「서리 효과」를 추가할 때마다 추가로 「냉해 효과」 피해를 1회 더 넣는다.
+  // 피해가 스킬 계수가 아니라 **이상 효과 피해 배율의 102%**라 이상 피해로 계산한다(anomaly).
+  // 배율은 버프 두 줄이 맡는다 — 기본 102%와 3체인의 +488%(합쳐 590%).
+  // 6체인이면 「자신이 추가할 때마다」가 「파티 내 캐릭터가 추가할 때마다」로 넓어진다.
+  {
+    id: "1005207_p4",
+    name: "눈의 침식 2스택 · 추가 냉해 효과 피해",
+    type: "Skill",
+    element: "Glacio",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    extra: true,
+    anomaly: "FrostChafe",
+    hits: [],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -547,15 +562,17 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
 
   // ── 공명 해방 「서리 단조 · 납도」 소모 보정 ──
-  // 납도는 「서리 단조 · 납도」 1pt마다 배율 합계에 400%p가 더해진다.
-  // DamageList로 확인된다: 기본 100%+400% = 500%가 1pt에 900%(180%+720%),
-  // 2pt에 1300%, 3pt에 1700%로 늘어난다. 엔진이 400%p를 2히트에 계수 비율(1:4)대로 나눈다 — 180% · 720%와 맞는다.
+  // 납도는 「서리 단조 · 납도」 1pt마다 배율 합계가 커진다. 증가량은 **스킬 레벨을 탄다** —
+  // 스킬 표 「「서리 단조 · 납도」 1pt 당 … 피해 총 증가량」이 레벨 1에서 400%, 레벨 10에서 795.24%다.
+  // 예전에는 레벨 1 값(400%p)이 박혀 있어 레벨 10 납도가 그만큼 낮게 나왔다(2026-09-16 고침).
+  // 기본 배율도 레벨 10이 198.81%+795.24%이므로 같은 레벨의 값끼리 맞춘 것이다.
+  // 엔진이 증가량을 2히트에 계수 비율(1:4)대로 나눈다.
   {
     label: "서리 단조 · 납도 (배율 증가, 1pt당)",
     target: "motionValue",
     damageType: "All",
     attackIds: ["1005203_2"],
-    value: 4, // 400%p (엔진이 2히트에 계수 비율대로 나눈다)
+    value: 7.9524, // 레벨 10 기준 1pt당 795.24%p
     modifier: "increase",
     stacks: 3, // 기본값 — DamageList에 3pt까지 실려 있다
     maxStacks: 3,
@@ -655,7 +672,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "anomalyBoost",
     damageType: "FrostChafe",
     value: 0.3, // 30% 부스트
-    uptime: "passive",
+    uptime: "active",
     scope: "self",
     condition: "히유키가 「눈의 침식」 1스택 이상 · 히유키가 나와 있는 동안",
   },
@@ -665,7 +682,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "anomalyBoost",
     damageType: "FrostChafe",
     value: 0.3, // 3스택에서 30%가 더 붙는다(1스택분과 합쳐 60%)
-    uptime: "passive",
+    uptime: "active",
     scope: "self",
     condition: "히유키가 「눈의 침식」 3스택 · 파티 내 등장 캐릭터일 때. 1스택분과 같이 켠다",
   },
@@ -678,6 +695,46 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 6,
     condition: "「눈의 침식」을 2스택 이상 들고 있을 때",
+  },
+  // ── 아래 세 줄은 뒤에 덧붙인다 ──
+  // 확인 표시(체크 · 나중에)가 줄 번호를 열쇠로 쓴다. 가운데 끼워 넣으면 그 뒤가 전부 밀리므로
+  // 새 줄은 맨 뒤에 붙인다.
+  // ── 고유 「속삭이는 눈」 2스택의 추가 냉해 피해 배율 ──
+  // 원문: 「이상 효과 피해 배율의 102%에 해당하는 「냉해 효과」 피해를 1회 입힌다」
+  // 이상 피해는 기초값 × (1 + anomalyAmplify)라 102%는 +2%p로 담는다. 3체인이 여기에 488%를 더한다.
+  {
+    label: "눈의 침식 2스택 · 추가 냉해 피해 배율 (102%)",
+    inherentSkillId: "1005204",
+    target: "anomalyAmplify",
+    damageType: "FrostChafe",
+    attackIds: ["1005207_p4"],
+    value: 0.02,
+    uptime: "active",
+    scope: "self",
+    condition: "「눈의 침식」 2스택 이상 · 히유키가 나와 있는 동안(6체인이면 파티원이 붙여도 난다)",
+  },
+  {
+    label: "3체인 · 추가 냉해 피해 배율 상승 (488%)",
+    target: "anomalyAmplify",
+    damageType: "FrostChafe",
+    attackIds: ["1005207_p4"],
+    value: 4.88,
+    resonanceChain: 3,
+    uptime: "active",
+    scope: "self",
+    condition: "「눈의 침식」 2스택 이상. 위 102%와 같이 켠다(합쳐 590%)",
+  },
+  // 6체인 뒷부분 — 「눈의 침식」 3스택이면 목표가 받는 「냉해 효과」 최종 피해가 25% 오른다.
+  // 「파티 내 등장 캐릭터의 범위 내 목표가 받는」이라 나와 있는 캐릭터 누구에게나 걸린다.
+  {
+    label: "6체인 · 눈의 침식 3스택 · 목표가 받는 냉해 최종 피해",
+    target: "totalDamage",
+    damageType: "FrostChafe",
+    value: 0.25,
+    resonanceChain: 6,
+    uptime: "active",
+    scope: "party",
+    condition: "히유키가 「눈의 침식」 3스택일 때",
   },
 ];
 
