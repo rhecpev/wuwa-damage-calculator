@@ -709,7 +709,8 @@ export function MatrixPlannerPage() {
  *     — 1번 몬스터에서 2사이클 3번째 타까지 썼으면 2번 몬스터는 2사이클 4번째 타부터 맞는다.
  *   - 넘친 피해는 다음 몬스터로 넘기지 않는다. 미믹을 잡으면 다음 라운드 첫 몬스터로 넘어간다.
  *   - 다음 파티는 앞 파티가 멈춘 몬스터의 남은 체력부터 이어서 깎는다.
- *   - 피해는 몬스터마다 따로 계산한다 — 그 몬스터의 레벨 · 속성과 매트릭스 저항(기본 20% · 같은 속성 60%).
+ *   - 피해는 몬스터마다 따로 계산한다 — 그 몬스터의 속성과 매트릭스 저항(기본 20% · 같은 속성 60%).
+ *     방어력 등 레벨이 들어가는 계산은 라운드와 상관없이 레벨 100 고정(몬스터 레벨은 체력에만 쓴다).
  *     한 타는 기대 피해(크리티컬 확률 반영), 고정 피해는 그 공격의 마지막 타에 붙인다.
  *   - 매트릭스 스테이지 버프 · 몬스터 위기 진화는 넣지 않았다.
  */
@@ -737,8 +738,9 @@ interface MatrixRun {
 
 /** 매트릭스 체력 깎기 계산 — 파티 순서 줄(파티별 결과)과 몬스터 칸이 같이 쓰도록 위로 올린다. */
 function useMatrixSim(runs: MatrixRun[]) {
-  const [hpByKey, setHpByKey] = usePersistedState<Record<string, number>>("matrix.hp", {});
-  const [oldRound1] = usePersistedState<Record<number, number>>("matrix.round1.hp", {});
+  // 키에 v2 — 예전 기본값은 도감 어림값이라 실제의 1/5였다. 그때 손으로 고쳐 둔 값이 남아 있으면
+  // 실측표로 바꾼 기본값을 덮어써 버리므로, 자리를 새로 잡아 실측값에서 다시 시작한다.
+  const [hpByKey, setHpByKey] = usePersistedState<Record<string, number>>("matrix.hp-v2", {});
   const {
     config,
     buffsWith,
@@ -749,9 +751,7 @@ function useMatrixSim(runs: MatrixRun[]) {
     characterNodes,
   } = usePartyConfig();
 
-  // 예전 「1라운드 몬스터」에서 고친 체력(웨이브 1~4)은 새 키가 없을 때 그대로 이어 쓴다.
-  const hpOf = (m: MatrixMonster) =>
-    hpByKey[matrixHpKey(m)] ?? (m.round === 1 ? oldRound1[m.slot] : undefined) ?? m.defaultHp;
+  const hpOf = (m: MatrixMonster) => hpByKey[matrixHpKey(m)] ?? m.defaultHp;
   const edited = Object.keys(hpByKey).length > 0;
 
   const sim = useMemo(() => {
@@ -785,7 +785,9 @@ function useMatrixSim(runs: MatrixRun[]) {
           ...config.enemy,
           id: String(m.monsterId),
           name: m.name,
-          level: m.level,
+          // 매트릭스는 라운드가 올라 몬스터 레벨이 110 · 120이 돼도 방어력 등 피해 계산은 레벨 100으로 고정이다.
+          // 레벨은 체력(기본값)에만 쓴다.
+          level: matrix.fixedLevel ?? 100,
           element: m.element,
           resPreset: "matrix",
           baseRes: matrix.baseRes,
@@ -845,7 +847,6 @@ function useMatrixSim(runs: MatrixRun[]) {
   }, [
     runs,
     hpByKey,
-    oldRound1,
     config,
     buffsWith,
     characterWeapons,
@@ -868,6 +869,13 @@ const matrixPlaceOf = (index: number) => {
 function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<typeof useMatrixSim> }) {
   const { sim, hpOf, setHpByKey, edited } = matrix;
 
+  // 잡은 몬스터의 점수 합. 어디까지 깎았는지보다 이 숫자가 결국 성적이다.
+  const earned = MATRIX_MONSTERS.reduce(
+    (sum, m, index) => sum + (sim.killedBy[index] !== null ? m.score : 0),
+    0,
+  );
+  const fullScore = MATRIX_MONSTERS.reduce((sum, m) => sum + m.score, 0);
+
   return (
     <section className="panel matrix-round">
       <div className="panel-head">
@@ -876,8 +884,11 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
           <small className="matrix-round-meta">
             {MATRIX_SEASON.name} · {MATRIX_SEASON.level}
           </small>
+          <small className="matrix-score-total">
+            점수 <b>{earned.toLocaleString()}</b> / {fullScore.toLocaleString()}
+          </small>
           {edited && (
-            <button onClick={() => setHpByKey({})} title="체력을 도감 기준 기본값으로 되돌립니다">
+            <button onClick={() => setHpByKey({})} title="체력을 실측표 기본값으로 되돌립니다">
               기본값으로
             </button>
           )}
@@ -893,6 +904,9 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
             <div className="matrix-round-title">
               <b>{round}라운드</b>
               <small>Lv.{list[0].m.level}</small>
+              <small>
+                점수 {list.reduce((sum, x) => sum + x.m.score, 0).toLocaleString()}
+              </small>
             </div>
 
             <div className="matrix-monsters">
@@ -914,6 +928,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                           {icon && <img src={icon} alt="" />}
                           {ELEMENT_NAMES[m.element]}
                         </span>
+                        {/* 잡으면 받는 점수 — 어느 몬스터를 먼저 눕힐지 고르는 기준이다. */}
+                        <span className="matrix-monster-score">{m.score.toLocaleString()}점</span>
                         <label className="matrix-hp-input">
                           HP
                           <input
@@ -976,8 +992,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
       })}
 
       <p className="matrix-hint">
-        기본 체력은 도감 몬스터 값으로 잡은 <b>추정치</b>입니다(매트릭스 전용 몬스터 체력은 API에
-        없음) — 게임에서 본 값으로 고쳐 주세요. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
+        기본 체력 · 점수는 인게임 <b>실측표</b>(s2.2 매트릭스 혈량 · 분수표)를 그대로 옮긴 값입니다 —
+        다르면 게임에서 본 값으로 고쳐 주세요. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
         기대 피해로 깎습니다. 몬스터가 쓰러지면 다음 타부터 다음 몬스터를 치고, 미믹을 잡으면 다음
         라운드로 넘어갑니다. 넘친 피해 · 매트릭스 스테이지 버프는 넣지 않았습니다.
       </p>

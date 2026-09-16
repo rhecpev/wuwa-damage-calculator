@@ -5,11 +5,14 @@ import { CharacterRoster } from "../CharactersPage/components/CharacterRoster";
 import {
   attackNickname,
   attackNicknamesVersion,
+  autoNickname,
   clearCharacterNicknames,
   nicknameCountOf,
   setAttackNickname,
   subscribeAttackNicknames,
 } from "../../data/attackNicknames";
+import { useReviewStatus } from "../../utils/useReviewStatus";
+import { ReviewActions, ReviewTags } from "../../components";
 import type { Attack, SkillCategory } from "../../types/game";
 
 /**
@@ -19,7 +22,11 @@ import type { Attack, SkillCategory } from "../../types/game";
  * 평소 쓰는 말이 빠르므로, 공격마다 별명을 적어 두고 계산 탭의 「공격 추가」에서
  * 토글로 갈아 볼 수 있게 한다(data/attackNicknames.ts).
  *
- * 적은 것만 저장된다 — 비워 두면 그 공격은 늘 인게임 명칭으로 보인다.
+ * 적은 것만 저장된다 — 비워 두면 **규칙으로 지은 별명**(평1 · E · R · F …)이 대신 보인다.
+ * 규칙은 data/attackNicknames.ts의 autoNicknamesOf가 짓는다.
+ *
+ * 캐릭터마다 「체크 완료」를 달 수 있다 — 쉰 명이 넘어 한 번에 다 볼 수 없으니
+ * 어디까지 손봤는지 표시해 두고 이어서 훑는다.
  */
 
 /** 공격을 묶는 구역과 순서. 공격 추가 화면과 같게 맞춘다. */
@@ -100,6 +107,8 @@ export function NicknamesPage() {
   const needle = query.trim().toLowerCase();
   const nicknameOf = (attackId: string) =>
     character ? (attackNickname(character.id, attackId) ?? "") : "";
+  /** 적어 둔 것이 없을 때 대신 보일 이름 — 규칙으로 지은 별명. */
+  const autoOf = (attackId: string) => (character ? autoNickname(character.id, attackId) : undefined);
 
   const filtered = sections
     .map((section) => ({
@@ -117,6 +126,9 @@ export function NicknamesPage() {
 
   const named = character ? nicknameCountOf(character.id) : 0;
   const total = sections.reduce((sum, section) => sum + section.rows.length, 0);
+  // 캐릭터 단위로 「체크 완료」를 단다. 다른 확인 화면과 같은 자리·같은 규칙이다.
+  const review = useReviewStatus("nicknames");
+  const doneCount = characters.filter((c) => review.checkedSet.has(c.id)).length;
 
   return (
     <div className="nick-workspace">
@@ -130,22 +142,35 @@ export function NicknamesPage() {
               <b>인게임 명칭 / 별명</b> 토글로 갈아 볼 수 있습니다.
             </p>
             <p className="nick-note">
-              비워 두면 그 공격은 늘 인게임 명칭으로 보입니다. 적어 둔 것만 저장됩니다.
+              비워 두면 <b>규칙으로 지은 별명</b>이 대신 보입니다 — 일반 공격 <b>평</b>, 공명 스킬{" "}
+              <b>E</b>, 공명 해방 <b>R</b>, 조화도 파괴 <b>F</b>, 점프 공격 <b>점공</b>, 공중 공격{" "}
+              <b>공중</b>, 낙하 공격 <b>낙공</b>, 반주 · 변주 스킬 <b>반주 · 변주</b>에 단수를 붙여
+              「일반 공격 1단 피해」는 <b>평1</b>이 됩니다(그 밖에 강공격 <b>강공</b>, 회피 반격{" "}
+              <b>회반</b>, 협동 공격 <b>협공</b>). 한 캐릭터 안에서 겹치면 뒤에 -2 · -3이 붙으니 그것만 손보면 됩니다.
             </p>
           </div>
 
-          {character && (
-            <div className="nick-tally">
-              <span>
-                <b>{named}</b>
-                <em>적어 둠</em>
-              </span>
-              <span>
-                <b>{total}</b>
-                <em>공격</em>
-              </span>
-            </div>
-          )}
+          <div className="nick-tally">
+            {character && (
+              <>
+                <span>
+                  <b>{named}</b>
+                  <em>적어 둠</em>
+                </span>
+                <span>
+                  <b>{total}</b>
+                  <em>공격</em>
+                </span>
+              </>
+            )}
+            {/* 쉰 명이 넘는다 — 어디까지 봤는지 여기서 센다. */}
+            <span>
+              <b className={doneCount ? "data-done-count" : undefined}>
+                {doneCount} / {characters.length}
+              </b>
+              <em>완료</em>
+            </span>
+          </div>
         </section>
 
         {!character ? (
@@ -160,6 +185,10 @@ export function NicknamesPage() {
                   <img className="nick-face" src={character.iconUrl} alt="" loading="lazy" />
                 )}
                 {character.name}
+                <ReviewTags
+                  checked={review.checkedSet.has(character.id)}
+                  deferred={review.deferredSet.has(character.id)}
+                />
               </h2>
               <div className="nick-actions">
                 <input
@@ -176,6 +205,14 @@ export function NicknamesPage() {
                 >
                   별명 지우기
                 </button>
+                {/* 이 캐릭터의 별명을 다 봤다는 표시. 다른 확인 화면과 같은 단추다. */}
+                <ReviewActions
+                  compact
+                  checked={review.checkedSet.has(character.id)}
+                  deferred={review.deferredSet.has(character.id)}
+                  onToggleChecked={() => review.toggleChecked(character.id)}
+                  onToggleDeferred={() => review.toggleDeferred(character.id)}
+                />
               </div>
             </div>
 
@@ -208,7 +245,8 @@ export function NicknamesPage() {
                           </span>
                           <input
                             type="text"
-                            placeholder="별명 없음"
+                            // 적은 것이 없으면 규칙으로 지은 별명이 대신 쓰인다 — 그것을 비쳐 둔다.
+                            placeholder={autoOf(attack.id) ?? "별명 없음"}
                             value={value}
                             onChange={(event) =>
                               setAttackNickname(character.id, attack.id, event.target.value)

@@ -154,7 +154,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     <section className="panel">
       <div className="row">
         <div>
-          <h2>공격 루틴</h2>
+          <h2>사이클 구성</h2>
         </div>
         <div className="rotation-tools">
           <button
@@ -168,7 +168,7 @@ export function RotationSection({ results }: RotationSectionProps) {
             <>
               <button
                 className="viz-toggle"
-                title="지금 루틴을 버프 체크까지 통째로 담아 사이클 관리 탭에서 다시 쓴다"
+                title="지금 사이클 구성을 버프 체크까지 통째로 담아 사이클 관리 탭에서 다시 쓴다"
                 onClick={() => {
                   setSaveOpen((open) => !open);
                   setSaved(false);

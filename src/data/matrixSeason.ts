@@ -2,26 +2,31 @@ import type { DamageElement, Element } from "../types/game";
 
 /**
  * 지금 매트릭스 시즌의 몬스터 배치.
- * 출처: encore.moe API v2 `/ko/dpmatrix/7` — S2 단계2 「위험한 경지의 강습」(3.8 버전까지), 특이점 확장(레벨 Id 14).
+ * 배치 · 몬스터 id · 아이콘 출처: encore.moe API v2 `/ko/dpmatrix/7`
+ *   — S2 단계2 「위험한 경지의 강습」(3.8 버전까지), 특이점 확장(레벨 Id 14).
  *
- * 특이점 확장은 3라운드 15웨이브다. 라운드마다 아래 다섯이 같은 순서로 나오고 레벨만 오른다(100 → 110 → 120).
- * 마지막 「매트릭스 미믹」을 잡으면 다음 라운드로 넘어간다.
+ * **체력과 점수는 인게임 실측표를 그대로 옮긴 것이다** — 「s2.2矩阵 各轮次分数对应表」(3.6 매트릭스
+ * boss 혈량 · 분수표, 矩7R1~r4). 예전에는 도감 LifeMax × 레벨 배율로 어림잡았는데 실제의 1/5 수준이라
+ * 라운드가 언제 끝나는지 맞지 않았다. 표의 血量이 체력, 分数가 그 몬스터를 잡고 받는 점수다.
  *
- * 기본 체력은 **도감 기준 추정치**다 — 도감 몬스터(`/ko/monster/{id}`)의 LifeMax × 레벨 성장 배율(LifeMaxRatio).
- * 매트릭스는 전용 몬스터 id(650000047 등)를 쓰고 그 id의 HP는 API에 없어, 실제 체력은 이보다 클 수 있다.
- * 「매트릭스 미믹」은 도감에 없어 일반 「미믹」(310000480) 값을 쓴다.
+ * 4라운드 20웨이브다. 라운드마다 아래 다섯이 같은 순서로 나오고, 마지막 「매트릭스 미믹」을 잡으면
+ * 다음 라운드로 넘어간다. 레벨은 1 · 2 · 3라운드가 100 · 110 · 120이고, 4라운드는 표에 레벨 칸이
+ * 비어 있어 120으로 둔다(체력만 3라운드보다 5%쯤 높다).
+ * 레벨은 체력에만 영향을 준다 — 방어력 등 피해 계산은 라운드와 상관없이 레벨 100 고정이다.
+ *
+ * 3라운드 미믹은 표에서 체력이 나머지 넷과 같고 점수만 높다. 표를 고치지 않고 그대로 옮겼다.
  * 화면에서 체력을 직접 고칠 수 있게 두고, 이 값은 처음 채워 넣는 기본값으로만 쓴다.
  */
 export interface MatrixMonster {
-  /** 라운드(1~3). */
+  /** 라운드(1~4). */
   round: number;
-  /** 웨이브 번호 — 전체에서 나오는 순서(1~15). */
+  /** 웨이브 번호 — 전체에서 나오는 순서(1~20). */
   wave: number;
   /** 라운드 안에서의 순서(1~5). */
   slot: number;
   /** 매트릭스 전용 몬스터 id. */
   monsterId: number;
-  /** 도감 몬스터 id(기본 HP를 뽑은 곳). */
+  /** 도감 몬스터 id(아이콘 · 속성을 뽑은 곳). */
   handbookId: number;
   name: string;
   level: number;
@@ -29,6 +34,8 @@ export interface MatrixMonster {
   element: Element;
   icon: string;
   defaultHp: number;
+  /** 이 몬스터를 잡고 받는 점수(표의 分数). */
+  score: number;
 }
 
 export const MATRIX_SEASON = {
@@ -38,9 +45,10 @@ export const MATRIX_SEASON = {
 
 const BOSS_ICON = "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/ImgBoss/";
 
-/** 라운드마다 같은 다섯. hp는 라운드 1 · 2 · 3(레벨 100 · 110 · 120)의 도감 기준 추정치. */
-const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaultHp"> & {
-  hp: [number, number, number];
+/** 라운드마다 같은 다섯. hp · score는 1 · 2 · 3 · 4라운드 순서다(실측표 그대로). */
+const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaultHp" | "score"> & {
+  hp: [number, number, number, number];
+  score: [number, number, number, number];
 })[] = [
   {
     monsterId: 650000047,
@@ -48,7 +56,8 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     name: "애곡하는 아익스",
     element: "Spectro",
     icon: `${BOSS_ICON}T_Boss_33006.webp`,
-    hp: [1074929, 1201226, 1274673],
+    hp: [5612519, 9541514, 19388951, 20358399],
+    score: [4677, 9144, 20197, 21207],
   },
   {
     monsterId: 243750011,
@@ -56,7 +65,8 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     name: "만와뢰 · 잔해",
     element: "Fusion",
     icon: `${BOSS_ICON}T_Boss_34030.webp`,
-    hp: [1444699, 1614442, 1713155],
+    hp: [5612519, 9541514, 19388951, 20358399],
+    score: [4677, 9144, 20197, 21207],
   },
   {
     monsterId: 607750001,
@@ -64,7 +74,8 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     name: "이성(異性) 무장",
     element: "Glacio",
     icon: `${BOSS_ICON}T_Boss_33012.webp`,
-    hp: [1444699, 1614442, 1713155],
+    hp: [5612519, 9541514, 19388951, 20358399],
+    score: [4677, 9144, 20197, 21207],
   },
   {
     monsterId: 650000045,
@@ -72,7 +83,8 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     name: "천둥의 비늘",
     element: "Electro",
     icon: `${BOSS_ICON}T_Boss_33010.webp`,
-    hp: [912749, 1019991, 1082357],
+    hp: [5612519, 9541514, 19388951, 20358399],
+    score: [4677, 9144, 20197, 21207],
   },
   {
     monsterId: 401800000,
@@ -80,21 +92,24 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
     name: "매트릭스 미믹",
     element: "Spectro",
     icon: `${BOSS_ICON}T_Boss_35220.webp`,
-    hp: [147908, 165286, 175393],
+    hp: [6173771, 12756094, 19388951, 20358399],
+    score: [6659, 14447, 23217, 24327],
   },
 ];
 
-const ROUND_LEVELS = [100, 110, 120];
+// 4라운드는 표에 레벨이 비어 있다 — 3라운드와 같은 120으로 둔다(체력만 5%쯤 높다).
+const ROUND_LEVELS = [100, 110, 120, 120];
 
-/** 나오는 순서대로 15마리. */
+/** 나오는 순서대로 20마리. */
 export const MATRIX_MONSTERS: MatrixMonster[] = ROUND_LEVELS.flatMap((level, r) =>
-  LINEUP.map(({ hp, ...m }, i) => ({
+  LINEUP.map(({ hp, score, ...m }, i) => ({
     ...m,
     round: r + 1,
     slot: i + 1,
     wave: r * LINEUP.length + i + 1,
     level,
     defaultHp: hp[r],
+    score: score[r],
   })),
 );
 

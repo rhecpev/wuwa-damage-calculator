@@ -12,32 +12,6 @@ import { PartyPresetSection } from "./PartyPresetSection";
 
 interface PartySectionProps {
   config: PartyConfig;
-  /**
-   * 어느 파티를 만지는지. 계산 탭과 파티 관리 탭이 같은 화면을 쓰지만
-   * 건드리는 파티는 서로 다르다(PartyConfigContext 참고).
-   *   "calc"   데미지 계산 탭이 쓰는 파티
-   *   "editor" 파티 관리 탭에서 짜는 편성
-   * 생략하면 계산용이다 — 예전 호출부가 그대로 돌아가도록.
-   */
-  scope?: "calc" | "editor";
-}
-
-/** 이 화면이 만질 파티의 조작 함수 묶음. scope에 맞는 것을 골라 준다. */
-function usePartyOps(scope: "calc" | "editor") {
-  const ctx = usePartyConfig();
-  return scope === "editor"
-    ? {
-        toggleCharacter: ctx.editorToggleCharacter,
-        clearSlot: ctx.editorClearSlot,
-        swapSlots: ctx.editorSwapSlots,
-        assignCharacterToSlot: ctx.editorAssignCharacterToSlot,
-      }
-    : {
-        toggleCharacter: ctx.toggleCharacter,
-        clearSlot: ctx.clearSlot,
-        swapSlots: ctx.swapSlots,
-        assignCharacterToSlot: ctx.assignCharacterToSlot,
-      };
 }
 
 /**
@@ -46,16 +20,26 @@ function usePartyOps(scope: "calc" | "editor") {
  *   CHAR_MIME = 캐릭터 선택에서 끌고 온 캐릭터 id
  *   SLOT_MIME = 파티 구성 안에서 끌고 온 자리 번호
  */
-const CHAR_MIME = "application/x-wuwa-character";
+export const CHAR_MIME = "application/x-wuwa-character";
 const SLOT_MIME = "application/x-wuwa-slot";
 
 const dragHas = (event: React.DragEvent, mime: string) =>
   Array.from(event.dataTransfer.types).includes(mime);
 
-/** 파티에 넣고 뺄 캐릭터 목록. 아이콘을 누르면 빈 자리에 들어가고, 다시 누르면 빠진다. */
-export function CharacterPickerSection({ config, scope = "calc" }: PartySectionProps) {
-  const { toggleCharacter } = usePartyOps(scope);
-  const { selectedCharacterId, setSelectedCharacterId } = useAppState();
+interface CharacterPickerProps {
+  /** 지금 고른 파티에 앉아 있는 캐릭터들. 순서가 곧 자리 번호다. */
+  memberIds: string[];
+  /** 아이콘을 눌렀을 때. 이미 들어 있는 캐릭터를 누르면 빼는 것으로 본다. */
+  onPick: (characterId: string) => void;
+  /** 제목 옆에 붙일 한 줄 — 「어느 파티에 들어가는지」를 알려 준다. */
+  hint?: string;
+}
+
+/**
+ * 파티에 넣고 뺄 캐릭터 목록.
+ * 아이콘을 누르면 고른 파티에 들어가고, 다시 누르면 빠진다. 파티 카드로 끌어다 놓아도 된다.
+ */
+export function CharacterPickerSection({ memberIds, onPick, hint }: CharacterPickerProps) {
   const [query, setQuery] = useState("");
 
   const needle = query.trim().toLowerCase();
@@ -67,6 +51,7 @@ export function CharacterPickerSection({ config, scope = "calc" }: PartySectionP
     <section className="panel">
       <div className="panel-head">
         <h2>캐릭터 선택</h2>
+        {hint && <em className="pick-hint">{hint}</em>}
         <input
           type="text"
           className="panel-search"
@@ -78,36 +63,24 @@ export function CharacterPickerSection({ config, scope = "calc" }: PartySectionP
 
       <div className="pick-grid">
         {availableCharacters.map((char) => {
-          const slotIndex = PARTY_SLOTS.findIndex(
-            (slot) => config[slot].characterId === char.id,
-          );
+          const slotIndex = memberIds.indexOf(char.id);
           const inParty = slotIndex >= 0;
 
           return (
             <button
               key={char.id}
-              className={[
-                "pick-card",
-                inParty ? "in" : "",
-                selectedCharacterId === char.id ? "on" : "",
-              ]
-                .filter(Boolean)
-                .join(" ")}
-              // 파티 구성의 자리로 끌어다 놓으면 그 번호에 바로 앉는다.
+              className={["pick-card", inParty ? "in" : ""].filter(Boolean).join(" ")}
+              // 파티 카드로 끌어다 놓으면 놓은 자리에 바로 앉는다.
               draggable
               onDragStart={(event) => {
                 event.dataTransfer.setData(CHAR_MIME, char.id);
                 event.dataTransfer.effectAllowed = "copyMove";
               }}
-              onClick={() => {
-                // 같은 아이콘을 다시 누르면 파티에서 빠진다.
-                toggleCharacter(char.id);
-                setSelectedCharacterId(inParty ? null : char.id);
-              }}
+              onClick={() => onPick(char.id)}
               title={
                 inParty
                   ? `${char.element} · ${char.weaponType} — ${slotIndex + 1}번 캐릭터 (다시 누르면 해제)`
-                  : `${char.element} · ${char.weaponType} (파티 자리로 끌어다 놓을 수 있습니다)`
+                  : `${char.element} · ${char.weaponType} (파티 카드로 끌어다 놓을 수 있습니다)`
               }
             >
               {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
@@ -128,12 +101,14 @@ export function CharacterPickerSection({ config, scope = "calc" }: PartySectionP
 }
 
 /** 1·2·3번 자리에 누가 앉았는지. 아래 절반은 콘텐츠(속성 저항 프리셋) 선택이다. */
-export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps) {
-  const { setEnemyResPreset, partyPresets } = usePartyConfig();
-  const { clearSlot, swapSlots, assignCharacterToSlot } = usePartyOps(scope);
+export function PartyRosterSection({ config }: PartySectionProps) {
+  const { setEnemyResPreset, partyPresets, clearSlot, swapSlots, assignCharacterToSlot } =
+    usePartyConfig();
   const { selectedCharacterId, setSelectedCharacterId } = useAppState();
   // 담아둔 파티는 평소엔 접어 둔다 — 늘 펼쳐 두면 이 칸이 통째로 길어진다.
   const [presetOpen, setPresetOpen] = useState(false);
+  // 캐릭터 목록 다이얼로그를 띄운 자리 번호. null이면 닫힌 것.
+  const [pickSlot, setPickSlot] = useState<number | null>(null);
   // 끌고 있는 자리 번호와, 지금 아이콘이 올라와 있는 자리 번호.
   // 에코 저장소는 React 상태가 아니라 localStorage 한 벌이다. 에코를 갈아끼우면
   // 화음 세트도 달라지므로, 저장될 때마다 올라가는 번호를 보고 다시 그린다.
@@ -181,7 +156,7 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
                 ×
               </button>
             </div>
-            <PartyPresetSection compact scope={scope} onLoaded={() => setPresetOpen(false)} />
+            <PartyPresetSection onLoaded={() => setPresetOpen(false)} />
           </div>
         </div>
       )}
@@ -200,12 +175,8 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
               ]
                 .filter(Boolean)
                 .join(" ")}
-              // 자리를 누르면 그 캐릭터만 파티에서 빠진다. 뒤 캐릭터는 당겨오지 않는다.
-              onClick={() => {
-                if (!character) return;
-                clearSlot(slot);
-                if (selectedCharacterId === character.id) setSelectedCharacterId(null);
-              }}
+              // 자리를 누르면 캐릭터 목록이 뜨고, 고른 캐릭터가 이 번호에 앉는다.
+              onClick={() => setPickSlot(index)}
               draggable={Boolean(character)}
               onDragStart={(event) => {
                 if (!character) return;
@@ -237,11 +208,26 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
               }}
               title={
                 character
-                  ? `${character.name} — 누르면 파티에서 빠지고, 끌면 자리를 바꿉니다`
-                  : `${index + 1}번 자리 — 캐릭터를 끌어다 놓으세요`
+                  ? `${character.name} — 누르면 캐릭터를 바꾸고, 끌면 자리를 바꿉니다`
+                  : `${index + 1}번 자리 — 눌러서 캐릭터를 고르거나 끌어다 놓으세요`
               }
             >
               <small>{index + 1}번 캐릭터</small>
+
+              {/* 자리를 누르면 목록이 뜨므로, 빼는 단추를 따로 둔다. */}
+              {character && (
+                <button
+                  className="party-clear"
+                  title={`${character.name} — 이 자리를 비웁니다`}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    clearSlot(slot);
+                    if (selectedCharacterId === character.id) setSelectedCharacterId(null);
+                  }}
+                >
+                  ×
+                </button>
+              )}
 
               {character ? (
                 <>
@@ -280,10 +266,31 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
         })}
       </div>
 
-      {/* 콘텐츠(적 저항)는 계산에만 쓰인다 — 편성만 짜는 파티 관리 탭에서는 감춘다. */}
-      {scope === "calc" && (
+      {pickSlot !== null && (
+        <SlotPickerDialog
+          config={config}
+          slotIndex={pickSlot}
+          onClose={() => setPickSlot(null)}
+          onPick={(characterId) => {
+            assignCharacterToSlot(PARTY_SLOTS[pickSlot], characterId);
+            setSelectedCharacterId(characterId);
+            setPickSlot(null);
+          }}
+          onClear={() => {
+            const current = config[PARTY_SLOTS[pickSlot]].characterId;
+            clearSlot(PARTY_SLOTS[pickSlot]);
+            if (current && selectedCharacterId === current) setSelectedCharacterId(null);
+            setPickSlot(null);
+          }}
+        />
+      )}
+
       <div className="party-half">
-        <h2>콘텐츠 선택</h2>
+        {/* 저항 안내는 제목 옆에 붙인다 — 칩이 남는 높이를 다 쓰도록 아래를 비워 둬야 해서다. */}
+        <div className="party-half-head">
+          <h2>콘텐츠 선택</h2>
+          <em className="party-half-note">기본 저항 / 동일 속성 저항</em>
+        </div>
         <div className="enemy-elements">
           {ENEMY_RES_PRESETS.map((item) => (
             <label
@@ -304,9 +311,97 @@ export function PartyRosterSection({ config, scope = "calc" }: PartySectionProps
             </label>
           ))}
         </div>
-        <span className="enemy-hint">기본 저항 / 동일 속성 저항</span>
       </div>
-      )}
     </section>
+  );
+}
+
+/**
+ * 파티 자리를 눌렀을 때 뜨는 캐릭터 목록.
+ * 고르면 그 자리에 바로 앉는다 — 이미 파티에 있는 캐릭터를 고르면 두 자리가 맞바뀐다
+ * (assignCharacterToSlot이 그렇게 처리한다).
+ */
+function SlotPickerDialog({
+  config,
+  slotIndex,
+  onPick,
+  onClear,
+  onClose,
+}: {
+  config: PartyConfig;
+  slotIndex: number;
+  onPick: (characterId: string) => void;
+  onClear: () => void;
+  onClose: () => void;
+}) {
+  const [query, setQuery] = useState("");
+  const needle = query.trim().toLowerCase();
+  const list = getAvailableCharacters().filter((c) => c.name.toLowerCase().includes(needle));
+  const current = config[PARTY_SLOTS[slotIndex]].characterId;
+
+  return (
+    <div
+      className="formula-backdrop"
+      onClick={onClose}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") onClose();
+      }}
+      role="presentation"
+    >
+      <div className="formula-modal slot-pick-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="formula-head">
+          <div>
+            <small>PARTY</small>
+            <h3>{slotIndex + 1}번 캐릭터</h3>
+            <span>고른 캐릭터가 이 자리에 앉습니다. 파티에 있는 캐릭터를 고르면 자리가 맞바뀝니다.</span>
+          </div>
+          <button className="formula-close" onClick={onClose}>
+            ×
+          </button>
+        </div>
+
+        <div className="panel-head slot-pick-head">
+          {current && (
+            <button className="party-load" onClick={onClear} title="이 자리를 비웁니다">
+              자리 비우기
+            </button>
+          )}
+          <input
+            type="text"
+            className="panel-search"
+            placeholder="캐릭터 검색..."
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            autoFocus
+          />
+        </div>
+
+        <div className="pick-grid slot-pick-grid">
+          {list.map((char) => {
+            const at = PARTY_SLOTS.findIndex((slot) => config[slot].characterId === char.id);
+            return (
+              <button
+                key={char.id}
+                className={["pick-card", at >= 0 ? "in" : "", char.id === current ? "on" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => onPick(char.id)}
+                title={`${char.element} · ${char.weaponType}${at >= 0 ? ` — 지금 ${at + 1}번 자리` : ""}`}
+              >
+                {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
+                <b>{char.name}</b>
+                {at >= 0 && <em>{at + 1}번 캐릭터</em>}
+              </button>
+            );
+          })}
+
+          {list.length === 0 && (
+            <p style={{ color: "var(--c-9ea7b7)", gridColumn: "1 / -1", margin: 0 }}>
+              이름에 맞는 캐릭터가 없습니다.
+            </p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

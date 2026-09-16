@@ -1,54 +1,49 @@
-import { characters } from "../../data/sampleData";
-import { PARTY_SLOTS, usePartyConfig } from "../../context/PartyConfigContext";
-import {
-  CharacterPickerSection,
-  PartyRosterSection,
-} from "../CalculatorPage/components/PartySection";
-import { PartyPresetSection } from "../CalculatorPage/components/PartyPresetSection";
+import { useState } from "react";
+import { usePartyConfig } from "../../context/PartyConfigContext";
+import { CharacterPickerSection } from "../CalculatorPage/components/PartySection";
+import { PartyListSection, membersOf } from "./PartyListSection";
 
 /**
  * 파티 관리 탭.
- * 캐릭터 목록에서 셋을 골라 자리를 채우고, 이름을 붙여 담아두는 자리다.
+ * 파티를 여러 벌 만들어 두는 자리다 — 왼쪽 캐릭터 목록에서 고르고, 오른쪽 파티 목록에 채운다.
  *
- * 여기서 짜는 편성은 **데미지 계산 탭의 파티와 따로 논다.** 계산 중인 구성을 잃지 않고
- * 다른 조합을 만져볼 수 있어야 해서다. 다 짜고 나면 「계산 탭으로 보내기」로 옮긴다.
- * 담아둔 파티(프리셋)는 두 탭이 같이 쓴다 — 저장은 여기 편성이, 불러오기는 여기 자리에 들어온다.
+ * 여기서 짜는 파티는 **데미지 계산 탭의 파티와 따로 논다.** 계산 중인 구성을 잃지 않고
+ * 다른 조합을 만들어 둘 수 있어야 해서다. 계산 탭의 「파티 불러오기」로 자리 편성만 옮긴다.
  */
 export function PartyPage() {
-  const { editorConfig, config, sendEditorToCalculator, loadCalculatorIntoEditor } =
-    usePartyConfig();
+  const { partyPresets, addPartyPreset, setPartyPresetMembers } = usePartyConfig();
+  // 캐릭터 선택에서 누른 캐릭터가 들어갈 파티. 없어진 파티를 가리키면 맨 앞 파티로 본다.
+  const [pickedId, setPickedId] = useState<string | null>(null);
+  const active = partyPresets.find((p) => p.id === pickedId) ?? partyPresets[0] ?? null;
+  const members = active ? membersOf(active.config) : [];
 
-  /** 그 편성에 앉은 캐릭터 이름들. 어느 파티가 어떤지 한 줄로 보여준다. */
-  const names = (cfg: typeof config) =>
-    PARTY_SLOTS.map((slot) => characters.find((c) => c.id === cfg[slot].characterId)?.name)
-      .filter(Boolean)
-      .join(" · ") || "비어 있음";
+  /** 아이콘을 누르면 고른 파티에 들어가고, 이미 있으면 빠진다. 파티가 없으면 하나 만들어 넣는다. */
+  const pick = (characterId: string) => {
+    if (!active) {
+      const id = addPartyPreset();
+      setPickedId(id);
+      setPartyPresetMembers(id, [characterId]);
+      return;
+    }
+    setPickedId(active.id);
+    setPartyPresetMembers(
+      active.id,
+      members.includes(characterId)
+        ? members.filter((id) => id !== characterId)
+        : [...members, characterId],
+    );
+  };
 
   return (
     <div className="party-page">
-      <section className="panel party-bridge">
-        <div>
-          <small>지금 계산 탭 파티</small>
-          <b>{names(config)}</b>
-        </div>
-        <div className="party-bridge-actions">
-          <button onClick={loadCalculatorIntoEditor}>← 계산 탭에서 가져오기</button>
-          <button className="primary" onClick={sendEditorToCalculator}>
-            계산 탭으로 보내기 →
-          </button>
-        </div>
-        <p>
-          여기서 짜는 편성은 계산 탭과 따로 놉니다. 자리를 바꿔도 계산 중인 파티는 그대로고,
-          옮기고 싶을 때만 위 버튼으로 주고받습니다 — 로테이션과 몬스터 설정은 건드리지 않습니다.
-        </p>
-      </section>
-
       <div className="party-page-top">
-        <CharacterPickerSection config={editorConfig} scope="editor" />
-        <PartyRosterSection config={editorConfig} scope="editor" />
+        <CharacterPickerSection
+          memberIds={members}
+          onPick={pick}
+          hint={active ? `→ ${active.name}` : "누르면 파티를 만들어 넣습니다"}
+        />
+        <PartyListSection activeId={active?.id ?? null} onActivate={setPickedId} />
       </div>
-
-      <PartyPresetSection scope="editor" />
     </div>
   );
 }

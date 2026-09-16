@@ -1,4 +1,7 @@
 import { loadPersisted, savePersisted } from "../utils/persist";
+import { characters } from "./sampleData";
+import { DISCORD_ATTACK_ID } from "./discord";
+import type { AttackType, SkillCategory } from "../types/game";
 
 /**
  * 공격 별명 — 인게임 명칭 대신 쓰는 내 말.
@@ -72,8 +75,109 @@ export const nicknameCountOf = (characterId: string): number =>
   Object.keys(nicknames).filter((key) => key.startsWith(`${characterId}:`)).length;
 
 /**
+ * ── 자동 별명 ────────────────────────────────────────────────
+ *
+ * 공격 1000줄이 넘는 것을 하나하나 적을 수는 없다. 그래서 **모션과 분류로 짓는 규칙**을 두고,
+ * 적어 둔 별명이 없는 공격은 이 이름으로 보인다. 손으로 적으면 그쪽이 늘 이긴다.
+ *
+ *   일반 공격 평 · 공명 스킬 E · 공명 해방 R · 조화도 파괴 F
+ *   점프 공격 점공 · 공중 공격 공중 · 낙하 공격 낙공 · 반주 스킬 반주 · 변주 스킬 변주
+ *   (규칙에 없던 모션은 강공격 강공 · 회피 반격 회반 · 협동 공격 협공으로 짓는다)
+ *
+ * 이름에 단수가 있으면 뒤에 붙인다 — 「일반 공격 1단 피해」는 **평1**이다.
+ */
+
+/** 이름에 이 말이 있으면 그 모션으로 본다. 위에서부터 먼저 걸리는 것을 쓴다. */
+const NAME_TOKENS: [RegExp, string][] = [
+  // 「공중 낙하 공격」처럼 두 말이 겹치는 이름이 있어 좁은 쪽을 먼저 본다.
+  [/낙하\s*공격/, "낙공"],
+  [/점프\s*공격/, "점공"],
+  [/공중\s*공격/, "공중"],
+  [/회피\s*반격/, "회반"],
+  [/강공격/, "강공"],
+  [/협동\s*공격/, "협공"],
+  [/일반\s*공격/, "평"],
+  [/반주\s*스킬/, "반주"],
+  [/변주\s*스킬/, "변주"],
+];
+
+/** 이름으로 모션을 못 가리면 스킬 분류로 본다. */
+const CATEGORY_TOKENS: Partial<Record<SkillCategory, string>> = {
+  Basic: "평",
+  Skill: "E",
+  Liberation: "R",
+  Intro: "반주",
+  Variation: "변주",
+  Sync: "F",
+};
+
+/** 분류마저 없는 옛 자료는 공격 타입으로 본다. */
+const TYPE_TOKENS: Partial<Record<AttackType, string>> = {
+  Basic: "평",
+  Heavy: "강공",
+  Aerial: "공중",
+  DodgeCounter: "회반",
+  Skill: "E",
+  Liberation: "R",
+  Ultimate: "R",
+  Intro: "반주",
+  Outro: "변주",
+  Variation: "변주",
+};
+
+/** 이 공격을 무엇이라 부를지 — 단수를 빼고 앞에 붙는 말만. */
+function tokenOf(name: string, category: SkillCategory | undefined, type: AttackType) {
+  for (const [pattern, token] of NAME_TOKENS) if (pattern.test(name)) return token;
+  return (category && CATEGORY_TOKENS[category]) ?? TYPE_TOKENS[type];
+}
+
+/** 자료는 바뀌지 않으므로 캐릭터마다 한 번만 짓고 들고 있는다. */
+const autoCache = new Map<string, Map<string, string>>();
+
+/**
+ * 이 캐릭터의 공격 id -> 자동 별명.
+ *
+ * 한 캐릭터 안에서 같은 이름이 나오면(회로의 「하늘로 향해 · 일반 공격 1단」처럼 모션이 겹친다)
+ * 두 번째부터 -2 · -3을 붙인다. 어느 쪽이 무엇인지는 별명 탭에서 손으로 고쳐 가른다.
+ */
+export function autoNicknamesOf(characterId: string): Map<string, string> {
+  const cached = autoCache.get(characterId);
+  if (cached) return cached;
+
+  const character = characters.find((c) => c.id === characterId);
+  const out = new Map<string, string>();
+  const used = new Map<string, number>();
+
+  for (const skill of character?.skills ?? []) {
+    for (const attack of skill.attacks) {
+      const token = tokenOf(attack.name, skill.category, attack.type);
+      if (!token) continue;
+      // 「2단 피해」 · 「일반 공격 2단 피해」 — 단수는 그대로 뒤에 붙인다.
+      const step = attack.name.match(/(\d+)\s*단/)?.[1] ?? "";
+      const base = `${token}${step}`;
+      const nth = (used.get(base) ?? 0) + 1;
+      used.set(base, nth);
+      out.set(attack.id, nth === 1 ? base : `${base}-${nth}`);
+    }
+  }
+
+  autoCache.set(characterId, out);
+  return out;
+}
+
+/**
+ * 규칙으로 지은 별명. 캐릭터 스킬에 없는 항목(조화도 파괴·이상 효과)도 여기서 받는다.
+ * 지을 수 없으면 undefined — 그때는 인게임 명칭을 그대로 쓴다.
+ */
+export function autoNickname(characterId: string, attackId: string): string | undefined {
+  // 조화도 파괴는 캐릭터 스킬이 아니라 팔레트가 늘 세우는 항목이다.
+  if (attackId === DISCORD_ATTACK_ID) return "F";
+  return autoNicknamesOf(characterId).get(attackId);
+}
+
+/**
  * 화면에 띄울 이름.
- * nickname 모드라도 적어 둔 별명이 없으면 인게임 명칭을 그대로 쓴다 — 빈 칸이 보이면 안 된다.
+ * 손으로 적어 둔 별명 → 규칙으로 지은 별명 → 인게임 명칭 차례로 고른다. 빈 칸이 보이면 안 된다.
  */
 export function attackDisplayName(
   characterId: string,
@@ -82,5 +186,5 @@ export function attackDisplayName(
   useNickname: boolean,
 ): string {
   if (!useNickname) return inGameName;
-  return attackNickname(characterId, attackId) ?? inGameName;
+  return attackNickname(characterId, attackId) ?? autoNickname(characterId, attackId) ?? inGameName;
 }

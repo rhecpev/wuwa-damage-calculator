@@ -12,7 +12,7 @@
 .party-sets{position:absolute;left:calc(50% + 30px);display:flex;flex-direction:column;gap:3px}
 .party-sets i{position:relative;display:flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:7px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);color:var(--c-9aa3b3);font-style:normal;font-size:11px}
 .party article .party-sets img{width:18px;height:18px;border:none;border-radius:0;object-fit:contain}
-.party-sets b{position:absolute;right:-4px;bottom:-4px;min-width:13px;padding:0 2px;border-radius:999px;background:var(--c-3f4a60);border:1px solid var(--c-4a5266);color:var(--c-e9edf5);font-size:9px;line-height:13px;text-align:center}.party strong{font-size:16px;color:var(--c-e9edf5)}.panel{padding:20px;margin-top:12px}.panel h2{margin:5px 0 18px;font-size:20px}.palette{display:flex;gap:8px;flex-wrap:wrap}.palette button{padding:9px 12px;cursor:pointer}.palette-groups{display:flex;gap:12px;align-items:flex-start;overflow-x:auto;padding-bottom:4px}.palette-group{flex:1 1 0;min-width:180px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px;padding:12px}.palette-group-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:30px}.palette-group-head img,.palette-group-icon-blank{width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);padding:2px}.palette-group-head small{letter-spacing:.6px;color:var(--c-c2c9d6);font-size:12px;white-space:nowrap}.palette-group .palette{flex-direction:column;flex-wrap:nowrap;gap:6px}.palette-group .palette button{width:100%;text-align:left}.row{display:flex;justify-content:space-between;align-items:end}/* ── 사이클 ──────────────────────────────────────────────────
+.party-sets b{position:absolute;right:-4px;bottom:-4px;min-width:13px;padding:0 2px;border-radius:999px;background:var(--c-3f4a60);border:1px solid var(--c-4a5266);color:var(--c-e9edf5);font-size:9px;line-height:13px;text-align:center}.party strong{font-size:16px;color:var(--c-e9edf5)}.panel{padding:20px;margin-top:12px}.panel h2{margin:5px 0 18px;font-size:20px}.palette{display:flex;gap:8px;flex-wrap:wrap}.palette button{padding:9px 12px;cursor:pointer}.palette-group{flex:1 1 0;min-width:180px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px;padding:12px}.palette-group-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:30px}.palette-group-head img,.palette-group-icon-blank{width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);padding:2px}.palette-group-head small{letter-spacing:.6px;color:var(--c-c2c9d6);font-size:12px;white-space:nowrap}.palette-group .palette{flex-direction:column;flex-wrap:nowrap;gap:6px}.palette-group .palette button{width:100%;text-align:left}.row{display:flex;justify-content:space-between;align-items:end}/* ── 사이클 ──────────────────────────────────────────────────
    루틴은 보통 4~5사이클을 도는 단위로 읽힌다. 사이클이 바뀌는 자리에서 줄을 끊고
    머리를 하나 세워, 카드를 눈으로 훑을 때 경계가 바로 보이게 한다.
    flex-basis 100%로 줄 전체를 차지해 뒤 카드가 다음 줄로 넘어간다. */
@@ -149,7 +149,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .weapon-empty{margin:0 0 12px;padding:12px 14px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:10px;color:var(--c-9ea7b7);font-size:12px;line-height:1.7}
 .weapon-empty-off{margin-left:10px;padding:4px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}
 .weapon-empty-off:hover{border-color:var(--c-8794aa)}
-.weapon-search{width:100%;padding:11px 14px;margin-bottom:14px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:10px}.weapon-refine{display:flex;align-items:center;gap:6px;color:var(--c-9aa3b3)!important;font-size:12px}.weapon-refine button{padding:3px 9px;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}.weapon-refine button.on{border-color:var(--c-e8c66a);color:var(--c-e8c66a);background:var(--c-443c2b)}.buff-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}.buff-form select:disabled{opacity:.45}.buff-form label{display:flex;flex-direction:column;gap:6px;min-width:0}.buff-form input,.buff-form select{width:100%;padding:10px 12px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:10px}.buff-add{padding:10px 20px;cursor:pointer;white-space:nowrap}.buff-add:disabled{opacity:.45;cursor:not-allowed}.buff-table{width:100%;margin-top:16px;border-collapse:collapse;font-size:13px}.buff-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155)}.buff-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6)}.buff-table tr.off td{opacity:.4}.buff-stack{width:62px;padding:6px 8px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:8px}.buff-remove{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer}.chain-controls{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:16px}.chain-picker{display:flex;align-items:center;gap:6px;color:var(--c-9aa3b3);font-size:12px;font-weight:800;letter-spacing:1px}.chain-picker button{padding:5px 12px;font-size:13px;border-radius:8px;cursor:pointer;background:var(--c-2a3246);letter-spacing:0;font-weight:400}.chain-picker button.on{border-color:var(--c-8d9ab0);background:var(--c-30394a);color:var(--c-ffffff)}.chain-table{width:100%;border-collapse:collapse;font-size:13px}.chain-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155);white-space:nowrap}.chain-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6);vertical-align:top}.chain-table tr.off td{opacity:.32}.chain-no{text-align:center;color:var(--c-8d9ab0);font-weight:700}.chain-value{white-space:nowrap;color:var(--c-8fb4d9)}.chain-value em{font-style:normal;color:var(--c-9aa3b3);margin-left:5px}.chain-cond{color:var(--c-9aa3b3);font-size:12px;max-width:260px}.chain-mode{margin-left:7px;padding:2px 7px;border:1px solid var(--c-4a5266);border-radius:999px;font-size:11px;color:var(--c-a8b0bf)}.skill-level-table{width:100%;border-collapse:collapse;font-size:13px}.skill-level-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155);white-space:nowrap}.skill-level-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6);vertical-align:middle}.skill-level-icon{width:38px}.skill-level-icon img{width:30px;height:30px;object-fit:contain;border-radius:7px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);display:block}.skill-level-count{color:var(--c-9aa3b3);white-space:nowrap}.skill-level-picker{display:inline-flex;gap:4px}.skill-level-picker button{width:28px;padding:4px 0;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}.skill-level-picker button.on{border-color:var(--c-8d9ab0);background:var(--c-30394a);color:var(--c-ffffff)}.skill-level-rate{white-space:nowrap;color:var(--c-8fb4d9)}.skill-level-rate em{display:block;font-style:normal;color:var(--c-9aa3b3);font-size:11px;margin-top:2px}.skill-level-all{display:inline-flex;align-items:center;gap:5px;color:var(--c-9aa3b3);font-size:12px}.skill-level-all button{padding:4px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}footer{margin-top:20px;color:var(--c-8791a4);font-size:12px}@media(max-width:900px){.skill-level-table{display:block;overflow-x:auto;white-space:nowrap}.chain-table{display:block;overflow-x:auto;white-space:nowrap}.buff-form{grid-template-columns:1fr 1fr}.buff-table{display:block;overflow-x:auto}.enemy-grid{grid-template-columns:1fr}.palette-groups{flex-wrap:wrap;overflow-x:visible}.palette-group{flex:1 1 220px}header,.row{align-items:stretch;flex-direction:column}.party,.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.stats{grid-template-columns:1fr}}
+.weapon-search{width:100%;padding:11px 14px;margin-bottom:14px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:10px}.weapon-refine{display:flex;align-items:center;gap:6px;color:var(--c-9aa3b3)!important;font-size:12px}.weapon-refine button{padding:3px 9px;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}.weapon-refine button.on{border-color:var(--c-e8c66a);color:var(--c-e8c66a);background:var(--c-443c2b)}.buff-form{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;align-items:end}.buff-form select:disabled{opacity:.45}.buff-form label{display:flex;flex-direction:column;gap:6px;min-width:0}.buff-form input,.buff-form select{width:100%;padding:10px 12px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:10px}.buff-add{padding:10px 20px;cursor:pointer;white-space:nowrap}.buff-add:disabled{opacity:.45;cursor:not-allowed}.buff-table{width:100%;margin-top:16px;border-collapse:collapse;font-size:13px}.buff-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155)}.buff-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6)}.buff-table tr.off td{opacity:.4}.buff-stack{width:62px;padding:6px 8px;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:8px}.buff-remove{width:24px;height:24px;padding:0;border-radius:50%;cursor:pointer}.chain-controls{display:flex;flex-wrap:wrap;gap:20px;margin-bottom:16px}.chain-picker{display:flex;align-items:center;gap:6px;color:var(--c-9aa3b3);font-size:12px;font-weight:800;letter-spacing:1px}.chain-picker button{padding:5px 12px;font-size:13px;border-radius:8px;cursor:pointer;background:var(--c-2a3246);letter-spacing:0;font-weight:400}.chain-picker button.on{border-color:var(--c-8d9ab0);background:var(--c-30394a);color:var(--c-ffffff)}.chain-table{width:100%;border-collapse:collapse;font-size:13px}.chain-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155);white-space:nowrap}.chain-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6);vertical-align:top}.chain-table tr.off td{opacity:.32}.chain-no{text-align:center;color:var(--c-8d9ab0);font-weight:700}.chain-value{white-space:nowrap;color:var(--c-8fb4d9)}.chain-value em{font-style:normal;color:var(--c-9aa3b3);margin-left:5px}.chain-cond{color:var(--c-9aa3b3);font-size:12px;max-width:260px}.chain-mode{margin-left:7px;padding:2px 7px;border:1px solid var(--c-4a5266);border-radius:999px;font-size:11px;color:var(--c-a8b0bf)}.skill-level-table{width:100%;border-collapse:collapse;font-size:13px}.skill-level-table th{text-align:left;padding:8px 10px;color:var(--c-9aa3b3);font-size:11px;font-weight:800;letter-spacing:1px;border-bottom:1px solid var(--c-384155);white-space:nowrap}.skill-level-table td{padding:9px 10px;border-bottom:1px solid var(--c-31394c);color:var(--c-c2c9d6);vertical-align:middle}.skill-level-icon{width:38px}.skill-level-icon img{width:30px;height:30px;object-fit:contain;border-radius:7px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);display:block}.skill-level-count{color:var(--c-9aa3b3);white-space:nowrap}.skill-level-picker{display:inline-flex;gap:4px}.skill-level-picker button{width:28px;padding:4px 0;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}.skill-level-picker button.on{border-color:var(--c-8d9ab0);background:var(--c-30394a);color:var(--c-ffffff)}.skill-level-rate{white-space:nowrap;color:var(--c-8fb4d9)}.skill-level-rate em{display:block;font-style:normal;color:var(--c-9aa3b3);font-size:11px;margin-top:2px}.skill-level-all{display:inline-flex;align-items:center;gap:5px;color:var(--c-9aa3b3);font-size:12px}.skill-level-all button{padding:4px 11px;font-size:12px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}footer{margin-top:20px;color:var(--c-8791a4);font-size:12px}@media(max-width:900px){.skill-level-table{display:block;overflow-x:auto;white-space:nowrap}.chain-table{display:block;overflow-x:auto;white-space:nowrap}.buff-form{grid-template-columns:1fr 1fr}.buff-table{display:block;overflow-x:auto}.enemy-grid{grid-template-columns:1fr}header,.row{align-items:stretch;flex-direction:column}.party,.stats{grid-template-columns:repeat(2,1fr)}}@media(max-width:520px){.stats{grid-template-columns:1fr}}
 .stat-bonus{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:6px;margin-top:12px}.stat-bonus div{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:9px 12px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:9px}.stat-bonus span{color:var(--c-a8b0bf);font-size:12px}.stat-bonus b{color:var(--c-8fb4d9);font-size:13px;white-space:nowrap}.stat-source{display:flex;flex-wrap:wrap;gap:18px;margin-top:14px;font-size:12px;color:var(--c-9aa3b3)}.stat-source b{color:var(--c-c2c9d6);font-weight:600}.stat-note{margin:10px 0 0;color:var(--c-949dae);font-size:12px;line-height:1.6}
 .stat-bonus div.zero{opacity:.45}.stat-bonus div.zero b{color:var(--c-9aa3b3)}
 
@@ -602,18 +602,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 
 .echo-slot[draggable="true"]{cursor:grab}
 .echo-slot.dragging{opacity:.35}
-/* 계산 화면 위쪽 2×2 — 캐릭터 선택 · 파티 선택 / 파티 구성 · 몬스터 설정. */
-/* 파티 목록 칸을 빼면서 2×2가 아니라 「캐릭터 선택 · 파티 구성」 윗줄과
-   몬스터 설정 아랫줄이 되었다. 캐릭터 선택이 넓어야 격자가 덜 세로로 자란다. */
-.calc-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px;align-items:start}
-.calc-top>.panel:last-child{grid-column:1 / -1}
-.calc-top>.panel{margin-top:0;height:100%}
-.calc-top .enemy-grid{grid-template-columns:1fr}
-/* 캐릭터가 60명이라 격자를 그대로 늘리면 위쪽이 통째로 길어진다. 그렇다고 한 줄만
-   보이게 끊으면 「패널이 비어 보이는」 상태가 되므로, 카드를 줄이고 네 줄쯤 보이게 끊는다.
-   오른쪽 여백은 스크롤바와 선택된 카드의 금색 글로우가 잘리지 않게 두는 자리다. */
-.calc-top .pick-grid{max-height:376px;overflow-y:auto;padding:2px 8px 2px 2px}
-
 .preset-add{display:flex;gap:8px;margin-bottom:12px}
 .preset-add input{flex:1;min-width:0;padding:9px 12px;font:inherit;font-size:13px;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:8px}
 .preset-add button{padding:9px 16px;font-size:13px;cursor:pointer}
@@ -630,7 +618,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .preset-list button:hover{border-color:var(--c-8794aa)}
 .preset-quiet{color:var(--c-9aa3b3)}
 
-@media(max-width:900px){.calc-top{grid-template-columns:1fr}}
 
 /* ── 왼쪽 사이드바 ────────────────────────────────────────────
    화면에 고정되고 본문만 스크롤된다. 활성 탭은 파란 기운으로 띄운다. */
@@ -681,9 +668,9 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .sidebar-text{display:none}
 .sidebar-link{padding:7px 9px}
 }
-/* 파티 관리 탭 — 위에 캐릭터 선택·파티 구성, 아래에 저장 목록. */
+/* 파티 관리 탭 — 왼쪽에 캐릭터 선택, 오른쪽에 파티 목록. */
 .party-page{display:flex;flex-direction:column;gap:12px}
-.party-page-top{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:12px;align-items:start}
+.party-page-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;align-items:start}
 .party-page-top>.panel{margin-top:0;height:100%}
 /* 파티 관리 탭은 편성이 본업이라 계산 탭보다 한 줄쯤 더 보여 준다. */
 .party-page-top .pick-grid{max-height:376px;overflow-y:auto;padding:2px 8px 2px 2px}
@@ -941,38 +928,34 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 공격 루틴 — 가로로 스크롤하지 않고 줄이 차면 다음 줄로 넘어간다. */
 .rotation-wrap{width:100%}
 
-/* 공격 추가 — 왼쪽 캐릭터 목록, 오른쪽 공격 팔레트. */
-.palette-layout{display:grid;grid-template-columns:184px minmax(0,1fr);gap:14px;align-items:start}
-.palette-side{display:flex;flex-direction:column;gap:6px;padding:8px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px}
-.palette-side-item{display:flex;align-items:center;gap:10px;padding:8px;text-align:left;background:none;border:1px solid transparent;border-radius:10px;cursor:pointer}
-.palette-side-item:hover{background:var(--c-30394a)}
-.palette-side-item img,.palette-side-blank{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:var(--c-262d3f);border:1px solid var(--c-3c455c);font-size:13px;font-weight:700;color:var(--c-78829a)}
-.palette-side-item>span{display:flex;flex-direction:column;gap:2px;min-width:0}
-.palette-side-item b{font-size:13px;font-weight:600;color:var(--c-a8b0bf);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.palette-side-item em{font-style:normal;font-size:11px;color:var(--c-8791a4)}
-.palette-side-item.on{background:var(--c-30394a);border-color:var(--c-574f3a)}
-.palette-side-item.on b{color:var(--c-e8c66a)}
-.palette-side-item.on img,.palette-side-item.on .palette-side-blank{border-color:var(--c-e8c66a);box-shadow:0 0 0 2px rgba(var(--rgb-e8c66a),.25)}
-.palette-main{min-width:0}
+/* 공격 추가 — 파티 세 자리를 나란히 세운다. 누구를 고르지 않아도 셋 다 보인다.
+   세 자리를 **한 격자**에 담는다. 같은 분류(일반 공격 · 공명 스킬 …)가 한 줄에 서고,
+   줄 높이는 격자가 그 줄에서 제일 긴 칸에 맞춰 주므로 칸끼리 어긋나지 않는다. */
+.palette-scroll{min-width:0;overflow-x:auto;padding-bottom:4px}
+.palette-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:stretch}
+/* 그 자리에 없는 분류 — 빈 칸으로 자리만 지킨다. */
+.palette-blank{min-width:0}
+.palette-column-head{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px}
+.palette-column-head.empty{opacity:.55}
+.palette-column-head img,.palette-column-blank{width:38px;height:38px;flex:none;display:grid;place-items:center;border-radius:50%;object-fit:cover;background:var(--c-262d3f);border:1px solid var(--c-3c455c);font-size:13px;font-weight:700;color:var(--c-78829a)}
+.palette-column-head>span{display:flex;flex-direction:column;gap:2px;min-width:0}
+.palette-column-head b{font-size:13px;font-weight:600;color:var(--c-c2c9d6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.palette-column-head em{font-style:normal;font-size:11px;color:var(--c-8791a4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-/* 캐릭터 줄은 위에 가로로 눕히고, 공격은 분류마다 한 줄씩 가로로 편다. */
-.palette-layout{display:flex;flex-direction:column;gap:14px}
-.palette-side{flex-direction:row;flex-wrap:wrap;gap:8px}
-.palette-side-item{flex:0 1 auto;min-width:150px}
-.palette-groups{flex-direction:column;align-items:stretch;overflow-x:visible;gap:8px}
-.palette-group{flex:none;min-width:0;display:flex;flex-wrap:wrap;align-items:flex-start;gap:12px;padding:10px 12px}
-.palette-group-head{flex:none;width:118px;margin-bottom:0;min-height:34px}
-.palette-group .palette{flex:1;min-width:0;flex-direction:row;flex-wrap:wrap;gap:6px}
+/* 분류 한 덩이 — 제목이 위, 단추가 아래. 칸이 좁아 가로로 눕힐 수 없다. */
+.palette-group{flex:none;min-width:0;display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:10px 12px}
+.palette-group-head{margin-bottom:0;min-height:auto}
+.palette-group-head small{white-space:normal}
+.palette-group .palette{flex-direction:row;flex-wrap:wrap;gap:6px;align-content:flex-start}
 .palette-group .palette button{width:auto;text-align:center}
 /* 에코 어빌리티 구역에만 붙는 한 줄 메모 — 원문 해석이 확실한지 알려준다. */
-.palette-note{flex:1 0 100%;margin:0;color:var(--c-949dae);font-size:11px;line-height:1.5}
+.palette-note{margin:0;color:var(--c-949dae);font-size:11px;line-height:1.5}
 .palette-note.warn{color:var(--c-e0a94d)}
 
-@media(max-width:900px){
-.palette-side{overflow-x:visible}
-.palette-side-item{flex:1 1 150px}
-.palette-group{flex-direction:column;gap:8px}
-.palette-group-head{width:auto}
+/* 좁은 화면에서도 세 자리를 나란히 둔다 — 한 줄로 접으면 줄 맞춤이 뜻을 잃는다.
+   대신 격자에 바닥 너비를 주고 가로로 밀어 본다. */
+@media(max-width:1000px){
+.palette-grid{min-width:660px}
 }
 
 /* ── 피해 분석 ────────────────────────────────────────────────
@@ -1240,14 +1223,37 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .weapon-owned-filter{display:flex;align-items:center;gap:6px;margin:8px 0 4px;color:var(--c-9aa3b3);font-size:12px;cursor:pointer}
 .weapon-owned-filter em{font-style:normal;color:var(--c-8791a4);font-size:11px}
 
-/* 파티 관리 ↔ 계산 탭 사이에서 편성을 주고받는 줄. */
-.party-bridge{display:flex;flex-wrap:wrap;align-items:center;gap:14px}
-.party-bridge>div:first-child{display:flex;flex-direction:column;gap:3px}
-.party-bridge b{font-size:14px;color:var(--c-c2c9d6)}
-.party-bridge-actions{display:flex;gap:8px;margin-left:auto}
-.party-bridge-actions button{padding:9px 14px;font-size:13px;cursor:pointer}
-.party-bridge-actions .primary{border-color:var(--c-e8c66a);color:var(--c-e8c66a);background:var(--c-443c2b)}
-.party-bridge p{flex:1 0 100%;margin:0;color:var(--c-9aa3b3);font-size:12px;line-height:1.6}
+/* 파티 목록 — 파티 카드를 세로로 쌓는다. 카드 안의 자리 셋은 가로로 눕힌다.
+   카드는 끌어서 목록 순서를, 자리는 끌어서 카드 안 순서를 바꾼다. */
+.party-list{display:flex;flex-direction:column;gap:10px}
+.party-list-panel .panel-head{margin-bottom:12px}
+.party-add{margin-left:auto;padding:6px 13px;font-size:12.5px;border-radius:8px;cursor:pointer;background:var(--c-2a3246);white-space:nowrap}
+.party-add:hover{border-color:var(--c-8794aa);color:var(--c-e8c66a)}
+.party-list-card{padding:10px 11px 11px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px;cursor:pointer}
+.party-list-card:hover{border-color:var(--c-4a5266)}
+.party-list-card.on{border-color:var(--c-e8c66a);background:var(--c-30394a)}
+.party-list-card.dragging{opacity:.35}
+.party-list-card.over{border-color:var(--c-8fb4d9)}
+.party-list-head{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+.party-grip{flex:none;padding:0 3px;color:var(--c-6b7488);font-size:14px;line-height:1;cursor:grab}
+.party-grip:hover{color:var(--c-c2c9d6)}
+.party-list-name{flex:1;min-width:0;font-size:13px;color:var(--c-c2c9d6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:text}
+.party-list-count{flex:none;font-style:normal;font-size:11px;color:var(--c-9aa3b3)}
+.party-list-remove{flex:none;padding:4px 10px;font-size:12px;color:var(--c-9aa3b3);background:var(--c-2a3246);border-radius:7px;cursor:pointer}
+.party-list-remove:hover{color:var(--c-f08a9a);border-color:var(--c-7a4a52)}
+/* 자리 셋 — 늘 세 칸으로 나눠 둔다. 캐릭터가 하나만 있어도 칸 크기가 흔들리지 않게. */
+.party-list-slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.party-slot{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 6px;text-align:center;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:10px;cursor:grab}
+.party-slot img{width:42px;height:42px;border-radius:50%;object-fit:cover;border:1px solid var(--c-4a5266)}
+.party-slot strong{font-size:12px;font-weight:600;color:var(--c-c2c9d6);line-height:1.25}
+.party-slot small{letter-spacing:1px}
+.party-slot:hover .party-clear,.party-slot .party-clear:focus-visible{opacity:1}
+.party-slot.over{border-color:var(--c-e8c66a);background:var(--c-30394a)}
+/* 남은 자리 — 끌어다 놓는 곳이라 점선으로 비워 둔다. */
+.party-slot.empty{justify-content:center;border-style:dashed;cursor:default;min-height:84px}
+.party-slot.empty .party-empty{margin:0;font-size:11px;line-height:1.4}
+/* 캐릭터 선택 제목 옆 — 지금 어느 파티에 들어가는지. */
+.pick-hint{flex:none;font-style:normal;font-size:12px;color:var(--c-e8c66a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:180px}
 
 /* 이상 효과 스택 상한을 올려주는 버프가 켜졌을 때 뜨는 표시.
    버프 목록(.buff-cap)과 딜사이클 카드(.card-anomaly .cap-note) 양쪽에서 같은 말을 한다. */
@@ -1790,6 +1796,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 매트릭스 1라운드 몬스터 — 체력바는 넷 중 가장 큰 체력을 꽉 찬 길이로 보고 비례한다. */
 .matrix-round{margin-bottom:12px}
 .matrix-round-meta{font-size:11.5px;color:var(--c-9aa3b3)}
+/* 잡은 만큼 쌓인 점수 — 매트릭스 성적은 결국 이 숫자다. */
+.matrix-score-total{font-size:11.5px;color:var(--c-9aa3b3);white-space:nowrap}
+.matrix-score-total b{color:var(--c-e8c66a);font-size:13px}
+/* 몬스터 줄에 붙는 처치 점수. */
+.matrix-monster-score{flex:none;font-size:11px;color:var(--c-c9ab6b);white-space:nowrap}
 .matrix-monsters{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:10px}
 .matrix-monster{display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:12px}
 .matrix-monster-face{width:56px;height:56px;flex:none;object-fit:cover;border-radius:10px;background:var(--c-30394a)}
@@ -1894,3 +1905,83 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-cycle-pick{margin-left:0}
 .matrix-row-result{margin:0 0 0 4px;flex:none;font-size:12.5px}
 .matrix-row-result b{font-variant-numeric:tabular-nums}
+
+/* 계산 탭 세부 탭 줄 — 공격 루틴(sticky) 바로 밑에 붙는 갈래 단추.
+   버튼 모양은 비교 탭(.compare-tabs)과 같이 쓰고 여기서는 간격만 잡는다. */
+.calc-tabs{margin-top:12px}
+.calc-tabs+.panel{margin-top:0}
+
+/* 파티 구성 · 콘텐츠 선택 · 몬스터 설정 — 공격 루틴 위 한 줄.
+   왼쪽 판이 「파티 구성 | 콘텐츠 선택」이고, 오른쪽에 몬스터 설정 판이 붙는다.
+   판 높이는 가장 큰 쪽(자리 카드)이 정하고 나머지가 그 높이를 나눠 쓴다. */
+.calc-party-bar{display:grid;grid-template-columns:auto minmax(0,1fr);gap:12px;align-items:stretch}
+.calc-party-bar>.panel{margin-top:0;padding:14px 18px}
+
+/* 왼쪽 판 — 제목 줄(1행)과 내용 줄(2행)의 두 행 격자.
+   두 제목이 같은 1행에 들어가야 높이가 맞는다. 폭은 자리 카드 셋이 정한다. */
+.calc-party-bar>.party-panel{display:grid;grid-template-columns:auto minmax(220px,auto);
+  grid-template-rows:auto minmax(0,1fr);gap:6px 18px;align-items:stretch;justify-content:start}
+.calc-party-bar .party-head{grid-column:1;grid-row:1;min-height:30px;margin-bottom:0}
+.calc-party-bar .party-head h2{font-size:17px}
+.calc-party-bar .party{grid-column:1;grid-row:2}
+
+/* 자리 셋은 세로로 긴 카드로 가로 일렬. 폭은 좁게 묶어 판이 옆으로 퍼지지 않게 한다. */
+.calc-party-bar .party{grid-template-columns:repeat(3,96px);gap:10px}
+.calc-party-bar .party article{position:relative;gap:5px;padding:12px 8px 10px}
+.calc-party-bar .party article img{width:52px;height:52px}
+.calc-party-bar .party strong{font-size:13px;line-height:1.3}
+.calc-party-bar .party-sets{left:calc(50% + 26px)}
+.calc-party-bar .party-sets i{width:20px;height:20px;border-radius:6px;font-size:10px}
+.calc-party-bar .party article .party-sets img{width:15px;height:15px}
+
+/* 콘텐츠 선택 — 왼쪽 판의 오른쪽 열. 제목 줄 아래 남는 높이를 칩이 다 먹는다. */
+.calc-party-bar .party-half{grid-column:2;grid-row:1 / span 2;display:grid;
+  grid-template-rows:auto minmax(0,1fr);gap:8px 0;
+  margin-top:0;padding:0 0 0 18px;border-top:none;border-left:1px solid var(--c-384155)}
+.party-half-head{display:flex;align-items:center;gap:10px;min-height:30px}
+.party-half-head h2{margin:0;font-size:17px}
+/* 「기본 저항 / 동일 속성 저항」 — 칩에 적힌 두 숫자가 무엇인지 알려 주는 말. */
+.party-half-note{font-style:normal;font-size:11px;color:var(--c-f08a9a);white-space:nowrap}
+.calc-party-bar .party-half .enemy-elements{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;height:100%}
+.calc-party-bar .party-half .enemy-element{align-content:center;padding:7px 6px;font-size:11.5px;
+  border-radius:11px;white-space:nowrap}
+.calc-party-bar .party-half .enemy-res{font-size:10px}
+
+/* 오른쪽 몬스터 설정 판 — 제목 높이를 왼쪽 두 제목과 맞춘다. */
+.calc-party-bar>.panel>h2{display:flex;align-items:center;min-height:30px;margin:0 0 8px;font-size:17px}
+.calc-party-bar .enemy-grid{gap:14px}
+.calc-party-bar .enemy-field .enemy-element{font-size:13px;padding:9px 8px;gap:6px}
+.calc-party-bar .enemy-icon{width:20px;height:20px}
+.calc-party-bar .enemy-hint{font-size:11px;line-height:1.5}
+
+@media(max-width:1100px){.calc-party-bar{grid-template-columns:1fr}}
+@media(max-width:760px){.calc-party-bar>.party-panel{grid-template-columns:minmax(0,1fr);
+  grid-template-rows:auto auto auto}
+  .calc-party-bar .party{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .calc-party-bar .party-half{grid-column:1;grid-row:3;
+    padding:14px 0 0;border-left:none;border-top:1px solid var(--c-384155)}}
+
+/* 적 레벨 — 막대 아래 단추 줄. 왼쪽이 자주 쓰는 레벨, 오른쪽이 올리고 내리는 폭이다. */
+.enemy-level-keys{display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.enemy-level-keys button{padding:6px 11px;font-size:12px;border-radius:9px;cursor:pointer;
+  color:var(--c-a8b0bf);background:var(--c-2a3246);border:1px solid var(--c-3c455c);
+  font-variant-numeric:tabular-nums}
+.enemy-level-keys button:hover:not(:disabled){border-color:var(--c-8794aa)}
+.enemy-level-keys button.on{color:var(--c-e8c66a);background:var(--c-3f382b);border-color:var(--c-e8c66a);font-weight:600}
+.enemy-level-keys button:disabled{opacity:.4;cursor:not-allowed}
+.enemy-level-step{color:var(--c-9aa3b3)!important;font-size:11.5px!important;padding:6px 9px!important}
+.enemy-level-sep{width:1px;align-self:stretch;margin:0 3px;background:var(--c-3c455c)}
+
+/* 자리를 누르면 캐릭터 목록이 뜨므로, 빼는 단추를 카드 모서리에 따로 둔다. */
+.party-clear{position:absolute;top:4px;right:4px;width:20px;height:20px;padding:0;
+  display:flex;align-items:center;justify-content:center;line-height:1;font-size:13px;
+  color:var(--c-9aa3b3);background:var(--c-262d3f);border:1px solid var(--c-3c455c);
+  border-radius:6px;cursor:pointer;opacity:0}
+.party article:hover .party-clear,.party-clear:focus-visible{opacity:1}
+.party-clear:hover{color:var(--c-f08a9a);border-color:var(--c-7a4a52)}
+
+/* 자리를 눌러 여는 캐릭터 목록 창. 목록이 길어도 창 안에서만 구른다. */
+.slot-pick-modal{width:min(720px,100%)}
+.slot-pick-head{gap:8px;margin-bottom:12px}
+.slot-pick-head .party-load{margin-left:0}
+.slot-pick-grid{max-height:min(56vh,440px);overflow-y:auto;padding:2px 8px 2px 2px}

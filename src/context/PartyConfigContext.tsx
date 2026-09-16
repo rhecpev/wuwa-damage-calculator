@@ -99,8 +99,11 @@ export interface GearOverride {
 }
 
 /**
- * 저장해둔 파티 한 벌. 편성·로테이션·몬스터 설정을 통째로 담는다.
- * 불러오면 그때 상태로 그대로 돌아간다.
+ * 파티 목록에 담긴 파티 한 벌. 자리 셋(누가 앉았는지)이 알맹이다.
+ * 불러오면 계산 탭 **편성만** 이걸로 바뀐다 — 로테이션과 몬스터 설정은 그대로 둔다.
+ *
+ * config가 PartyConfig 통째인 것은 예전에 담아둔 파티(로테이션·몬스터까지 들어 있다)를
+ * 그대로 읽으려는 것이다. 새로 만드는 파티는 자리 셋만 채워진 빈 설정으로 시작한다.
  */
 export interface PartyPreset {
   id: string;
@@ -212,25 +215,16 @@ interface PartyConfigContextType {
   setEnemyLevel: (level: number) => void;
   setEnemyElement: (element: Element) => void;
   setEnemyResPreset: (preset: EnemyResPreset) => void;
-  /** 저장해둔 파티 목록. 편성·로테이션·몬스터 설정을 한 벌로 담는다. */
-  /**
-   * 파티 관리 탭 전용 편성. 계산용(config)과 따로 논다 —
-   * 여기서 자리를 바꿔도 계산 탭의 파티는 그대로다.
-   */
-  editorConfig: PartyConfig;
-  editorToggleCharacter: (characterId: string) => void;
-  editorClearSlot: (slot: PartySlot) => void;
-  editorSwapSlots: (a: PartySlot, b: PartySlot) => void;
-  editorAssignCharacterToSlot: (slot: PartySlot, characterId: string) => void;
-  /** 파티 관리에서 짠 편성을 계산 탭으로 보낸다. 로테이션·몬스터 설정은 건드리지 않는다. */
-  sendEditorToCalculator: () => void;
-  /** 반대로 계산 탭의 편성을 파티 관리로 가져온다. */
-  loadCalculatorIntoEditor: () => void;
+  /** 파티 관리 탭의 파티 목록. 자리 셋만 담은 편성이 순서대로 들어 있다. */
   partyPresets: PartyPreset[];
-  /** 저장할 편성. 파티 관리 탭에서 부르면 editorConfig가 담긴다. */
-  savePartyPreset: (name: string, from?: PartyConfig) => void;
-  /** 불러오기. to가 "editor"면 파티 관리 쪽에 앉힌다. */
-  applyPartyPreset: (id: string, to?: "calc" | "editor") => void;
+  /** 목록 맨 뒤에 빈 파티를 하나 만든다. 만든 파티의 id를 돌려준다 — 바로 고른 상태로 두려고. */
+  addPartyPreset: () => string;
+  /** 그 파티의 캐릭터 구성을 통째로 갈아 끼운다. 받은 순서가 곧 1·2·3번 자리다. */
+  setPartyPresetMembers: (id: string, characterIds: string[]) => void;
+  /** 목록에서 보이는 순서 바꾸기. beforeId 앞에 끼워 넣고, null이면 맨 뒤로 보낸다. */
+  movePartyPreset: (id: string, beforeId: string | null) => void;
+  /** 담아둔 편성을 계산 탭 자리에 앉힌다. 로테이션·몬스터 설정은 건드리지 않는다. */
+  applyPartyPreset: (id: string) => void;
   renamePartyPreset: (id: string, name: string) => void;
   removePartyPreset: (id: string) => void;
 
@@ -271,18 +265,6 @@ const PartyConfigContext = createContext<PartyConfigContextType | undefined>(und
 export function PartyConfigProvider({ children }: { children: ReactNode }) {
   // 계산에 쓰는 파티. 데미지 계산 탭이 본다.
   const [config, setConfig] = useState<PartyConfig>(defaultConfig);
-  /**
-   * 파티 관리 탭에서 짜는 편성. 계산용과 **따로 논다.**
-   *
-   * 둘을 한 벌로 두면 파티를 짜보는 동안 계산 탭의 편성이 같이 흔들려서,
-   * 지금 계산 중인 구성을 잃지 않고는 다른 조합을 만져볼 수가 없다.
-   * 그래서 자리 편성만 따로 들고, 옮기고 싶을 때 버튼으로 주고받는다.
-   * 이쪽은 짜다 만 것을 잃지 않게 브라우저에 저장한다.
-   */
-  const [editorConfig, setEditorConfig] = usePersistedState<PartyConfig>(
-    "partyEditorConfig",
-    defaultConfig,
-  );
   // 캐릭터 id -> {무기 id, 정련 단계, 무기 레벨}. 파티 편성과 무관하게 캐릭터마다 하나씩 기억한다.
   // 새로고침해도 남도록 localStorage에 저장된다.
   const [characterWeapons, setCharacterWeapons] = usePersistedState<
@@ -791,26 +773,91 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setConfig((current) => ({ ...current, enemy: { ...current.enemy, element } }));
   };
 
-  /** 콘텐츠 프리셋을 고르면 두 저항 수치가 같이 바뀐다. */
-  // 저장해둔 파티. 새로고침해도 남는다.
+  // 파티 목록. 새로고침해도 남는다.
   const [partyPresets, setPartyPresets] = usePersistedState<PartyPreset[]>("partyPresets", []);
 
-  /** 지금 화면의 구성을 이름을 붙여 담아둔다. */
-  const savePartyPreset = (name: string, from: PartyConfig = config) => {
-    const label = name.trim();
-    if (!label) return;
+  /** 아무도 앉지 않은 자리. */
+  const emptyMember = () => ({ characterId: "", weaponId: "", echoIds: [] });
+
+  /** 그 편성에 앉은 자리들을 앞에서부터. 빈 자리는 빼고 준다. */
+  const filledMembers = (cfg: PartyConfig) =>
+    PARTY_SLOTS.map((slot) => cfg[slot]).filter((member) => member.characterId);
+
+  /** 자리 셋만 빈 채로 시작하는 파티 하나. 로테이션·몬스터는 계산 탭 것을 쓰므로 기본값이다. */
+  const addPartyPreset = () => {
+    const id = crypto.randomUUID();
     setPartyPresets((current) => [
       ...current,
-      { id: crypto.randomUUID(), name: label, config: from },
+      {
+        id,
+        name: `파티 ${current.length + 1}`,
+        config: {
+          ...defaultConfig,
+          mainDps: emptyMember(),
+          subDps: emptyMember(),
+          support: emptyMember(),
+          rotation: [],
+          enemy: { ...defaultEnemy },
+        },
+      },
     ]);
+    return id;
   };
 
-  /** 담아둔 구성을 그대로 되돌린다. */
-  const applyPartyPreset = (id: string, to: "calc" | "editor" = "calc") => {
+  /**
+   * 받은 순서대로 1·2·3번 자리에 앉힌다. 자리 수보다 많이 오면 뒤는 버린다.
+   * 이미 앉아 있던 캐릭터는 자리에 딸린 값(무기·에코)을 그대로 들고 옮겨간다 —
+   * 순서만 바꿨는데 끼워둔 것이 사라지지 않게.
+   */
+  const setPartyPresetMembers = (id: string, characterIds: string[]) => {
+    setPartyPresets((current) =>
+      current.map((preset) => {
+        if (preset.id !== id) return preset;
+        const worn = filledMembers(preset.config);
+        const members = characterIds
+          .slice(0, PARTY_SLOTS.length)
+          .map(
+            (characterId) =>
+              worn.find((m) => m.characterId === characterId) ?? {
+                characterId,
+                weaponId: "",
+                echoIds: [],
+              },
+          );
+        return {
+          ...preset,
+          config: {
+            ...preset.config,
+            ...Object.fromEntries(
+              PARTY_SLOTS.map((slot, index) => [slot, members[index] ?? emptyMember()]),
+            ),
+          },
+        };
+      }),
+    );
+  };
+
+  /** 카드를 끌어다 놓아 목록 순서 바꾸기. */
+  const movePartyPreset = (id: string, beforeId: string | null) => {
+    if (id === beforeId) return;
+    setPartyPresets((current) => {
+      const moving = current.find((p) => p.id === id);
+      if (!moving) return current;
+      const rest = current.filter((p) => p.id !== id);
+      const at = beforeId ? rest.findIndex((p) => p.id === beforeId) : -1;
+      return at >= 0 ? [...rest.slice(0, at), moving, ...rest.slice(at)] : [...rest, moving];
+    });
+  };
+
+  /**
+   * 담아둔 편성을 계산 탭에 앉힌다.
+   * 자리 셋만 옮긴다 — 예전에 담아둔 파티에는 그때의 로테이션·몬스터까지 들어 있지만,
+   * 파티를 고르려다 짜 놓은 루틴이 날아가면 안 된다.
+   */
+  const applyPartyPreset = (id: string) => {
     const preset = partyPresets.find((p) => p.id === id);
     if (!preset) return;
-    if (to === "editor") setEditorConfig(preset.config);
-    else setConfig(preset.config);
+    setConfig((current) => copySlots(preset.config, current));
   };
 
   const renamePartyPreset = (id: string, name: string) => {
@@ -940,68 +987,58 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   };
 
   /**
-   * 자리 편성을 다루는 함수 네 개를 setter 하나에 물려 찍어낸다.
-   *
-   * 계산용(config)과 파티 관리용(editorConfig)이 같은 조작을 각자의 상태에 해야 해서,
-   * 같은 코드를 두 벌 두지 않고 이렇게 만든다.
+   * 캐릭터를 파티에 넣거나 뺀다. 슬롯 자리는 고정 — 뺀 자리는 그대로 비워두고
+   * 뒤 캐릭터를 당겨오지 않는다.
+   * - 파티에 없으면 비어 있는 가장 앞 슬롯에 넣는다(3자리가 다 차면 무시).
+   * - 이미 있으면 그 슬롯만 비운다.
    */
-  const makePartyOps = (set: (updater: (current: PartyConfig) => PartyConfig) => void) => {
-    /**
-     * 캐릭터를 파티에 넣거나 뺀다. 슬롯 자리는 고정 — 뺀 자리는 그대로 비워두고
-     * 뒤 캐릭터를 당겨오지 않는다.
-     * - 파티에 없으면 비어 있는 가장 앞 슬롯에 넣는다(3자리가 다 차면 무시).
-     * - 이미 있으면 그 슬롯만 비운다.
-     */
-    const toggleCharacter = (characterId: string) => {
-      set((current) => {
-        const occupied = PARTY_SLOTS.find((slot) => current[slot].characterId === characterId);
+  const toggleCharacter = (characterId: string) => {
+    setConfig((current) => {
+      const occupied = PARTY_SLOTS.find((slot) => current[slot].characterId === characterId);
 
-        if (occupied) {
-          return {
-            ...current,
-            [occupied]: { characterId: "", weaponId: "", echoIds: [] },
-          };
-        }
-
-        const empty = PARTY_SLOTS.find((slot) => current[slot].characterId === "");
-        if (!empty) return current;
-
+      if (occupied) {
         return {
           ...current,
-          [empty]: { ...current[empty], characterId },
+          [occupied]: { characterId: "", weaponId: "", echoIds: [] },
         };
-      });
-    };
+      }
 
-    /** 자리 하나만 비운다. 뒤 캐릭터를 당겨오지 않는다. */
-    const clearSlot = (slot: PartySlot) => {
-      set((current) => ({
+      const empty = PARTY_SLOTS.find((slot) => current[slot].characterId === "");
+      if (!empty) return current;
+
+      return {
         ...current,
-        [slot]: { characterId: "", weaponId: "", echoIds: [] },
-      }));
-    };
+        [empty]: { ...current[empty], characterId },
+      };
+    });
+  };
 
-    /** 두 자리의 편성을 통째로 맞바꾼다. */
-    const swapSlots = (a: PartySlot, b: PartySlot) => {
-      if (a === b) return;
-      set((current) => ({ ...current, [a]: current[b], [b]: current[a] }));
-    };
+  /** 자리 하나만 비운다. 뒤 캐릭터를 당겨오지 않는다. */
+  const clearSlot = (slot: PartySlot) => {
+    setConfig((current) => ({
+      ...current,
+      [slot]: { characterId: "", weaponId: "", echoIds: [] },
+    }));
+  };
 
-    /**
-     * 캐릭터를 지정한 자리에 앉힌다.
-     * 이미 파티의 다른 자리에 있으면 두 자리를 맞바꾸고,
-     * 없으면 그 자리에 앉아 있던 캐릭터를 밀어내고 들어간다.
-     */
-    const assignCharacterToSlot = (slot: PartySlot, characterId: string) => {
-      set((current) => {
-        const from = PARTY_SLOTS.find((s) => current[s].characterId === characterId);
-        if (from === slot) return current;
-        if (from) return { ...current, [slot]: current[from], [from]: current[slot] };
-        return { ...current, [slot]: { characterId, weaponId: "", echoIds: [] } };
-      });
-    };
+  /** 두 자리의 편성을 통째로 맞바꾼다. */
+  const swapSlots = (a: PartySlot, b: PartySlot) => {
+    if (a === b) return;
+    setConfig((current) => ({ ...current, [a]: current[b], [b]: current[a] }));
+  };
 
-    return { toggleCharacter, clearSlot, swapSlots, assignCharacterToSlot };
+  /**
+   * 캐릭터를 지정한 자리에 앉힌다.
+   * 이미 파티의 다른 자리에 있으면 두 자리를 맞바꾸고,
+   * 없으면 그 자리에 앉아 있던 캐릭터를 밀어내고 들어간다.
+   */
+  const assignCharacterToSlot = (slot: PartySlot, characterId: string) => {
+    setConfig((current) => {
+      const from = PARTY_SLOTS.find((s) => current[s].characterId === characterId);
+      if (from === slot) return current;
+      if (from) return { ...current, [slot]: current[from], [from]: current[slot] };
+      return { ...current, [slot]: { characterId, weaponId: "", echoIds: [] } };
+    });
   };
 
   /**
@@ -1015,15 +1052,6 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     subDps: from.subDps,
     support: from.support,
   });
-
-  const sendEditorToCalculator = () => setConfig((current) => copySlots(editorConfig, current));
-  const loadCalculatorIntoEditor = () => setEditorConfig((current) => copySlots(config, current));
-
-  // 계산 탭이 쓰는 것 — 이름은 예전 그대로 둔다.
-  const { toggleCharacter, clearSlot, swapSlots, assignCharacterToSlot } =
-    makePartyOps(setConfig);
-  // 파티 관리 탭이 쓰는 것. 같은 조작이 editorConfig에만 걸린다.
-  const editorOps = makePartyOps(setEditorConfig);
 
   // 확인 화면(데이터 확인 · 버프 정리)에서 고쳐 둔 상시/발동 · 본인/파티.
   // derive*Buffs가 저장소에서 직접 읽어 가지만, 고친 즉시 목록이 다시 만들어지도록
@@ -1207,15 +1235,10 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setEnemyLevel,
     setEnemyElement,
     setEnemyResPreset,
-    editorConfig,
-    editorToggleCharacter: editorOps.toggleCharacter,
-    editorClearSlot: editorOps.clearSlot,
-    editorSwapSlots: editorOps.swapSlots,
-    editorAssignCharacterToSlot: editorOps.assignCharacterToSlot,
-    sendEditorToCalculator,
-    loadCalculatorIntoEditor,
     partyPresets,
-    savePartyPreset,
+    addPartyPreset,
+    setPartyPresetMembers,
+    movePartyPreset,
     applyPartyPreset,
     renamePartyPreset,
     removePartyPreset,
