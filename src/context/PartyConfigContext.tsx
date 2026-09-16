@@ -1098,7 +1098,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         members.map((m) => m.character.id),
       ),
       ...deriveEchoBuffs(members.map((m) => m.character.id)),
-      ...anomalyStateBuffs(),
+      ...anomalyStateBuffs(members.map((m) => m.character.id)),
     ];
   };
 
@@ -1131,7 +1131,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ...deriveCharacterBuffs(members, characterInherents),
       ...deriveWeaponBuffs(weapons, ids),
       ...(override.echoLinks ? deriveEchoBuffs(ids, override.echoLinks) : deriveEchoBuffs(ids)),
-      ...anomalyStateBuffs(),
+      ...anomalyStateBuffs(ids),
     ];
   };
 
@@ -1162,8 +1162,9 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ),
       // 장착 에코에서 나오는 것 — 화음 세트는 맞춘 개수만큼, 어빌리티는 메인 슬롯 것만.
       ...deriveEchoBuffs(members.map((m) => m.character.id)),
-      // 적에게 붙은 상태(암흑 효과)는 누가 붙였든 하나뿐이라 파티와 무관하게 늘 담는다.
-      ...anomalyStateBuffs(),
+      // 적에게 붙은 상태(암흑 효과)는 누가 붙였든 적에게 하나뿐이다 — 그래서 캐릭터마다 두지 않고
+      // 여기 한 줄로 담는다. 다만 **붙일 수 있는 캐릭터가 파티에 있을 때만** 담는다.
+      ...anomalyStateBuffs(members.map((m) => m.character.id)),
     ];
   }, [
     manualBuffs,

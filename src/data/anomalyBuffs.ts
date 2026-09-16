@@ -1,4 +1,5 @@
 import { ANOMALIES } from "./anomalies";
+import { anomaliesOf } from "./characterAnomalies";
 import type { ManualBuff } from "../types/game";
 
 /**
@@ -17,8 +18,18 @@ import type { ManualBuff } from "../types/game";
  */
 export const HAVOC_BANE_BUFF_ID = "anomaly:HavocBane";
 
-export function anomalyStateBuffs(): ManualBuff[] {
+/**
+ * 파티가 붙일 수 있는 상태만 담는다.
+ *
+ * 예전에는 「누가 붙였든 적에게 하나뿐」이라는 이유로 파티와 무관하게 늘 담았는데,
+ * 암흑을 붙일 수 있는 캐릭터가 하나도 없는 파티에도 줄이 떠서 켤 수 있었다 —
+ * 켜면 그냥 없는 방어력 감소가 걸린다. 그래서 파티를 보고 거른다(characterAnomalies 표).
+ *
+ * characterIds를 주지 않으면 예전처럼 전부 담는다(목록만 훑는 화면을 위해 남겨 둔다).
+ */
+export function anomalyStateBuffs(characterIds?: string[]): ManualBuff[] {
   const def = ANOMALIES.HavocBane;
+  if (characterIds && !characterIds.some((id) => anomaliesOf(id).includes("HavocBane"))) return [];
   return [
     {
       id: HAVOC_BANE_BUFF_ID,
