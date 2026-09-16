@@ -451,14 +451,14 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   // ── 스킬에서 오는 것 (설명문에서 옮김) ──
   {
-    label: "디커플링 · 최종 피해 (조화도 파괴 증폭 비례)",
+    label: "디커플링 · 최종 피해 (조화도 파괴 증폭 비례, 간섭 1스택당)",
     target: "totalDamage",
     damageType: "All",
     scaleFrom: "SyncAmplify",
     value: 0.0012,
     uptime: "active",
     scope: "self",
-    condition: "조화도 파괴 증폭 1pt당 0.12% — 「조화 밀집 · 간섭」 스택마다",
+    condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
   },
   // ── 스킬에서 오는 것 ──
   {

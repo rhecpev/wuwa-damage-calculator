@@ -823,7 +823,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceMode: "Cluster",
-    condition: "목표의 「조화 밀집 · 간섭」 스택 수만큼 스택을 올려 켠다",
+    condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
   },
   {
     // 원문: 「공명 모드 · 불꽃에 있을 시, 침식 영역이 목표에게 피해를 입힌 후

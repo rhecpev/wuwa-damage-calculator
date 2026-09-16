@@ -813,7 +813,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceMode: "Cluster",
-    condition: "목표의 「조화 밀집 · 간섭」 스택 수만큼 스택을 올려 켠다 (린네가 파티에 있으면 상한 +1)",
+    condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
   },
 ];
 

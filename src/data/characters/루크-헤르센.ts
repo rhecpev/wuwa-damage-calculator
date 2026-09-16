@@ -572,14 +572,14 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "「햇무리 참살 · 요광」 뒤에 이어지는 공격에만",
   },
   {
-    label: "빛에 대한 무언의 논쟁 · 최종 피해 (조화도 파괴 증폭 비례)",
+    label: "빛에 대한 무언의 논쟁 · 최종 피해 (조화도 파괴 증폭 비례, 간섭 1스택당)",
     target: "totalDamage",
     damageType: "All",
     scaleFrom: "SyncAmplify",
     value: 0.0012,
     uptime: "active",
     scope: "self",
-    condition: "조화도 파괴 증폭 1pt당 0.12%",
+    condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
   },
   // ── 고유 스킬 ──
   {
