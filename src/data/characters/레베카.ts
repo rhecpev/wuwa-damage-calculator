@@ -497,6 +497,31 @@ const circuitSkillAttacks: Attack[] = [
       [11.865, 12.838, 13.8109, 15.173, 16.1459, 17.2648, 18.8215, 20.3782, 21.9349, 23.5889],
     ],
   },
+  // 6체인 — 두 강공격 발동 기간에 900%의 전도 피해가 1회 더 들어간다.
+  // **일반 공격 피해로 적용된다**고 원문이 못 박아 두었다. 배율 증가 버프로 담으면 강공격 판정을
+  // 그대로 타서 틀리므로 공격 카드로 따로 세운다(2026-09-16 고침).
+  {
+    id: "1004807_c6a",
+    name: "6체인 · 탕탕탕! 추가 타격",
+    type: "Basic",
+    element: "Electro",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    extra: true,
+    resonanceChain: 6,
+    hits: [[9, 9, 9, 9, 9, 9, 9, 9, 9, 9]],
+  },
+  {
+    id: "1004807_c6b",
+    name: "6체인 · 콰과광! 추가 타격",
+    type: "Basic",
+    element: "Electro",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    extra: true,
+    resonanceChain: 6,
+    hits: [[9, 9, 9, 9, 9, 9, 9, 9, 9, 9]],
+  },
 ];
 
 const circuitSkill: Skill = {
@@ -669,7 +694,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     maxStacks: 70,
     uptime: "active",
     scope: "party",
-    condition: "엣지러너의 유대 보유 중 0.2초마다 1스택, 최대 35%",
+    condition: "엣지러너의 유대 보유 중 0.2초마다 1스택, 최대 35% — 루시가 받으면 즉시 최대 스택",
   },
 
   // ── 공명체인 ──
@@ -746,17 +771,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   // 전도 피해를 1회 입히고, 그 피해는 일반 공격 피해로 적용된다.
   // 두 공격 모두 이미 일반 공격 판정(damageBonusType: Basic)이라 배율에 900%p를 그대로 더한다.
   {
-    label: "6체인 · 탕탕탕! · 콰과광! 추가 타격",
-    target: "motionValue",
-    damageType: "All",
-    attackIds: ["1004807_1", "1004807_2"],
-    value: 9, // 900%p
-    modifier: "increase",
-    uptime: "passive", // 그 공격을 쓰면 늘 같이 나온다
-    scope: "self",
-    resonanceChain: 6,
-  },
-  {
     label: "5체인 · 일반 공격 피해 보너스",
     target: "damageBonus",
     damageType: "Basic",
@@ -777,11 +791,24 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "party",
     condition: "파티 내 캐릭터가 「해킹 · 이탈」을 붙인 뒤 30초간",
   },
+  // 반주 「최고의 동료」 — 터렛은 루시가 강화할 수 있다. 배율이 250% 오르고 지속이 4초로 줄어
+  // 타수가 적어진다(타수는 위 「터렛 추가 타격」 스택으로 줄여 잡는다).
+  {
+    label: "최고의 동료 · 루시가 강화한 터렛 (배율 상승)",
+    target: "motionValue",
+    damageType: "Intro",
+    attackId: "1004809_1",
+    value: 2.5, // 250% 상승
+    modifier: "amplify",
+    uptime: "active",
+    scope: "self",
+    condition: "파티에 루시가 있고 터렛을 강화했을 때 · 지속이 14초에서 4초로 줄어든다",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「빈틈 발견!」 앞부분 강공격 경직 저항 증가
-//   반주 앞부분   터렛이 2.5%의 전도 피해를 지속적으로 넣는다(루시가 있으면 배율 250% 상승)
+//   반주 앞부분   터렛이 2.5%의 전도 피해를 지속적으로 넣는다(타수는 공격 카드의 스택으로 잡는다)
 //   1체인 뒷부분  「부랑아의 직감」 스택과 스태미나 회복
 //   3체인 뒷부분  폭발 범위 증가 · 「나한테 딱이야」 회복
 //   6체인 앞부분  일반 공격 피해 보너스 수치를 40% 키우는 메타 효과(보너스의 보너스)

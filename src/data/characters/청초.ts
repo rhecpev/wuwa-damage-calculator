@@ -515,7 +515,9 @@ const INSIGHT_IDS = [
   "1005803_1", // 공명 해방
 ];
 /** 6체인의 「받는 피해 40% 증가」가 붙는 셋. */
-const C6_ATTACK_IDS = ["1005801_5", "1005807_6", "1005803_1"];
+// 6체인이 「받는 피해 40% 증가」를 거는 네 갈래. 원문이 「거궐로 멸한 흔적」까지 적어 두었는데
+// 1체인 추가타(1005801_c1)가 빠져 있었다(2026-09-16 고침).
+const C6_ATTACK_IDS = ["1005801_5", "1005807_6", "1005803_1", "1005801_c1"];
 
 /**
  * 고유 스킬 · 공명체인 6개를 계산 가능한 버프로 옮긴 것.
@@ -719,12 +721,99 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
   },
+  // ── 1체인 「거궐로 멸한 흔적」에 붙는 것들 ──
+  // 원문: 「제거된 「악을 씻어내는 검결」 1스택 당 목표가 「거궐로 멸한 흔적」으로부터 받는 피해를
+  //        4% 증가시키고, 해당 효과는 2초간 지속된다」
+  {
+    label: "1체인 · 거궐로 멸한 흔적 받는 피해 (태운 검결 1스택당 4%)",
+    target: "damageTaken",
+    damageType: "All",
+    attackIds: ["1005801_c1"],
+    value: 0.04,
+    stacks: 25, // 기본값 — 전투 진입 시 25스택을 들고 시작한다
+    maxStacks: 25,
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 1,
+    condition: "그때 태운 「악을 씻어내는 검결」 스택만큼 · 2초간",
+  },
+  // ── 6체인이 「거궐로 멸한 흔적」에 더 얹는 것들 ──
+  // 원문 둘이 같은 꼴이다 — 「올곧은 심지」 스택당 2%, 1~7스택 구간은 스택당 5%가 더 붙는다.
+  // 하나는 부스트(받는 피해), 하나는 고유 스킬 해제 뒤의 피해 증가다.
+  {
+    label: "6체인 · 거궐 받는 피해 부스트 (올곧은 심지 스택당 2%)",
+    target: "boost",
+    damageType: "All",
+    attackIds: ["1005801_c1"],
+    value: 0.02,
+    stacks: 25,
+    maxStacks: 25,
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    condition: "목표의 「올곧은 심지」 스택만큼",
+  },
+  {
+    label: "6체인 · 거궐 받는 피해 부스트 1~7스택 (스택당 추가 5%)",
+    target: "boost",
+    damageType: "All",
+    attackIds: ["1005801_c1"],
+    value: 0.05,
+    stacks: 7,
+    maxStacks: 7,
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    condition: "위 줄과 같이 켠다",
+  },
+  {
+    label: "6체인 · 만물의 통찰 뒤 거궐 피해 증가 (스택당 2%)",
+    inherentSkillId: "1005805",
+    target: "damageBonus",
+    damageType: "All",
+    attackIds: ["1005801_c1"],
+    value: 0.02,
+    stacks: 25,
+    maxStacks: 25,
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    condition: "「만물의 통찰, 가려낸 악의」 해제 후 · 목표의 「올곧은 심지」 스택만큼",
+  },
+  {
+    label: "6체인 · 만물의 통찰 뒤 거궐 피해 증가 1~7스택 (스택당 추가 5%)",
+    inherentSkillId: "1005805",
+    target: "damageBonus",
+    damageType: "All",
+    attackIds: ["1005801_c1"],
+    value: 0.05,
+    stacks: 7,
+    maxStacks: 7,
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    condition: "위 줄과 같이 켠다",
+  },
+  // 6체인 — 「조화 밀집 · 간섭」 대응 효과가 20% 오른다(증폭 1pt당 0.12% -> 0.144%).
+  // 기본 줄(0.12%)은 그대로 두고 늘어난 몫(0.024%)만 여기 담는다.
+  {
+    label: "6체인 · 간섭 대응 효과 20% 상승 (증폭 1pt당 0.024%)",
+    target: "totalDamage",
+    damageType: "All",
+    value: 0.00024,
+    scaleFrom: "SyncAmplify",
+    uptime: "active",
+    scope: "self",
+    resonanceChain: 6,
+    condition: "기본 대응 줄과 같이 켠다 — 간섭 1스택 몫",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   고유 「아득한 바다, 무수한 존재」 「신심 집중」으로 「올곧은 심지」 · 「조화 밀집 · 간섭」을
 //                                  퍼뜨리는 규칙 — 스택 수급이라 피해식에 자리가 없다
-//   (거궐로 멸한 흔적 400%는 기본 공격 1005801_c1로 반영, 스택당 받는 피해 증가는 미반영)
+//   (거궐로 멸한 흔적 400%는 기본 공격 1005801_c1로 반영. 1체인의 스택당 받는 피해 증가와
+//    6체인의 부스트 · 피해 증가도 2026-09-16에 담았다)
 //   1체인 뒷부분 「악을 씻어내는 검결」과 「거궐로 멸한 흔적」(공격력 400%, 일반 공격 판정)
 //   6체인 가운데 · 뒷부분 거궐로 멸한 흔적의 피해 부스트와 조화 밀집 대응 강화
 //                — 거궐로 멸한 흔적은 공격이 새로 생기는 형태라 속성표에 없다

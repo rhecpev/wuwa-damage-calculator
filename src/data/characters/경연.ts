@@ -403,7 +403,9 @@ const circuitSkillAttacks: Attack[] = [
   },
   {
     id: "1005907_2",
-    name: "강공격 · 북두칠성 피해",
+    // 인게임 표기는 「보강(步罡)」이다. API 원문(characterTexts.json)은 「북두칠성」으로 적혀 있어
+    // 근거 문장(source)은 그대로 두고 화면에 뜨는 이름만 인게임 표기로 맞춘다.
+    name: "강공격 · 보강 피해",
     type: "Heavy",
     element: "Fusion",
     scalingStat: "ATK",
@@ -577,7 +579,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   // 2체인 — DamageList에 8.25% 옆에 12.05%(= 8.25 × 1.46), 72.54% 옆에 105.91%(× 1.46)가 있다.
   {
-    label: "2체인 · 혼백 탈취 · 북두칠성 배율 상승",
+    label: "2체인 · 혼백 탈취 · 보강 배율 상승",
     target: "motionValue",
     damageType: "All",
     attackIds: CIRCUIT_IDS,

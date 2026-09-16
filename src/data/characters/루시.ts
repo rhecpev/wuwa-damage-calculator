@@ -381,6 +381,19 @@ const resonanceSkillAttacks: Attack[] = [
       [0.1008, 0.1091, 0.1174, 0.129, 0.1372, 0.1467, 0.1599, 0.1732, 0.1864, 0.2005],
     ],
   },
+  // 2체인 — 「공명 스킬 · 펄스 교란」 뒤에 450%의 회절 피해가 1회 더 들어간다.
+  // **강공격 피해로 적용된다**고 원문이 못 박아 두어 판정을 Heavy로 둔다.
+  {
+    id: "1004902_c2",
+    name: "2체인 · 펄스 교란 추가 타격",
+    type: "Heavy",
+    element: "Spectro",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    extra: true,
+    resonanceChain: 2,
+    hits: [[4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5, 4.5]],
+  },
 ];
 
 const resonanceSkill: Skill = {

@@ -41,8 +41,9 @@ function attackNames(characterId: string): Map<string, string> {
 /** 수치 한 줄. 스택형이면 최대 스택까지 곱한 값도, 스탯 비례면 기준 스탯 이름도 같이 적는다. */
 function formatValue(template: CharacterBuffTemplate): string {
   const scale = template.scaleFrom ? ` × ${template.scaleFrom}` : "";
-  // 조화도 파괴 증폭은 퍼센트가 아닌 수치(pt)다.
-  if (template.target === "syncAmplify") {
+  // 퍼센트가 아니라 **수치(pt)**로 읽는 칸들. 조화도 파괴 증폭과 깡공격력이 그렇다.
+  // 예전에는 깡공격력도 ×100에 %를 붙여 찍어서 「HP 100pt당 5pt」가 「500%」로 보였다.
+  if (template.target === "syncAmplify" || template.target === "atkFlat") {
     const max = template.maxValue !== undefined ? ` · 최대 ${template.maxValue}pt` : "";
     return `${template.value}pt${scale}${max}`;
   }
