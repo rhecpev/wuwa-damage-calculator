@@ -47,10 +47,26 @@ function formatValue(template: CharacterBuffTemplate): string {
     const max = template.maxValue !== undefined ? ` · 최대 ${template.maxValue}pt` : "";
     return `${template.value}pt${scale}${max}`;
   }
-  const one =
-    template.target === "motionValue" && template.modifier === "amplify"
-      ? `×${(1 + template.value).toFixed(2)}`
-      : `${+(template.value * 100).toFixed(2)}%${scale}`;
+  // 기준 스탯에 「N을 넘은 만큼」을 보는 버프는 그 문턱도 같이 적는다.
+  // 문턱은 스탯 단위(HP·공격력·방어력은 100으로 나눈 값)로 담겨 있어 읽을 때 되돌린다.
+  const offsetOf = () => {
+    if (template.scaleOffset === undefined) return "";
+    const raw = ["ATK", "HP", "DEF"].includes(template.scaleFrom ?? "")
+      ? template.scaleOffset * 100
+      : template.scaleOffset;
+    return ` ${raw.toLocaleString()} 초과분`;
+  };
+
+  const amplify = template.target === "motionValue" && template.modifier === "amplify";
+  // 배율 비례 버프를 ×(1+값)으로만 찍으면 기준 스탯이 사라져 「×1.00」처럼 보인다
+  // (경연 2체인의 0.41%가 그랬다). 기준과 문턱 · 상한을 함께 적는다.
+  const one = amplify
+    ? template.scaleFrom
+      ? `배율 +${+(template.value * 100).toFixed(2)}%${scale}${offsetOf()}` +
+        (template.maxValue !== undefined ? ` · 최대 ×${(1 + template.maxValue).toFixed(2)}` : "")
+      : `×${(1 + template.value).toFixed(2)}`
+    : `${+(template.value * 100).toFixed(2)}%${scale}${offsetOf()}` +
+      (template.maxValue !== undefined ? ` · 최대 ${+(template.maxValue * 100).toFixed(2)}%` : "");
 
   // 체인별 상한이 있으면 칸마다 적는다(「기본 2스택 60% · 3체인 4스택 120%」).
   if (template.maxStacksByChain) {
