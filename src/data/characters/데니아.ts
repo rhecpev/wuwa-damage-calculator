@@ -562,11 +562,13 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     attackId: "1005302_4",
     damageType: "Liberation",
     modifier: "amplify",
-    value: 1.5,
-    maxStacks: 6,
+    value: 1.5, // 1개당 배율 150% 상승
+    // 「어둠의 핵심」은 최대 3개, 3체인 「밤바람을 가르는 붉은 버들」부터 5개다.
+    // 예전에 6으로 적혀 있어 최대 900%로 보였다 — 실제 상한은 450%(3체인 750%)다.
+    maxStacksByChain: { 0: 3, 3: 5 },
     uptime: "active",
     scope: "self",
-    condition: "「추방 · 환멸의 모습 2단」에만 — 소모한 「어둠의 핵심」 개수만큼",
+    condition: "「추방 · 환멸의 모습 2단」에만 — 소모한 「어둠의 핵심」 개수만큼(최대 3개 · 3체인부터 5개)",
   },
   {
     label: "막이 내리는 순간 · 공격력",
