@@ -903,7 +903,11 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
           <div key={round} className="matrix-round-block">
             <div className="matrix-round-title">
               <b>{round}라운드</b>
-              <small>Lv.{list[0].m.level}</small>
+              {/* 표기 레벨일 뿐이다 — 체력만 이 레벨을 타고, 방어력은 라운드와 무관하게 100이다. */}
+              <small title="표기 레벨입니다 — 체력만 이 레벨을 따르고, 방어력 · 피해 계산은 레벨 100 고정입니다">
+                Lv.{list[0].m.level}
+                {list[0].m.level !== 100 && <span className="muted"> · 방어 100</span>}
+              </small>
               <small>
                 점수 {list.reduce((sum, x) => sum + x.m.score, 0).toLocaleString()}
               </small>
@@ -993,7 +997,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
 
       <p className="matrix-hint">
         기본 체력 · 점수는 인게임 <b>실측표</b>(s2.2 매트릭스 혈량 · 분수표)를 그대로 옮긴 값입니다 —
-        다르면 게임에서 본 값으로 고쳐 주세요. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
+        다르면 게임에서 본 값으로 고쳐 주세요. 라운드 레벨(110 · 120)은 <b>표기일 뿐</b>이라 체력에만
+        걸립니다. 방어력은 라운드와 상관없이 <b>레벨 100</b>으로 계산합니다. 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
         기대 피해로 깎습니다. 몬스터가 쓰러지면 다음 타부터 다음 몬스터를 치고, 미믹을 잡으면 다음
         라운드로 넘어갑니다. 넘친 피해 · 매트릭스 스테이지 버프는 넣지 않았습니다.
       </p>

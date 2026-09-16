@@ -1844,7 +1844,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-legend i{width:14px;height:14px;flex:none;border-radius:4px}
 .matrix-legend b{color:var(--c-e9edf5)}
 .matrix-legend span{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.matrix-legend .muted,.matrix-monster-state .muted{color:var(--c-6d7689)}
+.matrix-legend .muted,.matrix-monster-state .muted,.matrix-round-title .muted{color:var(--c-6d7689)}
 .matrix-round-block{margin-bottom:14px}
 .matrix-round-title{display:flex;align-items:baseline;gap:6px;margin-bottom:6px}
 .matrix-round-title b{font-size:13px;color:var(--c-e9edf5)}
