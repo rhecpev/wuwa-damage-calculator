@@ -9,7 +9,7 @@
 /* 파티 카드의 캐릭터 그림과 그 옆에 붙는 화음 세트 아이콘.
    .party article img 규칙이 64px 동그라미라 세트 아이콘은 따로 크기를 잡아 준다. */
 .party-face{position:relative;display:flex;align-items:center;justify-content:center;gap:6px}
-.party-sets{position:absolute;left:calc(50% + 30px);display:flex;flex-direction:column;gap:3px}
+.party-sets{display:flex;flex-direction:row;justify-content:center;gap:4px;margin:1px 0}
 .party-sets i{position:relative;display:flex;width:24px;height:24px;align-items:center;justify-content:center;border-radius:7px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);color:var(--c-9aa3b3);font-style:normal;font-size:11px}
 .party article .party-sets img{width:18px;height:18px;border:none;border-radius:0;object-fit:contain}
 .party-sets b{position:absolute;right:-4px;bottom:-4px;min-width:13px;padding:0 2px;border-radius:999px;background:var(--c-3f4a60);border:1px solid var(--c-4a5266);color:var(--c-e9edf5);font-size:9px;line-height:13px;text-align:center}.party strong{font-size:16px;color:var(--c-e9edf5)}.panel{padding:20px;margin-top:12px}.panel h2{margin:5px 0 18px;font-size:20px}.palette{display:flex;gap:8px;flex-wrap:wrap}.palette button{padding:9px 12px;cursor:pointer}.palette-group{flex:1 1 0;min-width:180px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px;padding:12px}.palette-group-head{display:flex;align-items:center;gap:8px;margin-bottom:10px;min-height:30px}.palette-group-head img,.palette-group-icon-blank{width:28px;height:28px;flex:none;object-fit:contain;border-radius:8px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);padding:2px}.palette-group-head small{letter-spacing:.6px;color:var(--c-c2c9d6);font-size:12px;white-space:nowrap}.palette-group .palette{flex-direction:column;flex-wrap:nowrap;gap:6px}.palette-group .palette button{width:100%;text-align:left}.row{display:flex;justify-content:space-between;align-items:end}/* ── 사이클 ──────────────────────────────────────────────────
@@ -1021,7 +1021,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 공격 루틴 — 본문 맨 위에 가로로 눕고, 스크롤해도 위 막대 바로 아래에 붙어 있는다.
    카드가 폭을 다 쓰고 여러 줄로 접히며, 너무 길어지면 그 판만 스스로 스크롤한다
    (아래 섹션이 화면 밖으로 밀리지 않게). 배경을 깔아야 밑을 지나가는 내용이 비치지 않는다. */
-.rotation-rail{--dock-w:clamp(300px,30vw,470px);--rail-h:min(46vh,460px);
+.rotation-rail{--dock-w:clamp(300px,30vw,470px);--trig-w:clamp(96px,9vw,132px);--rail-h:min(46vh,460px);
   position:sticky;top:56px;z-index:12;display:flex;
   margin:-8px -8px 0;padding:8px 8px 10px;background:var(--c-242a39);
   box-shadow:0 10px 16px -12px rgba(0,0,0,.6)}
@@ -1030,13 +1030,27 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
    카드가 몇 장 없어도 --rail-h 아래로는 안 내려간다. 판이 짧아지면 자리도 같이
    쪼그라들어 버프 목록이 손바닥만 해지기 때문이다. 위아래 한 값(--rail-h)으로 묶는다. */
 .rotation-rail>.panel{flex:1;min-width:0;min-height:var(--rail-h);
-  margin-top:0;margin-right:calc(var(--dock-w) + 12px);
+  margin-top:0;margin-right:calc(var(--dock-w) + var(--trig-w) + 24px);
   display:flex;flex-direction:column}
 .rotation-rail .rotation-wrap{flex:1;min-height:0;max-height:var(--rail-h);
   overflow-y:auto;padding-right:4px}
 /* 루틴 오른쪽 자리 — 버프 창이 여기에 뜬다(계산식은 화면 위 창으로 따로 뜬다).
    화면 위에 떠서 루틴을 가리던 것을 옆으로 뺐다. 둘 다 열려 있으면 위아래로 쌓이고
    넘치면 이 자리만 스스로 스크롤한다. */
+/* 사이클 구성과 버프 창 사이의 트리거 탑 — 고른 공격이 붙이고 태우는 것을 위에서 아래로 쌓는다. */
+.trigger-tower{position:absolute;top:8px;bottom:10px;right:calc(var(--dock-w) + 20px);
+  width:var(--trig-w);display:flex;flex-direction:column;gap:6px;overflow-y:auto;padding-right:2px}
+.trigger-tower-head{letter-spacing:1.4px}
+.trigger-tower-empty{margin:0;color:var(--c-6d7689);font-size:11px;line-height:1.5}
+.trigger-chip{display:flex;flex-direction:column;gap:2px;padding:6px 8px;border-radius:9px;
+  background:var(--c-262d3f);border:1px solid var(--c-3c455c)}
+.trigger-chip em{font-style:normal;font-size:10px;font-weight:700;letter-spacing:.6px}
+.trigger-chip b{font-size:11.5px;color:var(--c-c2c9d6);line-height:1.3;word-break:keep-all}
+.trigger-chip span{font-size:10px;color:var(--c-8791a4)}
+.trigger-chip.add{border-color:var(--c-3d5f47)}
+.trigger-chip.add em{color:var(--c-7fc08a)}
+.trigger-chip.use{border-color:var(--c-7a4a52)}
+.trigger-chip.use em{color:var(--c-f08a9a)}
 .rotation-dock{position:absolute;top:8px;right:8px;bottom:10px;width:var(--dock-w);
   display:flex;flex-direction:column;gap:10px;overflow-y:auto;padding-right:2px}
 /* 버프 창은 원래 화면에 떠 있던 것이라 붙박이 자리에 맞게 위치·크기를 풀어 준다.
@@ -1054,6 +1068,8 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .rotation-rail>.panel{display:block;min-height:0;margin-right:0}
 .rotation-rail .rotation-wrap{flex:none;max-height:none;overflow:visible;padding-right:0}
 .rotation-dock{position:static;width:100%;margin-top:12px;overflow:visible}
+.trigger-tower{position:static;width:100%;margin-top:10px;flex-direction:row;flex-wrap:wrap;overflow:visible}
+.trigger-tower-empty{flex:1 0 100%}
 .rotation-dock .buff-dialog{max-height:70vh}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
@@ -1933,7 +1949,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .calc-party-bar .party article{position:relative;gap:5px;padding:12px 8px 10px}
 .calc-party-bar .party article img{width:52px;height:52px}
 .calc-party-bar .party strong{font-size:13px;line-height:1.3}
-.calc-party-bar .party-sets{left:calc(50% + 26px)}
 .calc-party-bar .party-sets i{width:20px;height:20px;border-radius:6px;font-size:10px}
 .calc-party-bar .party article .party-sets img{width:15px;height:15px}
 

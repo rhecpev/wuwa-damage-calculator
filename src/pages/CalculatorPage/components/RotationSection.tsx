@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
+import { triggersFor } from "../../../data/attackTriggers";
 import { DamageFormulaModal } from "./DamageFormulaModal";
 import { buildDamageSnapshot } from "./DamageBreakdownSection";
 import { BuffDialog } from "./BuffDialog";
@@ -507,6 +508,11 @@ export function RotationSection({ results }: RotationSectionProps) {
       )}
     </section>
 
+    {/* 사이클 구성과 버프 창 사이 — 고른 공격이 **피해 말고 따로 일으키는 일**(트리거)을
+        위에서 아래로 쌓아 보여 준다. 무엇을 붙이고 무엇을 태우는지 카드를 고른 채로 읽는 자리다.
+        트리거가 없는 공격이면 칸을 비워 둔다(자료에 없는 것이 아니라 하는 일이 없다는 뜻). */}
+    {selected && <TriggerTower result={selected} />}
+
     {/* 루틴 오른쪽 자리 — 버프 창이 여기에 뜬다.
         아무것도 안 열려 있으면 무엇을 누르면 되는지만 적어 둔다. */}
     <aside className="rotation-dock">
@@ -529,5 +535,58 @@ export function RotationSection({ results }: RotationSectionProps) {
         document.body,
       )}
     </>
+  );
+}
+
+/** 트리거 갈래별 딱지 색과 이름. */
+const TRIGGER_KIND: Record<string, string> = {
+  anomaly: "이상",
+  status: "상태",
+  debuff: "디버프",
+  resource: "자원",
+};
+
+/**
+ * 고른 공격의 트리거 탑.
+ * 사이클 구성 판과 버프 창 사이에 세로로 쌓는다 — 카드를 고르면 그 공격이 무엇을 붙이고
+ * 무엇을 태우는지 한눈에 보인다(data/attackTriggers.ts).
+ */
+function TriggerTower({ result }: { result: CalculationResult }) {
+  const list = triggersFor(result.item.characterId, result.attack.id);
+
+  return (
+    <aside className="trigger-tower">
+      <small className="trigger-tower-head">트리거</small>
+      {list.length === 0 ? (
+        <p className="trigger-tower-empty">피해 말고 따로 일으키는 일이 없습니다.</p>
+      ) : (
+        list.map((t, at) => {
+          const kind = t.anomaly
+            ? "anomaly"
+            : t.status
+              ? "status"
+              : t.debuff
+                ? "debuff"
+                : "resource";
+          const name = t.anomaly
+            ? `${ANOMALIES[t.anomaly].name} 효과`
+            : (t.status ?? t.debuff ?? t.resource ?? "");
+          return (
+            <div
+              key={at}
+              className={t.action === "add" ? "trigger-chip add" : "trigger-chip use"}
+              title={[t.condition, t.source].filter(Boolean).join(" — ")}
+            >
+              <em>{t.action === "add" ? "부여" : "소모"}</em>
+              <b>{name}</b>
+              <span>
+                {TRIGGER_KIND[kind]}
+                {t.amount !== undefined && ` · ${t.amount}`}
+              </span>
+            </div>
+          );
+        })
+      )}
+    </aside>
   );
 }

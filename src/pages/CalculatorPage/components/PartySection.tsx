@@ -231,31 +231,32 @@ export function PartyRosterSection({ config }: PartySectionProps) {
 
               {character ? (
                 <>
-                  {/* 캐릭터 그림 옆에 맞춰 둔 화음 세트를 붙인다 — 어느 세트를 끼고 있는지
-                      파티를 짜면서 바로 보이도록. 개수는 아이콘 위 작은 숫자로 적는다. */}
                   <div className="party-face">
                     {character.iconUrl && (
                       <img src={character.iconUrl} alt="" loading="lazy" draggable={false} />
                     )}
-                    {(() => {
-                      const sets = equippedFetterSets(character.id);
-                      if (sets.length === 0) return null;
-                      return (
-                        <span className="party-sets">
-                          {sets.map((set) => (
-                            <i key={set.name} title={`${set.name} · ${set.count}개`}>
-                              {set.icon ? (
-                                <img src={set.icon} alt="" loading="lazy" draggable={false} />
-                              ) : (
-                                set.name[0]
-                              )}
-                              <b>{set.count}</b>
-                            </i>
-                          ))}
-                        </span>
-                      );
-                    })()}
                   </div>
+                  {/* 맞춰 둔 화음 세트 — **아이콘과 이름 사이**에 가로로 눕힌다.
+                      예전에는 아이콘 오른쪽에 세로로 붙여 두어 카드 밖으로 비어져 나왔다.
+                      개수는 아이콘 위 작은 숫자로 적는다. */}
+                  {(() => {
+                    const sets = equippedFetterSets(character.id);
+                    if (sets.length === 0) return null;
+                    return (
+                      <span className="party-sets">
+                        {sets.map((set) => (
+                          <i key={set.name} title={`${set.name} · ${set.count}개`}>
+                            {set.icon ? (
+                              <img src={set.icon} alt="" loading="lazy" draggable={false} />
+                            ) : (
+                              set.name[0]
+                            )}
+                            <b>{set.count}</b>
+                          </i>
+                        ))}
+                      </span>
+                    );
+                  })()}
                   <strong>{character.name}</strong>
                 </>
               ) : (
