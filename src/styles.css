@@ -309,6 +309,10 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .char-list-name{display:flex;flex-direction:column;gap:2px;min-width:0}
 .char-list-name b{font-size:13px;font-weight:600;color:var(--c-c2c9d6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .char-list-name em{font-style:normal;font-size:11px;color:var(--c-8791a4)}
+/* 확인 화면에서 표시한 캐릭터 — 속성 옆 작은 꼬리표 */
+.char-list-review{margin-left:6px;padding:0 6px;font-size:10px;border-radius:999px;border:1px solid}
+.char-list-review.done{color:var(--c-7fc08a);background:var(--c-2d4335);border-color:var(--c-3d5f47)}
+.char-list-review.later{color:var(--c-e0a94d);background:var(--c-443c2b);border-color:var(--c-66543a)}
 .char-list-item.on{background:var(--c-30394a);border-color:var(--c-574f3a)}
 .char-list-item.on img,.char-list-item.on .char-list-blank{border-color:var(--c-e8c66a);box-shadow:0 0 0 2px rgba(var(--rgb-e8c66a),.25)}
 .char-list-item.on .char-list-name b{color:var(--c-e8c66a)}

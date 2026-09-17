@@ -416,6 +416,8 @@ export function NicknamesPage() {
         characters={characters}
         selectedId={selectedCharacterId}
         onSelect={setSelectedCharacterId}
+        checkedIds={review.checkedSet}
+        deferredIds={review.deferredSet}
       />
     </div>
   );
