@@ -132,3 +132,37 @@ export function autoBuffCandidates(): AutoBuffCandidate[] {
 
   return out;
 }
+
+/**
+ * 버프 id 하나가 자동 발동 후보인지 — 버프 창이 그 줄에 색을 달리 칠하는 데 쓴다.
+ *
+ * 화면에 뜨는 버프 id는 만든 자리에서 붙인 것이라(equippedBuffs) 자료 쪽 열쇠와 모양이 다르다.
+ *   weapon:<무기id>:<순번>
+ *   echoability:<캐릭터id>:<에코id>:<순번>
+ *   echoset:<캐릭터id>:<세트 이름>:<순번>
+ * 캐릭터 고유 버프(character:…)는 여기 대상이 아니다 — 자동 발동은 무기 · 에코에만 걸어 둔다.
+ */
+let byKey: Map<string, AutoBuffCandidate> | null = null;
+
+export function autoBuffRecommendation(buffId: string): AutoBuffCandidate | null {
+  if (!byKey) {
+    byKey = new Map(
+      autoBuffCandidates()
+        .filter((row) => row.kinds.length > 0)
+        .map((row) => [`${row.what}|${row.key}|${row.index}`, row]),
+    );
+  }
+  const parts = buffId.split(":");
+  if (parts[0] === "weapon" && parts.length === 3) {
+    return byKey.get(`무기|${parts[1]}|${parts[2]}`) ?? null;
+  }
+  if (parts[0] === "echoability" && parts.length === 4) {
+    return byKey.get(`에코 어빌리티|${parts[2]}|${parts[3]}`) ?? null;
+  }
+  // 세트 이름에는 콜론이 없다 — 앞뒤를 떼면 가운데가 통째로 이름이다.
+  if (parts[0] === "echoset" && parts.length >= 4) {
+    const name = parts.slice(2, -1).join(":");
+    return byKey.get(`화음 세트|${name}|${parts[parts.length - 1]}`) ?? null;
+  }
+  return null;
+}

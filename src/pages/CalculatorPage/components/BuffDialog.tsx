@@ -10,6 +10,7 @@ import {
   TARGET_OPTIONS,
 } from "../../../calculator/manualBuffs";
 import type { ManualBuff } from "../../../types/game";
+import { autoBuffRecommendation } from "../../../data/autoBuffCandidates";
 import { characters } from "../../../data/sampleData";
 import { num } from "../../../utils/format";
 import { CopyJson } from "./CopyJson";
@@ -189,8 +190,22 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
               ? characters.find((c) => c.id === buff.ownerId)
               : undefined;
 
+            // 자료에 조건이 「○○ 발동 후 N초」로 적혀 있는데 아직 자동 발동을 안 건 줄 —
+            // 배경색을 달리해 「이건 루틴이 대신 켜 줄 수 있다」를 그 자리에서 보이게 한다
+            // (data/autoBuffCandidates.ts. 목록만 보려면 npm run report:autobuffs).
+            const recommended = buff.triggeredBy?.length ? null : autoBuffRecommendation(buff.id);
+
             return (
-              <label key={buff.id} className={checked ? "on" : ""}>
+              <label
+                key={buff.id}
+                className={[checked ? "on" : "", recommended ? "rec" : ""].filter(Boolean).join(" ")}
+                title={
+                  recommended
+                    ? `자동 발동 후보 — 「${recommended.condition}」이라 ` +
+                      `${recommended.kinds.map((k) => k.key).join(" · ")}를 루틴에 담으면 대신 켤 수 있습니다`
+                    : undefined
+                }
+              >
                 <input
                   type="checkbox"
                   checked={checked}

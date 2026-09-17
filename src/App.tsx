@@ -13,7 +13,6 @@ import { CyclePage } from "./pages/CyclePage/CyclePage";
 import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
 import { MatrixPlannerPage } from "./pages/MatrixPlannerPage/MatrixPlannerPage";
 import { NicknamesPage } from "./pages/NicknamesPage/NicknamesPage";
-import { AutoBuffPage } from "./pages/AutoBuffPage/AutoBuffPage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -37,7 +36,6 @@ function AppContent() {
         {tab === "cycleCompare" && <CycleComparePage />}
         {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "nicknames" && <NicknamesPage />}
-        {tab === "autoBuff" && <AutoBuffPage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />
