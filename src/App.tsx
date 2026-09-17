@@ -2,7 +2,6 @@ import { AppStateProvider } from "./context/AppStateContext";
 import { PartyConfigProvider } from "./context/PartyConfigContext";
 import { useAppState } from "./context/AppStateContext";
 import { TabNavigation, Footer } from "./components";
-import { StorageBar } from "./components/StorageBar";
 import { CalculatorPage } from "./pages/CalculatorPage/CalculatorPage";
 import { CharactersPage } from "./pages/CharactersPage/CharactersPage";
 import { EchoesPage } from "./pages/EchoesPage/EchoesPage";
@@ -24,9 +23,6 @@ function AppContent() {
 
       {/* 계산 탭은 오른쪽에 공격 루틴 기둥이 붙어서 본문 폭이 그만큼 줄어든다. */}
       <main className={tab === "calculator" ? "app has-rail" : "app"}>
-        {/* 어디에 저장되고 있는지 늘 보이게 — 서버가 없으면 탭을 닫는 순간 사라진다. */}
-        <StorageBar />
-
         {tab === "calculator" && <CalculatorPage />}
         {tab === "party" && <PartyPage />}
         {tab === "characters" && <CharactersPage />}

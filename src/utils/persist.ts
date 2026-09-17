@@ -70,6 +70,8 @@ let handle: DiskFileHandle | null = null;
  * 화면에 「다시 연결」 버튼을 띄우려고 따로 들고 있는다.
  */
 let needsPermission = false;
+/** 마지막 저장이 실패했는지(용량 초과 · 서버 끊김 · 파일 사라짐). 위 막대의 빨간 점이 본다. */
+let failed = false;
 
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((fn) => fn());
@@ -84,6 +86,15 @@ export const storageMode = (): StorageMode => mode;
 export const isFileBacked = (): boolean => mode === "file" || mode === "disk";
 /** 아직 원본에 못 올린 것이 있는지. */
 export const persistPending = (): boolean => dirty;
+/** 마지막 저장이 실패했는지. 다음 저장이 성공하면 풀린다. */
+export const persistFailed = (): boolean => failed;
+
+/** 실패 표시를 바꾸고, 바뀌었을 때만 알린다(저장은 잦아서 매번 알리면 화면이 계속 다시 그려진다). */
+const setFailed = (next: boolean) => {
+  if (failed === next) return;
+  failed = next;
+  notify();
+};
 
 /** 이 브라우저가 하드의 파일에 쓸 수 있는지(크롬 계열 데스크톱). */
 export const diskAvailable = (): boolean => supportsDisk();
@@ -165,8 +176,10 @@ function writeBrowser(): void {
     }
     for (const key of stale) localStorage.removeItem(key);
     for (const [key, value] of memory) localStorage.setItem(key, value);
+    if (mode === "browser") setFailed(false);
   } catch {
-    // 용량 초과·시크릿 창 등 — 저장 실패가 앱을 막지는 않게 한다.
+    // 용량 초과·시크릿 창 등 — 저장 실패가 앱을 막지는 않게 한다. 화면에는 빨간 점으로 알린다.
+    if (mode === "browser") setFailed(true);
   }
 }
 
@@ -185,6 +198,7 @@ export function flushToFile(): void {
   if (mode === "disk") {
     if (!handle) return;
     void writeFile(handle, snapshot()).then((ok) => {
+      failed = !ok;
       if (ok) {
         dirty = false;
       } else {
@@ -204,12 +218,14 @@ export function flushToFile(): void {
     body: JSON.stringify(snapshot()),
     keepalive: true, // 창이 닫히는 중에도 끝까지 보낸다
   })
-    .then(() => {
-      dirty = false;
+    .then((response) => {
+      failed = !response.ok;
+      if (response.ok) dirty = false;
       notify();
     })
     .catch(() => {
       // 서버가 끊겼으면 다음 저장 때 다시 시도한다 — dirty를 남겨 둔다.
+      setFailed(true);
     });
 }
 

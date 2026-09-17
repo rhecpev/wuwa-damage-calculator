@@ -10,11 +10,16 @@ import { useState } from "react";
  */
 export type Theme = "dark" | "light" | "sepia" | "midnight";
 
-export const THEMES: { id: Theme; label: string }[] = [
-  { id: "dark", label: "다크" },
-  { id: "light", label: "라이트" },
-  { id: "sepia", label: "세피아" },
-  { id: "midnight", label: "미드나잇" },
+/**
+ * swatch — 테마 고르개의 동그라미 색. 그 테마의 바탕색(--c-242a39)이다.
+ * 변수로 쓰면 지금 테마 값이 나와 넷이 같은 색이 되므로 값을 그대로 적는다.
+ * styles.css의 테마 블록(세피아 · 미드나잇은 build-themes.mjs)을 바꾸면 여기도 맞춘다.
+ */
+export const THEMES: { id: Theme; label: string; swatch: string }[] = [
+  { id: "dark", label: "다크", swatch: "#232731" },
+  { id: "light", label: "라이트", swatch: "#ced3e1" },
+  { id: "sepia", label: "세피아", swatch: "#dfd3ba" },
+  { id: "midnight", label: "미드나잇", swatch: "#101422" },
 ];
 
 const KEY = "theme";
