@@ -12,7 +12,8 @@ export type TabType =
   | "matrixPlanner"
   | "nicknames"
   | "weapons"
-  | "profileImport";
+  | "profileImport"
+  | "autoBuff";
 
 interface AppStateContextType {
   tab: TabType;

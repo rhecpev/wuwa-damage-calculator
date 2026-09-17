@@ -118,6 +118,16 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     icon: brandIcon(<path d={DISCORD_MARK} />),
   },
   {
+    id: "autoBuff",
+    label: "자동 발동 후보",
+    hint: "「발동 후 N초」 버프 훑기",
+    icon: icon(
+      <>
+        <path d="M13 2 4.5 13H11l-1 9 8.5-11H12l1-9Z" />
+      </>,
+    ),
+  },
+  {
     id: "nicknames",
     label: "별명",
     hint: "공격 이름을 내 말로",
