@@ -11,8 +11,6 @@ export type TabType =
   | "cycleCompare"
   | "matrixPlanner"
   | "nicknames"
-  | "weaponBuffReview"
-  | "characterBuffReview"
   | "weapons"
   | "profileImport";
 

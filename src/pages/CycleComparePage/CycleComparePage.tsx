@@ -1094,7 +1094,7 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
 
         {baseRotation.length === 0 && (
           <p className="enemy-hint">
-            담긴 공격이 없습니다. 「데미지 계산」 탭에서 루틴을 짜거나, 위에서 담아 둔 사이클을
+            담긴 공격이 없습니다. 「대미지 계산」 탭에서 루틴을 짜거나, 위에서 담아 둔 사이클을
             고르세요.
           </p>
         )}

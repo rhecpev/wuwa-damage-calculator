@@ -197,12 +197,17 @@ export const matrixHpKey = (m: Pick<MatrixMonster, "round" | "slot">) => `${m.ro
 
 /**
  * 스테이지 버프(NewTowerBuffs) — 파티마다 하나 고른다. 전부 「최종적으로 N% 증가」라 피해에 따로 곱한다
- * (피해 보너스 합연산 자리가 아니다). 조건부 효과(이상 효과 추가 시 · 이탈 추가 시)는 **늘 켜진 것으로** 본다.
+ * (피해 보너스 합연산 자리가 아니다).
  *
- *   33 공용 강화          받는 피해 ×1.2, 강공격 피해 ×1.2 더
- *   30 이상 효과 강화      받는 피해 ×1.25(이상 효과를 건 뒤), 서리 효과 피해 ×1.8 더
- *   31 에코 어빌리티 강화  에코 어빌리티 ×1.3, 인멸 피해 ×1.2, 공명 스킬 ×1.2 — 겹치면 곱한다
- *   32 조화도 파괴 강화    피해 ×1.25(조화도 · 이탈 추가 뒤). 조화 밀집 · 이탈의 ×1.3은 넣지 않았다
+ *   33 공용 강화          받는 피해 ×1.2, 강공격 피해 ×1.2 더 — 조건 없음
+ *   30 이상 효과 강화      받는 피해 ×1.25(**이상 효과를 건 뒤부터**), 서리 효과 피해 ×1.8 더
+ *   31 에코 어빌리티 강화  에코 어빌리티 ×1.3, 인멸 피해 ×1.2, 공명 스킬 ×1.2 — 겹치면 곱한다. 조건 없음
+ *   32 조화도 파괴 강화    ×1.25(**「이탈」을 붙인 뒤부터**), 조화 밀집 · 이탈이면 ×1.3 더
+ *
+ * 조건부 두 줄(30 · 32)은 사이클이 실제로 그것을 붙였는지 **공격 트리거로 따라간다**
+ * — 몬스터 전용 시스템(feature)과 같은 자료(data/attackTriggers.ts)를 같은 규칙으로 읽는다.
+ * 배수는 **그 공격 앞의 상태**로 매긴다. 붙이는 그 타는 아직 덕을 보지 않는다.
+ * 지속 시간(30초 · 15초)은 보지 않는다 — 사이클 한 벌 안에서는 유지되는 것으로 본다.
  */
 export interface MatrixHitInfo {
   /** 피해 판정 분류(damageBonusType ?? type). */
@@ -212,11 +217,24 @@ export interface MatrixHitInfo {
   anomaly?: string;
 }
 
+/**
+ * 사이클이 지금까지 **무엇을 붙였는지**. 조건부 스테이지 버프가 이 값을 본다.
+ * 공격 트리거를 앞에서부터 훑으며 채운다(MatrixPlannerPage의 follow).
+ */
+export interface MatrixStageState {
+  /** 이상 효과를 하나라도 붙였는지(30번의 「이상 효과 추가 시」). */
+  anomalyOn: boolean;
+  /** 지금까지 붙인 부조화 「이탈」 상태 이름들(32번의 두 문장이 이걸 본다). */
+  breaches: Set<string>;
+}
+
 export interface MatrixBuff {
   id: number;
   name: string;
   desc: string;
-  multiplier: (hit: MatrixHitInfo) => number;
+  multiplier: (hit: MatrixHitInfo, state: MatrixStageState) => number;
+  /** 조건이 붙는 버프인지 — 화면에서 「아직 안 켜짐」을 알려 주려고 표시해 둔다. */
+  conditional?: boolean;
 }
 
 export const MATRIX_BUFFS: MatrixBuff[] = [
@@ -230,7 +248,9 @@ export const MATRIX_BUFFS: MatrixBuff[] = [
     id: 30,
     name: "이상 효과 강화",
     desc: "캐릭터가 이상 효과 추가 시, 목표가 받는 피해를 최종적으로 25% 증가시키고, 30초간 지속된다. 적군이 받는 서리 효과의 피해가 최종적으로 80% 증가된다",
-    multiplier: (h) => 1.25 * (h.anomaly === "FrostChafe" ? 1.8 : 1),
+    // 앞 문장만 조건부다 — 서리 효과 ×1.8은 조건 없이 늘 걸린다.
+    multiplier: (h, st) => (st.anomalyOn ? 1.25 : 1) * (h.anomaly === "FrostChafe" ? 1.8 : 1),
+    conditional: true,
   },
   {
     id: 31,
@@ -243,6 +263,9 @@ export const MATRIX_BUFFS: MatrixBuff[] = [
     id: 32,
     name: "조화도 파괴 강화",
     desc: "캐릭터가 조화도 · 이탈 상태 추가 시, 파티 전체의 피해가 최종적으로 25% 증가되며, 30초간 지속된다. 캐릭터가 조화 밀집 · 이탈 상태 추가 시, 피해가 최종적으로 30% 증가되며, 15초간 지속된다",
-    multiplier: () => 1.25,
+    // 두 문장이 따로 선다 — 아무 「이탈」이나 붙으면 ×1.25, 그게 조화 밀집 · 이탈이면 ×1.3이 더 붙는다.
+    multiplier: (_h, st) =>
+      (st.breaches.size > 0 ? 1.25 : 1) * (st.breaches.has("조화 밀집 · 이탈") ? 1.3 : 1),
+    conditional: true,
   },
 ];

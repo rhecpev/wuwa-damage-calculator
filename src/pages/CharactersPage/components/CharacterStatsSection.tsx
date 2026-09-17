@@ -18,6 +18,7 @@ import type { Echo, Element } from "../../../types/game";
 import type { Stats } from "../../../types/stats";
 import { flat } from "../../../utils/format";
 import { StatOrigin } from "./StatOrigin";
+import { ELEMENT_COLORS, elementIcon } from "../../../data/elements";
 
 interface CharacterStatsSectionProps {
   characterId: string;
@@ -193,15 +194,23 @@ export function CharacterStatsSection({
 
   return (
     <section className="panel">
-      <div className="row">
-        <div>
-          <small>STATS</small>
-          <h2>
-            {character.name} - 스탯
-            <span style={{ color: "var(--c-9ea7b7)", fontSize: 14, marginLeft: 8 }}>
-              Lv.{character.level} · {ELEMENT_NAMES[character.element]} · 공명체인 {chain}단계
+      {/* 캐릭터 얼굴을 크게 두고, 이름 아래에 레벨 · 속성 · 공명체인을 한 줄로 적는다. */}
+      <div className="char-head">
+        {character.iconUrl && (
+          <img className="char-head-face" src={character.iconUrl} alt="" loading="lazy" />
+        )}
+        <div className="char-head-text">
+          <h2>{character.name}</h2>
+          <div className="char-head-meta">
+            <span>Lv.{character.level}</span>
+            <span className="char-head-el" style={{ color: ELEMENT_COLORS[character.element] }}>
+              {elementIcon(character.element) && (
+                <img src={elementIcon(character.element)} alt="" loading="lazy" />
+              )}
+              {ELEMENT_NAMES[character.element]}
             </span>
-          </h2>
+            <span>공명체인 {chain}단계</span>
+          </div>
         </div>
       </div>
 

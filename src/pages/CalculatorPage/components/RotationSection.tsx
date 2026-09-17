@@ -77,6 +77,7 @@ function attackGroups(character: CalculationResult["character"], chain: number) 
     { category: "Variation", label: "변주 스킬" },
     { category: "Intro", label: "반주 스킬" },
     { category: "Sync", label: "조화도 파괴" },
+    { category: "Passive", label: "고유 스킬" },
   ];
   const bucket = new Map<string, CalculationResult["attack"][]>();
   for (const skill of character.skills) {
@@ -118,6 +119,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     allBuffs,
     config,
     characterChains,
+    autoBuffIdsFor,
   } = usePartyConfig();
   // 상세보기를 연 항목의 id. 카드 선택(selectedId)과는 별개로 둔다 —
   // 카드를 눌러 히트별로 펼치는 것과 계산식을 여는 것은 다른 동작이다.
@@ -323,7 +325,8 @@ export function RotationSection({ results }: RotationSectionProps) {
                     const cap = anomalyStackCap(
                       result.damage.breakdown.anomaly,
                       allBuffs,
-                      result.item.enabledBuffIds,
+                      // 앞 카드의 트리거로 저절로 켜진 버프도 상한을 올릴 수 있다.
+                      [...result.item.enabledBuffIds, ...autoBuffIdsFor(result.item.id).keys()],
                       result.item.disabledBuffIds,
                     );
                     return (

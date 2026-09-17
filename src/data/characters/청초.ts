@@ -1,5 +1,6 @@
 import type { Attack, Character, CharacterBuffTemplate, Skill } from "../../types/game";
 import { emptyStats } from "../../types/stats";
+import { DISCORD_ATTACK_ID } from "../discord";
 
 /**
  * 청초 (Id 1413, 5성, 기류, 직검)
@@ -527,22 +528,24 @@ const C6_ATTACK_IDS = ["1005801_5", "1005807_6", "1005803_1", "1005801_c1"];
 const passiveBuffs: CharacterBuffTemplate[] = [
   {
     /**
-     * 「조화 밀집 · 간섭」 스택 상한을 1 올린다 — 대응 캐릭터가 파티에 설 때마다 하나씩 는다.
-     * 상한이 오르면 그만큼 간섭을 더 쌓을 수 있고, 간섭 1스택은 곧 「증폭 1pt당 최종 피해 0.12%」다.
-     * 그래서 **늘어난 한 스택 몫을 상시 버프로** 담는다(스택 자체는 적에게 쌓이는 값이라 엔진이 못 센다).
+     * 원문: 「이 캐릭터가 파티에 있을 시, 목표의 「조화 밀집 · 간섭」 효과의 스택 최대치가 1스택 증가된다」
      *
-     * 받는 쪽을 대응 캐릭터로 묶어 둔다(onlyFor) — 간섭 스택을 피해로 바꾸는 능력이 없는 캐릭터는
-     * 상한이 올라도 얻는 것이 없다. 비례 기준(증폭)은 엔진이 **주는 쪽** 스탯으로 읽는다.
+     * 예전에는 늘어난 한 스택 몫을 이 줄이 직접 피해로 냈는데, 그러면 비례 기준(증폭)을 엔진이
+     * **주는 쪽** 스탯으로 읽어 버린다 — 원문은 「**자신의** 증폭」이라 받는 쪽이 맞다.
+     * 그래서 피해는 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)로 모으고, 이 줄은 **상한만** 올린다.
+     * statusStackCap이 이런 줄을 전부 **더해서** 상한을 낸다 — 셋이 서면 기본 1 + 3 = 4스택이다.
      */
     label: "청초 · 조화 밀집 간섭 상한 +1 (파티에 있으면)",
     target: "totalDamage",
     damageType: "All",
-    value: 0.0012, // 증폭 1pt당 0.12% — 늘어난 간섭 1스택 몫
-    scaleFrom: "SyncAmplify",
+    // 피해는 여기서 내지 않는다 — 늘어난 스택 몫까지 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이
+    // 맡는다. 이 줄은 **상한을 1 올려 주는 역할**만 하고, 버프 창이 「누가 얼마나 올렸는지」로 띄운다.
+    value: 0,
+    raisesStatusStacks: 1,
+    raisesStatusKinds: ["조화 밀집 · 간섭"],
     uptime: "passive",
     scope: "party",
-    onlyFor: ["luke", "qingchao", "linne", "denia", "monie"],
-    condition: "대응 캐릭터에게만 걸린다 · 늘어난 상한을 실제로 채운다고 본다",
+    condition: "이 캐릭터가 파티에 서면 「조화 밀집 · 간섭」 스택 상한이 1 오른다",
   },
   // ── 스킬에서 오는 것 (설명문에서 옮김) ──
   // 회로 원문은 「일반 공격 · 선인의 몸」과 「회피 반격 · 선인의 몸」 항목 아래에 있다 —
@@ -712,14 +715,14 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   {
     // 린네 · 데니아와 같은 「증폭 1pt당 최종 피해 0.12%」 형태다.
-    label: "만법을 깨는 검 · 최종 피해 (조화도 파괴 증폭 비례, 간섭 1스택당)",
+    label: "만법을 깨는 검 · 최종 피해 (조화도 파괴 증폭 비례, 간섭 1스택당) (효과 없음 — 「조화 밀집 · 간섭」 줄로 옮김)",
     target: "totalDamage",
     damageType: "All",
-    value: 0.0012, // 증폭 1pt당 0.12%
+    value: 0, // 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이 기본 1스택까지 함께 낸다
     scaleFrom: "SyncAmplify",
     uptime: "active",
     scope: "self",
-    condition: "기본 간섭 1스택 몫 — 대응 캐릭터가 파티에 설 때마다 늘어나는 몫은 각자의 「간섭 상한 +1」 줄이 맡는다",
+    condition: "효과 없음 — 「조화 밀집 · 간섭」을 켜세요. 줄은 버프 순번을 지키려 남겨 둔다",
   },
   // ── 1체인 「거궐로 멸한 흔적」에 붙는 것들 ──
   // 원문: 「제거된 「악을 씻어내는 검결」 1스택 당 목표가 「거궐로 멸한 흔적」으로부터 받는 피해를
@@ -805,7 +808,12 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceChain: 6,
-    condition: "기본 대응 줄과 같이 켠다 — 간섭 1스택 몫",
+    // 스택도 상한도 「조화 밀집 · 간섭」과 같이 간다 — 조화도 파괴 카드를 담으면 같이 켜지고 같이 쌓인다.
+    statusStacks: "조화 밀집 · 간섭",
+    triggeredBy: [DISCORD_ATTACK_ID],
+    stacksPerTrigger: 1,
+    endsOn: "rotation",
+    condition: "간섭 1스택당 늘어나는 몫 — 「조화 밀집 · 간섭」과 같은 스택으로 본다",
   },
 ];
 

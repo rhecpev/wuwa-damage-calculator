@@ -12,6 +12,8 @@ import {
 } from "../../data/cyclePresets";
 import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreakdownSection";
 import { num } from "../../utils/format";
+import { ELEMENT_COLORS, ELEMENT_NAMES } from "../../data/elements";
+import { resPresetOf } from "../../context/PartyConfigContext";
 
 /**
  * 사이클 관리 탭.
@@ -207,7 +209,7 @@ export function CyclePage() {
         {shown.length === 0 ? (
           <p className="preset-empty">
             {cyclePresets.length === 0
-              ? "담아둔 사이클이 없습니다. 데미지 계산 탭에서 루틴을 짜고 「사이클 저장」을 누르세요."
+              ? "담아둔 사이클이 없습니다. 대미지 계산 탭에서 루틴을 짜고 「사이클 저장」을 누르세요."
               : "이름에 맞는 사이클이 없습니다."}
           </p>
         ) : (
@@ -220,6 +222,7 @@ export function CyclePage() {
               return (
                 <li key={preset.id}>
                   <div className="cycle-row-main">
+                    {/* 캐릭터 셋을 먼저 — 어느 파티의 사이클인지가 이름보다 먼저 눈에 든다. */}
                     <span className="preset-faces">{preset.members.map(memberFace)}</span>
 
                     <div className="cycle-row-name">
@@ -246,9 +249,27 @@ export function CyclePage() {
                       <em>
                         {preset.rotation.length}대 · {cycles}사이클 ·{" "}
                         {new Date(preset.savedAt).toLocaleDateString("ko-KR")}
-                        {preset.snapshot && ` · 저장 당시 총 ${num(preset.snapshot.total)}`}
                         {preset.note && ` · ${preset.note}`}
                       </em>
+
+                      {/* 저장 당시 대미지와 몬스터 세팅 — 사이클을 고르는 실제 기준이라 목록에 바로 적는다. */}
+                      <span className="cycle-row-facts">
+                        <span className="cycle-fact damage">
+                          <u>저장 당시</u>
+                          <b>{preset.snapshot ? num(preset.snapshot.total) : "—"}</b>
+                        </span>
+                        <span className="cycle-fact">
+                          <u>몬스터</u>
+                          <b>
+                            {resPresetOf(preset.enemy.resPreset ?? "field").label} · Lv.
+                            {preset.enemy.level}
+                            <i style={{ color: ELEMENT_COLORS[preset.enemy.element] }}>
+                              {" "}
+                              {ELEMENT_NAMES[preset.enemy.element]}
+                            </i>
+                          </b>
+                        </span>
+                      </span>
                       {(orphans.length > 0 || diff.length > 0) && (
                         <span className="cycle-warn">
                           지금 환경과 다름

@@ -401,7 +401,19 @@ const passive5709: Skill = {
   category: "Intro",
   name: "일렁이는 맑은 물결",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiT.webp",
-  attacks: [],
+  // 피해가 없는 반주다. 그래도 카드로 세울 수 있게 히트 0짜리 한 줄을 둔다 —
+  // 이 카드가 루틴에 놓이면 뒤따르는 카드에 반주 버프가 저절로 켜진다(calculator/autoBuffs.ts).
+  attacks: [
+    {
+      id: "1005709_1",
+      name: "반주 스킬 · 일렁이는 맑은 물결",
+      type: "Intro",
+      element: "Glacio",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [],
+    },
+  ],
 };
 
 const passive5710: Skill = {
@@ -454,6 +466,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "party", // 파티 전원에게 걸린다
     condition: "반주 스킬 발동 후 30초간, 파티 전원",
+    // 반주 카드를 놓으면 그 뒤의 카드에 저절로 켜진다. 파티 전원에게 시간으로 걸리는 것이라
+    // 교체로 끊기지 않는다 — 끝은 사이클 경계로 본다(endsOn 생략 = "cycle").
+    // 아래 두 줄(편지 400 · 600)은 얼마나 쓰고 반주를 눌렀느냐로 갈려 자동으로 켜지 않는다.
+    triggeredBy: ["1005709_1"],
   },
   // 「꽃향기의 편지」를 얼마나 쓰고 반주를 발동했느냐로 갈리는 두 효과.
   // 둘 다 **수수의 공명 효율 200% 초과분**에 비례한다 — scaleFrom으로 스탯창 값을 그대로 받아

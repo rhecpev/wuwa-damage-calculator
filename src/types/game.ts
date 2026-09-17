@@ -1,6 +1,6 @@
 import type {Stats} from "./stats";
 import type {AnomalyKind} from "../data/anomalies";
-import type {AttackTrigger} from "../data/attackTriggers";
+import type {AttackTrigger,TriggerStatus} from "../data/attackTriggers";
 export type Element="Aero"|"Glacio"|"Electro"|"Fusion"|"Havoc"|"Spectro";
 export type DamageElement=Element|"Physical";
 // 공격이 가진 속성. 캐릭터·몬스터는 6속성 중 하나지만(Element), 피해 자체에는
@@ -77,7 +77,7 @@ export type SkillCategory="Basic"|"Skill"|"Circuit"|"Liberation"|"Variation"|"In
 //   공격 팔레트를 이 분류로 묶어서 보여준다.
 export interface SkillAttribute{attributeName:string;description:string;values:string[];}
 export interface Skill{id:string;name:string;category?:SkillCategory;attacks:Attack[];icon?:string;attributes?:SkillAttribute[];}
-export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
+export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];}
 // 캐릭터 고유효과·공명체인처럼 캐릭터가 스스로 들고 있는 버프를 계산 가능한 형태로 적어둔 것.
 //   무기 쪽 WeaponBuffTemplate과 같은 모양이되, 정련(values 5개) 대신 아래 두 조건을 쓴다.
 //   resonanceChain: 이 단계 이상 보유해야 걸린다. 생략하면 체인과 무관(고유효과 등).
@@ -99,6 +99,21 @@ export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType
 //     비전투 4초면 최대치로 채워져 속성 창에 보인다 — {0:1, 1:2, 6:4}).
 //   allElements: damageType "All"인 피해 보너스가 원문상 「전체 속성 피해 보너스」라 속성 창의
 //     6속성 칸에 모두 찍히는 것(치사 2체인). 계산에는 영향이 없고 스탯창 표시만 바뀐다.
+//   triggeredBy: 이 버프를 켜는 공격의 id 목록. 루틴에서 그 공격 카드가 나오면
+//     **그 뒤의 카드부터** 저절로 켜진다(calculator/autoBuffs.ts).
+//     반주처럼 「발동 후 N초」로 적힌 것을 손으로 일일이 켜지 않으려고 둔 칸이다.
+//     생략하면 예전처럼 공격마다 손으로 켠다.
+//   endsOn: 그렇게 켜진 것이 언제 풀리는지. 위 BuffEnd 참고(생략하면 사이클 끝).
+//   stacksPerTrigger: 트리거 공격이 나올 때마다 이만큼씩 스택이 쌓인다(상한까지).
+//     적으면 트리거가 몇 번 나오든 1스택으로 켜지기만 한다.
+//     「조화도 파괴를 쓸 때마다 「조화 밀집 · 간섭」이 1스택씩」이 이 꼴이다.
+//   statusStacks: 이 버프의 스택이 **적에게 붙은 상태**의 스택을 그대로 따른다.
+//     상한이 고정이 아니라 파티 구성에 따라 오르내리므로 statusStackCap이 정한다
+//     — 이상 효과의 anomalyStacks와 같은 자리이고, 이쪽은 이상 효과가 아닌 상태(부조화 등)를 맡는다.
+//   raisesStatusStacks / raisesStatusKinds: 그 상태의 스택 상한을 올려 주는 줄.
+//     「○○가 파티에 있을 시 「조화 밀집 · 간섭」 스택 최대치가 1 증가」가 이것이다.
+//     이상 효과 쪽(raisesAnomalyStacks)은 「중첩 불가」라 가장 큰 것 하나만 세지만,
+//     이쪽은 사람마다 따로 성립해서 **더한다**(calculator/manualBuffs.ts의 두 함수 참고).
 export interface Character{id:string;name:string;level:number;element:Element;weaponType:WeaponType;baseStats:Stats;skills:Skill[];chainEffects?:ChainEffect[];passiveBuffs?:CharacterBuffTemplate[];iconUrl?:string;artUrl?:string;echoIds?:string[];resonanceModes?:ResonanceMode[];}
 // passiveBuffs: 위 CharacterBuffTemplate 목록. 파티에 편성하면 버프 목록에 자동으로 잡힌다.
 // resonanceModes: 이 캐릭터가 고를 수 있는 공명 모드 목록. 모드가 있는 캐릭터만 채우고,
@@ -114,6 +129,24 @@ export interface Echo{id:string;name:string;cost:number;stats:Partial<Stats>;sub
 //   메인 옵션 몫과 부옵션 몫으로 갈리기 때문에 따로 들고 다닌다(calculateFinalStats 참고).
 //   합산은 stats로만 한다 — subStats는 그 안에 이미 들어 있는 값이라 더하면 두 번 걸린다.
 export interface Buff{id:string;name:string;source:string;description:string;stats:Partial<Stats>;}
+export type BuffEnd="cycle"|"switch"|"rotation";
+export interface BuffAutoTrigger{triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;}
+// 루틴에서 **저절로 켜지는 버프**가 쓰는 칸들(calculator/autoBuffs.ts).
+//   triggeredBy     이 공격 id가 앞 카드에 나오면 켜진다. 캐릭터 자신의 공격을 짚을 때 쓴다.
+//   triggeredByType 이 **분류**의 공격이 나오면 켜진다. 무기·에코처럼 누가 낄지 모르는 것이 쓴다
+//     — 「공명 해방 발동 후 15초」는 낀 캐릭터가 누구든 그 캐릭터의 해방이라야 한다.
+//     둘 다 적으면 어느 한쪽만 맞아도 켜진다.
+//   endsOn          언제 풀리는지(BuffEnd). 생략하면 사이클 끝.
+//   stacksPerTrigger 트리거가 나올 때마다 이만큼씩 쌓인다. 생략하면 켜지기만 한다.
+//   statusStacks    스택을 적에게 붙은 상태에서 따온다(상한은 statusStackCap).
+
+// triggeredBy로 저절로 켜진 버프가 **언제 풀리는지**(calculator/autoBuffs.ts).
+//   "cycle"  = 사이클이 끝나면(적지 않으면 이쪽). 수수 「일렁이는 맑은 물결」처럼 파티 전원에게
+//     시간으로 걸려 교체로 끊기지 않는 것 — 루틴에 시간축이 없어 끝을 잡을 데가 사이클뿐이다.
+//   "switch" = 받은 캐릭터가 물러나면. 반주 중 「다음 등장 캐릭터에게 … 전환하면 즉시 끝난다」로
+//     적힌 것(절지 「글레이징 기법」). 사이클 경계를 보지 않고 카드 주인이 바뀌는 데서 끊는다.
+//   "rotation" = 루틴이 끝날 때까지. 적에게 쌓여 다음 사이클로 그대로 넘어가는 것
+//     (「조화 밀집 · 간섭」 스택). 상한이 있으면 쓰는 쪽에서 자른다.
 export type BuffUptime="passive"|"active";
 // 버프가 걸려 있는 방식.
 //   passive = 조건 없이 늘 걸려 있다(무기 부옵션형 고정 효과, 상시 고유효과 등)
@@ -162,7 +195,7 @@ export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamag
 //   atkPercent / hpPercent / defPercent = 공격력·HP·방어력 % 증가
 //     이 셋은 기초 스탯에 곱해지기 전에 합산돼야 해서, 다른 타깃과 달리
 //     calculateFinalStats의 곱연산 이전 단계에 얹힌다(manualBuffDelta 참고).
-export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;}
+export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];}
 // 수기로 입력하는 버프 프로토타입.
 //   label: 메모용 이름(선택). 계산에는 쓰이지 않는다.
 //   target: 위 BuffTarget — 계산의 어느 자리에 붙는지

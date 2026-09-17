@@ -214,8 +214,7 @@ export function SkillLevelSection({ characterId }: SkillLevelSectionProps) {
     <section className="panel">
       <div className="row">
         <div>
-          <small>SKILL TREE</small>
-          <h2>{character.name} - 스킬 노드</h2>
+          <h2>스킬 노드</h2>
         </div>
         <div className="tree-actions">
           <span className="skill-level-all">

@@ -13,10 +13,38 @@ const icon = (path: ReactNode) => (
   </svg>
 );
 
+/**
+ * 인게임 기능 아이콘을 그대로 쓰는 자리. 원본 주소를 직접 참조한다 —
+ * 캐릭터 · 에코 그림과 같은 규칙이다(파일을 받아 리포지토리에 넣지 않는다).
+ *
+ * 선 아이콘과 달리 currentColor를 타지 않아 활성/비활성 색이 따라오지 않는다.
+ * 대신 styles.css의 .sidebar-icon img가 밝기로 흐리고 켜는 것을 맡는다.
+ */
+const gameIcon = (url: string) => <img src={url} alt="" loading="lazy" />;
+
+/**
+ * 브랜드 마크 — 선이 아니라 **면**으로 그려진 로고를 담는다.
+ * 위 icon()은 stroke 방식이라 면으로 된 로고를 그리지 못한다. currentColor는 그대로 탄다.
+ */
+const brandIcon = (path: ReactNode) => (
+  <svg viewBox="0 0 24 24" fill="currentColor" stroke="none">
+    {path}
+  </svg>
+);
+
+/** 디스코드 공식 마크(브랜드 자산의 24×24 경로). */
+const DISCORD_MARK =
+  "M20.317 4.3698a19.7913 19.7913 0 0 0-4.8851-1.5152.0741.0741 0 0 0-.0785.0371c-.211.3753-.4447.8648-.6083 1.2495-1.8447-.2762-3.68-.2762-5.4868 0-.1636-.3933-.4058-.8742-.6177-1.2495a.077.077 0 0 0-.0785-.037 19.7363 19.7363 0 0 0-4.8852 1.515.0699.0699 0 0 0-.0321.0277C.5334 9.0458-.319 13.5799.0992 18.0578a.0824.0824 0 0 0 .0312.0561c2.0528 1.5076 4.0413 2.4228 5.9929 3.0294a.0777.0777 0 0 0 .0842-.0276c.4616-.6304.8731-1.2952 1.226-1.9942a.076.076 0 0 0-.0416-.1057c-.6528-.2476-1.2743-.5495-1.8722-.8923a.077.077 0 0 1-.0076-.1277c.1258-.0943.2517-.1923.3718-.2914a.0743.0743 0 0 1 .0776-.0105c3.9278 1.7933 8.18 1.7933 12.0614 0a.0739.0739 0 0 1 .0785.0095c.1202.099.246.198.3728.2924a.077.077 0 0 1-.0066.1276 12.2986 12.2986 0 0 1-1.873.8914.0766.0766 0 0 0-.0407.1067c.3604.698.7719 1.3628 1.225 1.9932a.076.076 0 0 0 .0842.0286c1.961-.6067 3.9495-1.5219 6.0023-3.0294a.077.077 0 0 0 .0313-.0552c.5004-5.177-.8382-9.6739-3.5485-13.6604a.061.061 0 0 0-.0312-.0286zM8.02 15.3312c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9555-2.4189 2.157-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.9555 2.4189-2.1569 2.4189zm7.9748 0c-1.1825 0-2.1569-1.0857-2.1569-2.419 0-1.3332.9554-2.4189 2.1569-2.4189 1.2108 0 2.1757 1.0952 2.1568 2.419 0 1.3332-.946 2.4189-2.1568 2.4189z";
+
+const ENCORE = "https://encore.moe/_nuxt/";
+
+/** 인게임 아이콘 원본 서버. 무기 종류 아이콘이 여기 있다(API의 WeaponTypeIcon). */
+const AKI = "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/";
+
 const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }> = [
   {
     id: "calculator",
-    label: "데미지 계산",
+    label: "대미지 계산",
     hint: "루틴 · 피해량",
     icon: icon(
       <>
@@ -26,8 +54,27 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
+    id: "characters",
+    label: "캐릭터",
+    hint: "무기 · 에코 · 스킬",
+    icon: gameIcon(`${ENCORE}SP_FuncIconRole.B66doHXn.svg`),
+  },
+  {
+    id: "weapons",
+    label: "무기",
+    hint: "보유 무기 등록",
+    // 대검 아이콘 — 무기 종류 다섯 중 생김새가 가장 또렷해 「무기」를 대표시킨다.
+    icon: gameIcon(`${AKI}SP_IconNorSword.webp`),
+  },
+  {
+    id: "echoes",
+    label: "에코",
+    hint: "보유 에코 등록",
+    icon: gameIcon(`${ENCORE}SP_FuncIconMonster.DjNJIuuu.svg`),
+  },
+  {
     id: "party",
-    label: "파티 관리",
+    label: "파티",
     hint: "저장한 파티",
     icon: icon(
       <>
@@ -38,43 +85,8 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "matrixPlanner",
-    label: "매트릭스",
-    hint: "파티 플래너 · 도는 순서",
-    icon: icon(
-      <>
-        <rect x="3" y="3" width="7.5" height="7.5" rx="1.6" />
-        <rect x="13.5" y="3" width="7.5" height="7.5" rx="1.6" />
-        <rect x="3" y="13.5" width="7.5" height="7.5" rx="1.6" />
-        <path d="M17.25 14.5v5.5M14.5 17.25h5.5" />
-      </>,
-    ),
-  },
-  {
-    id: "characters",
-    label: "캐릭터 관리",
-    hint: "무기 · 에코 · 스킬",
-    icon: icon(
-      <>
-        <circle cx="12" cy="8" r="3.4" />
-        <path d="M5 20c0-3.6 3.1-6 7-6s7 2.4 7 6" />
-      </>,
-    ),
-  },
-  {
-    id: "weapons",
-    label: "무기 관리",
-    hint: "보유 무기 등록",
-    icon: icon(
-      <>
-        <path d="M14.5 3.5 20 9l-9.5 9.5H5v-5.5z" />
-        <path d="m4 20 3-3" />
-      </>,
-    ),
-  },
-  {
     id: "cycles",
-    label: "사이클 관리",
+    label: "사이클",
     hint: "담아둔 공격 루틴 · 주고받기",
     icon: icon(
       <>
@@ -84,14 +96,10 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "echoes",
-    label: "에코 관리",
-    hint: "보유 에코 등록",
-    icon: icon(
-      <>
-        <path d="M12 3l2.3 6.2L21 11l-6.7 1.8L12 19l-2.3-6.2L3 11l6.7-1.8z" />
-      </>,
-    ),
+    id: "matrixPlanner",
+    label: "매트릭스",
+    hint: "파티 플래너 · 도는 순서",
+    icon: gameIcon(`${ENCORE}SP_IconActivityTowerGuide.CveSAbrf.svg`),
   },
   {
     id: "cycleCompare",
@@ -104,49 +112,18 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
+    id: "profileImport",
+    label: "디스코드 프로필 입력",
+    hint: "카드 사진 한 장으로 채우기",
+    icon: brandIcon(<path d={DISCORD_MARK} />),
+  },
+  {
     id: "nicknames",
     label: "별명",
     hint: "공격 이름을 내 말로",
     icon: icon(
       <>
         <path d="M20.5 10.5 13 18a3.5 3.5 0 0 1-5-5l7.5-7.5a2.5 2.5 0 0 1 3.5 3.5L11.5 16" />
-      </>,
-    ),
-  },
-  // 옮겨 적은 무기 · 캐릭터 버프를 대조하고 고치는 확인용 탭이다.
-  // 배포본에서도 보인다 — 체크 상태를 파일로 내보내 주고받을 수 있게.
-  {
-    id: "weaponBuffReview",
-    label: "무기 버프 확인",
-    hint: "설명문과 대조",
-    icon: icon(
-      <>
-        <path d="M14.5 3.5 20 9l-9.5 9.5H5v-5.5z" />
-        <path d="m13 14 2 2 4-4" />
-      </>,
-    ),
-  },
-  {
-    id: "characterBuffReview",
-    label: "캐릭터 버프 확인",
-    hint: "고유효과 · 체인 정리",
-    icon: icon(
-      <>
-        <circle cx="10" cy="8" r="3.2" />
-        <path d="M4 20c0-3.4 2.7-5.6 6-5.6 1.3 0 2.5.3 3.4.9" />
-        <path d="m15 18 2 2 4-4" />
-      </>,
-    ),
-  },
-  {
-    id: "profileImport",
-    label: "디스코드 프로필 입력",
-    hint: "카드 사진 한 장으로 채우기",
-    icon: icon(
-      <>
-        <rect x="3" y="4" width="18" height="16" rx="2" />
-        <circle cx="9" cy="10" r="2" />
-        <path d="M4 18l5-5 3 3 3-3 5 5" />
       </>,
     ),
   },

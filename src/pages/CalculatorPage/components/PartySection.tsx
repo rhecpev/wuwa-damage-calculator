@@ -130,7 +130,7 @@ export function PartyRosterSection({ config }: PartySectionProps) {
           onClick={() => setPresetOpen((open) => !open)}
           title="담아둔 파티를 불러옵니다"
         >
-          파티 불러오기{partyPresets.length > 0 && ` (${partyPresets.length})`}
+          파티 불러오기
         </button>
       </div>
 
@@ -275,13 +275,23 @@ export function PartyRosterSection({ config }: PartySectionProps) {
           onPick={(characterId) => {
             assignCharacterToSlot(PARTY_SLOTS[pickSlot], characterId);
             setSelectedCharacterId(characterId);
-            setPickSlot(null);
+            // 창을 닫지 않는다 — 셋을 이어서 고를 수 있어야 한다.
+            // 방금 채운 자리를 빼고 남은 빈 자리로 옮겨 간다. 다 찼으면 그 자리에 머문다(바꿔 끼우기).
+            const next = PARTY_SLOTS.findIndex(
+              (slot, i) => i !== pickSlot && !config[slot].characterId,
+            );
+            if (next >= 0) setPickSlot(next);
+          }}
+          onSlot={setPickSlot}
+          onDrop={(index, characterId) => {
+            assignCharacterToSlot(PARTY_SLOTS[index], characterId);
+            setSelectedCharacterId(characterId);
           }}
           onClear={() => {
             const current = config[PARTY_SLOTS[pickSlot]].characterId;
             clearSlot(PARTY_SLOTS[pickSlot]);
             if (current && selectedCharacterId === current) setSelectedCharacterId(null);
-            setPickSlot(null);
+            // 비운 뒤에도 창은 열어 둔다 — 그 자리를 바로 다시 채우는 일이 잦다.
           }}
         />
       )}
@@ -328,14 +338,22 @@ function SlotPickerDialog({
   onPick,
   onClear,
   onClose,
+  onSlot,
+  onDrop,
 }: {
   config: PartyConfig;
   slotIndex: number;
   onPick: (characterId: string) => void;
   onClear: () => void;
   onClose: () => void;
+  /** 채울 자리를 바꾼다. 창 위의 자리 세 칸을 눌렀을 때. */
+  onSlot: (index: number) => void;
+  /** 끌어다 놓아 그 자리에 바로 앉힌다. 고르는 자리(slotIndex)는 그대로 둔다. */
+  onDrop: (index: number, characterId: string) => void;
 }) {
   const [query, setQuery] = useState("");
+  /** 끌고 지나가는 자리 — 테두리를 밝혀 어디에 놓이는지 보인다. */
+  const [overSlot, setOverSlot] = useState<number | null>(null);
   const needle = query.trim().toLowerCase();
   const list = getAvailableCharacters().filter((c) => c.name.toLowerCase().includes(needle));
   const current = config[PARTY_SLOTS[slotIndex]].characterId;
@@ -354,11 +372,56 @@ function SlotPickerDialog({
           <div>
             <small>PARTY</small>
             <h3>{slotIndex + 1}번 캐릭터</h3>
-            <span>고른 캐릭터가 이 자리에 앉습니다. 파티에 있는 캐릭터를 고르면 자리가 맞바뀝니다.</span>
+            <span>
+              고르면 이 자리에 앉고 <b>다음 빈 자리로 넘어갑니다</b> — 셋을 이어서 고를 수 있습니다.
+              파티에 있는 캐릭터를 고르면 자리가 맞바뀝니다.
+            </span>
           </div>
           <button className="formula-close" onClick={onClose}>
             ×
           </button>
+        </div>
+
+        {/* 자리 셋 — 지금 채우는 자리가 밝다. 눌러서 채울 자리를 옮길 수 있다. */}
+        <div className="slot-pick-slots">
+          {PARTY_SLOTS.map((slot, index) => {
+            const char = getAvailableCharacters().find((c) => c.id === config[slot].characterId);
+            return (
+              <button
+                key={slot}
+                className={[
+                  "slot-pick-slot",
+                  index === slotIndex ? "on" : "",
+                  overSlot === index ? "over" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")}
+                onClick={() => onSlot(index)}
+                onDragOver={(event) => {
+                  if (!dragHas(event, CHAR_MIME)) return;
+                  event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
+                  setOverSlot(index);
+                }}
+                onDragLeave={() => setOverSlot((cur) => (cur === index ? null : cur))}
+                onDrop={(event) => {
+                  event.preventDefault();
+                  const characterId = event.dataTransfer.getData(CHAR_MIME);
+                  setOverSlot(null);
+                  if (characterId) onDrop(index, characterId);
+                }}
+                title={`${index + 1}번 자리를 채웁니다 — 아래 목록에서 끌어다 놓아도 됩니다`}
+              >
+                <em>{index + 1}</em>
+                {char?.iconUrl ? (
+                  <img src={char.iconUrl} alt="" loading="lazy" />
+                ) : (
+                  <span className="slot-pick-blank" />
+                )}
+                <b>{char?.name ?? "빈 자리"}</b>
+              </button>
+            );
+          })}
         </div>
 
         <div className="panel-head slot-pick-head">
@@ -386,8 +449,14 @@ function SlotPickerDialog({
                 className={["pick-card", at >= 0 ? "in" : "", char.id === current ? "on" : ""]
                   .filter(Boolean)
                   .join(" ")}
+                // 위 자리 셋으로 끌어다 놓으면 그 자리에 앉는다 — 순서를 정해 담을 때 쓴다.
+                draggable
+                onDragStart={(event) => {
+                  event.dataTransfer.setData(CHAR_MIME, char.id);
+                  event.dataTransfer.effectAllowed = "copyMove";
+                }}
                 onClick={() => onPick(char.id)}
-                title={`${char.element} · ${char.weaponType}${at >= 0 ? ` — 지금 ${at + 1}번 자리` : ""}`}
+                title={`${char.element} · ${char.weaponType}${at >= 0 ? ` — 지금 ${at + 1}번 자리` : ""} (위 자리로 끌어다 놓을 수 있습니다)`}
               >
                 {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
                 <b>{char.name}</b>

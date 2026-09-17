@@ -306,7 +306,6 @@ export function EchoesPage() {
 
   return (
     <section className="panel">
-      <small>ECHO LIST</small>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>내 에코 목록 ({myEchoes.length}개)</h2>
         <div style={{ display: "flex", gap: "8px" }}>
@@ -1215,23 +1214,54 @@ export function EchoesPage() {
         </div>
       )}
 
+      {/* 수정 · 저장 창. 그림으로 등록할 때 뜨는 일괄 다이얼로그와 같은 껍데기다 —
+          목록을 덮지 않고 위에 떠서, 뒤에 있는 목록을 그대로 두고 고칠 수 있다.
+          바깥을 누르면 닫힌다(안쪽 클릭은 stopPropagation으로 막는다). */}
       {selectedEcho && (
-        <EchoDetailModal
-          echo={selectedEcho as any}
-          isEditing={(selectedEcho as any).pk !== undefined && myEchoes.some(e => e.pk === (selectedEcho as any).pk)}
-          onSave={handleSaveEcho}
-          onUpdate={handleUpdateEcho}
-          onCancel={() => setSelectedEcho(null)}
-        />
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(0, 0, 0, 0.5)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 1000,
+            padding: "24px",
+          }}
+          onClick={() => setSelectedEcho(null)}
+          role="presentation"
+        >
+          <div
+            style={{ maxHeight: "90vh", overflow: "auto", width: "min(900px, 100%)" }}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <EchoDetailModal
+              echo={selectedEcho as any}
+              isEditing={
+                (selectedEcho as any).pk !== undefined &&
+                myEchoes.some((e) => e.pk === (selectedEcho as any).pk)
+              }
+              onSave={handleSaveEcho}
+              onUpdate={handleUpdateEcho}
+              onCancel={() => setSelectedEcho(null)}
+            />
+          </div>
+        </div>
       )}
 
-      {!selectedEcho && (
-        <div style={{
+      {/* 목록은 늘 보인다 — 수정 창이 위에 떠도 뒤에 그대로 남는다. */}
+      <div
+        style={{
           display: "flex",
           flexDirection: "column",
           gap: "8px",
           marginTop: "16px",
-        }}>
+        }}
+      >
           {(() => {
             const allFettersWithIcons = Array.from(
               myEchoes.flatMap(echo =>
@@ -1297,114 +1327,70 @@ export function EchoesPage() {
               </div>
             ) : null;
           })()}
-          {myEchoes
-            .filter((echo: any) => !selectedFetterFilter || echo.options?.selectedFetter === selectedFetterFilter)
-            .map((echo: any) => (
-            <div
-              key={echo.pk}
-              style={{
-                padding: "12px 16px",
-                border: "1px solid var(--c-4a5266)",
-                borderRadius: "6px",
-                display: "flex",
-                alignItems: "center",
-                gap: "16px",
-                background: "linear-gradient(135deg, var(--c-344059) 0%, var(--c-2d3a52) 100%)",
-                color: "var(--c-ffffff)",
-              }}
-            >
-              <div style={{ flex: 5, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {echo.iconUrl && (
-                  <img
-                    src={echo.iconUrl}
-                    alt={echo.name}
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      objectFit: "cover",
-                      borderRadius: "4px",
-                      border: "1px solid var(--c-4a5266)",
-                    }}
-                  />
-                )}
-              </div>
-              <div style={{ flex: 10, minWidth: 0, display: "flex", alignItems: "center" }}>
-                {echo.options?.selectedFetter && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "4px", minWidth: 0 }}>
-                    {(() => {
-                      const selectedGroup = echo.fetterGroups?.find((g: any) => g.name === echo.options.selectedFetter);
-                      return selectedGroup?.icon ? (
-                        <img src={selectedGroup.icon} alt="" style={{ width: "16px", height: "16px", flexShrink: 0 }} />
-                      ) : null;
-                    })()}
-                    <span style={{ fontSize: "12px", color: "var(--c-8d8d8d)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.options.selectedFetter}</span>
+          {/* 캐릭터 탭의 에코 카드와 같은 모양이다(.echo-row) — 한 군데만 고치면 둘이 같이 바뀐다. */}
+          <div className="echo-grid">
+            {myEchoes
+              .filter(
+                (echo: any) =>
+                  !selectedFetterFilter || echo.options?.selectedFetter === selectedFetterFilter,
+              )
+              .map((echo: any) => {
+                const fetter = echo.fetterGroups?.find(
+                  (g: any) => g.name === echo.options?.selectedFetter,
+                );
+                return (
+                  <div key={echo.pk} className="echo-row">
+                    <span className="echo-row-left">
+                      <span className="echo-row-icon">
+                        {echo.iconUrl && <img src={echo.iconUrl} alt="" loading="lazy" />}
+                      </span>
+                      <span className="echo-row-fetter">
+                        {fetter?.icon && <img src={fetter.icon} alt="" loading="lazy" />}
+                        <b>{echo.options?.selectedFetter || "화음 없음"}</b>
+                      </span>
+                    </span>
+
+                    <span className="echo-row-right">
+                      <strong className="echo-row-name">{echo.name}</strong>
+
+                      {echo.options?.mainOption?.type && (
+                        <em className="echo-row-main">
+                          <span>{echo.options.mainOption.type}</span>
+                          <b>{echo.options.mainOption.value}</b>
+                        </em>
+                      )}
+                      {/* 메인 서브 옵션 — 코스트로 정해지는 고정 옵션(4코스트 공격력 150 · 1코스트 HP 2280).
+                          스탯에 그대로 더해지는 값이라 목록에서도 보여야 어떤 에코인지 가늠할 수 있다. */}
+                      {echo.options?.mainSubOption?.type && (
+                        <em className="echo-row-mainsub">
+                          <span>{echo.options.mainSubOption.type}</span>
+                          <b>{echo.options.mainSubOption.value}</b>
+                        </em>
+                      )}
+
+                      <span className="echo-row-subs">
+                        {(echo.options?.mainSelects ?? []).map((opt: string, idx: number) =>
+                          opt ? (
+                            <span key={idx}>
+                              <span>{opt}</span>
+                              <b>{echo.options?.subSelects?.[idx]}</b>
+                            </span>
+                          ) : null,
+                        )}
+                      </span>
+
+                      <span className="echo-row-tools">
+                        <button onClick={() => setSelectedEcho(echo as any)}>수정</button>
+                        <button className="danger" onClick={() => handleDeleteEcho(echo.pk)}>
+                          삭제
+                        </button>
+                      </span>
+                    </span>
                   </div>
-                )}
-              </div>
-              <div style={{ flex: 10, minWidth: 0 }}>
-                <strong style={{ color: "var(--c-4a9eff)", fontSize: "14px", display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{echo.name}</strong>
-                {echo.options?.mainOption?.type && (
-                  <div style={{ fontSize: "12px", color: "var(--c-9a9a9a)", marginTop: "4px" }}>
-                    {echo.options.mainOption.type}: <span style={{ color: "var(--c-7fc3ff)" }}>{echo.options.mainOption.value}</span>
-                  </div>
-                )}
-                {/* 메인 서브 옵션 — 코스트로 정해지는 고정 옵션(4코스트 공격력 150 · 1코스트 HP 2280).
-                    스탯에 그대로 더해지는 값이라 목록에서도 보여야 어떤 에코인지 가늠할 수 있다. */}
-                {echo.options?.mainSubOption?.type && (
-                  <div style={{ fontSize: "12px", color: "var(--c-9a9a9a)", marginTop: "2px" }}>
-                    {echo.options.mainSubOption.type}:{" "}
-                    <span style={{ color: "var(--c-7fc3ff)" }}>{echo.options.mainSubOption.value}</span>
-                  </div>
-                )}
-              </div>
-              {echo.options?.mainSelects && echo.options.mainSelects.length > 0 && (
-                <div style={{ display: "flex", gap: "8px", flex: 60, justifyContent: "space-around" }}>
-                  {echo.options.mainSelects.map((opt: string, idx: number) => (
-                    opt ? (
-                      <div key={idx} style={{ fontSize: "12px", color: "var(--c-aaaaaa)", textAlign: "center", flex: 1 }}>
-                        <div style={{ color: "var(--c-7fc3ff)", fontWeight: "500", fontSize: "11px" }}>{opt}</div>
-                        <div style={{ fontSize: "11px" }}>{echo.options.subSelects?.[idx]}</div>
-                      </div>
-                    ) : null
-                  ))}
-                </div>
-              )}
-              <div style={{ display: "flex", gap: "8px", flex: 10 }}>
-                <button
-                  onClick={() => setSelectedEcho(echo as any)}
-                  style={{
-                    padding: "6px 12px",
-                    background: "var(--c-4a9eff)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  수정
-                </button>
-                <button
-                  onClick={() => handleDeleteEcho(echo.pk)}
-                  style={{
-                    padding: "6px 12px",
-                    background: "var(--c-ff4444)",
-                    color: "white",
-                    border: "none",
-                    borderRadius: "4px",
-                    cursor: "pointer",
-                    fontSize: "12px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  삭제
-                </button>
-              </div>
-            </div>
-          ))}
+                );
+              })}
         </div>
-      )}
+      </div>
     </section>
   );
 }

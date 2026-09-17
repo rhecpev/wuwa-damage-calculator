@@ -612,20 +612,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "passive",
     scope: "self",
   },
-  // 6체인 뒷부분 「분노의 번개」는 회전 베기 · 올려치기의 추가타(extraHits)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
-  // 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이다. 수정분 JSON을 반영한 뒤에 지운다.
-  {
-    label: "6체인 · 분노의 번개 추가 타격 (추가타로 옮김 · 효과 없음)",
-    target: "motionValue",
-    damageType: "All",
-    attackIds: ["1003901_7", "1003901_8"],
-    value: 0,
-    modifier: "increase",
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 6,
-    condition: "6체인 이상이면 회전 베기 · 올려치기에 분노의 번개 2타가 자동으로 붙는다",
-  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들

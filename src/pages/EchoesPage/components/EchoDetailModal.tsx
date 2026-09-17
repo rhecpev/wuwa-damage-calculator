@@ -178,9 +178,10 @@ export function EchoDetailModal({ echo, isEditing = false, onSave, onUpdate, onC
   };
 
   return (
+    // 다이얼로그 안에 들어가므로 바깥 여백을 판이 직접 갖는다(EchoesPage가 감싼다).
     <section className="panel" style={{ maxWidth: "900px", margin: "auto" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
-        <h2 style={{ margin: 0 }}>에코 저장</h2>
+        <h2 style={{ margin: 0 }}>{isEditing ? "에코 수정" : "에코 저장"}</h2>
         <button
           onClick={onCancel}
           style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--c-cccccc)" }}

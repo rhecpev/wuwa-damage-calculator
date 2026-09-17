@@ -23,11 +23,14 @@ import { calculateDiscordDamage } from "../../../calculator/discord";
 import { DISCORD_ATTACK_ID, discordAttack, isDiscordAttackId } from "../../../data/discord";
 import {
   anomalyStackCap,
+  statusStackCap,
   critOverrides,
   applyDamageTypeSwitch,
   buffContributions,
   manualBuffDelta,
 } from "../../../calculator/manualBuffs";
+import { autoBuffIds, NO_AUTO_BUFFS } from "../../../calculator/autoBuffs";
+import { attackTypeOf } from "../../../data/attackLookup";
 import type { Stats } from "../../../types/stats";
 import type { EchoLink, MyEcho } from "../../../data/echoStore";
 import type {
@@ -164,6 +167,12 @@ export function computeResults(
     );
   }
 
+  // 「이 공격을 쓰면 그 뒤로 걸린다」고 적힌 버프(수수의 반주 등)를 미리 짚어 둔다.
+  // 루틴에 써 넣지 않고 여기서 매번 다시 내므로, 트리거 카드를 지우거나 옮겨도 늘 맞는다.
+  const autoOnByItem = autoBuffIds(config.rotation, manualBuffs, (item) =>
+    attackTypeOf(item.characterId, item.attackId, links, owned),
+  );
+
   for (const item of config.rotation) {
     const baseCharacter = characters.find((c) => c.id === item.characterId);
     if (!baseCharacter) continue;
@@ -215,29 +224,40 @@ export function computeResults(
     // 조건부(active) 버프는 반대로 켜둔 것만 넣는다.
     // 공격 분류가 맞는지는 manualBuffDelta 안의 appliesTo가 다시 본다.
     const off = new Set(item.disabledBuffIds ?? []);
+    // 손으로 켠 것에, 앞 카드의 트리거로 저절로 켜진 것을 더한다. 자동분도 꺼 둘 수 있어야 하므로
+    // (반주를 썼지만 이 공격에는 안 걸린다고 보고 싶을 때) 꺼 둔 목록을 그대로 빼 준다.
+    const autoOn = autoOnByItem.get(item.id) ?? NO_AUTO_BUFFS;
+    const on = (buffId: string) =>
+      (item.enabledBuffIds.includes(buffId) || autoOn.has(buffId)) && !off.has(buffId);
+    // 스택 상한을 볼 때도 자동분을 같이 봐야 한다 — 상한을 올려주는 버프가 자동으로 켜질 수 있다.
+    const onIds = [...new Set([...item.enabledBuffIds, ...autoOn.keys()])].filter(
+      (id) => !off.has(id),
+    );
     // 배타 묶음은 계산에서도 한 번 더 막는다 — 같은 묶음의 발동 버프가 켜져 있으면 상시 버프는 뺀다
     // (브렌트 「극중 인생」 상시 ↔ 「나」의 인생 발동). 켜기 동작 밖에서 들어온 설정에도 안전하다.
     const activeGroups = new Set(
       manualBuffs
-        .filter((b) => b.uptime !== "passive" && b.exclusiveGroup && item.enabledBuffIds.includes(b.id))
+        .filter((b) => b.uptime !== "passive" && b.exclusiveGroup && on(b.id))
         .map((b) => b.exclusiveGroup),
     );
     const itemBuffs = manualBuffs
       .filter((buff) =>
         buff.uptime === "passive"
           ? !off.has(buff.id) && !(buff.exclusiveGroup && activeGroups.has(buff.exclusiveGroup))
-          : item.enabledBuffIds.includes(buff.id),
+          : on(buff.id),
       )
       // 스택형 버프는 이 공격에서 정한 스택이 있으면 그 값으로 바꿔 넣는다.
+      // 손으로 정한 것이 없으면 트리거로 쌓인 자동 스택을 쓴다(조화도 파괴마다 「간섭」 1스택).
       .map((buff) => {
-        const picked = item.buffStacks?.[buff.id];
+        const picked = item.buffStacks?.[buff.id] ?? autoOn.get(buff.id);
         if (picked === undefined || picked === buff.stacks) return buff;
-        // 이상 효과 스택을 쓰는 버프는 상한이 버프 구성에 따라 오르내린다 —
-        // 상한을 올려주던 버프를 끄면 담아 뒀던 스택이 상한 밖으로 남는다. 그때는 잘라 쓴다.
+        // 스택 상한은 버프 구성에 따라 오르내린다 — 상한을 올려주던 버프를 끄면 담아 뒀던 스택이
+        // 상한 밖으로 남는다. 그때는 잘라 쓴다.
         const cap = buff.anomalyStacks
-          ? anomalyStackCap(buff.anomalyStacks, manualBuffs, item.enabledBuffIds, item.disabledBuffIds)
-              .max
-          : (buff.maxStacks ?? picked);
+          ? anomalyStackCap(buff.anomalyStacks, manualBuffs, onIds, item.disabledBuffIds).max
+          : buff.statusStacks
+            ? statusStackCap(buff.statusStacks, manualBuffs, onIds, item.disabledBuffIds).max
+            : (buff.maxStacks ?? picked);
         return { ...buff, stacks: Math.min(picked, cap) };
       });
 
@@ -361,8 +381,7 @@ export function computeResults(
               // 상한을 올려주는 버프(치사의 반주)를 켜 뒀으면 그 상한을 쓴다.
               stacks:
                 item.anomalyStacks ??
-                anomalyStackCap(attack.anomaly, itemBuffs, item.enabledBuffIds, item.disabledBuffIds)
-                  .max,
+                anomalyStackCap(attack.anomaly, itemBuffs, onIds, item.disabledBuffIds).max,
               occurrences: item.anomalyOccurrences ?? 1,
             },
             character,

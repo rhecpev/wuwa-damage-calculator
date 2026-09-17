@@ -28,6 +28,9 @@ const SECTIONS: { category: SkillCategory; label: string }[] = [
   { category: "Variation", label: "변주 스킬" },
   { category: "Intro", label: "반주 스킬" },
   { category: "Sync", label: "조화도 파괴" },
+  // 고유 스킬에서 떨어지는 공격(히유키 「속삭이는 눈」의 추가 냉해 피해 등).
+  // 공격이 없는 고유 스킬이 대부분이라 그런 캐릭터에게는 이 구역이 아예 뜨지 않는다.
+  { category: "Passive", label: "고유 스킬" },
 ];
 
 /**

@@ -188,8 +188,7 @@ export function EchoSelector({
     <section className="panel">
       <div className="row">
         <div>
-          <small>ECHO</small>
-          <h2>{found.name} - 에코 설정</h2>
+          <h2>에코 설정</h2>
         </div>
         {onClose && <button onClick={onClose}>닫기</button>}
       </div>
@@ -272,33 +271,44 @@ export function EchoSelector({
                   onDragStart={() => setDrag({ pk: e.pk, from: null })}
                   onDragEnd={endDrag}
                 >
-                  <span className="echo-row-icon">
-                    {e.iconUrl && <img src={e.iconUrl} alt="" loading="lazy" />}
+                  {/* 왼쪽 — 에코 그림과 그 아래 화음 세트. */}
+                  <span className="echo-row-left">
+                    <span className="echo-row-icon">
+                      {e.iconUrl && <img src={e.iconUrl} alt="" loading="lazy" />}
+                    </span>
+                    <span className="echo-row-fetter">
+                      {icon && <img src={icon} alt="" loading="lazy" />}
+                      <b>{e.options?.selectedFetter || "화음 없음"}</b>
+                    </span>
                   </span>
 
-                  <span className="echo-row-fetter">
-                    {icon && <img src={icon} alt="" loading="lazy" />}
-                    {e.options?.selectedFetter}
-                  </span>
+                  {/* 오른쪽 — 이름 · 주옵션 · 메인 서브 옵션 · 부옵션을 세로로 쭉. */}
+                  <span className="echo-row-right">
+                    <strong className="echo-row-name">{e.name}</strong>
 
-                  <span className="echo-row-name">
-                    <strong>{e.name}</strong>
                     {e.options?.mainOption?.type && (
-                      <em>
-                        {e.options.mainOption.type}: <b>{e.options.mainOption.value}</b>
+                      <em className="echo-row-main">
+                        <span>{e.options.mainOption.type}</span>
+                        <b>{e.options.mainOption.value}</b>
                       </em>
                     )}
-                  </span>
-
-                  <span className="echo-row-subs">
-                    {(e.options?.mainSelects ?? []).map((opt: string, index: number) =>
-                      opt ? (
-                        <span key={index}>
-                          <b>{opt}</b>
-                          <em>{e.options?.subSelects?.[index]}</em>
-                        </span>
-                      ) : null,
+                    {e.options?.mainSubOption?.type && (
+                      <em className="echo-row-mainsub">
+                        <span>{e.options.mainSubOption.type}</span>
+                        <b>{e.options.mainSubOption.value}</b>
+                      </em>
                     )}
+
+                    <span className="echo-row-subs">
+                      {(e.options?.mainSelects ?? []).map((opt: string, index: number) =>
+                        opt ? (
+                          <span key={index}>
+                            <span>{opt}</span>
+                            <b>{e.options?.subSelects?.[index]}</b>
+                          </span>
+                        ) : null,
+                      )}
+                    </span>
                   </span>
 
                   <span className="echo-row-state">
@@ -315,7 +325,6 @@ export function EchoSelector({
                       </i>
                     )}
                     {on && <i className="echo-row-check">✓</i>}
-                    {detailButton(e.pk)}
                   </span>
                 </button>
               );

@@ -478,20 +478,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "passive", // 조건이 없어 늘 걸린다
     scope: "self",
   },
-  // 「꾸준한 수행」 추가 타격은 공격 카드(1001807_p5)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
-  // 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이라 빼면 뒤 줄 키가 당겨진다.
-  // 수정분 JSON을 소스에 반영한 뒤에 이 줄을 지운다.
-  {
-    label: "꾸준한 수행 · 질주 추가 타격 (공격 카드로 옮김 · 효과 없음)",
-    inherentSkillId: "1001805",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1001807_4"],
-    value: 0,
-    uptime: "active",
-    scope: "self",
-    condition: "공격 카드 「꾸준한 수행 · 질주 추가 피해」를 담는다",
-  },
 
   // ── 공명체인 ──
   {
@@ -523,17 +509,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "party", // 파티 전원에게 걸린다
     resonanceChain: 4,
     condition: "반주 스킬 흔적 · 의지의 발자취 발동 후 30초간, 파티 전원",
-  },
-  // 5체인 추가 타격은 공격 카드(1001803_c5)로 옮겼다 — 위 「꾸준한 수행」 줄과 같은 이유로 자리만 남긴다.
-  {
-    label: "5체인 · 사자의 질주 추가 타격 (공격 카드로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1001803_1"],
-    value: 0,
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 5,
   },
   {
     label: "6체인 · 다음 일반 공격 피해 보너스",

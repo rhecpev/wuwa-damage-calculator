@@ -56,8 +56,7 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
     <section className="panel">
       <div className="row">
         <div>
-          <small>RESONANCE CHAIN</small>
-          <h2>{character.name} - 공명체인 · 고유 버프</h2>
+          <h2>공명체인</h2>
         </div>
         <span style={{ color: "var(--c-9aa3b3)", fontSize: 12 }}>
           {buffs.length === 0

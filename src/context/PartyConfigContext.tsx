@@ -16,6 +16,9 @@ import {
   deriveEchoBuffs,
   deriveWeaponBuffs,
 } from "../calculator/equippedBuffs";
+import { autoBuffIds, NO_AUTO_BUFFS } from "../calculator/autoBuffs";
+import { clusterStateBuffs } from "../data/clusterBuffs";
+import { attackTypeOf } from "../data/attackLookup";
 import { characters } from "../data/sampleData";
 import { DEFAULT_WEAPON_LEVEL, WEAPON_LEVEL_MAX, WEAPON_LEVEL_MIN } from "../data/weapons";
 import {
@@ -24,20 +27,11 @@ import {
   setPreAscensionSource,
 } from "../data/characterStats";
 import { inherentSkillsOf, nodesOf } from "../data/characterNodes";
-import {
-  getWeaponBuffOverrides,
-  subscribeWeaponBuffOverrides,
-} from "../data/weaponBuffOverrides";
-import {
-  getCharacterBuffOverrides,
-  subscribeCharacterBuffOverrides,
-} from "../data/characterBuffOverrides";
-import { getEchoBuffOverrides, subscribeEchoBuffOverrides } from "../data/echoBuffOverrides";
 import { echoStoreVersion, subscribeEchoStore } from "../data/echoStore";
 import type { EchoLink } from "../data/echoStore";
 import { anomalyFromAttackId } from "../data/anomalies";
 import { anomalyStateBuffs } from "../data/anomalyBuffs";
-import { anomalyStackCap } from "../calculator/manualBuffs";
+import { anomalyStackCap, statusStackCap } from "../calculator/manualBuffs";
 import { isDiscordAttackId } from "../data/discord";
 
 /**
@@ -258,6 +252,13 @@ interface PartyConfigContextType {
    * 무기가 바뀌면 무기 버프가, 체인이 오르면 체인 버프가, 에코가 바뀌면 화음·어빌리티 버프가 따라 바뀐다.
    */
   buffsWith: (characterIds: string[], override?: GearOverride) => ManualBuff[];
+  /**
+   * 이 카드에서 **저절로 켜진** 버프 id. 앞 카드의 트리거(수수의 반주 등)로 붙은 것이다.
+   * 손으로 켠 것(enabledBuffIds)과 달리 자료에 남지 않고 루틴을 훑어 매번 다시 낸다
+   * — calculator/autoBuffs.ts. 꺼 둔 것(disabledBuffIds)은 여기서 이미 빠져 있다.
+   * 값은 그 카드에서의 스택이다(스택이 쌓이지 않는 버프는 1).
+   */
+  autoBuffIdsFor: (rotationId: string) => ReadonlyMap<string, number>;
 }
 
 const PartyConfigContext = createContext<PartyConfigContextType | undefined>(undefined);
@@ -637,6 +638,28 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       }));
       return;
     }
+    // 앞 카드의 트리거로 저절로 켜진 것은 「켠 목록」에서 빼도 트리거가 다시 켠다 —
+    // 상시 버프와 같이 「꺼 둔 목록」으로 다뤄야 이 카드에서만 빠진다.
+    if (autoBuffs.get(rotationId)?.has(buffId)) {
+      setConfig((current) => ({
+        ...current,
+        rotation: current.rotation.map((item) => {
+          if (item.id !== rotationId) return item;
+          const off = item.disabledBuffIds ?? [];
+          const isOff = off.includes(buffId);
+          return {
+            ...item,
+            // 껐다 켤 때 손으로 켠 자국이 남아 있으면 자동분과 겹친다 — 끌 때 같이 지운다.
+            enabledBuffIds: isOff
+              ? item.enabledBuffIds
+              : item.enabledBuffIds.filter((id) => id !== buffId),
+            disabledBuffIds: isOff ? off.filter((id) => id !== buffId) : [...off, buffId],
+          };
+        }),
+      }));
+      return;
+    }
+
     const group = buff?.exclusiveGroup;
     const siblings = group
       ? allBuffs.filter((b) => b.exclusiveGroup === group && b.id !== buffId).map((b) => b.id)
@@ -685,9 +708,13 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과)는 상한이 고정이 아니다 —
         // 이 공격에서 켜 둔 상한 증가 버프까지 보고 자른다. 버프 창이 띄우는 목록과 같은 규칙이라
         // 「6까지 고를 수 있는데 3으로 잘리는」 어긋남이 생기지 않는다.
+        const auto = autoBuffs.get(rotationId);
+        const onIds = [...item.enabledBuffIds, ...(auto ? auto.keys() : [])];
         const max = buff?.anomalyStacks
-          ? anomalyStackCap(buff.anomalyStacks, allBuffs, item.enabledBuffIds).max
-          : (buff?.maxStacks ?? 1);
+          ? anomalyStackCap(buff.anomalyStacks, allBuffs, onIds, item.disabledBuffIds).max
+          : buff?.statusStacks
+            ? statusStackCap(buff.statusStacks, allBuffs, onIds, item.disabledBuffIds).max
+            : (buff?.maxStacks ?? 1);
         const value = Math.min(Math.max(Math.round(stacks) || 1, 1), max);
         return { ...item, buffStacks: { ...item.buffStacks, [buffId]: value } };
       }),
@@ -1056,15 +1083,6 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   // 확인 화면(데이터 확인 · 버프 정리)에서 고쳐 둔 상시/발동 · 본인/파티.
   // derive*Buffs가 저장소에서 직접 읽어 가지만, 고친 즉시 목록이 다시 만들어지도록
   // 여기서도 구독해 두고 아래 useMemo의 의존 목록에 넣는다.
-  const weaponOverrides = useSyncExternalStore(
-    subscribeWeaponBuffOverrides,
-    getWeaponBuffOverrides,
-  );
-  const characterOverrides = useSyncExternalStore(
-    subscribeCharacterBuffOverrides,
-    getCharacterBuffOverrides,
-  );
-  const echoOverrides = useSyncExternalStore(subscribeEchoBuffOverrides, getEchoBuffOverrides);
   // 에코를 갈아끼우면 화음 세트 개수와 메인 에코가 달라진다. 저장소는 React 상태가 아니라
   // localStorage 한 벌이라, 저장될 때마다 올라가는 번호를 보고 다시 계산한다.
   const echoVersion = useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
@@ -1099,6 +1117,10 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ),
       ...deriveEchoBuffs(members.map((m) => m.character.id)),
       ...anomalyStateBuffs(members.map((m) => m.character.id)),
+      // 「조화 밀집 · 간섭」 — 암흑 효과와 같이 적에게 붙는 상태라 캐릭터마다 두지 않고 한 줄로 담는다.
+      ...clusterStateBuffs(
+        members.map((m) => ({ characterId: m.character.id, mode: m.config.resonanceMode })),
+      ),
     ];
   };
 
@@ -1132,6 +1154,9 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ...deriveWeaponBuffs(weapons, ids),
       ...(override.echoLinks ? deriveEchoBuffs(ids, override.echoLinks) : deriveEchoBuffs(ids)),
       ...anomalyStateBuffs(ids),
+      ...clusterStateBuffs(
+        members.map((m) => ({ characterId: m.character.id, mode: m.config.resonanceMode })),
+      ),
     ];
   };
 
@@ -1165,6 +1190,10 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       // 적에게 붙은 상태(암흑 효과)는 누가 붙였든 적에게 하나뿐이다 — 그래서 캐릭터마다 두지 않고
       // 여기 한 줄로 담는다. 다만 **붙일 수 있는 캐릭터가 파티에 있을 때만** 담는다.
       ...anomalyStateBuffs(members.map((m) => m.character.id)),
+      // 「조화 밀집 · 간섭」 — 암흑 효과와 같이 적에게 붙는 상태라 캐릭터마다 두지 않고 한 줄로 담는다.
+      ...clusterStateBuffs(
+        members.map((m) => ({ characterId: m.character.id, mode: m.config.resonanceMode })),
+      ),
     ];
   }, [
     manualBuffs,
@@ -1173,14 +1202,29 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     characterModes,
     // 고유 스킬을 켜고 끄면 그 스킬이 주는 버프도 목록에서 바로 빠져야 한다.
     characterInherents,
-    weaponOverrides,
-    characterOverrides,
-    echoOverrides,
     echoVersion,
     config.mainDps,
     config.subDps,
     config.support,
   ]);
+
+  // 앞 카드의 트리거로 저절로 켜지는 버프. 루틴이나 버프 목록이 바뀌면 같이 다시 난다.
+  const autoBuffs = useMemo(
+    () =>
+      autoBuffIds(config.rotation, allBuffs, (item) =>
+        attackTypeOf(item.characterId, item.attackId),
+      ),
+    // echoVersion — 낀 에코가 바뀌면 에코 어빌리티 공격의 분류도 다시 봐야 한다.
+    [config.rotation, allBuffs, echoVersion],
+  );
+  const autoBuffIdsFor = (rotationId: string): ReadonlyMap<string, number> => {
+    const on = autoBuffs.get(rotationId);
+    if (!on) return NO_AUTO_BUFFS;
+    // 이 카드에서 꺼 둔 것은 자동으로 켜진 것으로 치지 않는다 — 화면과 계산이 같은 규칙이어야 한다.
+    const off = config.rotation.find((item) => item.id === rotationId)?.disabledBuffIds;
+    if (!off || off.length === 0) return on;
+    return new Map([...on].filter(([id]) => !off.includes(id)));
+  };
 
   const value: PartyConfigContextType = {
     config,
@@ -1252,6 +1296,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     currentCycleMembers,
     buffIdsFor,
     buffsWith,
+    autoBuffIdsFor,
   };
 
   return <PartyConfigContext.Provider value={value}>{children}</PartyConfigContext.Provider>;

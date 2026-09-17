@@ -13,8 +13,6 @@ import { CyclePage } from "./pages/CyclePage/CyclePage";
 import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
 import { MatrixPlannerPage } from "./pages/MatrixPlannerPage/MatrixPlannerPage";
 import { NicknamesPage } from "./pages/NicknamesPage/NicknamesPage";
-import { WeaponBuffReviewPage } from "./pages/WeaponBuffReviewPage/WeaponBuffReviewPage";
-import { CharacterBuffReviewPage } from "./pages/CharacterBuffReviewPage/CharacterBuffReviewPage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -38,8 +36,6 @@ function AppContent() {
         {tab === "cycleCompare" && <CycleComparePage />}
         {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "nicknames" && <NicknamesPage />}
-        {tab === "weaponBuffReview" && <WeaponBuffReviewPage />}
-        {tab === "characterBuffReview" && <CharacterBuffReviewPage />}
         {tab === "profileImport" && <ProfileImportPage />}
 
         <Footer />

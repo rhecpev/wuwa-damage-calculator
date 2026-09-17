@@ -30,15 +30,6 @@ const stars = (rarity: number) => "★".repeat(rarity);
 
 const REFINE_STEPS = [1, 2, 3, 4, 5];
 
-/** 목록 정렬 기준 — 게임의 「레벨 순서」 자리에 해당한다. */
-const SORTS = [
-  { id: "rarity", label: "등급 순" },
-  { id: "atk", label: "공격력 순" },
-  { id: "name", label: "이름 순" },
-] as const;
-
-type SortId = (typeof SORTS)[number]["id"];
-
 /**
  * 무기 스킬 본문에는 정련 1~5단계 수치가 "4%/6.2%/8.4%/10.6%/12.8%" 처럼
  * 슬래시로 붙어 있다. 고른 단계의 값 하나만 남겨서 읽기 쉽게 만든다.
@@ -70,10 +61,6 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
   const { characterWeapons, setCharacterWeapon, setWeaponRefine, setWeaponLevel } =
     usePartyConfig();
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortId>("rarity");
-  // 기본은 무기 관리 탭에 담아둔 것만 보여준다. 아직 아무것도 안 담았거나
-  // 도감에서 바로 고르고 싶을 때를 위해 전체 보기를 열어 둔다.
-  const [ownedOnly, setOwnedOnly] = useState(true);
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
   const character = characters.find((c) => c.id === characterId);
   if (!character) return null;
@@ -124,39 +111,27 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
     ];
   };
 
+  // 정렬은 등급 순 하나로 고정한다 — 고를 기준 단추를 없앴다.
   // 이름은 무기 관리 탭과 같은 한글 순서로 — 두 화면의 목록 순서가 어긋나지 않게.
   const byName = (a: WeaponEntry, b: WeaponEntry) => a.name.localeCompare(b.name, "ko");
-  const compare = (a: WeaponEntry, b: WeaponEntry) => {
-    if (sort === "atk") return b.baseAtk - a.baseAtk || byName(a, b);
-    if (sort === "name") return byName(a, b);
-    return b.rarity - a.rarity || byName(a, b);
-  };
+  const compare = (a: WeaponEntry, b: WeaponEntry) => b.rarity - a.rarity || byName(a, b);
 
-  // 캐릭터가 드는 무기 종류만. 그 안에서 보유 여부와 이름으로 한 번 더 거른다.
-  // 「보유한 무기만」을 켜 두었으면 담아둔 게 없어도 전체를 보여주지 않는다.
-  // 예전에는 빈 화면을 피하려고 전체로 되돌렸는데, 그러면 안 가진 무기를 가진 것처럼
-  // 골라 끼우게 된다 — 걸러진 결과가 비었다는 사실 자체를 보여주는 편이 맞다.
-  // 이 캐릭터가 드는 종류 전체. 걸러서 비었을 때 종류 이름을 대려면 이쪽이 필요하다.
+  // 캐릭터가 드는 무기 종류 중 **무기 관리 탭에 담아 둔 자루만** 세운다.
+  // 도감 전체를 보여주면 안 가진 무기를 가진 것처럼 골라 끼우게 된다 — 늘 보유분만 본다.
+  // 자루마다 한 장이라 같은 무기를 두 자루 가졌으면 두 장이 뜬다(레벨 · 정련이 자루마다 다르다).
   const ofType = weaponsFor(character.weaponType);
   const typeName = ofType[0]?.typeName ?? character.weaponType;
   const q = query.trim().toLowerCase();
   const ofTypeIds = new Set(ofType.map((w) => w.id));
-  const cards: Card[] = ownedOnly
-    ? myWeapons
-        .filter((copy) => ofTypeIds.has(copy.weaponId))
-        .map((copy) => ({
-          key: `pk:${copy.pk}`,
-          weapon: weaponsById.get(copy.weaponId)!,
-          pk: copy.pk,
-          refine: copy.refine,
-          level: copy.level,
-        }))
-    : ofType.map((weapon) => ({
-        key: `id:${weapon.id}`,
-        weapon,
-        refine: 1,
-        level: WEAPON_LEVEL_MAX,
-      }));
+  const cards: Card[] = myWeapons
+    .filter((copy) => ofTypeIds.has(copy.weaponId))
+    .map((copy) => ({
+      key: `pk:${copy.pk}`,
+      weapon: weaponsById.get(copy.weaponId)!,
+      pk: copy.pk,
+      refine: copy.refine,
+      level: copy.level,
+    }));
   const candidates = cards
     .filter((card) => card.weapon.name.toLowerCase().includes(q))
     .sort((a, b) => compare(a.weapon, b.weapon) || (a.pk ?? 0) - (b.pk ?? 0));
@@ -173,18 +148,6 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
 
   return (
     <section className="panel">
-      <div className="row">
-        <div>
-          <small>WEAPON</small>
-          <h2>
-            {character.name} - 무기 교체
-            <span style={{ color: "var(--c-9ea7b7)", fontSize: 14, marginLeft: 8 }}>
-              {typeName}
-            </span>
-          </h2>
-        </div>
-      </div>
-
       <div className="weapon-layout">
         {/* ── 왼쪽: 보유 무기 격자 ── */}
         <div className="weapon-pane">
@@ -196,28 +159,10 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
             onChange={(event) => setQuery(event.target.value)}
           />
 
-          <label className="weapon-owned-filter">
-            <input
-              type="checkbox"
-              checked={ownedOnly}
-              onChange={(event) => setOwnedOnly(event.target.checked)}
-            />
-            보유한 무기만
-            {owned.size === 0 && <em>— 무기 관리 탭에서 먼저 담아야 합니다</em>}
-          </label>
-
           {candidates.length === 0 && (
             <p className="weapon-empty">
-              {ownedOnly ? (
-                <>
-                  보유한 {typeName}가 없습니다.
-                  <button className="weapon-empty-off" onClick={() => setOwnedOnly(false)}>
-                    전체 무기 보기
-                  </button>
-                </>
-              ) : (
-                "이름에 맞는 무기가 없습니다."
-              )}
+              {q ? "이름에 맞는 무기가 없습니다." : `보유한 ${typeName}가 없습니다.`}
+              {owned.size === 0 && <em> — 무기 탭에서 먼저 담아야 합니다</em>}
             </p>
           )}
 
@@ -291,21 +236,11 @@ export function WeaponSelector({ characterId }: WeaponSelectorProps) {
             })}
 
             {candidates.length === 0 && (
-              <p style={{ color: "var(--c-9ea7b7)" }}>조건에 맞는 무기가 없습니다.</p>
+              // 격자 한 칸에 갇혀 쪼그라들지 않게 줄 전체를 쓰게 한다.
+              <p className="weapon-grid-empty">조건에 맞는 무기가 없습니다.</p>
             )}
           </div>
 
-          <div className="weapon-sort">
-            {SORTS.map((item) => (
-              <button
-                key={item.id}
-                className={item.id === sort ? "on" : ""}
-                onClick={() => setSort(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
         </div>
 
         {/* ── 오른쪽: 고른 무기 상세 ── */}

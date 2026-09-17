@@ -8,10 +8,13 @@ import { computeResults } from "../CalculatorPage/hooks/useCalculationResults";
 import { useAppState } from "../../context/AppStateContext";
 import { usePersistedState } from "../../utils/usePersistedState";
 import type { CyclePreset } from "../../data/cyclePresets";
-import type { Element, PartyConfig } from "../../types/game";
+import type { Character, Element, PartyConfig } from "../../types/game";
 import { MATRIX_BUFFS, MATRIX_MONSTERS, MATRIX_ROUND_COUNT, MATRIX_SEASON, matrixHpKey } from "../../data/matrixSeason";
 import { triggersFor } from "../../data/attackTriggers";
 import type { MatrixBuff, MatrixMonster } from "../../data/matrixSeason";
+import { isMainDps, tagsOf } from "../../data/characterTags";
+import { adviseFor } from "../../data/partyAdvice";
+import type { AdviceRow } from "../../data/partyAdvice";
 
 /**
  * 매트릭스.
@@ -37,7 +40,7 @@ const PARTY_SIZE = 3;
 const ELEMENT_ORDER: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectro", "Havoc"];
 
 /**
- * 콘텐츠 규칙상 겹쳐 쓸 수 있는 횟수 — 치유·보조 다섯만 둘이고 나머지는 하나다.
+ * 콘텐츠 규칙상 겹쳐 쓸 수 있는 횟수 — 치유·보조만 둘이고 나머지는 하나다.
  * 넘겨 담는 것을 **막지는 않는다.** 넘겼다는 것만 눈에 띄게 표시한다.
  */
 const USE_LIMIT: Record<string, number> = {
@@ -46,9 +49,206 @@ const USE_LIMIT: Record<string, number> = {
   baizhi: 2, // 설지
   bochi: 2, // 복링
   monie: 2, // 모니에
+  shushu: 2, // 수수
 };
 
 const useLimit = (characterId: string): number => USE_LIMIT[characterId] ?? 1;
+
+/** 툴팁 줄바꿈. title 속성은 줄바꿈 문자를 그대로 쓴다. */
+const LF = String.fromCharCode(10);
+
+/** 추천 등급별 꼬리표. 색은 styles.css의 .pool-tier-* 가 맡는다. */
+const TIER_LABEL: Record<AdviceRow["tier"], string> = {
+  best: "최선책",
+  good: "차선책",
+  ok: "참고",
+};
+
+/**
+ * 보유 목록의 카드 하나. 「메인 딜러」와 「나머지」 두 구역이 같이 쓴다.
+ *
+ * advice가 있으면 추천 등급 · 버프 개수 · 대략적인 피해 증가를 함께 적는다.
+ * basis/onBasis는 메인 딜러 칸에만 넘긴다 — 담지 않고 추천 기준만 바꾸는 ★ 단추다.
+ */
+function PoolCard({
+  char,
+  at,
+  blocked,
+  onPlace,
+  basis,
+  onBasis,
+}: {
+  char: Character;
+  at: string[];
+  blocked: string | null;
+  onPlace: () => void;
+  basis?: boolean;
+  onBasis?: () => void;
+}) {
+  const limit = useLimit(char.id);
+  const over = at.length > limit;
+  // 겹쳐 쓸 수 있는 횟수가 남아 있으면 아직 「다 쓴 것」이 아니다 — 흐리게 하지 않는다.
+  // (수수 · 파수인처럼 두 번 쓸 수 있는 캐릭터가 한 번 담겼다고 꺼져 보이면 안 된다)
+  const spent = at.length >= limit;
+  const tags = tagsOf(char.id);
+
+  return (
+    <div className="pool-card-wrap">
+      <button
+        className={spent ? "pick-card in" : "pick-card"}
+        disabled={blocked !== null}
+        onClick={onPlace}
+        title={
+          blocked ??
+          (at.length > 0
+            ? `${at.join(" · ")}에 있습니다 (${at.length}/${limit} 사용)`
+            : [`${ELEMENT_NAMES[char.element]} · ${char.weaponType}`, tags.join(" · ")]
+                .filter(Boolean)
+                .join(" — "))
+        }
+      >
+        {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
+        <b>{char.name}</b>
+        <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
+          {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
+        </em>
+        {at.length > 0 && (
+          <i
+            className={over ? "over" : undefined}
+            title={
+              over
+                ? `겹쳐 쓸 수 있는 ${limit}회를 넘겼습니다 — ${at.join(" · ")}`
+                : `${at.length}/${limit} 사용 — ${at.join(" · ")}`
+            }
+          >
+            {at.length}/{limit}회{over ? " 초과" : ""}
+          </i>
+        )}
+      </button>
+
+      {/* 담지 않고 추천 기준만 바꾸는 단추. 메인 딜러 칸에만 나온다. */}
+      {onBasis && (
+        <button
+          className={basis ? "pool-basis on" : "pool-basis"}
+          title={basis ? "추천 기준입니다 — 누르면 해제" : "이 딜러를 추천 기준으로 삼습니다"}
+          onClick={onBasis}
+        >
+          ★
+        </button>
+      )}
+
+    </div>
+  );
+}
+
+/** 버프가 붙는 자리 이름 — 꼬리표에 짧게 적는다. */
+const TARGET_SHORT: Record<string, string> = {
+  atkPercent: "공격력",
+  damageBonus: "피해",
+  boost: "부스트",
+  totalDamage: "최종",
+  damageTaken: "받는피해",
+  critRate: "크리",
+  critDamage: "크리피해",
+  defIgnore: "방무",
+  defReduction: "방깎",
+  resPen: "저항무시",
+  resReduction: "저항감소",
+  energyRegen: "공명효율",
+  syncAmplify: "증폭",
+};
+
+/**
+ * 추천 순으로 세울 때 쓰는 **가로로 긴** 카드.
+ *
+ * 격자 카드는 「버프 6」처럼 개수만 적을 수밖에 없었다 — 어느 버프인지가 정작 고르는 기준인데
+ * 그게 안 보였다. 한 줄을 통째로 쓰고 걸리는 버프를 이름과 수치까지 전부 늘어놓는다.
+ */
+function AdviceCard({
+  char,
+  at,
+  blocked,
+  onPlace,
+  advice,
+}: {
+  char: Character;
+  at: string[];
+  blocked: string | null;
+  onPlace: () => void;
+  advice?: AdviceRow;
+}) {
+  const limit = useLimit(char.id);
+  const over = at.length > limit;
+  // 위 PoolCard와 같은 규칙 — 횟수가 남았으면 흐리게 하지 않는다.
+  const spent = at.length >= limit;
+
+  return (
+    <button
+      className={`advice-card${advice ? ` pool-tier-${advice.tier}` : ""}${spent ? " in" : ""}`}
+      disabled={blocked !== null}
+      onClick={onPlace}
+      title={
+        blocked ??
+        [
+          `대략 +${((advice?.gain ?? 0) * 100).toFixed(0)}% — 이 캐릭터의 파티 버프를 전부 최대로 받았을 때의 어림값입니다.`,
+          "사이클도 장비도 없는 자리라 크리티컬 확률 70%를 가정하고 셉니다. 정확한 값은 사이클을 짜고 계산 탭에서 보세요.",
+          "",
+          ...(advice?.reasons ?? []),
+        ].join(LF)
+      }
+    >
+      {char.iconUrl && <img className="advice-face" src={char.iconUrl} alt="" loading="lazy" />}
+
+      <span className="advice-who">
+        <b>{char.name}</b>
+        <em style={{ color: ELEMENT_COLORS[char.element] }}>{ELEMENT_NAMES[char.element]}</em>
+        {at.length > 0 && (
+          <i className={over ? "over" : undefined}>
+            {at.join(" · ")}
+          </i>
+        )}
+      </span>
+
+      {advice && (
+        <span className="advice-mark">
+          <span className="pool-tier">{TIER_LABEL[advice.tier]}</span>
+          <span className="pool-gain">
+            {advice.gain > 0 ? `+${(advice.gain * 100).toFixed(0)}%` : "—"}
+          </span>
+        </span>
+      )}
+
+      {/* 걸리는 버프를 전부 — 큰 것부터. 좁아지면 다음 줄로 흐른다. */}
+      <span className="advice-buffs">
+        {/* 조건이 안 서서 뺀 줄 — 왜 못 쓰는지 그 자리에 적는다. */}
+        {advice?.skipped.map((sk, i) => (
+          <span key={`x${i}`} className="advice-buff unmet" title={`${sk.label} — ${sk.why}`}>
+            <u>조건 안 섬</u>
+            {sk.label}
+          </span>
+        ))}
+        {advice?.buffs.length ? (
+          advice.buffs.map((b, i) => (
+            <span
+              key={i}
+              className={b.switchBound ? "advice-buff switch" : "advice-buff"}
+              title={b.switchBound ? `${b.label} — 교체하면 사라집니다` : b.label}
+            >
+              {b.switchBound && <u>교체 시 해제</u>}
+              {b.label}
+              <b>
+                +{(b.amount * 100).toFixed(0)}%
+                {TARGET_SHORT[b.target] ? ` ${TARGET_SHORT[b.target]}` : ""}
+              </b>
+            </span>
+          ))
+        ) : (
+          <span className="advice-none">이 딜러에게 걸리는 파티 버프가 없습니다</span>
+        )}
+      </span>
+    </button>
+  );
+}
 
 interface PlannerParty {
   /** 파티를 지우고 더해도 섞이지 않게 붙이는 번호. 화면의 「N파티」는 목록 순서로 센다. */
@@ -59,14 +259,14 @@ interface PlannerParty {
 /** 세부 탭. 순서가 화면 순서다. */
 const VIEWS = [
   { id: "planner", label: "파티 플래너", hint: "보유 캐릭터를 파티에 담기" },
-  { id: "order", label: "파티 순서 구성하기", hint: "도는 순서대로 끌어 옮기기" },
+  { id: "order", label: "매트릭스 시뮬레이터", hint: "순서대로 돌려 체력을 깎아 보기" },
 ] as const;
 
 type ViewId = (typeof VIEWS)[number]["id"];
 
 export function MatrixPlannerPage() {
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
-  const { cyclePresets, applyCyclePreset } = usePartyConfig();
+  const { cyclePresets, applyCyclePreset, characterChains, characterModes } = usePartyConfig();
   const { setTab } = useAppState();
   const [stored, setParties] = usePersistedState<PlannerParty[]>("matrixParties", []);
   const [view, setView] = useState<ViewId>("planner");
@@ -137,6 +337,51 @@ export function MatrixPlannerPage() {
       ELEMENT_NAMES[c.element].includes(needle),
   );
 
+  /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
+  const active =
+    parties.find((p) => p.id === activeId) ??
+    parties.find((p) => p.memberIds.length < PARTY_SIZE);
+
+  /**
+   * 손으로 못 박아 둔 추천 기준. 비어 있으면 **지금 채우는 파티의 1번 자리**를 기준으로 삼는다.
+   * 예전에는 이 값만 봤는데, 그러면 파티를 옮기거나 태그가 「메인 딜러」가 아닌 캐릭터를
+   * 1번에 넣었을 때 기준이 안 잡혀 추천이 통째로 사라졌다.
+   */
+  const [pinnedMain, setPinnedMain] = useState<string | null>(null);
+
+  /**
+   * 추천 기준. 손으로 못 박은 것이 먼저고, 없으면 지금 채우는 파티의 1번 자리다.
+   * 테두리가 밝은 파티가 곧 기준이 되므로 파티를 옮기면 추천도 따라 바뀐다.
+   */
+  const mainPick = pinnedMain ?? active?.memberIds[0] ?? null;
+
+  /** 목록을 「메인 딜러」와 「나머지」로 가른다 — 태그가 붙인 구분을 그대로 쓴다.
+   *  기준으로 잡힌 캐릭터는 태그와 상관없이 왼쪽(메인 딜러) 칸에 세운다. */
+  const mains = shown.filter((c) => isMainDps(c.id) || c.id === mainPick);
+  const others = shown.filter((c) => !isMainDps(c.id) && c.id !== mainPick);
+
+  /**
+   * 나머지 칸. 기준 딜러가 있으면 추천 순으로 다시 세우고, 없으면 속성 순 그대로다.
+   * 점수는 태그와 그 캐릭터의 파티 버프를 함께 본다(data/partyAdvice.ts).
+   */
+  const rest = useMemo(() => {
+    if (!mainPick) return others.map((char) => ({ char, advice: undefined }));
+    // 체인 · 모드를 같이 넘긴다 — 보유하지 않은 체인의 버프가 세어지면 안 된다.
+    const table = new Map(
+      adviseFor(
+        mainPick,
+        others.map((c) => c.id),
+        characterChains,
+        characterModes,
+      ).map((r) => [r.character.id, r]),
+    );
+    return others
+      .map((char) => ({ char, advice: table.get(char.id) }))
+      .sort((a, b) => (b.advice?.score ?? -1) - (a.advice?.score ?? -1));
+    // others는 shown에서 나온 파생값이라 needle · ownedVersion이 바뀔 때 같이 바뀐다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainPick, needle, ownedVersion, characterChains, characterModes, parties]);
+
   /**
    * 이 파티의 캐릭터들**만으로** 담아 둔 사이클.
    *
@@ -158,11 +403,6 @@ export function MatrixPlannerPage() {
     applyCyclePreset(preset.id);
     setTab("calculator");
   };
-
-  /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
-  const active =
-    parties.find((p) => p.id === activeId) ??
-    parties.find((p) => p.memberIds.length < PARTY_SIZE);
 
   /**
    * 이 캐릭터를 지금 더 앉힐 수 있는지. 못 앉히는 까닭까지 같이 돌려준다.
@@ -212,13 +452,11 @@ export function MatrixPlannerPage() {
   };
 
   /** 사람이 앉아 있으면 비우고, 이미 빈 파티면 목록에서 치운다. */
+  /**
+   * 파티를 통째로 치운다. 캐릭터가 들어 있어도 한 번에 없앤다 —
+   * 예전에는 먼저 비우고 다시 눌러야 사라져서, 지우려면 늘 두 번 눌러야 했다.
+   */
   const dropParty = (partyId: number) => {
-    const party = parties.find((p) => p.id === partyId);
-    if (!party) return;
-    if (party.memberIds.length > 0) {
-      setParties(parties.map((p) => (p.id === partyId ? { ...p, memberIds: [] } : p)));
-      return;
-    }
     setParties(parties.filter((p) => p.id !== partyId));
     if (partyId === activeId) setActiveId(null);
   };
@@ -451,51 +689,107 @@ export function MatrixPlannerPage() {
                 눌러 가지고 있는 캐릭터를 먼저 표시해 주세요.
               </p>
             ) : (
-              <div className="pick-grid matrix-pool">
-                {shown.map((char) => {
-                  const at = placedIn.get(char.id) ?? [];
-                  const limit = useLimit(char.id);
-                  const blocked = blockedReason(char.id);
-                  const over = at.length > limit;
-
-                  return (
+              <div className="matrix-pool-split">
+                {/* ── 메인 딜러 ── 고르면 오른쪽 「나머지」가 그 딜러에 맞는 순서로 다시 선다. */}
+                <div className="matrix-pool-col">
+                <div className="matrix-pool-head">
+                  <b>메인 딜러</b>
+                  <em>
+                    {mainPick
+                      ? `${byId.get(mainPick)?.name} 기준 — ${pinnedMain ? "★로 고정" : "지금 채우는 파티의 1번 자리"}`
+                      : "파티 1번 자리를 채우거나 ★를 누르면 같이 세울 캐릭터를 추천합니다"}
+                  </em>
+                  {pinnedMain && (
                     <button
-                      key={char.id}
-                      className={at.length > 0 ? "pick-card in" : "pick-card"}
-                      disabled={blocked !== null}
-                      onClick={() => place(char.id)}
-                      title={
-                        blocked ??
-                        (at.length > 0
-                          ? `${at.join(" · ")}에 있습니다 (${at.length}/${limit} 사용)`
-                          : `${ELEMENT_NAMES[char.element]} · ${char.weaponType}`)
-                      }
+                      className="matrix-pool-clear"
+                      title="지금 채우는 파티의 1번 자리를 기준으로 되돌립니다"
+                      onClick={() => setPinnedMain(null)}
                     >
-                      {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
-                      <b>{char.name}</b>
-                      <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
-                        {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
-                      </em>
-                      {/* 몇 번 썼는지 — 겹쳐 쓸 수 있는 횟수를 넘기면 붉게 센다. */}
-                      {at.length > 0 && (
-                        <i
-                          className={over ? "over" : undefined}
-                          title={
-                            over
-                              ? `겹쳐 쓸 수 있는 ${limit}회를 넘겼습니다 — ${at.join(" · ")}`
-                              : `${at.length}/${limit} 사용 — ${at.join(" · ")}`
-                          }
-                        >
-                          {at.length}회 사용{over ? ` · ${limit}회 초과` : ""}
-                        </i>
-                      )}
+                      기준 해제
                     </button>
-                  );
-                })}
+                  )}
+                </div>
+                <div className="pick-grid matrix-pool">
+                  {mains.map((char) => (
+                    <PoolCard
+                      key={char.id}
+                      char={char}
+                      at={placedIn.get(char.id) ?? []}
+                      blocked={blockedReason(char.id)}
+                      onPlace={() => place(char.id)}
+                      basis={char.id === mainPick}
+                      onBasis={() => setPinnedMain(char.id === pinnedMain ? null : char.id)}
+                    />
+                  ))}
+                  {mains.length === 0 && (
+                    <p className="matrix-empty">이름에 맞는 메인 딜러가 없습니다.</p>
+                  )}
+                </div>
+                </div>
 
-                {shown.length === 0 && (
-                  <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
+                {/* ── 나머지 ── 기준 딜러가 있으면 추천 순, 없으면 원래 순서. */}
+                <div className="matrix-pool-col">
+                <div className="matrix-pool-head">
+                  <b>2 · 3 캐릭터</b>
+                  <em>
+                    {mainPick
+                      ? "추천 순 — 초록이 최선책, 노랑이 차선책입니다. 숫자는 버프를 전부 받았을 때의 어림값"
+                      : "속성 순"}
+                  </em>
+                </div>
+                {mainPick ? (
+                  // 추천 순일 때는 격자 대신 한 줄짜리 카드로 — 무슨 버프인지 다 적으려면 가로가 필요하다.
+                  // 자리로 한 번 더 가른다. 교체로 끊기는 버프는 메인 딜러 **바로 앞**에서만 값어치를 한다.
+                  <div className="advice-split">
+                    {([2, 1] as const).map((group) => {
+                      const list = rest.filter((r) => r.advice?.group === group);
+                      if (list.length === 0) return null;
+                      return (
+                        <div key={group} className="advice-col">
+                          <div className="matrix-pool-head sub">
+                            <b>{group === 2 ? "2번 자리" : "3번 자리"}</b>
+                            <em>
+                              {group === 2
+                                ? "「교체 시 해제」가 붙은 버프를 줍니다 — 메인 딜러 바로 앞에 세워야 살아납니다"
+                                : "교체해도 남는 파티 버프만 줍니다 — 앞에서 미리 깔아 두면 됩니다"}
+                            </em>
+                          </div>
+                          <div className="advice-list">
+                            {list.map(({ char, advice }) => (
+                              <AdviceCard
+                                key={char.id}
+                                char={char}
+                                at={placedIn.get(char.id) ?? []}
+                                blocked={blockedReason(char.id)}
+                                onPlace={() => place(char.id)}
+                                advice={advice}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                    {rest.length === 0 && (
+                      <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
+                    )}
+                  </div>
+                ) : (
+                  <div className="pick-grid matrix-pool">
+                    {rest.map(({ char }) => (
+                      <PoolCard
+                        key={char.id}
+                        char={char}
+                        at={placedIn.get(char.id) ?? []}
+                        blocked={blockedReason(char.id)}
+                        onPlace={() => place(char.id)}
+                      />
+                    ))}
+                    {rest.length === 0 && (
+                      <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
+                    )}
+                  </div>
                 )}
+                </div>
               </div>
             )}
           </section>
@@ -533,9 +827,7 @@ export function MatrixPlannerPage() {
                     {(party.memberIds.length > 0 || parties.length > 1) && (
                       <button
                         className="matrix-drop"
-                        title={
-                          party.memberIds.length > 0 ? "이 파티를 비웁니다" : "이 파티를 치웁니다"
-                        }
+                        title="이 파티를 치웁니다"
                         onClick={(event) => {
                           event.stopPropagation();
                           dropParty(party.id);
@@ -763,6 +1055,8 @@ function useMatrixSim(runs: MatrixRun[]) {
     const killedBy: (number | null)[] = MATRIX_MONSTERS.map(() => null);
     /** 몬스터마다 사이클이 실제로 켠 전용 시스템 배수(1이면 조건을 못 채운 것). */
     const featureUp = MATRIX_MONSTERS.map(() => 1);
+    /** 몬스터마다 스테이지 버프가 실제로 낸 최대 배수(조건을 못 채웠으면 조건 없는 몫만 남는다). */
+    const stageUp = MATRIX_MONSTERS.map(() => 1);
     const report = runs.map(() => ({ damage: 0, hits: 0, totalHits: 0, stoppedAt: -1 }));
 
     // 파티 · 몬스터마다 타수별 피해 목록. 실제로 맞는 몬스터만 계산한다(계산이 무겁다).
@@ -823,6 +1117,11 @@ function useMatrixSim(runs: MatrixRun[]) {
       let stacks = 0;
       let consumed = false;
       let statusOn = false;
+      /**
+       * 스테이지 버프의 조건부 줄이 보는 상태. 몬스터 전용 시스템과 **같은 트리거 자료**를 읽는다
+       * — 30번은 이상 효과를 붙였는지, 32번은 어떤 「이탈」을 붙였는지로 갈린다.
+       */
+      const stage = { anomalyOn: false, breaches: new Set<string>() };
       const featureScale = (syncAmplify: number) => {
         if (!rule) return 1;
         if (rule.kind === "anomaly") {
@@ -839,9 +1138,16 @@ function useMatrixSim(runs: MatrixRun[]) {
       };
       /** 이 공격이 걸거나 태운 것을 상태에 반영한다. */
       const follow = (characterId: string, attackId: string) => {
-        if (!rule) return;
         // 공용 항목(조화도 파괴)은 누가 썼느냐로 달라진다 — 캐릭터를 묶은 줄까지 함께 본다.
         for (const t of triggersFor(characterId, attackId)) {
+          // ── 스테이지 버프 쪽 — 몬스터가 무엇이든 늘 따라간다.
+          if (t.action === "add") {
+            if (t.anomaly) stage.anomalyOn = true;
+            if (t.status?.endsWith("이탈")) stage.breaches.add(t.status);
+          }
+
+          // ── 이 몬스터의 전용 시스템 쪽.
+          if (!rule) continue;
           if (rule.kind === "anomaly") {
             if (t.anomaly !== rule.anomaly) continue;
             // 개수를 안 적어 둔 줄(「최대 스택까지」)은 상한까지 채운 것으로 본다.
@@ -857,14 +1163,18 @@ function useMatrixSim(runs: MatrixRun[]) {
       const list = results.flatMap((r) => {
         // 스테이지 버프는 「최종적으로」라 공격마다 따로 곱한다.
         const scale = run.buff
-          ? run.buff.multiplier({
-              category: r.attack.damageBonusType ?? r.attack.type,
-              element: r.attack.element,
-              anomaly: r.attack.anomaly,
-            })
+          ? run.buff.multiplier(
+              {
+                category: r.attack.damageBonusType ?? r.attack.type,
+                element: r.attack.element,
+                anomaly: r.attack.anomaly,
+              },
+              stage,
+            )
           : 1;
         const feature = featureScale(r.stats.syncAmplify);
         featureUp[monsterIndex] = Math.max(featureUp[monsterIndex], feature);
+        stageUp[monsterIndex] = Math.max(stageUp[monsterIndex], scale);
         follow(r.item.characterId, r.attack.id);
         return r.damage.hits.map(
           (h, i) =>
@@ -897,7 +1207,7 @@ function useMatrixSim(runs: MatrixRun[]) {
       report[run.index].stoppedAt = cur;
     }
 
-    return { hp, dealt, killedBy, report, featureUp, reached: cur };
+    return { hp, dealt, killedBy, report, featureUp, stageUp, reached: cur };
     // hpByKey가 바뀌면 hpOf도 달라진다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -925,11 +1235,23 @@ const matrixPlaceOf = (index: number) => {
 function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<typeof useMatrixSim> }) {
   const { sim, hpOf, setHpByKey, edited } = matrix;
 
-  // 잡은 몬스터의 점수 합. 어디까지 깎았는지보다 이 숫자가 결국 성적이다.
-  const earned = MATRIX_MONSTERS.reduce(
-    (sum, m, index) => sum + (sim.killedBy[index] !== null ? m.score : 0),
-    0,
-  );
+  /**
+   * 깎은 체력만큼 점수를 준다 — 게임도 피해량을 점수로 환산하지, 처치 여부로 끊지 않는다.
+   *
+   * 환산은 그 몬스터의 「체력 1당 점수」(score ÷ 체력)다. 실측표 기준으로 1라운드가
+   * 체력 1,200당 1점이고 라운드마다 ×1.15 · ×1.25로 오른다.
+   * 체력을 화면에서 고쳐 두었으면 고친 값을 기준으로 삼는다 — 그래야 처치했을 때
+   * 표에 적힌 점수(m.score)가 그대로 나온다.
+   */
+  const scoreOf = (m: (typeof MATRIX_MONSTERS)[number], index: number) => {
+    const hp = hpOf(m);
+    if (hp <= 0) return 0;
+    if (sim.killedBy[index] !== null) return m.score; // 처치했으면 반올림 없이 표 값 그대로
+    const dealt = Math.max(0, Math.min(hp, hp - sim.hp[index]));
+    return (m.score * dealt) / hp;
+  };
+
+  const earned = MATRIX_MONSTERS.reduce((sum, m, index) => sum + scoreOf(m, index), 0);
   const fullScore = MATRIX_MONSTERS.reduce((sum, m) => sum + m.score, 0);
 
   return (
@@ -940,8 +1262,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
           <small className="matrix-round-meta">
             {MATRIX_SEASON.name} · {MATRIX_SEASON.level}
           </small>
-          <small className="matrix-score-total">
-            점수 <b>{earned.toLocaleString()}</b> / {fullScore.toLocaleString()}
+          <small className="matrix-score-total" title="깎은 체력만큼 점수가 붙습니다(처치는 표 점수 그대로)">
+            점수 <b>{Math.floor(earned).toLocaleString()}</b> / {fullScore.toLocaleString()}
           </small>
           {edited && (
             <button onClick={() => setHpByKey({})} title="체력을 실측표 기본값으로 되돌립니다">
@@ -1002,6 +1324,13 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                                 : ""}
                           </span>
                         )}
+                        {/* 고른 스테이지 버프가 이 몬스터에서 실제로 낸 배수 —
+                            조건부(이상 효과 추가 · 이탈 추가)는 사이클이 실제로 붙여야 오른다. */}
+                        {sim.stageUp[index] > 1 && (
+                          <span className="matrix-innate on" title="고른 스테이지 버프가 낸 최대 배수">
+                            스테이지 ×{sim.stageUp[index].toFixed(2)}
+                          </span>
+                        )}
                         {m.uniformRes ? (
                           // 저항이 전부 같아 「어느 속성으로 때리든 같다」만 알리면 된다.
                           <span className="matrix-monster-el muted" title="속성 저항이 모두 같습니다 — 어느 속성으로 때려도 20%">
@@ -1034,7 +1363,13 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                         {killer !== null ? (
                           <span style={{ color: partyColor(killer) }}>{killer + 1}파티가 처치</span>
                         ) : sim.hp[index] < hp ? (
-                          <>남은 체력 {Math.round(sim.hp[index]).toLocaleString()}</>
+                          <>
+                            남은 체력 {Math.round(sim.hp[index]).toLocaleString()}
+                            {/* 못 눕혀도 깎은 만큼은 점수가 붙는다 — 어디까지 갔는지 바로 보이게. */}
+                            <em className="matrix-monster-part">
+                              {Math.floor(scoreOf(m, index)).toLocaleString()}점
+                            </em>
+                          </>
                         ) : (
                           <span className="muted">안 맞음</span>
                         )}

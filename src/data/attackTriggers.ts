@@ -70,6 +70,17 @@ export const TRIGGER_STATUSES = [
 export type TriggerStatus = (typeof TRIGGER_STATUSES)[number];
 
 /**
+ * 상태의 **기본 스택 상한**. 적지 않은 상태는 1로 본다.
+ *
+ * 「조화 밀집 · 간섭」은 여기에 대응 캐릭터가 파티에 설 때마다 1씩 더해진다
+ * — 원문이 캐릭터마다 「○○가 파티에 있을 시 스택 최대치가 1스택 증가된다」로 따로 적혀 있고,
+ * 「중첩 불가」 단서가 없어 사람 수만큼 더한다(calculator/manualBuffs.ts의 statusStackCap).
+ */
+export const STATUS_BASE_STACKS: Partial<Record<TriggerStatus, number>> = {
+  "조화 밀집 · 간섭": 1,
+};
+
+/**
  * 적의 값을 깎는 디버프. 이상 효과도 부조화도 아니고 **수치를 직접 건드리는** 것만 담는다.
  * 계산에 걸리는 자리는 캐릭터 버프(target: defReduction 등)이고, 여기는 「어느 공격이 거는가」다.
  */
@@ -7860,7 +7871,8 @@ export function triggerLabel(trigger: AttackTrigger): string {
 /** 이 트리거가 어느 갈래인지. 화면에서 색을 가르는 데 쓴다. */
 export const triggerKind = (t: AttackTrigger): "anomaly" | "status" | "resource" =>
   t.anomaly ? "anomaly" : t.status ? "status" : "resource";
-
+
+
 /**
  * 이 캐릭터가 이 공격을 썼을 때 따라 일어나는 일.
  * 캐릭터를 묶어 적은 줄(`캐릭터id:공격id`)이 있으면 그것까지 함께 준다.

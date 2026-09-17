@@ -3,6 +3,7 @@ import type { CalculationResult } from "../hooks/useCalculationResults";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import {
   anomalyStackCap,
+  statusStackCap,
   appliesTo,
   buffAmount,
   DAMAGE_TYPE_OPTIONS,
@@ -37,6 +38,12 @@ function describe(buff: ManualBuff): string {
   return `${target} · ${damage} · ${how}`;
 }
 
+/**
+ * 상한을 올려 준 줄의 이름에서 **캐릭터 이름만** 뽑는다.
+ * 라벨이 「데니아 · 조화 밀집 간섭 상한 +1 (파티에 있으면)」 꼴이라 그대로 이으면 줄이 길어진다.
+ */
+const capOwner = (label: string) => label.split(" · ")[0];
+
 /** 탭 id — 캐릭터 id와 겹치지 않게 밑줄을 붙인다. */
 const ALL_TAB = "__all";
 const SHARED_TAB = "__shared";
@@ -51,7 +58,9 @@ interface BuffDialogProps {
  * 화면을 덮지 않도록 오른쪽에 붙는 패널로 그린다 — 루틴을 보면서 버프를 켜고 끌 수 있다.
  */
 export function BuffDialog({ selected, onClose }: BuffDialogProps) {
-  const { toggleBuff, setBuffStacks, allBuffs, config } = usePartyConfig();
+  const { toggleBuff, setBuffStacks, allBuffs, config, autoBuffIdsFor } = usePartyConfig();
+  // 앞 카드의 트리거로 저절로 켜진 것(수수의 반주 등). 손으로 끄면 이 카드에서만 빠진다.
+  const autoOn = autoBuffIdsFor(selected.item.id);
   // 고른 탭 — 카드를 바꿔도 남겨 둔다. 한 캐릭터의 버프를 여러 카드에 걸쳐 보는 일이 잦아서다.
   const [tab, setTab] = useState(ALL_TAB);
 
@@ -65,7 +74,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
   const isOn = (buff: ManualBuff) =>
     buff.uptime === "passive"
       ? !(selected.item.disabledBuffIds?.includes(buff.id) ?? false)
-      : selected.item.enabledBuffIds.includes(buff.id);
+      : selected.item.enabledBuffIds.includes(buff.id) || autoOn.has(buff.id);
 
   // 캐릭터별 탭 — 파티 자리 순서대로, 주인 없는 버프는 「공용」으로 맨 뒤에 모은다.
   const partyOrder = PARTY_SLOTS.map((slot) => config[slot].characterId);
@@ -106,7 +115,8 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
           <small>이 공격에 적용할 버프</small>
           <b>{selected.attack.name}</b>
           <em>
-            {selected.character.name} · 켜둔 것 {selected.item.enabledBuffIds.length}개
+            {selected.character.name} · 켜둔 것 {usable.filter(isOn).length}개
+            {autoOn.size > 0 && ` (앞 카드에서 자동 ${usable.filter((b) => autoOn.has(b.id)).length}개)`}
           </em>
         </div>
         {/* 계산이 어긋나 보일 때 통째로 퍼서 보여주는 자리 — 버프 한 줄씩 수치까지 담긴다. */}
@@ -151,20 +161,27 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
             // 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 뒀다 — 끈 것은 그 공격에만 남는다.
             const always = buff.uptime === "passive";
             const off = selected.item.disabledBuffIds?.includes(buff.id) ?? false;
+            const auto = autoOn.has(buff.id);
             const checked = isOn(buff);
             // 스택형이면 이 공격에서 정한 스택을, 없으면 버프의 기본값을 쓴다.
             // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과의 방어력 감소 등)는 상한이 고정이 아니다
             // — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면 같이 올라간다.
+            // 상한을 올려주는 버프가 자동으로 켜졌을 수도 있다 — 계산 쪽과 같은 목록을 넘긴다.
+            const onIds = [...selected.item.enabledBuffIds, ...autoOn.keys()];
             const cap = buff.anomalyStacks
-              ? anomalyStackCap(
-                  buff.anomalyStacks,
-                  allBuffs,
-                  selected.item.enabledBuffIds,
-                  selected.item.disabledBuffIds,
-                )
+              ? anomalyStackCap(buff.anomalyStacks, allBuffs, onIds, selected.item.disabledBuffIds)
               : null;
-            const max = cap ? cap.max : (buff.maxStacks ?? 1);
-            const stacks = selected.item.buffStacks?.[buff.id] ?? buff.stacks;
+            // 적에게 붙는 상태(조화 밀집 · 간섭)의 스택을 따르는 줄 — 상한이 파티 구성으로 정해진다.
+            // 누가 얼마나 올렸는지를 그대로 들고 있어 아래에서 이름까지 적는다.
+            const statusCap = buff.statusStacks
+              ? statusStackCap(buff.statusStacks, allBuffs, onIds, selected.item.disabledBuffIds)
+              : null;
+            const max = statusCap ? statusCap.max : cap ? cap.max : (buff.maxStacks ?? 1);
+            // 손으로 정한 스택이 없으면 트리거로 쌓인 자동 스택을 보여 준다(계산과 같은 규칙).
+            const stacks = Math.min(
+              selected.item.buffStacks?.[buff.id] ?? autoOn.get(buff.id) ?? buff.stacks,
+              max,
+            );
             // scaleFrom 버프는 그때의 스탯에서 수치가 나온다 — 계산에 쓴 최종 스탯을 그대로 넘긴다.
             // 파티 버프는 준 사람의 스탯을 보므로 파티 전원의 스탯창도 함께 넘긴다.
             const amount = buffAmount(buff, stacks, selected.stats, selected.ownerPanels);
@@ -177,7 +194,13 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                 <input
                   type="checkbox"
                   checked={checked}
-                  title={always ? "상시 버프 — 끄면 이 공격에서만 빠집니다" : undefined}
+                  title={
+                    always
+                      ? "상시 버프 — 끄면 이 공격에서만 빠집니다"
+                      : auto
+                        ? "앞 카드에서 저절로 켜진 버프 — 끄면 이 공격에서만 빠집니다"
+                        : undefined
+                  }
                   onChange={() => toggleBuff(selected.item.id, buff.id)}
                 />
                 {/* 무기 버프는 무기 그림, 그 외는 들고 있는 캐릭터 아이콘. */}
@@ -201,7 +224,9 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                     {buff.label || describe(buff)}{" "}
                     <em className="buff-amount">
                       {/* 스탯은 안 건드리고 이상 스택 상한만 올리는 버프는 퍼센트가 의미 없다. */}
-                      {buff.raisesAnomalyStacks && !buff.value
+                      {buff.raisesStatusStacks && !buff.value
+                        ? `${buff.raisesStatusKinds?.[0] ?? "상태"} 상한 +${buff.raisesStatusStacks}`
+                        : buff.raisesAnomalyStacks && !buff.value
                         ? `이상 스택 상한 +${buff.raisesAnomalyStacks}`
                         : buff.target === "syncAmplify"
                           ? `${+amount.toFixed(1)}pt` // 조화도 파괴 증폭은 퍼센트가 아닌 수치
@@ -227,6 +252,17 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                     {cap && cap.bonus > 0 && (
                       <em className="buff-cap" title={cap.from.join(" · ")}>
                         {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}
+                      </em>
+                    )}
+                    {/* 상태 스택은 누가 몇 칸씩 올렸는지를 그대로 적는다 —
+                        「조화 밀집 · 간섭」은 대응 캐릭터가 파티에 설 때마다 상한이 하나씩 오른다. */}
+                    {statusCap && (
+                      <em
+                        className="buff-cap"
+                        title={statusCap.from.map((r) => `${r.label} +${r.amount}`).join(" · ")}
+                      >
+                        상한 {statusCap.max} = 기본 {statusCap.base}
+                        {statusCap.from.map((r) => ` + ${capOwner(r.label)} ${r.amount}`).join("")}
                       </em>
                     )}
                     {max > 1 && (
@@ -255,6 +291,8 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                   <small>
                     {describe(buff)}
                     {always && (off ? " · 상시(이 공격에서 끔)" : " · 상시")}
+                    {auto && " · 앞 카드에서 자동"}
+                    {!always && !auto && off && buff.triggeredBy && " · 자동(이 공격에서 끔)"}
                     {buff.exclusiveGroup && " · 같은 묶음에서 하나만"}
                     {!buff.enabled && " · 목록에서 꺼둠"}
                   </small>

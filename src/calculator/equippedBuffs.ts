@@ -1,16 +1,8 @@
 import { weaponsById } from "../data/weapons";
-import { getWeaponBuffOverrides, weaponBuffKey } from "../data/weaponBuffOverrides";
-import { characterBuffKey, getCharacterBuffOverrides } from "../data/characterBuffOverrides";
 import { echoAbilityBuffs, echoSetBuffs } from "../data/echoBuffs";
 import { anomaliesOf } from "../data/characterAnomalies";
 import { baseCharacterId } from "../data/modeVariants";
 import { echoesById, fetterGroupByName } from "../data/echoes";
-import {
-  echoAbilityOwnerId,
-  echoBuffKey,
-  echoSetOwnerId,
-  getEchoBuffOverrides,
-} from "../data/echoBuffOverrides";
 import { loadEchoLinks, loadMyEchoes, type EchoLink, type MyEcho } from "../data/echoStore";
 import { CATEGORY_BONUS_KEY, ELEMENT_BONUS_KEY } from "./damage";
 import type {
@@ -45,11 +37,7 @@ export function deriveWeaponBuffs(
     const weapon = weaponsById.get(equipped.weaponId);
     if (!weapon) continue;
 
-    const overrides = getWeaponBuffOverrides();
-
     weapon.passiveBuffs.forEach((template, index) => {
-      // 데이터 확인 탭에서 사람이 고쳐 둔 상시/발동 · 본인/파티가 있으면 그게 이긴다.
-      const override = overrides[weaponBuffKey(weapon.id, index)];
       out.push({
         id: weaponBuffId(weapon.id, index),
         label: `${weapon.name} · ${template.label}`,
@@ -64,11 +52,20 @@ export function deriveWeaponBuffs(
         modifier: template.modifier ?? "increase",
         enabled: true,
         // 조건 메모가 달려 있으면 발동형으로 본다.
-        uptime: override?.uptime ?? template.uptime ?? (template.condition ? "active" : "passive"),
-        scope: override?.scope ?? template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
+        uptime: template.uptime ?? (template.condition ? "active" : "passive"),
+        scope: template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
         ownerId: characterId,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
+        // 루틴에서 저절로 켜지는 효과(calculator/autoBuffs.ts). 무기·에코는 누가 낄지 모르므로
+        // 공격 id가 아니라 분류(triggeredByType)로 걸린다.
+        ...(template.triggeredBy ? { triggeredBy: template.triggeredBy } : {}),
+        ...(template.triggeredByType ? { triggeredByType: template.triggeredByType } : {}),
+        ...(template.endsOn ? { endsOn: template.endsOn } : {}),
+        ...(template.stacksPerTrigger !== undefined
+          ? { stacksPerTrigger: template.stacksPerTrigger }
+          : {}),
+        ...(template.statusStacks ? { statusStacks: template.statusStacks } : {}),
         // 무기 버프는 목록에 무기 그림으로 띄운다.
         ...(weapon.icon ? { iconUrl: weapon.icon } : {}),
       });
@@ -115,7 +112,6 @@ export function deriveCharacterBuffs(
     const chain = config.resonanceChain ?? 0;
     const mode = config.resonanceMode ?? character.resonanceModes?.[0];
     const inherentsOn = characterInherents[character.id];
-    const overrides = getCharacterBuffOverrides();
 
     (character.passiveBuffs ?? []).forEach((template, index) => {
       if (template.resonanceChain !== undefined && chain < template.resonanceChain) return;
@@ -128,9 +124,6 @@ export function deriveCharacterBuffs(
         !inherentsOn.includes(template.inherentSkillId)
       )
         return;
-
-      // 버프 정리 탭에서 사람이 고쳐 둔 상시/발동 · 본인/파티가 있으면 그게 이긴다.
-      const override = overrides[characterBuffKey(character.id, index)];
 
       out.push({
         id: characterBuffId(character.id, index),
@@ -160,8 +153,8 @@ export function deriveCharacterBuffs(
         stacks: template.stacks ?? 1,
         modifier: template.modifier ?? "increase",
         enabled: true,
-        uptime: override?.uptime ?? template.uptime ?? (template.condition ? "active" : "passive"),
-        scope: override?.scope ?? template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
+        uptime: template.uptime ?? (template.condition ? "active" : "passive"),
+        scope: template.scope ?? "self", // 따로 적지 않으면 본인 버프로 본다
         // 파티 버프인데 본인은 빼는 것(치사 2체인) — 본인 몫이 따로 적혀 있다.
         ...(template.excludeOwner ? { excludeOwner: true } : {}),
         // 특정 캐릭터 전용 파티 버프(파수인 「자아의 이끌림」의 방랑자 몫)
@@ -185,6 +178,19 @@ export function deriveCharacterBuffs(
           ? { stacks: Math.min(template.stacks ?? 1, panelStacksAt(template.maxStacksByChain, chain)) }
           : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
+        // 「이 공격을 쓰면 그 뒤로 걸린다」 — 루틴에서 저절로 켜 준다(calculator/autoBuffs.ts).
+        ...(template.triggeredBy ? { triggeredBy: template.triggeredBy } : {}),
+        ...(template.triggeredByType ? { triggeredByType: template.triggeredByType } : {}),
+        ...(template.endsOn ? { endsOn: template.endsOn } : {}),
+        ...(template.stacksPerTrigger !== undefined
+          ? { stacksPerTrigger: template.stacksPerTrigger }
+          : {}),
+        // 적에게 붙는 상태(조화 밀집 · 간섭)의 스택을 따르는 줄 · 그 상한을 올려 주는 줄
+        ...(template.statusStacks ? { statusStacks: template.statusStacks } : {}),
+        ...(template.raisesStatusStacks !== undefined
+          ? { raisesStatusStacks: template.raisesStatusStacks }
+          : {}),
+        ...(template.raisesStatusKinds ? { raisesStatusKinds: template.raisesStatusKinds } : {}),
       });
     });
   }
@@ -228,7 +234,6 @@ export function deriveEchoBuffs(
   owned: MyEcho[] = loadMyEchoes(),
 ): ManualBuff[] {
   const out: ManualBuff[] = [];
-  const overrides = getEchoBuffOverrides();
 
   for (const characterId of characterIds) {
     // 순서가 곧 슬롯 순서다. 목록에 없는(지운) 에코는 걸러낸다.
@@ -250,7 +255,6 @@ export function deriveEchoBuffs(
       const templates = echoSetBuffs[setName];
       if (!templates) continue;
       const icon = fetterGroupByName(setName)?.icon ?? undefined;
-      const ownerKey = echoSetOwnerId(setName);
 
       templates.forEach((template, index) => {
         // 맞춘 개수가 그 단계에 못 미치면 아직 열리지 않은 효과다.
@@ -264,7 +268,6 @@ export function deriveEchoBuffs(
         )
           return;
 
-        const override = overrides[echoBuffKey(ownerKey, index)];
         out.push({
           id: echoSetBuffId(characterId, setName, index),
           label: `${setName} ${template.setKey}세트 · ${template.label}`,
@@ -281,14 +284,22 @@ export function deriveEchoBuffs(
           modifier: template.modifier ?? "increase",
           enabled: true,
           uptime:
-            override?.uptime ??
             (passiveFor(template.passiveFor, characterId) ? "passive" : undefined) ??
             template.uptime ??
             (template.condition ? "active" : "passive"),
-          scope: override?.scope ?? template.scope ?? "self",
+          scope: template.scope ?? "self",
           ownerId: characterId,
           ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
           ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
+          // 루틴에서 저절로 켜지는 효과(calculator/autoBuffs.ts). 에코도 누가 낄지 모르므로
+          // 공격 id가 아니라 분류(triggeredByType)로 걸린다.
+          ...(template.triggeredBy ? { triggeredBy: template.triggeredBy } : {}),
+          ...(template.triggeredByType ? { triggeredByType: template.triggeredByType } : {}),
+          ...(template.endsOn ? { endsOn: template.endsOn } : {}),
+          ...(template.stacksPerTrigger !== undefined
+            ? { stacksPerTrigger: template.stacksPerTrigger }
+            : {}),
+          ...(template.statusStacks ? { statusStacks: template.statusStacks } : {}),
           ...(icon ? { iconUrl: icon } : {}),
         });
       });
@@ -301,7 +312,6 @@ export function deriveEchoBuffs(
 
     const mainName = main.name || echoesById.get(main.id)?.name || `에코 ${main.id}`;
     const mainIcon = main.iconUrl ?? echoesById.get(main.id)?.icon ?? undefined;
-    const abilityOwnerKey = echoAbilityOwnerId(main.id);
 
     abilityTemplates.forEach((template, index) => {
       // 「장착 캐릭터가 루시 혹은 레베카일 경우」처럼 낀 사람을 가리는 효과.
@@ -311,7 +321,6 @@ export function deriveEchoBuffs(
       if (template.requiresAnomaly && !anomaliesOf(characterId).includes(template.requiresAnomaly))
         return;
 
-      const override = overrides[echoBuffKey(abilityOwnerKey, index)];
       out.push({
         id: echoAbilityBuffId(characterId, main.id, index),
         label: `${mainName} · ${template.label}`,
@@ -329,14 +338,21 @@ export function deriveEchoBuffs(
         modifier: template.modifier ?? "increase",
         enabled: true,
         uptime:
-          override?.uptime ??
           (passiveFor(template.passiveFor, characterId) ? "passive" : undefined) ??
           template.uptime ??
           (template.condition ? "active" : "passive"),
-        scope: override?.scope ?? template.scope ?? "self",
+        scope: template.scope ?? "self",
         ownerId: characterId,
         ...(template.maxStacks ? { maxStacks: template.maxStacks } : {}),
         ...(template.exclusiveGroup ? { exclusiveGroup: template.exclusiveGroup } : {}),
+        // 「에코 어빌리티 발동 후」처럼 루틴에서 저절로 켜지는 효과 — 분류로 건다.
+        ...(template.triggeredBy ? { triggeredBy: template.triggeredBy } : {}),
+        ...(template.triggeredByType ? { triggeredByType: template.triggeredByType } : {}),
+        ...(template.endsOn ? { endsOn: template.endsOn } : {}),
+        ...(template.stacksPerTrigger !== undefined
+          ? { stacksPerTrigger: template.stacksPerTrigger }
+          : {}),
+        ...(template.statusStacks ? { statusStacks: template.statusStacks } : {}),
         ...(mainIcon ? { iconUrl: mainIcon } : {}),
       });
     });

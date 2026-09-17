@@ -1,4 +1,5 @@
 import type {
+  BuffAutoTrigger,
   BuffDamageType,
   BuffModifier,
   BuffScope,
@@ -16,7 +17,7 @@ import type {
  *
  * values는 정련 1~5단계 값을 소수로 적는다(12% → 0.12). 무기 설명의 슬래시 순서와 같다.
  */
-export interface WeaponBuffTemplate {
+export interface WeaponBuffTemplate extends BuffAutoTrigger {
   label: string;
   target: BuffTarget;
   damageType: BuffDamageType;
@@ -47,6 +48,12 @@ export interface WeaponBuffTemplate {
    * 상태를 나눠 적을 때 쓴다 — 하나를 켜면 같은 묶음의 다른 것은 자동으로 꺼진다.
    */
   exclusiveGroup?: string;
+  /**
+   * 자동 발동 — BuffAutoTrigger를 물려받는다(types/game.ts).
+   * 무기는 누가 낄지 모르므로 공격 id(triggeredBy)가 아니라 **분류**(triggeredByType)로 건다.
+   *   예) 「공명 해방 발동 후 15초간 공격력 증가」 → triggeredByType: ["Liberation"]
+   * 낀 캐릭터의 공격만 트리거로 친다 — 엔진이 ownerId로 가린다.
+   */
 }
 
 export const weaponBuffs: Record<string, WeaponBuffTemplate[]> = {
@@ -411,6 +418,9 @@ export const weaponBuffs: Record<string, WeaponBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "공명 해방 발동 시, 15초간",
+      // 낀 캐릭터가 공명 해방 카드를 쓰면 그 뒤로 저절로 켜진다(calculator/autoBuffs.ts).
+      // 공격 id가 아니라 분류로 거는 것은 이 무기를 누가 낄지 모르기 때문이다.
+      triggeredByType: ["Liberation"],
     },
     {
       label: "공명 해방 피해 보너스",
@@ -420,6 +430,7 @@ export const weaponBuffs: Record<string, WeaponBuffTemplate[]> = {
       uptime: "active",
       scope: "self",
       condition: "공명 해방 발동 시, 15초간",
+      triggeredByType: ["Liberation"],
     },
   ],
 

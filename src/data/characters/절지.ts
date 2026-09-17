@@ -375,7 +375,20 @@ const passive2209: Skill = {
   category: "Intro",
   name: "글레이징 기법",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhezhi/SP_IconZhezhiT.webp",
-  attacks: [],
+  // 피해가 없는 반주다. 그래도 카드로 세울 수 있게 히트 0짜리 한 줄을 둔다 —
+  // 이 카드가 루틴에 놓이면 **바로 다음 카드의 캐릭터**가 반주를 받고,
+  // 그 뒤로 다른 캐릭터 카드가 끼는 순간 끊긴다(calculator/autoBuffs.ts).
+  attacks: [
+    {
+      id: "1002209_1",
+      name: "반주 스킬 · 글레이징 기법",
+      type: "Intro",
+      element: "Glacio",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      hits: [],
+    },
+  ],
 };
 
 const passive2210: Skill = {
@@ -424,6 +437,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "party",
     condition: "반주 스킬로 등장한 캐릭터에게 14초간. 전환하면 즉시 끝난다",
+    triggeredBy: ["1002209_1"],
+    endsOn: "switch", // 「전환하면 즉시 끝난다」 — 다른 캐릭터 카드가 끼면 거기서 끊는다
   },
   {
     label: "글레이징 기법 · 공명 스킬 피해 부스트",
@@ -433,6 +448,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "party",
     condition: "반주 스킬로 등장한 캐릭터에게 14초간. 전환하면 즉시 끝난다",
+    triggeredBy: ["1002209_1"],
+    endsOn: "switch",
   },
 
   // ── 공명체인 ──
@@ -467,42 +484,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "party", // 파티 전원에게 걸린다
     resonanceChain: 4,
     condition: "공명 해방 상상과 현실 발동 후 30초간, 파티 전원",
-  },
-  // 5 · 6체인의 추가 두루미는 공격 카드(1002203_c5 · 1002207_c6)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
-  // 세 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이라 빼면 뒤 줄 키가 당겨진다.
-  // 수정분 JSON을 소스에 반영한 뒤에 지운다.
-  {
-    label: "5체인 · 추가 재두루미 (공격 카드로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1002203_1"],
-    value: 0,
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 5,
-    condition: "공격 카드 「5체인 · 추가 재두루미 피해」를 담는다",
-  },
-  {
-    label: "6체인 · 흰두루미 (천재의 붓놀림) (공격 카드로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1002207_2"],
-    value: 0,
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 6,
-    condition: "공격 카드 「6체인 · 흰두루미 피해」를 담는다",
-  },
-  {
-    label: "6체인 · 흰두루미 (궁극 · 천재의 붓놀림) (공격 카드로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1002207_3"],
-    value: 0,
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 6,
-    condition: "공격 카드 「6체인 · 흰두루미 피해」를 담는다",
   },
 ];
 

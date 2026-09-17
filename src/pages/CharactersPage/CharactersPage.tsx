@@ -11,11 +11,11 @@ import { loadEchoLinks, saveEchoLinks } from "../../data/echoStore";
 
 /** 왼쪽 세로 탭. 순서가 화면 순서이고, id는 어떤 창을 띄울지 고르는 데만 쓴다. */
 const TABS = [
-  { id: "basic", label: "기본창", hint: "레벨 · 스탯" },
-  { id: "weapon", label: "무기선택창", hint: "무기 · 레벨 · 정련" },
-  { id: "echo", label: "에코장착창", hint: "보유 에코 장착" },
-  { id: "skill", label: "스킬 노드 관리", hint: "스킬 레벨" },
-  { id: "chain", label: "공명체인 관리", hint: "체인 단계 · 고유 버프" },
+  { id: "basic", label: "스탯" },
+  { id: "weapon", label: "무기" },
+  { id: "echo", label: "에코" },
+  { id: "skill", label: "스킬" },
+  { id: "chain", label: "공명체인" },
 ] as const;
 // 「버프 정리」는 전 캐릭터를 한 번에 훑도록 개발용 「캐릭터 버프 확인」 탭으로 옮겼다
 // (pages/CharacterBuffReviewPage).
@@ -127,7 +127,6 @@ export function CharactersPage() {
             onClick={() => setTab(item.id)}
           >
             <b>{item.label}</b>
-            <em>{item.hint}</em>
           </button>
         ))}
       </nav>

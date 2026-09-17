@@ -538,21 +538,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 5,
   },
-  // 6체인 배율 상승은 죽음의 징조(1002803_2)의 추가타(extraHits · 사격 강화 + 결정체 2배)로 옮겼다
-  // — 여기서 또 얹으면 두 번 센다. 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이다.
-  // 수정분 JSON을 소스에 반영한 뒤에 지운다.
-  {
-    label: "6체인 · 죽음의 징조 배율 상승 (추가타로 옮김 · 효과 없음)",
-    target: "motionValue",
-    damageType: "All",
-    attackIds: ["1002803_2"],
-    value: 0,
-    modifier: "amplify",
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 6,
-    condition: "6체인 이상이면 죽음의 징조에 사격 강화 · 결정체 4개가 자동으로 붙는다",
-  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들

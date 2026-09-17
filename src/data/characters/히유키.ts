@@ -460,21 +460,6 @@ const circuitSkillAttacks: Attack[] = [
       [0.238, 0.2575, 0.277, 0.3043, 0.3238, 0.3463, 0.3775, 0.4087, 0.4399, 0.4731],
     ],
   },
-  // 고유 「속삭이는 눈」 2스택 — 「서리 효과」를 추가할 때마다 추가로 「냉해 효과」 피해를 1회 더 넣는다.
-  // 피해가 스킬 계수가 아니라 **이상 효과 피해 배율의 102%**라 이상 피해로 계산한다(anomaly).
-  // 배율은 버프 두 줄이 맡는다 — 기본 102%와 3체인의 +488%(합쳐 590%).
-  // 6체인이면 「자신이 추가할 때마다」가 「파티 내 캐릭터가 추가할 때마다」로 넓어진다.
-  {
-    id: "1005207_p4",
-    name: "눈의 침식 2스택 · 추가 냉해 효과 피해",
-    type: "Skill",
-    element: "Glacio",
-    scalingStat: "ATK",
-    skillLevel: 10,
-    extra: true,
-    anomaly: "FrostChafe",
-    hits: [],
-  },
 ];
 
 const circuitSkill: Skill = {
@@ -493,7 +478,26 @@ const passive5204: Skill = {
   category: "Passive",
   name: "속삭이는 눈",
   icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixue1D1.webp",
-  attacks: [],
+  // 「눈의 침식」 2스택 — 「서리 효과」를 추가할 때마다 추가로 「냉해 효과」 피해를 1회 더 넣는다.
+  // 공명 회로에 얹혀 있던 것을 이리로 옮겼다(2026-09-16). 회로 공격이 아니라 이 고유 스킬이 내는 피해다.
+  // id는 그대로 둔다 — 배율을 대는 버프 두 줄이 attackIds로 이 id를 가리키고, 담아 둔 루틴도 이 id로 남는다.
+  //
+  // 피해가 스킬 계수가 아니라 **이상 효과 피해 배율의 102%**라 이상 피해로 계산한다(anomaly).
+  // 배율은 버프 두 줄이 맡는다 — 기본 102%와 3체인의 +488%(합쳐 590%).
+  // 6체인이면 「자신이 추가할 때마다」가 「파티 내 캐릭터가 추가할 때마다」로 넓어진다.
+  attacks: [
+    {
+      id: "1005207_p4",
+      name: "눈의 침식 2스택 · 추가 냉해 효과 피해",
+      type: "Skill",
+      element: "Glacio",
+      scalingStat: "ATK",
+      skillLevel: 10,
+      extra: true,
+      anomaly: "FrostChafe",
+      hits: [],
+    },
+  ],
 };
 
 const passive5205: Skill = {

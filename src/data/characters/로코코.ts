@@ -492,19 +492,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     resonanceChain: 6,
     condition: "공명 해방 발동 후 12초간",
   },
-  // 6체인 「현실 구축」은 공격 카드(1002707_c6)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
-  // 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이다. 수정분 JSON을 반영한 뒤에 지운다.
-  {
-    label: "6체인 · 현실 구축 추가 타격 (공격 카드로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1002707_3"],
-    value: 0,
-    uptime: "active",
-    scope: "self",
-    resonanceChain: 6,
-    condition: "공격 카드 「6체인 · 현실 구축 피해」를 담는다",
-  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들

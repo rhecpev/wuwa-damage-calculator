@@ -473,21 +473,6 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "공명 스킬 발동 시 1스택, 8초 지속",
   },
 
-  // ── 공명체인 ──
-  // 1체인 회선 매트릭스는 만물의 법칙(1002307_2)의 추가타(extraHits)로 옮겼다 — 여기서 또 얹으면 두 번 센다.
-  // 줄은 지우지 않는다: 버프 확인 탭의 수정분 키가 배열 순번이라 빼면 뒤 줄 키가 당겨진다.
-  // 수정분 JSON을 소스에 반영한 뒤에 지운다.
-  {
-    label: "1체인 · 회선 매트릭스 (만물의 법칙 추가타로 옮김 · 효과 없음)",
-    target: "damageBonus",
-    damageType: "All",
-    attackIds: ["1002307_2"],
-    value: 0,
-    uptime: "passive",
-    scope: "self",
-    resonanceChain: 1,
-    condition: "1체인 이상이면 만물의 법칙에 매트릭스 6타가 자동으로 붙는다",
-  },
   {
     label: "2체인 · 크리티컬 피해",
     target: "critDamage",

@@ -1,5 +1,6 @@
 import { ANOMALIES, type AnomalyKind } from "../data/anomalies";
 import { baseCharacterId } from "../data/modeVariants";
+import { STATUS_BASE_STACKS, type TriggerStatus } from "../data/attackTriggers";
 import type {
   Attack,
   BuffDamageType,
@@ -550,6 +551,37 @@ export function anomalyStackCap(
     from.push(buff.label || describeTarget(buff.target));
   }
   return { max: base + bonus, bonus, from };
+}
+
+/**
+ * 「적에게 붙는 상태」의 스택 상한. 위 anomalyStackCap과 짝이되 **더하는** 점이 다르다.
+ *
+ * 「조화 밀집 · 간섭」은 대응 캐릭터마다 원문이 따로 「파티에 있을 시 최대치 +1」이라고 적어 두었고
+ * 「중첩 불가」 단서가 없다 — 셋이 서면 +3이다. 이상 효과 쪽은 반대로 「중첩 불가」가 못 박혀 있어
+ * 가장 크게 올려주는 하나만 센다. 규칙이 반대라 함수를 따로 둔다.
+ *
+ * from에는 올려 준 줄의 이름을 순서대로 담는다 — 버프 창이 「누가 얼마나 보탰는지」를 그대로 띄운다.
+ */
+export function statusStackCap(
+  status: TriggerStatus,
+  buffs: ManualBuff[],
+  enabledBuffIds: string[] = [],
+  disabledBuffIds: string[] = [],
+): { max: number; base: number; bonus: number; from: { label: string; amount: number }[] } {
+  const base = STATUS_BASE_STACKS[status] ?? 1;
+  const from: { label: string; amount: number }[] = [];
+  let bonus = 0;
+  for (const buff of buffs) {
+    if (!buff.raisesStatusStacks) continue;
+    if (buff.raisesStatusKinds && !buff.raisesStatusKinds.includes(status)) continue;
+    // 상시 버프는 이 공격에서 꺼 두지 않았으면 걸린다. 나머지는 켜 뒀을 때만 센다.
+    if (buff.uptime === "passive") {
+      if (disabledBuffIds.includes(buff.id)) continue;
+    } else if (!enabledBuffIds.includes(buff.id)) continue;
+    bonus += buff.raisesStatusStacks;
+    from.push({ label: buff.label || describeTarget(buff.target), amount: buff.raisesStatusStacks });
+  }
+  return { max: base + bonus, base, bonus, from };
 }
 
 /**

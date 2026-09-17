@@ -138,7 +138,7 @@ export function NicknamesPage() {
             <small>NICKNAMES</small>
             <h2>별명</h2>
             <p>
-              공격마다 평소 부르는 이름을 적어 둡니다. <b>데미지 계산</b> 탭의 공격 추가에서{" "}
+              공격마다 평소 부르는 이름을 적어 둡니다. <b>대미지 계산</b> 탭의 공격 추가에서{" "}
               <b>인게임 명칭 / 별명</b> 토글로 갈아 볼 수 있습니다.
             </p>
             <p className="nick-note">

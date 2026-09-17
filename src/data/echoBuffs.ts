@@ -1,5 +1,6 @@
 import type { AnomalyKind } from "./anomalies";
 import type {
+  BuffAutoTrigger,
   BuffDamageType,
   BuffModifier,
   BuffScaleStat,
@@ -18,7 +19,12 @@ import type {
  *
  * 무기 쪽 WeaponBuffTemplate과 같은 모양이되, 에코에는 정련이 없어 values 5개 대신 value 하나다.
  */
-export interface EchoBuffTemplate {
+/**
+ * 자동 발동(BuffAutoTrigger)도 물려받는다 — 에코는 누가 낄지 모르므로 공격 id가 아니라
+ * **분류**(triggeredByType)로 건다. 「에코 어빌리티 발동 후」는 ["Echo"],
+ * 화음 세트의 「공명 해방 발동 후」는 ["Liberation"]이다.
+ */
+export interface EchoBuffTemplate extends BuffAutoTrigger {
   label: string;
   target: BuffTarget;
   damageType: BuffDamageType;
