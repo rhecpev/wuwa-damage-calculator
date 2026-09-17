@@ -1139,6 +1139,7 @@ function useMatrixSim(runs: MatrixRun[]) {
       /** 이 공격이 걸거나 태운 것을 상태에 반영한다. */
       const follow = (characterId: string, attackId: string) => {
         // 공용 항목(조화도 파괴)은 누가 썼느냐로 달라진다 — 캐릭터를 묶은 줄까지 함께 본다.
+        // 공명 모드가 다른 줄(불꽃 데니아의 「조화 밀집」 등)은 triggersFor가 걸러서 준다.
         for (const t of triggersFor(characterId, attackId)) {
           // ── 스테이지 버프 쪽 — 몬스터가 무엇이든 늘 따라간다.
           if (t.action === "add") {

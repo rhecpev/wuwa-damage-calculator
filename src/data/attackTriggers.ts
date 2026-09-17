@@ -1,6 +1,7 @@
 import type { AnomalyKind } from "./anomalies";
 import { ANOMALIES } from "./anomalies";
 import type { ResonanceMode } from "../types/game";
+import { baseCharacterId, modeOfCharacterId } from "./modeVariants";
 
 /**
  * 공격 트리거 — 그 공격을 **쓰면 따라 일어나는 일**.
@@ -254,7 +255,9 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       action: "add",
       status: "조화 밀집 · 간섭",
       amount: 1,
-      resonanceMode: "Discord",
+      // 「공명 모드 · 조화 밀집」에 있을 때만 갖는 능력이다(원문 6체인). 불꽃 모드의 데니아는
+      // 조화도 파괴는 하지만 이탈 · 간섭에는 관여하지 않는다. Cluster = 조화 밀집.
+      resonanceMode: "Cluster",
       condition: "조화 밀집 모드 · 목표가 「조화 밀집 · 이탈」과 「조화 소실」 상태여야 한다 · 같은 목표에 3초 1회",
       source: "파티 내 캐릭터가 「조화 밀집 · 이탈」을 보유하고 「조화 소실」 상태에 빠진 목표에게 「조화도 파괴 피해」를 입힐 시, 추가로 1스택의 「조화 밀집 · 간섭」을 추가하고",
     },
@@ -7875,11 +7878,24 @@ export const triggerKind = (t: AttackTrigger): "anomaly" | "status" | "resource"
 
 /**
  * 이 캐릭터가 이 공격을 썼을 때 따라 일어나는 일.
- * 캐릭터를 묶어 적은 줄(`캐릭터id:공격id`)이 있으면 그것까지 함께 준다.
+ *
+ * 캐릭터를 묶어 적은 줄(`캐릭터id:공격id`)이 있으면 그것까지 함께 준다. 열쇠는 **원래 id**로
+ * 적혀 있으므로(denia) 모드로 가른 id(denia-cluster)로 물어도 찾아지도록 둘 다 본다.
+ *
+ * **모드가 다른 줄은 빼고 준다.** 이중 모드 캐릭터는 모드에 따라 붙이는 것이 통째로 달라진다 —
+ * 데니아는 조화 밀집 모드에서만 「조화 밀집 · 이탈 · 간섭」을, 에이메스 · 린네는 조화 파동
+ * 모드에서만 「조화 파동 · 이탈」을 붙인다(불꽃 · 밀집 모드에서는 조화도 파괴만 한다).
+ * 모드는 가른 id에서 읽는다(modeOfCharacterId). 가르지 않은 id로 물으면 모드를 알 수 없어
+ * 전부 준다 — 그런 캐릭터는 모드 개념이 없으니 모드가 적힌 줄도 없다.
  */
 export function triggersFor(characterId: string, attackId: string): AttackTrigger[] {
-  return [
+  const baseId = baseCharacterId(characterId);
+  const mode = modeOfCharacterId(characterId);
+  const rows = [
     ...(ATTACK_TRIGGERS[attackId] ?? []),
     ...(ATTACK_TRIGGERS[`${characterId}:${attackId}`] ?? []),
+    ...(baseId === characterId ? [] : (ATTACK_TRIGGERS[`${baseId}:${attackId}`] ?? [])),
   ];
+  if (mode === undefined) return rows;
+  return rows.filter((t) => t.resonanceMode === undefined || t.resonanceMode === mode);
 }

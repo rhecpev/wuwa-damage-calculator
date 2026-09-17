@@ -1,5 +1,6 @@
 import type { Character } from "../types/game";
 import { ATTACK_TRIGGERS } from "./attackTriggers";
+import { modeOfCharacterId } from "./modeVariants";
 
 /**
  * src/data/characters/*.ts 를 전부 읽어 캐릭터 목록을 만든다.
@@ -29,13 +30,20 @@ function isCharacter(value: unknown): value is Character {
  * 하나만 보면 된다. 표에 없는 공격은 필드가 없다(= 피해만 준다).
  */
 function withTriggers(character: Character): Character {
+  // 모드로 가른 캐릭터는 **그 모드 줄만** 매단다 — 불꽃 데니아의 공격에 「조화 밀집 · 이탈」이
+  // 붙어 보이면 안 된다(triggersFor가 거르는 것과 같은 규칙).
+  const mode = modeOfCharacterId(character.id);
   return {
     ...character,
     skills: character.skills.map((skill) => ({
       ...skill,
       attacks: skill.attacks.map((attack) => {
-        const trigger = ATTACK_TRIGGERS[attack.id];
-        return trigger ? { ...attack, trigger } : attack;
+        const rows = ATTACK_TRIGGERS[attack.id];
+        const trigger =
+          rows && mode !== undefined
+            ? rows.filter((t) => t.resonanceMode === undefined || t.resonanceMode === mode)
+            : rows;
+        return trigger && trigger.length > 0 ? { ...attack, trigger } : attack;
       }),
     })),
   };

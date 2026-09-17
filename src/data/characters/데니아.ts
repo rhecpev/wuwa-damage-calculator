@@ -604,6 +604,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "party",
     exclusiveGroup: "denia-intro",
+    // 원문이 「공명 모드 · 조화 밀집」에 있을 시로 못 박았다 — 불꽃 모드에는 이 줄이 없다
+    // (불꽃 쪽 반주는 아래 「불꽃 효과 피해 부스트」가 맡는다).
+    resonanceMode: "Cluster",
     condition: "조화 밀집 모드. 반주로 등장한 캐릭터에게 16초간. 아래 40%와 하나만 켠다",
   },
   {
@@ -614,7 +617,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "party",
     exclusiveGroup: "denia-intro",
-    condition: "그 캐릭터가 「조화 밀집 · 이탈」을 붙인 뒤",
+    resonanceMode: "Cluster",
+    condition: "조화 밀집 모드. 그 캐릭터가 「조화 밀집 · 이탈」을 붙인 뒤",
   },
 
   // ── 공명체인 ──
@@ -676,6 +680,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceChain: 2,
+    // 원문 2체인의 「공명 모드 · 불꽃」 문단에 있다 — 조화 밀집 모드에는 이 줄이 없다.
+    resonanceMode: "Flame",
     condition: "불꽃 모드. 「불꽃 효과」가 터질 때마다 1스택, 최대 10스택",
   },
   // 2체인 끝 — DamageList에 17.44% 옆에 24.42%(= 17.44 × 1.4) 엔트리가 들어 있다.

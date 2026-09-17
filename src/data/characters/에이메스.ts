@@ -484,6 +484,9 @@ const circuitSkillAttacks: Attack[] = [
     element: "Fusion",
     scalingStat: "ATK",
     skillLevel: 10,
+    // 원문: 「공명 모드 · 조화 파동」에 있을 시 합주가 「조화 파동 궤적」을 제거하고 추가로
+    // 5회(별조각의 공진이면 10회)의 「조화 파동 피해」를 입힌다 — 불꽃 모드에는 없다.
+    resonanceMode: "Discord",
     // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
     noCrit: true,
     hits: [
@@ -497,6 +500,8 @@ const circuitSkillAttacks: Attack[] = [
     element: "Fusion",
     scalingStat: "ATK",
     skillLevel: 10,
+    // 원문: 「「공명 모드 · 조화 파동」에 있을 시 효력이 발생하고」 — 불꽃 모드에서는 나가지 않는다.
+    resonanceMode: "Discord",
     // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
     noCrit: true,
     hits: [

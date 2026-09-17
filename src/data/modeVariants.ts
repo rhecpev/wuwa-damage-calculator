@@ -32,6 +32,24 @@ const MODE_SLUG: Record<ResonanceMode, string> = {
 
 const SLUGS = new Set(Object.values(MODE_SLUG));
 
+/** 슬러그 -> 모드. 가른 id에서 모드를 되읽는 데 쓴다. */
+const MODE_BY_SLUG = Object.fromEntries(
+  Object.entries(MODE_SLUG).map(([mode, slug]) => [slug, mode as ResonanceMode]),
+) as Record<string, ResonanceMode>;
+
+/**
+ * 가른 id가 어느 모드인지(denia-cluster -> "Cluster"). 가르지 않은 id면 undefined다.
+ *
+ * 모드가 있는 캐릭터는 목록에 **모드마다 한 명씩** 서므로(modeVariants), id만 보면 지금
+ * 어느 모드인지 알 수 있다. 공격 트리거를 모드로 걸러낼 때 이 값을 본다 —
+ * 데니아가 불꽃일 때 「조화 밀집 · 이탈」을 붙이지 않는 것이 그 예다.
+ */
+export function modeOfCharacterId(characterId: string): ResonanceMode | undefined {
+  const cut = characterId.lastIndexOf("-");
+  if (cut < 0) return undefined;
+  return MODE_BY_SLUG[characterId.slice(cut + 1)];
+}
+
 /**
  * 가른 id -> 원래 id. **모드 슬러그로 끝나는 것만** 되돌린다 —
  * rover-aero · yangyang-xuanling처럼 모드가 아닌 꼬리는 그대로 둔다.
