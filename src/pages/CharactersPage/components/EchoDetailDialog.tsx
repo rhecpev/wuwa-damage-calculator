@@ -50,7 +50,6 @@ export function EchoDetailDialog({ echo, ownerId, slotIndex, onClose }: EchoDeta
             <h3>{echo.name}</h3>
             <span className="echo-detail-tags">
               {entry && <em>★{entry.rarity + 1}</em>}
-              {echo.cost !== undefined && <em>COST {echo.cost}</em>}
               {entry?.elementName && (
                 <em>
                   {entry.elementIcon && <img src={entry.elementIcon} alt="" loading="lazy" />}

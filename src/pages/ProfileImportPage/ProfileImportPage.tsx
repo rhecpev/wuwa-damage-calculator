@@ -89,7 +89,6 @@ interface EchoDraft {
   iconNote: string;
   /** 고른 화음(세트). 에코마다 두어 개 중 하나를 고른다. */
   fetter: string;
-  cost?: number;
   mainKey: string;
   mainValue: string;
   subKey: string;
@@ -258,7 +257,6 @@ export function ProfileImportPage() {
           catalogId: e.icon?.catalogId ?? "",
           fetter: e.icon?.fetter ?? "",
           iconNote: echoIconNote(e.icon),
-          cost: e.cost,
           mainKey: e.mainOption.key ?? "",
           mainValue: e.mainOption.value,
           subKey: e.mainSubOption.key ?? "",
@@ -623,7 +621,7 @@ export function ProfileImportPage() {
                       </span>
                       <label className={e.iconNote ? "warn" : undefined}>
                         <em>
-                          {i + 1}번 <i className="cost">COST {e.cost ?? "?"}</i>
+                          {i + 1}번
                         </em>
                         <SearchPicker
                           items={echoItems}

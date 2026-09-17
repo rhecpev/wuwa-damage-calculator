@@ -1531,7 +1531,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .profile-import .echo-card-icon img.echo-card-fetter{position:absolute;right:-5px;bottom:-5px;width:20px;height:20px;
   object-fit:contain;border-radius:50%;background:var(--c-262d3f);border:1px solid var(--c-4a5266)}
 .profile-import .echo-card-head label>em{display:flex;align-items:center;gap:4px;color:var(--c-4a9eff)}
-.profile-import .echo-card .cost{font-style:normal;padding:0 6px;border-radius:999px;font-size:10px;color:var(--c-d8b98a);background:var(--c-4f412b);border:1px solid var(--c-66543a)}
 .profile-import .echo-card .fetters .radio{padding:3px 7px 3px 5px;font-size:11.5px}
 .profile-import .echo-card-mains{display:grid;gap:6px;padding-bottom:8px;border-bottom:1px solid var(--c-3c455c)}
 .profile-import .echo-card-main>em{color:var(--c-e8c66a)}
