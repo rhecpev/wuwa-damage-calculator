@@ -172,7 +172,15 @@ export function TabNavigation() {
       >
         {menuOpen ? "✕" : "☰"}
       </button>
-      {/* 접혀 있을 때 지금 탭 — 탭 줄과 같은 아이콘을 붙인다. */}
+      {/* 인게임 그림 아이콘을 글자색으로 칠하는 필터. 색은 styles.css가 테마 변수로 준다.
+          (encore.moe 그림은 다른 출처라 mask로는 못 칠한다 — 필터는 출처와 상관없이 걸린다.) */}
+      <svg className="sidebar-tint-defs" aria-hidden="true">
+        <filter id="sidebar-icon-tint" colorInterpolationFilters="sRGB">
+          <feFlood className="sidebar-tint-flood" />
+          <feComposite in2="SourceAlpha" operator="in" />
+        </filter>
+      </svg>
+      {/* 접혀 있을 때 지금 탭 — 탭 줄과 같은 아이콘을 글자색으로 붙인다. */}
       <span className="sidebar-current">
         {current && <span className="sidebar-icon">{current.icon}</span>}
         <b>{current?.label}</b>
