@@ -95,8 +95,8 @@ export const nicknameCountOf = (characterId: string): number =>
  * 적어 둔 별명이 없는 공격은 이 이름으로 보인다. 손으로 적으면 그쪽이 늘 이긴다.
  *
  *   일반 공격 평 · 공명 스킬 E · 공명 해방 R · 조화도 파괴 F
- *   점프 공격 점공 · 공중 공격 공중 · 낙하 공격 낙공 · 반주 스킬 반주 · 변주 스킬 변주
- *   (규칙에 없던 모션은 강공격 강공 · 회피 반격 회반 · 협동 공격 협공으로 짓는다)
+ *   점프 공격 점공 · 공중 공격 공중공격 · 낙하 공격 낙공 · 반주 스킬 반주 · 변주 스킬 변주
+ *   (규칙에 없던 모션은 강공격 강공 · 회피 반격 회피반격 · 협동 공격 협공으로 짓는다)
  *
  * 이름에 단수가 있으면 뒤에 붙인다 — 「일반 공격 1단 피해」는 **평1**이다.
  */
@@ -106,8 +106,8 @@ const NAME_TOKENS: [RegExp, string][] = [
   // 「공중 낙하 공격」처럼 두 말이 겹치는 이름이 있어 좁은 쪽을 먼저 본다.
   [/낙하\s*공격/, "낙공"],
   [/점프\s*공격/, "점공"],
-  [/공중\s*공격/, "공중"],
-  [/회피\s*반격/, "회반"],
+  [/공중\s*공격/, "공중공격"],
+  [/회피\s*반격/, "회피반격"],
   [/강공격/, "강공"],
   [/협동\s*공격/, "협공"],
   [/일반\s*공격/, "평"],
@@ -129,8 +129,8 @@ const CATEGORY_TOKENS: Partial<Record<SkillCategory, string>> = {
 const TYPE_TOKENS: Partial<Record<AttackType, string>> = {
   Basic: "평",
   Heavy: "강공",
-  Aerial: "공중",
-  DodgeCounter: "회반",
+  Aerial: "공중공격",
+  DodgeCounter: "회피반격",
   Skill: "E",
   Liberation: "R",
   Ultimate: "R",
