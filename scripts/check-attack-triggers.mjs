@@ -23,7 +23,7 @@ function buildOwners() {
     const src = fs.readFileSync(path.join(CHAR_DIR, file), "utf8");
     // 줄 끝이 CRLF인 파일이 섞여 있다 — \r을 넘겨 짚지 않으면 캐릭터 열세 명을 놓친다.
     const key = src.match(/\n {2}id: "([a-z0-9-]+)",\r?\n {2}name:/)?.[1] ?? null;
-    for (const m of src.matchAll(/id: "(\d+_\d+)"/g)) {
+    for (const m of src.matchAll(/id: "(\d+_c?\d+)"/g)) {
       owners.set(m[1], { file: file.slice(0, -3), key });
     }
   }
@@ -87,7 +87,8 @@ const problems = { unknownId: [], weakSource: [], amountMismatch: [], anomalyNot
 let attacks = 0;
 let triggers = 0;
 
-for (const [, attackId, body] of data.matchAll(/\n {2}"(\d+_\d+)": \[(.*?)\n {2}\],/gs)) {
+// 체인 조건 공격(1005801_c1)도 함께 본다 — 열쇠에 c가 끼어 예전 정규식이 통째로 건너뛰었다.
+for (const [, attackId, body] of data.matchAll(/\n {2}"(\d+_c?\d+)": \[(.*?)\n {2}\],/gs)) {
   attacks += 1;
   // ⑤ 한 공격 안에서 같은 것을 두 번 적었거나, 같은 자원을 조건 없이 넣고 빼는 자리.
   //    자료를 append로 덧붙이며 늘려 왔기 때문에 같은 줄이 두 번 들어가기 쉽다.
