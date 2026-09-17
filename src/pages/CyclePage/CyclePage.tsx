@@ -185,6 +185,20 @@ export function CyclePage() {
         </div>
       </header>
 
+      {/* 불러오기는 목록 판 밖 — 에코 탭의 등록 단추와 같은 자리 · 같은 모양이다. */}
+      <div className="page-toolbar">
+        <button
+          className="primary"
+          onClick={() => {
+            setImportOpen(true);
+            setImportText("");
+            setImportError("");
+          }}
+        >
+          불러오기
+        </button>
+      </div>
+
       <section className="panel">
         <div className="panel-head">
           <h2>담아둔 사이클 {cyclePresets.length > 0 && `(${cyclePresets.length})`}</h2>
@@ -194,16 +208,6 @@ export function CyclePage() {
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
-          <button
-            className="viz-toggle"
-            onClick={() => {
-              setImportOpen(true);
-              setImportText("");
-              setImportError("");
-            }}
-          >
-            불러오기
-          </button>
         </div>
 
         {shown.length === 0 ? (

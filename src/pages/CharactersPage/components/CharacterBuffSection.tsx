@@ -2,27 +2,14 @@ import { useState } from "react";
 import { characters } from "../../../data/sampleData";
 import { CHAIN_MAX, chainNodesOf } from "../../../data/characterChains";
 import { usePartyConfig } from "../../../context/PartyConfigContext";
-import { DAMAGE_TYPE_OPTIONS, TARGET_OPTIONS } from "../../../calculator/manualBuffs";
-import type { CharacterBuffTemplate } from "../../../types/game";
 import { MODE_LABEL } from "../../../data/modeVariants";
 
 interface CharacterBuffSectionProps {
   characterId: string;
 }
 
-/** 공격 id -> 공격 이름. 버프가 어느 공격에 걸리는지 이름으로 보여주려고 미리 만든다. */
-function attackNames(characterId: string): Map<string, string> {
-  const character = characters.find((c) => c.id === characterId);
-  const map = new Map<string, string>();
-  for (const skill of character?.skills ?? []) {
-    for (const attack of skill.attacks) map.set(attack.id, attack.name);
-  }
-  return map;
-}
-
 /**
- * 공명체인 단계와 공명 모드를 정하고, 그 조건에서 어떤 버프가 걸리는지 바로 확인하는 자리.
- * 조건에 맞지 않는 버프도 흐리게 함께 보여줘서 몇 체인부터 열리는지 알 수 있게 한다.
+ * 공명체인 단계와 공명 모드를 정하는 자리. 단계를 누르면 그 설명이 옆에 뜬다.
  */
 export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps) {
   const { characterChains, setCharacterChain, characterModes, setCharacterMode } =
@@ -35,22 +22,8 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
 
   const chain = characterChains[characterId] ?? 0;
   const mode = characterModes[characterId] ?? character.resonanceModes?.[0];
-  const buffs = character.passiveBuffs ?? [];
-  const names = attackNames(characterId);
   const nodes = chainNodesOf(characterId);
   const picked = nodes.find((n) => n.chain === pickedChain) ?? nodes[0];
-
-  const targetLabel = (b: CharacterBuffTemplate) =>
-    TARGET_OPTIONS.find((o) => o.value === b.target)?.label ?? b.target;
-  const damageLabel = (b: CharacterBuffTemplate) =>
-    DAMAGE_TYPE_OPTIONS.find((o) => o.value === b.damageType)?.label ?? b.damageType;
-
-  /** 지금 설정에서 이 버프가 실제로 걸리는지. */
-  const isActive = (b: CharacterBuffTemplate) =>
-    (b.resonanceChain === undefined || chain >= b.resonanceChain) &&
-    (b.resonanceMode === undefined || mode === b.resonanceMode);
-
-  const activeCount = buffs.filter(isActive).length;
 
   return (
     <section className="panel">
@@ -58,11 +31,6 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
         <div>
           <h2>공명체인</h2>
         </div>
-        <span style={{ color: "var(--c-9aa3b3)", fontSize: 12 }}>
-          {buffs.length === 0
-            ? "등록된 버프 없음"
-            : `${buffs.length}개 중 ${activeCount}개 적용 중`}
-        </span>
       </div>
 
       {/* 1단계부터 6단계까지 가로로 나란히. 노드를 누르면 그 단계까지 보유한 것으로 잡히고,
@@ -133,69 +101,6 @@ export function CharacterBuffSection({ characterId }: CharacterBuffSectionProps)
         </div>
       </div>
 
-      {buffs.length === 0 ? (
-        <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>
-          이 캐릭터에는 아직 옮겨 적은 공명체인 버프가 없습니다.
-        </p>
-      ) : (
-        <table className="chain-table">
-          <thead>
-            <tr>
-              <th>체인</th>
-              <th>버프</th>
-              <th>적용 대상</th>
-              <th>방식</th>
-              <th>걸리는 공격</th>
-              <th>수치</th>
-              <th>조건</th>
-            </tr>
-          </thead>
-          <tbody>
-            {buffs.map((buff, index) => {
-              const active = isActive(buff);
-              const stacks = buff.stacks ?? 1;
-              const how =
-                buff.target === "motionValue"
-                  ? buff.modifier === "amplify"
-                    ? "상승 (곱)"
-                    : "증가 (합)"
-                  : "가산";
-
-              return (
-                <tr key={index} className={active ? "" : "off"}>
-                  <td className="chain-no">{buff.resonanceChain ?? "—"}</td>
-                  <td>
-                    {buff.label}
-                    {buff.resonanceMode && (
-                      <span className="chain-mode">{MODE_LABEL[buff.resonanceMode]}</span>
-                    )}
-                  </td>
-                  <td>{targetLabel(buff)}</td>
-                  <td>{how}</td>
-                  <td>
-                    {buff.attackIds?.length
-                      ? buff.attackIds.map((id) => names.get(id) ?? id).join(" · ")
-                      : buff.attackId
-                        ? (names.get(buff.attackId) ?? buff.attackId)
-                        : damageLabel(buff)}
-                  </td>
-                  <td className="chain-value">
-                    {buff.target === "syncAmplify"
-                      ? `${buff.value}pt` // 조화도 파괴 증폭은 퍼센트가 아닌 수치
-                      : `${(buff.value * 100).toFixed(0)}%`}
-                    {stacks > 1 && (
-                      <em>
-                        ×{stacks} = {(buff.value * stacks * 100).toFixed(0)}%
-                      </em>
-                    )}
-                  </td>
-                  <td className="chain-cond">{buff.condition ?? "—"}</td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
     </section>
   );
 }

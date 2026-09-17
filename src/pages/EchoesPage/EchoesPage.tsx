@@ -310,54 +310,33 @@ export function EchoesPage() {
   };
 
   return (
+    <>
+    {/* 등록 단추는 목록 판 밖 — 목록이 길어도 늘 위에 있다. 색은 테마 변수를 탄다(.page-toolbar). */}
+    <div className="page-toolbar">
+      <button className="primary" onClick={() => setShowEchoSearch(true)}>
+        + 에코 추가
+      </button>
+      <button
+        disabled={batchProcessing}
+        onClick={() => document.getElementById("imageUpload")?.click()}
+        title="에코 스크린샷을 고릅니다 — 여러 장을 한꺼번에 골라도 됩니다"
+      >
+        {batchProcessing ? "처리 중..." : "그림으로 등록"}
+      </button>
+      {/* 한 장이든 여러 장이든 같은 단추 — 고른 장수만큼 읽어 한 창에 모아 등록한다. */}
+      <input
+        id="imageUpload"
+        type="file"
+        accept="image/*"
+        multiple
+        style={{ display: "none" }}
+        onChange={handleBatchImageUpload}
+      />
+      {batchProgress && <ProgressBar progress={batchProgress} />}
+    </div>
+
     <section className="panel">
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <h2>내 에코 목록 ({myEchoes.length}개)</h2>
-        <div style={{ display: "flex", gap: "8px" }}>
-          <button
-            onClick={() => setShowEchoSearch(true)}
-            style={{
-              padding: "8px 16px",
-              background: "var(--c-4a9eff)",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "14px",
-            }}
-          >
-            + 에코 추가
-          </button>
-          <button
-            disabled={batchProcessing}
-            onClick={() => document.getElementById("imageUpload")?.click()}
-            title="에코 스크린샷을 고릅니다 — 여러 장을 한꺼번에 골라도 됩니다"
-            style={{
-              padding: "8px 16px",
-              background: batchProcessing ? "var(--c-727272)" : "var(--c-6a7aef)",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: batchProcessing ? "not-allowed" : "pointer",
-              fontWeight: "bold",
-              fontSize: "14px",
-            }}
-          >
-            {batchProcessing ? "처리 중..." : "그림으로 등록"}
-          </button>
-          {/* 한 장이든 여러 장이든 같은 단추 — 고른 장수만큼 읽어 한 창에 모아 등록한다. */}
-          <input
-            id="imageUpload"
-            type="file"
-            accept="image/*"
-            multiple
-            style={{ display: "none" }}
-            onChange={handleBatchImageUpload}
-          />
-        </div>
-        {batchProgress && <ProgressBar progress={batchProgress} />}
-      </div>
+      <h2>내 에코 목록 ({myEchoes.length}개)</h2>
 
       <EchoSearchDialog
         isOpen={showEchoSearch}
@@ -1354,5 +1333,6 @@ export function EchoesPage() {
         </div>
       </div>
     </section>
+    </>
   );
 }

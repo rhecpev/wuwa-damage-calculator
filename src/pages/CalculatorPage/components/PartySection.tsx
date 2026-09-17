@@ -1,6 +1,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { characters, getAvailableCharacters } from "../../../data/sampleData";
-import type { PartyConfig } from "../../../types/game";
+import type { Element, PartyConfig } from "../../../types/game";
+import { ElementFilter } from "../../../components/ElementFilter";
 import {
   ENEMY_RES_PRESETS,
   PARTY_SLOTS,
@@ -41,10 +42,13 @@ interface CharacterPickerProps {
  */
 export function CharacterPickerSection({ memberIds, onPick, hint }: CharacterPickerProps) {
   const [query, setQuery] = useState("");
+  // 속성 아이콘으로 거른다. null이면 전체.
+  const [elementFilter, setElementFilter] = useState<Element | null>(null);
 
   const needle = query.trim().toLowerCase();
-  const availableCharacters = getAvailableCharacters().filter((c) =>
-    c.name.toLowerCase().includes(needle),
+  const availableCharacters = getAvailableCharacters().filter(
+    (c) =>
+      (!elementFilter || c.element === elementFilter) && c.name.toLowerCase().includes(needle),
   );
 
   return (
@@ -52,6 +56,7 @@ export function CharacterPickerSection({ memberIds, onPick, hint }: CharacterPic
       <div className="panel-head">
         <h2>캐릭터 선택</h2>
         {hint && <em className="pick-hint">{hint}</em>}
+        <ElementFilter value={elementFilter} onChange={setElementFilter} />
         <input
           type="text"
           className="panel-search"

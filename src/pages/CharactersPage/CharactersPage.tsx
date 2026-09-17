@@ -93,12 +93,7 @@ export function CharactersPage() {
 
     switch (tab) {
       case "basic":
-        return (
-          <CharacterStatsSection
-            characterId={selectedCharacterId}
-            characterEchoLinks={characterEchoLinks}
-          />
-        );
+        return null;
       case "weapon":
         return <WeaponSelector characterId={selectedCharacterId} />;
       case "echo":
@@ -131,8 +126,22 @@ export function CharactersPage() {
         ))}
       </nav>
 
+      {/* 판 크기는 **스탯 탭이 정한다.** 다른 탭에서도 스탯 판을 보이지 않게 깔아 두어 그 높이를 잡고,
+          고른 탭은 그 자리 위에 겹쳐 그린다 — 넘치면 판 안에서 스크롤한다. 탭을 옮겨도 판이 출렁이지 않는다. */}
       <div className="char-content">
-        {content()}
+        {selectedCharacterId ? (
+          <>
+            <div className={tab === "basic" ? "char-sizer" : "char-sizer ghost"} inert={tab !== "basic"}>
+              <CharacterStatsSection
+                characterId={selectedCharacterId}
+                characterEchoLinks={characterEchoLinks}
+              />
+            </div>
+            {tab !== "basic" && <div className="char-pane">{content()}</div>}
+          </>
+        ) : (
+          content()
+        )}
       </div>
 
       <CharacterRoster

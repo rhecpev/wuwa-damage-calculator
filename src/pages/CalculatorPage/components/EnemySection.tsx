@@ -91,7 +91,10 @@ export function EnemySection() {
 
           {/* 막대를 끌지 않고도 자주 쓰는 레벨로 바로 가고, 옆 단추로 잘게 옮긴다.
               setEnemyLevel이 1~200으로 잘라 주므로 여기서 따로 막지 않는다. */}
+          {/* 두 묶음(자주 쓰는 레벨 · 올리고 내리는 폭)은 각자 넷씩 한 덩어리로 접힌다 —
+              폭이 모자라면 단추 하나만 내려가지 않고 넷이 통째로 다음 줄로 간다. */}
           <div className="enemy-level-keys">
+            <span className="enemy-level-group">
             {LEVEL_PRESETS.map((level) => (
               <button
                 key={level}
@@ -103,7 +106,8 @@ export function EnemySection() {
                 {level}
               </button>
             ))}
-            <span className="enemy-level-sep" />
+            </span>
+            <span className="enemy-level-group">
             {LEVEL_STEPS.map((step) => (
               <button
                 key={step}
@@ -115,6 +119,7 @@ export function EnemySection() {
                 {step > 0 ? `+${step}` : step}
               </button>
             ))}
+            </span>
           </div>
           <span className="enemy-hint">
             방어력 {num(792 + 8 * enemy.level)} (= 8 × 레벨 + 792)

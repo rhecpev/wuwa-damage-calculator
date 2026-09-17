@@ -1,5 +1,6 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { PartyPresetSection } from "../CalculatorPage/components/PartyPresetSection";
+import { ElementFilter } from "../../components/ElementFilter";
 import type { DragEvent } from "react";
 import { characters } from "../../data/sampleData";
 import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
@@ -118,7 +119,16 @@ function PoolCard({
         {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
         <b>{char.name}</b>
         <em style={at.length ? undefined : { color: ELEMENT_COLORS[char.element] }}>
-          {at.length ? at.join(" · ") : ELEMENT_NAMES[char.element]}
+          {at.length ? (
+            at.join(" · ")
+          ) : (
+            <>
+              {elementIcon(char.element) && (
+                <img className="pick-card-el" src={elementIcon(char.element)} alt="" />
+              )}
+              {ELEMENT_NAMES[char.element]}
+            </>
+          )}
         </em>
         {at.length > 0 && (
           <i
@@ -209,7 +219,12 @@ function AdviceCard({
 
       <span className="advice-who">
         <b>{char.name}</b>
-        <em style={{ color: ELEMENT_COLORS[char.element] }}>{ELEMENT_NAMES[char.element]}</em>
+        <em style={{ color: ELEMENT_COLORS[char.element] }}>
+          {elementIcon(char.element) && (
+            <img className="advice-el" src={elementIcon(char.element)} alt="" />
+          )}
+          {ELEMENT_NAMES[char.element]}
+        </em>
         {at.length > 0 && (
           <i className={over ? "over" : undefined}>
             {at.join(" · ")}
@@ -280,6 +295,8 @@ export function MatrixPlannerPage() {
   const [view, setView] = useState<ViewId>("planner");
   const [activeId, setActiveId] = useState<number | null>(null);
   const [query, setQuery] = useState("");
+  // 보유 목록을 속성으로 거른다. null이면 전체.
+  const [elementFilter, setElementFilter] = useState<Element | null>(null);
   // 끌고 있는 파티와, 지금 그 위에 올라가 있는 파티. 둘 다 화면 표시에만 쓴다.
   const [dragId, setDragId] = useState<number | null>(null);
   const [overId, setOverId] = useState<number | null>(null);
@@ -340,9 +357,10 @@ export function MatrixPlannerPage() {
   const needle = query.trim().toLowerCase();
   const shown = owned.filter(
     (c) =>
-      !needle ||
-      c.name.toLowerCase().includes(needle) ||
-      ELEMENT_NAMES[c.element].includes(needle),
+      (!elementFilter || c.element === elementFilter) &&
+      (!needle ||
+        c.name.toLowerCase().includes(needle) ||
+        ELEMENT_NAMES[c.element].includes(needle)),
   );
 
   /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
@@ -396,7 +414,7 @@ export function MatrixPlannerPage() {
       .sort((a, b) => (b.advice?.score ?? -1) - (a.advice?.score ?? -1));
     // others는 shown에서 나온 파생값이라 needle · ownedVersion이 바뀔 때 같이 바뀐다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mainPick, needle, ownedVersion, characterChains, characterModes, parties]);
+  }, [mainPick, needle, elementFilter, ownedVersion, characterChains, characterModes, parties]);
 
   /**
    * 이 파티의 캐릭터들**만으로** 담아 둔 사이클.
@@ -669,6 +687,7 @@ export function MatrixPlannerPage() {
           <section className="panel">
             <div className="panel-head">
               <h2>보유 캐릭터</h2>
+              <ElementFilter value={elementFilter} onChange={setElementFilter} />
               <input
                 type="text"
                 className="panel-search"
@@ -889,9 +908,14 @@ export function MatrixPlannerPage() {
                         >
                           {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
                           <b>{char.name}</b>
-                          <em style={{ color: ELEMENT_COLORS[char.element] }}>
-                            {ELEMENT_NAMES[char.element]}
-                          </em>
+                          {elementIcon(char.element) && (
+                            <img
+                              className="matrix-slot-el"
+                              src={elementIcon(char.element)}
+                              alt={ELEMENT_NAMES[char.element]}
+                              title={ELEMENT_NAMES[char.element]}
+                            />
+                          )}
                           {/* 여러 파티에 든 캐릭터는 몇 번째로 쓰는 것인지 카드에도 적는다. */}
                           {used > 1 && <i className={over ? "over" : undefined}>×{used}</i>}
                         </button>

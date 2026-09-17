@@ -60,7 +60,10 @@ export function CycleComparePage() {
   const [tab, setTab] = usePersistedState<"cycles" | "gear">("compare.tab", "cycles");
   // 이 탭에서만 쓰는 몬스터 설정. null이면 따로 정하지 않은 것 — 사이클은 저장 당시 몬스터, 지금 루틴은 계산 탭 몬스터.
   // 계산 탭의 몬스터는 건드리지 않는다.
-  const [enemy, setEnemy] = usePersistedState<Enemy | null>("compare.enemy", null);
+  // 안쪽 탭 둘은 **몬스터를 따로 정한다.** 사이클끼리 견주는 몬스터와 장비를 견주는 몬스터가 다를 수 있어서다.
+  // (사이클 VS 사이클은 예전 저장 이름을 그대로 써서 전에 정해 둔 몬스터를 이어 받는다.)
+  const [cyclesEnemy, setCyclesEnemy] = usePersistedState<Enemy | null>("compare.enemy", null);
+  const [gearEnemy, setGearEnemy] = usePersistedState<Enemy | null>("compare.enemy.gear", null);
 
   return (
     <>
@@ -82,8 +85,17 @@ export function CycleComparePage() {
           에코 · 무기 · 돌파 비교
         </button>
       </div>
-      <CompareEnemyBar enemy={enemy} onChange={setEnemy} />
-      {tab === "cycles" ? <CycleVsCycle enemy={enemy} /> : <GearCompare enemy={enemy} />}
+      {tab === "cycles" ? (
+        <>
+          <CompareEnemyBar enemy={cyclesEnemy} onChange={setCyclesEnemy} />
+          <CycleVsCycle enemy={cyclesEnemy} />
+        </>
+      ) : (
+        <>
+          <CompareEnemyBar enemy={gearEnemy} onChange={setGearEnemy} />
+          <GearCompare enemy={gearEnemy} />
+        </>
+      )}
     </>
   );
 }
