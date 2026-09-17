@@ -742,6 +742,25 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .sidebar-text{display:none}
 .sidebar-link{padding:7px 9px}
 }
+/* 세로로 긴 화면 — 탭 줄 대신 ☰ 단추 하나만 두고, 누르면 탭 목록 · 테마가 아래로 펼쳐진다. */
+.sidebar-menu{display:contents}
+.sidebar-menu-button,.sidebar-current{display:none}
+@media(orientation:portrait){
+.sidebar{gap:10px}
+.sidebar-menu-button{display:grid;place-items:center;flex:none;width:36px;height:36px;padding:0;font-size:20px;line-height:1;
+  border-radius:9px;cursor:pointer;color:var(--c-c2c9d6);background:var(--c-2a3246);border:1px solid var(--c-3c455c)}
+.sidebar-menu-button:hover{border-color:var(--c-8794aa)}
+.sidebar-current{display:block;font-size:14px;font-weight:600;color:var(--c-e9edf5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-menu{display:none}
+.sidebar.open .sidebar-menu{position:absolute;top:56px;left:0;right:0;display:flex;flex-direction:column;gap:10px;
+  max-height:calc(100vh - 56px);overflow-y:auto;padding:10px 12px 14px;
+  background:rgb(var(--rgb-283042));border-bottom:1px solid rgba(var(--rgb-ffffff),.08);box-shadow:0 12px 24px -12px rgba(0,0,0,.6)}
+.sidebar.open .sidebar-nav{flex:none;flex-direction:column;align-items:stretch;overflow:visible;gap:2px}
+.sidebar.open .sidebar-link{padding:8px 10px}
+.sidebar.open .sidebar-text{display:flex}
+.sidebar.open .theme-toggle{align-self:flex-start}
+.sidebar-foot{display:none}
+}
 /* 파티 관리 탭 — 왼쪽에 캐릭터 선택, 오른쪽에 파티 목록. */
 .party-page{display:flex;flex-direction:column;gap:12px}
 .party-page-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;align-items:start}

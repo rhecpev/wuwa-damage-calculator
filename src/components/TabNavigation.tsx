@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { useAppState, type TabType } from "../context/AppStateContext";
 import { THEMES, useTheme, type Theme } from "../utils/theme";
 
@@ -157,9 +157,23 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
 export function TabNavigation() {
   const { tab, setTab } = useAppState();
   const { theme, setTheme } = useTheme();
+  // 세로로 긴 화면에서만 쓰는 접이식 메뉴. 가로 화면에서는 늘 펼쳐져 있어 이 값을 보지 않는다.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const current = TABS.find((item) => item.id === tab);
 
   return (
-    <aside className="sidebar">
+    <aside className={menuOpen ? "sidebar open" : "sidebar"}>
+      {/* 세로 화면 전용 — ☰을 누르면 탭 목록과 테마 고르개가 아래로 펼쳐진다. */}
+      <button
+        className="sidebar-menu-button"
+        aria-label="메뉴"
+        aria-expanded={menuOpen}
+        onClick={() => setMenuOpen((open) => !open)}
+      >
+        {menuOpen ? "✕" : "☰"}
+      </button>
+      <span className="sidebar-current">{current?.label}</span>
+
       <div className="sidebar-brand">
         <span>
           <b>명조 피해량 계산기</b>
@@ -167,13 +181,18 @@ export function TabNavigation() {
         </span>
       </div>
 
+      {/* 가로 화면에서는 display:contents라 막대에 그대로 늘어서고, 세로 화면에서는 펼침 판이 된다. */}
+      <div className="sidebar-menu">
       <nav className="sidebar-nav">
         {TABS.map((item) => (
           <button
             key={item.id}
             className={item.id === tab ? "sidebar-link on" : "sidebar-link"}
             title={`${item.label} — ${item.hint}`}
-            onClick={() => setTab(item.id)}
+            onClick={() => {
+              setTab(item.id);
+              setMenuOpen(false);
+            }}
           >
             <span className="sidebar-icon">{item.icon}</span>
             <span className="sidebar-text">
@@ -199,6 +218,7 @@ export function TabNavigation() {
             {THEME_ICONS[item.id]}
           </button>
         ))}
+      </div>
       </div>
 
       <div className="sidebar-foot">
