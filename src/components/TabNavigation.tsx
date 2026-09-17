@@ -172,7 +172,11 @@ export function TabNavigation() {
       >
         {menuOpen ? "✕" : "☰"}
       </button>
-      <span className="sidebar-current">{current?.label}</span>
+      {/* 접혀 있을 때 지금 탭 — 탭 줄과 같은 아이콘을 붙인다. */}
+      <span className="sidebar-current">
+        {current && <span className="sidebar-icon">{current.icon}</span>}
+        <b>{current?.label}</b>
+      </span>
 
       <div className="sidebar-brand">
         <span>
