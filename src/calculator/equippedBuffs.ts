@@ -114,6 +114,9 @@ export function deriveCharacterBuffs(
     const inherentsOn = characterInherents[character.id];
 
     (character.passiveBuffs ?? []).forEach((template, index) => {
+      // 자리만 남긴 줄은 버프를 만들지 않는다. forEach의 index는 배열 위치라 그대로 남으므로
+      // 뒤 줄의 id가 당겨지지 않는다 — 그게 이 칸을 두는 이유다(types/game.ts의 retired).
+      if (template.retired) return;
       if (template.resonanceChain !== undefined && chain < template.resonanceChain) return;
       if (template.resonanceMode !== undefined && mode !== template.resonanceMode) return;
       // 고유 스킬에서 나온 버프는 그 스킬을 꺼두면 같이 빠진다.

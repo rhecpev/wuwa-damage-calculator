@@ -65,8 +65,8 @@ export function baseCharacterId(characterId: string): string {
  *
  * 가른 쪽은 resonanceModes가 한 칸이라 모드 고르개(CharacterBuffSection)가 뜨지 않고,
  * passiveBuffs도 그 모드 것만 남는다 — 다른 모드 버프는 아예 목록에 오르지 않는다.
- * passiveBuffs 순번은 버프 수정분의 키(`캐릭터id:순번`)라 가른 뒤의 순번이 기준이 된다.
- * id가 함께 바뀌므로 예전 수정분과 섞이지 않는다.
+ * passiveBuffs 순번은 버프 id(`character:캐릭터id:순번`)의 열쇠라 가른 뒤의 순번이 기준이다.
+ * id가 함께 바뀌므로 가르지 않았을 때 담아 둔 사이클과는 섞이지 않는다.
  */
 export function modeVariants(base: Character): Character[] {
   const modes = base.resonanceModes ?? [];

@@ -17,7 +17,7 @@ const TABS = [
   { id: "skill", label: "스킬" },
   { id: "chain", label: "공명체인" },
 ] as const;
-// 「버프 정리」는 전 캐릭터를 한 번에 훑도록 개발용 「캐릭터 버프 확인」 탭으로 옮겼다
+// 「버프 정리」 탭이 있던 자리다 — 검수 장치는 2026-09-17에 걷어냈다(값은 캐릭터 자료 본문으로)
 // (pages/CharacterBuffReviewPage).
 
 type TabId = (typeof TABS)[number]["id"];

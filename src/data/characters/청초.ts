@@ -718,11 +718,13 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     label: "만법을 깨는 검 · 최종 피해 (조화도 파괴 증폭 비례, 간섭 1스택당) (효과 없음 — 「조화 밀집 · 간섭」 줄로 옮김)",
     target: "totalDamage",
     damageType: "All",
-    value: 0, // 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이 기본 1스택까지 함께 낸다
+    value: 0,
+    // 쓸모가 없어진 줄 — 지우면 뒤 줄의 버프 id가 당겨져 담아 둔 사이클의 체크가 밀린다.
+    retired: true, // 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이 기본 1스택까지 함께 낸다
     scaleFrom: "SyncAmplify",
     uptime: "active",
     scope: "self",
-    condition: "효과 없음 — 「조화 밀집 · 간섭」을 켜세요. 줄은 버프 순번을 지키려 남겨 둔다",
+    condition: "자리만 남긴 줄 — 「조화 밀집 · 간섭」 한 줄이 이 몫을 낸다",
   },
   // ── 1체인 「거궐로 멸한 흔적」에 붙는 것들 ──
   // 원문: 「제거된 「악을 씻어내는 검결」 1스택 당 목표가 「거궐로 멸한 흔적」으로부터 받는 피해를

@@ -459,10 +459,12 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "totalDamage",
     damageType: "All",
     scaleFrom: "SyncAmplify",
-    value: 0, // 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이 기본 1스택까지 함께 낸다
+    value: 0,
+    // 쓸모가 없어진 줄 — 지우면 뒤 줄의 버프 id가 당겨져 담아 둔 사이클의 체크가 밀린다.
+    retired: true, // 「조화 밀집 · 간섭」 한 줄(data/clusterBuffs.ts)이 기본 1스택까지 함께 낸다
     uptime: "active",
     scope: "self",
-    condition: "효과 없음 — 「조화 밀집 · 간섭」을 켜세요. 줄은 버프 순번을 지키려 남겨 둔다",
+    condition: "자리만 남긴 줄 — 「조화 밀집 · 간섭」 한 줄이 이 몫을 낸다",
   },
   // ── 스킬에서 오는 것 ──
   {
