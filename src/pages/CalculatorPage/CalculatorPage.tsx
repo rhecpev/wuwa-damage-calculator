@@ -8,10 +8,13 @@ import { EnemySection } from "./components/EnemySection";
 import { BuffSection } from "./components/BuffSection";
 import { DamageBreakdownSection } from "./components/DamageBreakdownSection";
 
-/** 사이클 구성 아래에 깔리는 세부 탭. 순서대로 위에서 아래로 쓰던 흐름 그대로다. */
+/**
+ * 사이클 구성 아래에 깔리는 세부 탭. **쓰는 차례대로** 세운다 —
+ * 공격을 담고(공격 추가), 걸리는 것을 손보고(버프 직접 입력), 결과를 본다(피해 분석).
+ */
 const TABS = [
-  { id: "buffs", label: "버프 직접 입력" },
   { id: "attacks", label: "공격 추가" },
+  { id: "buffs", label: "버프 직접 입력" },
   { id: "damage", label: "피해 분석" },
 ] as const;
 
@@ -39,7 +42,7 @@ export function CalculatorPage() {
   );
   // 바깥 탭으로 나갔다 와도 보던 세부 탭이 남는다.
   // 예전에 저장된 이름(없어진 탭)이 남아 있으면 첫 탭으로 돌린다 — 아무것도 안 보이지 않게.
-  const [tab, setTab] = usePersistedState<SubTab>("calc.tab", "buffs");
+  const [tab, setTab] = usePersistedState<SubTab>("calc.tab", TABS[0].id);
   const active = TABS.some((item) => item.id === tab) ? tab : TABS[0].id;
 
   return (
@@ -59,7 +62,8 @@ export function CalculatorPage() {
       </section>
 
       {/* 나머지는 세부 탭으로 접어 둔다 — 한 화면에 다 펼치면 루틴이 위로 밀려서다. */}
-      <div className="compare-tabs calc-tabs" role="tablist">
+      {/* 아래 판과 한 장처럼 이어 붙는 폴더 탭 — 고른 탭이 판 위로 그대로 얹힌다. */}
+      <div className="calc-tabs" role="tablist">
         {TABS.map((item) => (
           <button
             key={item.id}
@@ -73,8 +77,8 @@ export function CalculatorPage() {
         ))}
       </div>
 
-      {active === "buffs" && <BuffSection />}
       {active === "attacks" && <AttackPaletteSection onAddAttack={addAttack} />}
+      {active === "buffs" && <BuffSection />}
       {active === "damage" && <DamageBreakdownSection results={results} />}
     </>
   );
