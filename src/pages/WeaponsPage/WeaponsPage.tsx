@@ -26,7 +26,7 @@ import { flat } from "../../utils/format";
 /**
  * 무기 관리 탭 — 내가 가진 무기를 등록해 두는 자리. 에코 관리와 같은 방식이다.
  *
- * 아래 도감에서 무기를 누르면 위쪽 「내 무기」에 한 자루가 담긴다.
+ * 오른쪽 도감에서 무기를 누르면 왼쪽 「내 무기」에 한 자루가 담긴다.
  * **같은 무기를 여러 번 담을 수 있다** — 무기 하나는 한 캐릭터만 낄 수 있으므로,
  * 두 캐릭터에게 같은 무기를 물리려면 실제로 두 자루가 있어야 하기 때문이다.
  * 자루마다 레벨과 정련을 따로 정한다.
@@ -99,29 +99,16 @@ export function WeaponsPage() {
 
   return (
     <div className="data-page">
-      <header>
-        <div>
-          <h1>무기 관리</h1>
-          <p>
-            아래 도감에서 무기를 누르면 「내 무기」에 한 자루가 담깁니다.{" "}
-            <b className="weapon-dup-note">같은 무기를 여러 번 담을 수 있습니다</b> — 무기 한 자루는
-            한 캐릭터만 낄 수 있으니, 둘에게 물리려면 두 자루가 있어야 합니다.
-          </p>
-          <p>
-            캐릭터에게 실제로 물리는 건 <b>캐릭터 관리 → 무기선택창</b>에서 합니다. 여기 담아 둔
-            무기만 그쪽 목록에 뜹니다.
-          </p>
-        </div>
-      </header>
-
+      {/* 왼쪽이 담아 둔 무기, 오른쪽이 도감 — 도감을 누르면 왼쪽에 한 자루가 담긴다. */}
+      <div className="weapon-split">
       <section className="panel">
         <div className="row">
-          <h2>내 무기 {mine.length}자루</h2>
+          <h2>내 무기</h2>
         </div>
 
         {mine.length === 0 ? (
           <p className="data-empty">
-            아직 담은 무기가 없습니다. 아래 목록에서 무기를 눌러 담으세요.
+            아직 담은 무기가 없습니다. 오른쪽 도감에서 무기를 눌러 담으세요.
           </p>
         ) : (
           <>
@@ -322,6 +309,7 @@ export function WeaponsPage() {
 
         {list.length === 0 && <p className="data-empty">조건에 맞는 무기가 없습니다.</p>}
       </section>
+      </div>
     </div>
   );
 }

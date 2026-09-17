@@ -2,17 +2,23 @@ import { useState } from "react";
 import { characters } from "../../../data/sampleData";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import type { PartyConfig } from "../../../types/game";
+import type { PartyPreset } from "../../../context/PartyConfigContext";
 
 interface PartyPresetSectionProps {
   /** 하나를 불러온 뒤 부를 것. 다이얼로그로 띄운 쪽이 스스로 닫으려고 쓴다. */
   onLoaded?: () => void;
+  /**
+   * 고른 파티를 계산 탭 자리 대신 여기로 넘긴다. 매트릭스 파티 플래너처럼
+   * 계산 중인 편성을 건드리지 않고 파티만 받아 가는 화면이 쓴다.
+   */
+  onPick?: (preset: PartyPreset) => void;
 }
 
 /**
  * 파티 관리 탭에서 짜둔 파티 목록. 눌러서 계산 탭 자리에 그대로 앉힌다.
  * 만들고 지우고 순서를 바꾸는 것은 파티 관리 탭이 한다 — 여기서는 고르기만 한다.
  */
-export function PartyPresetSection({ onLoaded }: PartyPresetSectionProps) {
+export function PartyPresetSection({ onLoaded, onPick }: PartyPresetSectionProps) {
   const { partyPresets, applyPartyPreset } = usePartyConfig();
   const [query, setQuery] = useState("");
 
@@ -67,7 +73,8 @@ export function PartyPresetSection({ onLoaded }: PartyPresetSectionProps) {
 
               <button
                 onClick={() => {
-                  applyPartyPreset(preset.id);
+                  if (onPick) onPick(preset);
+                  else applyPartyPreset(preset.id);
                   onLoaded?.();
                 }}
               >

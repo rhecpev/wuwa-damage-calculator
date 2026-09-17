@@ -11,9 +11,6 @@ interface CharacterRosterProps {
   characters: Character[];
   selectedId: string | null;
   onSelect: (characterId: string) => void;
-  /** 확인 화면에서 「체크 완료」 · 「나중에」를 누른 캐릭터. 주면 이름 줄에 꼬리표가 붙는다. */
-  checkedIds?: Set<string>;
-  deferredIds?: Set<string>;
 }
 
 const ELEMENT_NAMES: Record<Character["element"], string> = {
@@ -33,13 +30,7 @@ const ELEMENT_NAMES: Record<Character["element"], string> = {
  * 줄 오른쪽의 ✓ / ✕가 보유 표시다 — 눌러서 켜고 끄며, 보유한 것만 보도록 걸러낼 수도 있다.
  * 목록은 보유한 것을 먼저 세우고 그 안에서 이름순으로 둔다 — 쓰는 캐릭터가 늘 위에 있게.
  */
-export function CharacterRoster({
-  characters,
-  selectedId,
-  onSelect,
-  checkedIds,
-  deferredIds,
-}: CharacterRosterProps) {
+export function CharacterRoster({ characters, selectedId, onSelect }: CharacterRosterProps) {
   const version = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
   const [query, setQuery] = useState("");
   const [ownedOnly, setOwnedOnly] = useState(false);
@@ -104,15 +95,7 @@ export function CharacterRoster({
                 )}
                 <span className="char-list-name">
                   <b>{character.name}</b>
-                  <em>
-                    {ELEMENT_NAMES[character.element]}
-                    {checkedIds?.has(character.id) && (
-                      <span className="char-list-review done">완료</span>
-                    )}
-                    {deferredIds?.has(character.id) && (
-                      <span className="char-list-review later">나중에</span>
-                    )}
-                  </em>
+                  <em>{ELEMENT_NAMES[character.element]}</em>
                 </span>
               </button>
 

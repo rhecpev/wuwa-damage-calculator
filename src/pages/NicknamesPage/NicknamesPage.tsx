@@ -13,8 +13,6 @@ import {
   setAttackNickname,
   subscribeAttackNicknames,
 } from "../../data/attackNicknames";
-import { useReviewStatus } from "../../utils/useReviewStatus";
-import { ReviewActions, ReviewTags } from "../../components";
 import type { Attack, SkillCategory } from "../../types/game";
 
 /**
@@ -27,16 +25,12 @@ import type { Attack, SkillCategory } from "../../types/game";
  * 적은 것만 저장된다 — 비워 두면 **규칙으로 지은 별명**(평1 · E · R · F …)이 대신 보인다.
  * 규칙은 data/attackNicknames.ts의 autoNicknamesOf가 짓는다.
  *
- * 캐릭터마다 「체크 완료」를 달 수 있다 — 쉰 명이 넘어 한 번에 다 볼 수 없으니
- * 어디까지 손봤는지 표시해 두고 이어서 훑는다.
- *
- * 별명 줄마다도 「나중에」 · 「완료」를 단다. 줄 표시와 적어 둔 별명은 파일로 내보내고
- * 다시 불러올 수 있다 — 파일을 건네 함께 보며 고치기 위해서다(형식은 NicknameExport).
+ * 적어 둔 별명은 파일로 내보내고 다시 불러올 수 있다(형식은 NicknameExport).
  */
 
 /** 내보내기 파일 한 줄. 사람이 읽고 고칠 수 있게 이름까지 함께 싣는다. */
 type NicknameExportRow = {
-  /** `캐릭터id:공격id` — 불러올 때는 이것과 nickname · status만 본다. */
+  /** `캐릭터id:공격id` — 불러올 때는 이것과 nickname만 본다. */
   key: string;
   character: string;
   section: string;
@@ -45,7 +39,6 @@ type NicknameExportRow = {
   /** 적어 둔 별명. 비었으면 auto가 쓰인다. */
   nickname: string;
   auto: string | null;
-  status: "done" | "later" | null;
 };
 
 type NicknameExport = {
@@ -154,18 +147,6 @@ export function NicknamesPage() {
 
   const named = character ? nicknameCountOf(character.id) : 0;
   const total = sections.reduce((sum, section) => sum + section.rows.length, 0);
-  // 캐릭터 단위로 「체크 완료」를 단다. 다른 확인 화면과 같은 자리·같은 규칙이다.
-  const review = useReviewStatus("nicknames");
-  const doneCount = characters.filter((c) => review.checkedSet.has(c.id)).length;
-  // 별명 줄 하나하나의 「나중에」 · 「완료」. 키는 별명 표와 같은 `캐릭터id:공격id`.
-  const rowReview = useReviewStatus("nickname-rows");
-  const rowKeys = character
-    ? sections.flatMap((section) =>
-        section.rows.map((row) => attackNicknameKey(character.id, row.attack.id)),
-      )
-    : [];
-  const rowDone = rowKeys.filter((key) => rowReview.checkedSet.has(key)).length;
-  const rowLater = rowKeys.filter((key) => rowReview.deferredSet.has(key)).length;
 
   const fileInput = useRef<HTMLInputElement>(null);
   const [importNote, setImportNote] = useState("");
@@ -174,23 +155,15 @@ export function NicknamesPage() {
   const exportFile = () => {
     const rows: NicknameExportRow[] = characters.flatMap((c) =>
       sectionsOf(c).flatMap((section) =>
-        section.rows.map(({ attack, skill }) => {
-          const key = attackNicknameKey(c.id, attack.id);
-          return {
-            key,
-            character: c.name,
-            section: section.label,
-            skill,
-            attack: attack.name,
-            nickname: attackNickname(c.id, attack.id) ?? "",
-            auto: autoNickname(c.id, attack.id) ?? null,
-            status: rowReview.checkedSet.has(key)
-              ? "done"
-              : rowReview.deferredSet.has(key)
-                ? "later"
-                : null,
-          };
-        }),
+        section.rows.map(({ attack, skill }) => ({
+          key: attackNicknameKey(c.id, attack.id),
+          character: c.name,
+          section: section.label,
+          skill,
+          attack: attack.name,
+          nickname: attackNickname(c.id, attack.id) ?? "",
+          auto: autoNickname(c.id, attack.id) ?? null,
+        })),
       ),
     );
     const data: NicknameExport = {
@@ -210,8 +183,7 @@ export function NicknamesPage() {
   };
 
   /**
-   * 내보낸 파일을 되돌려 넣는다. 파일에 실린 줄만 바꾸고 나머지는 그대로 둔다 —
-   * 줄 표시(status)와 별명(nickname) 둘 다 파일 것을 따른다.
+   * 내보낸 파일을 되돌려 넣는다. 파일에 실린 줄의 별명만 바꾸고 나머지는 그대로 둔다.
    */
   const importFile = async (file: File) => {
     try {
@@ -219,16 +191,10 @@ export function NicknamesPage() {
       if (data.kind !== "wuwa-nicknames" || !Array.isArray(data.rows)) {
         throw new Error("별명 내보내기 파일이 아닙니다");
       }
-      const keys = new Set(data.rows.map((row) => row.key));
-      const checked = rowReview.checked.filter((key) => !keys.has(key));
-      const deferred = rowReview.deferred.filter((key) => !keys.has(key));
       const names: Record<string, string> = {};
       for (const row of data.rows) {
-        if (row.status === "done") checked.push(row.key);
-        else if (row.status === "later") deferred.push(row.key);
         if (typeof row.nickname === "string") names[row.key] = row.nickname;
       }
-      rowReview.replaceAll({ checked, deferred });
       mergeAttackNicknames(names);
       setImportNote(`${data.rows.length}줄을 불러왔습니다`);
     } catch (error) {
@@ -269,26 +235,11 @@ export function NicknamesPage() {
                   <b>{total}</b>
                   <em>공격</em>
                 </span>
-                <span>
-                  <b className={rowDone ? "data-done-count" : undefined}>{rowDone}</b>
-                  <em>줄 완료</em>
-                </span>
-                <span>
-                  <b className={rowLater ? "data-later-count" : undefined}>{rowLater}</b>
-                  <em>줄 나중에</em>
-                </span>
               </>
             )}
-            {/* 쉰 명이 넘는다 — 어디까지 봤는지 여기서 센다. */}
-            <span>
-              <b className={doneCount ? "data-done-count" : undefined}>
-                {doneCount} / {characters.length}
-              </b>
-              <em>완료</em>
-            </span>
           </div>
 
-          {/* 줄 표시와 별명을 파일로 주고받는다 — 전 캐릭터를 한 파일에 담는다. */}
+          {/* 별명을 파일로 주고받는다 — 전 캐릭터를 한 파일에 담는다. */}
           <div className="nick-io">
             <button onClick={exportFile}>내보내기</button>
             <button onClick={() => fileInput.current?.click()}>불러오기</button>
@@ -319,10 +270,6 @@ export function NicknamesPage() {
                   <img className="nick-face" src={character.iconUrl} alt="" loading="lazy" />
                 )}
                 {character.name}
-                <ReviewTags
-                  checked={review.checkedSet.has(character.id)}
-                  deferred={review.deferredSet.has(character.id)}
-                />
               </h2>
               <div className="nick-actions">
                 <input
@@ -339,14 +286,6 @@ export function NicknamesPage() {
                 >
                   별명 지우기
                 </button>
-                {/* 이 캐릭터의 별명을 다 봤다는 표시. 다른 확인 화면과 같은 단추다. */}
-                <ReviewActions
-                  compact
-                  checked={review.checkedSet.has(character.id)}
-                  deferred={review.deferredSet.has(character.id)}
-                  onToggleChecked={() => review.toggleChecked(character.id)}
-                  onToggleDeferred={() => review.toggleDeferred(character.id)}
-                />
               </div>
             </div>
 
@@ -371,14 +310,8 @@ export function NicknamesPage() {
 
                     {section.rows.map(({ attack, skill }) => {
                       const value = nicknameOf(attack.id);
-                      const key = attackNicknameKey(character.id, attack.id);
-                      const done = rowReview.checkedSet.has(key);
-                      const later = rowReview.deferredSet.has(key);
-                      const classes = ["nick-row", value && "on", done && "done", later && "later"]
-                        .filter(Boolean)
-                        .join(" ");
                       return (
-                        <div className={classes} key={attack.id}>
+                        <label className={value ? "nick-row on" : "nick-row"} key={attack.id}>
                           <span className="nick-name">
                             <b>{attack.name}</b>
                             <em>{skill}</em>
@@ -392,16 +325,7 @@ export function NicknamesPage() {
                               setAttackNickname(character.id, attack.id, event.target.value)
                             }
                           />
-                          <span className="nick-review">
-                            <ReviewActions
-                              compact
-                              checked={done}
-                              deferred={later}
-                              onToggleChecked={() => rowReview.toggleChecked(key)}
-                              onToggleDeferred={() => rowReview.toggleDeferred(key)}
-                            />
-                          </span>
-                        </div>
+                        </label>
                       );
                     })}
                   </div>
@@ -416,8 +340,6 @@ export function NicknamesPage() {
         characters={characters}
         selectedId={selectedCharacterId}
         onSelect={setSelectedCharacterId}
-        checkedIds={review.checkedSet}
-        deferredIds={review.deferredSet}
       />
     </div>
   );

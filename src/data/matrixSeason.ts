@@ -269,3 +269,53 @@ export const MATRIX_BUFFS: MatrixBuff[] = [
     conditional: true,
   },
 ];
+
+/**
+ * 매트릭스 전용 캐릭터 강화(API의 `Roles[].EnhanceSkillDesc`) — 이 시즌에 강화받는 캐릭터.
+ * 출처: encore.moe API v2 `/ko/dpmatrix/7`의 Roles. 데니아는 「추가 피로도」라 피해에 걸리지 않아 뺐다.
+ *
+ *   finalDamage  그 캐릭터가 준 피해에 곱하는 「최종 피해 N% 증가」(곱연산)
+ *   party        그 캐릭터가 공명 해방을 쓴 **뒤부터** 파티 전원의 피해 보너스에 더하는 몫(합연산)
+ *                — 스테이지 버프와 같이 「그 공격 앞의 상태」로 매기고, 지속 시간(30초)은 보지 않는다.
+ */
+export interface MatrixRoleBoost {
+  finalDamage: number;
+  party?: {
+    /** 더하는 피해 보너스 자리 — 공격 분류(Skill · Liberation)나 속성(Havoc · Spectro). */
+    category?: "Skill" | "Liberation";
+    element?: Element;
+    amount: number;
+  };
+  desc: string;
+}
+
+export const MATRIX_ROLE_BOOSTS: Record<string, MatrixRoleBoost> = {
+  zhezhi: {
+    finalDamage: 0.2,
+    party: { category: "Skill", amount: 0.3 },
+    desc: "최종 피해 20% 증가. 공명 해방 발동 시 파티 내 캐릭터의 공명 스킬 피해 보너스 30% 증가(30초)",
+  },
+  yinlin: {
+    finalDamage: 0.2,
+    party: { category: "Liberation", amount: 0.3 },
+    desc: "최종 피해 20% 증가. 공명 해방 발동 시 파티 내 캐릭터의 공명 해방 피해 보너스 30% 증가(30초)",
+  },
+  roccia: {
+    finalDamage: 0.2,
+    party: { element: "Havoc", amount: 0.2 },
+    desc: "최종 피해 20% 증가. 공명 해방 발동 시 파티 내 캐릭터의 인멸 피해 보너스 20% 증가(30초)",
+  },
+  phoebe: {
+    finalDamage: 0.2,
+    party: { element: "Spectro", amount: 0.2 },
+    desc: "최종 피해 20% 증가. 공명 해방 발동 시 파티 내 캐릭터의 회절 피해 보너스 20% 증가(30초)",
+  },
+  jinhsi: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  changli: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  jiyan: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  xiangliyao: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  brant: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  cantarella: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  camellya: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+  carlotta: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
+};

@@ -1,4 +1,5 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
+import { PartyPresetSection } from "../CalculatorPage/components/PartyPresetSection";
 import type { DragEvent } from "react";
 import { characters } from "../../data/sampleData";
 import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
@@ -9,9 +10,16 @@ import { useAppState } from "../../context/AppStateContext";
 import { usePersistedState } from "../../utils/usePersistedState";
 import type { CyclePreset } from "../../data/cyclePresets";
 import type { Character, Element, PartyConfig } from "../../types/game";
-import { MATRIX_BUFFS, MATRIX_MONSTERS, MATRIX_ROUND_COUNT, MATRIX_SEASON, matrixHpKey } from "../../data/matrixSeason";
+import {
+  MATRIX_BUFFS,
+  MATRIX_MONSTERS,
+  MATRIX_ROLE_BOOSTS,
+  MATRIX_ROUND_COUNT,
+  MATRIX_SEASON,
+  matrixHpKey,
+} from "../../data/matrixSeason";
 import { triggersFor } from "../../data/attackTriggers";
-import type { MatrixBuff, MatrixMonster } from "../../data/matrixSeason";
+import type { MatrixBuff, MatrixMonster, MatrixRoleBoost } from "../../data/matrixSeason";
 import { isMainDps, tagsOf } from "../../data/characterTags";
 import { adviseFor } from "../../data/partyAdvice";
 import type { AdviceRow } from "../../data/partyAdvice";
@@ -463,6 +471,26 @@ export function MatrixPlannerPage() {
 
   const clearAll = () => setParties(parties.map((p) => ({ ...p, memberIds: [] })));
 
+  // 파티 관리 탭에 담아 둔 파티를 고르는 창. 계산 탭의 「파티 불러오기」와 같은 목록이다.
+  const [presetOpen, setPresetOpen] = useState(false);
+
+  /**
+   * 담아 둔 파티를 **지금 채우는 파티**에 통째로 앉힌다(원래 있던 캐릭터는 비운다).
+   * 채우는 파티가 없으면(전부 꽉 참) 맨 뒤에 새 파티를 만들어 앉힌다.
+   * 계산 탭의 편성은 건드리지 않는다.
+   */
+  const loadPreset = (memberIds: string[]) => {
+    const ids = memberIds.filter(Boolean).slice(0, PARTY_SIZE);
+    if (active) {
+      setParties(parties.map((p) => (p.id === active.id ? { ...p, memberIds: ids } : p)));
+    } else {
+      const id = parties.reduce((max, p) => Math.max(max, p.id), 0) + 1;
+      setParties([...parties, { id, memberIds: ids }]);
+      setActiveId(id);
+    }
+    setPresetOpen(false);
+  };
+
   /**
    * 끌어다 놓아 순서를 바꾼다. beforeId가 가리키는 파티 **앞**에 끼우고,
    * null이면 맨 뒤로 보낸다. 목록 순서가 곧 도는 순서라 여기서 층 차례가 정해진다.
@@ -523,13 +551,6 @@ export function MatrixPlannerPage() {
       .filter(Boolean)
       .join(" ");
 
-  const placedCount = [...placedIn.values()].reduce((sum, at) => sum + at.length, 0);
-  const usedCharacters = placedIn.size;
-  /** 겹쳐 쓸 수 있는 횟수를 넘겨 담은 사람 수. 넘겨도 막지 않으므로 세어서 알려만 준다. */
-  const overCount = [...placedIn.entries()].filter(
-    ([id, at]) => at.length > useLimit(id),
-  ).length;
-
   /**
    * 「메인딜러 : 속성」 — 파티의 1번 캐릭터를 메인딜러로 보고 그 속성을 적는다.
    * 매트릭스는 속성별로 적을 고르므로 파티가 어느 속성으로 치는지 한눈에 보이게 한다. 두 세부 탭이 같이 쓴다.
@@ -574,7 +595,7 @@ export function MatrixPlannerPage() {
 
   // 파티 순서 구성하기에서 파티마다 드롭다운으로 고른 사이클. 안 골랐으면 첫 사이클.
   const [pickedCycle, setPickedCycle] = useState<Record<number, string>>({});
-  // 파티마다 고른 매트릭스 스테이지 버프 id. 없으면 버프 없이 계산한다. 새로 고쳐도 남는다.
+  // 파티마다 고른 매트릭스 스테이지 버프 id. 넷 중 하나는 반드시 고른다 — 고른 적이 없으면 첫 버프다.
   const [pickedBuff, setPickedBuff] = usePersistedState<Record<number, number>>("matrix.buffs", {});
 
   /** 파티 순서대로, 파티마다 고른 사이클. 몬스터 체력 깎기가 이 순서로 돈다. */
@@ -585,7 +606,7 @@ export function MatrixPlannerPage() {
         return {
           index,
           cycle: found.find((p) => p.id === pickedCycle[party.id]) ?? found[0] ?? null,
-          buff: MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id]) ?? null,
+          buff: MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id]) ?? MATRIX_BUFFS[0],
         };
       }),
     // cyclesFor는 cyclePresets로만 결과가 달라진다.
@@ -621,40 +642,6 @@ export function MatrixPlannerPage() {
 
   return (
     <div className="matrix-planner">
-      <section className="panel matrix-intro">
-        <div>
-          <small>MATRIX</small>
-          <h2>매트릭스</h2>
-          <p>
-            보유 캐릭터를 파티로 나눠 담고, 도는 순서를 정합니다. 파티는 <b>담은 순서대로</b>{" "}
-            서고, 카드를 끌어 옮기면 순서가 바뀝니다.
-          </p>
-          <p className="matrix-note">
-            한 캐릭터를 여러 파티에 넣어도 막지 않습니다 — 몇 번 썼고 어느 파티에 있는지 목록에
-            적어 둡니다. 계산 탭 · 파티 관리 탭의 편성과는 따로 놉니다.
-          </p>
-        </div>
-
-        <div className="matrix-tally">
-          <span>
-            <b>{owned.length}</b>
-            <em>보유</em>
-          </span>
-          <span>
-            <b>{usedCharacters}</b>
-            <em>사용</em>
-          </span>
-          <span>
-            <b>{placedCount}</b>
-            <em>배치</em>
-          </span>
-          <span className={overCount > 0 ? "over" : undefined}>
-            <b>{overCount}</b>
-            <em>초과</em>
-          </span>
-        </div>
-      </section>
-
       {/* 세부 탭 — 담는 화면과 순서 정하는 화면을 갈라 둔다. */}
       <nav className="matrix-views">
         {VIEWS.map((item) => (
@@ -798,10 +785,50 @@ export function MatrixPlannerPage() {
             <div className="panel-head">
               <h2>파티 구성</h2>
               <div className="matrix-actions">
+                <button
+                  onClick={() => setPresetOpen(true)}
+                  title="파티 관리 탭에 담아 둔 파티를 지금 채우는 파티에 앉힙니다"
+                >
+                  파티 불러오기
+                </button>
                 <button onClick={addParty}>+ 파티</button>
                 <button onClick={clearAll}>전체 비우기</button>
               </div>
             </div>
+
+            {presetOpen && (
+              // 계산 탭의 파티 불러오기와 같은 창 — 바깥이나 Esc로 닫는다.
+              <div
+                className="formula-backdrop"
+                onClick={() => setPresetOpen(false)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") setPresetOpen(false);
+                }}
+                role="presentation"
+              >
+                <div className="formula-modal party-load-modal" onClick={(e) => e.stopPropagation()}>
+                  <div className="formula-head">
+                    <div>
+                      <small>PARTY</small>
+                      <h3>파티 불러오기</h3>
+                      <span>
+                        {active
+                          ? `담아둔 파티를 눌러 ${parties.indexOf(active) + 1}파티에 앉힙니다.`
+                          : "담아둔 파티를 눌러 새 파티로 앉힙니다."}
+                      </span>
+                    </div>
+                    <button className="formula-close" onClick={() => setPresetOpen(false)}>
+                      ×
+                    </button>
+                  </div>
+                  <PartyPresetSection
+                    onPick={(preset) =>
+                      loadPreset(PARTY_SLOTS.map((slot) => preset.config[slot].characterId))
+                    }
+                  />
+                </div>
+              </div>
+            )}
 
             {/* 담은 순서대로 쭉. 좁아지면 한 줄에 서는 카드 수가 줄어든다. */}
             <div className="matrix-list">
@@ -927,6 +954,14 @@ export function MatrixPlannerPage() {
                           <span key={id} className="matrix-chip matrix-chip-tall" title={char.name}>
                             {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
                             {icon && <img className="matrix-chip-el" src={icon} alt="" />}
+                            {MATRIX_ROLE_BOOSTS[id] && (
+                              <i
+                                className="matrix-chip-boost"
+                                title={`매트릭스 강화 — ${MATRIX_ROLE_BOOSTS[id].desc}`}
+                              >
+                                강화
+                              </i>
+                            )}
                             <b>{char.name}</b>
                           </span>
                         );
@@ -936,19 +971,13 @@ export function MatrixPlannerPage() {
                   {party.memberIds.length > 0 && (
                     <select
                       className="matrix-buff-pick"
-                      value={pickedBuff[party.id] ?? 0}
-                      title={MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id])?.desc ?? "매트릭스 스테이지 버프"}
+                      value={matrixRuns[index].buff.id}
+                      title={matrixRuns[index].buff.desc}
                       onChange={(event) => {
                         const id = Number(event.target.value);
-                        setPickedBuff((cur) => {
-                          const next = { ...cur };
-                          if (id) next[party.id] = id;
-                          else delete next[party.id];
-                          return next;
-                        });
+                        setPickedBuff((cur) => ({ ...cur, [party.id]: id }));
                       }}
                     >
-                      <option value={0}>버프 없음</option>
                       {MATRIX_BUFFS.map((b) => (
                         <option key={b.id} value={b.id}>
                           {b.name}
@@ -1025,8 +1054,8 @@ interface MatrixRun {
   /** 파티 순서(0부터). */
   index: number;
   cycle: CyclePreset | null;
-  /** 이 파티에 고른 매트릭스 스테이지 버프. */
-  buff: MatrixBuff | null;
+  /** 이 파티에 고른 매트릭스 스테이지 버프. 넷 중 하나는 늘 고른다. */
+  buff: MatrixBuff;
 }
 
 /** 매트릭스 체력 깎기 계산 — 파티 순서 줄(파티별 결과)과 몬스터 칸이 같이 쓰도록 위로 올린다. */
@@ -1062,7 +1091,7 @@ function useMatrixSim(runs: MatrixRun[]) {
     // 파티 · 몬스터마다 타수별 피해 목록. 실제로 맞는 몬스터만 계산한다(계산이 무겁다).
     const cache = new Map<string, number[]>();
     const hitsFor = (run: MatrixRun, monsterIndex: number): number[] => {
-      const key = `${run.index}:${run.buff?.id ?? 0}:${monsterIndex}`;
+      const key = `${run.index}:${run.buff.id}:${monsterIndex}`;
       const hit = cache.get(key);
       if (hit) return hit;
       const cycle = run.cycle!;
@@ -1161,22 +1190,45 @@ function useMatrixSim(runs: MatrixRun[]) {
         }
       };
 
+      /**
+       * 매트릭스 전용 캐릭터 강화(MATRIX_ROLE_BOOSTS).
+       *   최종 피해 — 강화받은 캐릭터가 낸 피해에 곱한다.
+       *   파티 피해 보너스 — 강화받은 캐릭터가 공명 해방을 쓴 **뒤의** 공격부터, 그 공격의
+       *   피해 보너스 합(1+Σ)에 더해 다시 나눈다. 해방 그 타는 아직 덕을 보지 않는다.
+       */
+      const partyBoosts: NonNullable<MatrixRoleBoost["party"]>[] = [];
+      const roleScale = (r: (typeof results)[number]) => {
+        const own = 1 + (MATRIX_ROLE_BOOSTS[r.item.characterId]?.finalDamage ?? 0);
+        if (r.damage.kind !== "normal" || partyBoosts.length === 0) return own;
+        const { dmgBonus, category, element } = r.damage.breakdown;
+        const extra = partyBoosts
+          .filter((b) => (b.category ? b.category === category : b.element === element))
+          .reduce((sum, b) => sum + b.amount, 0);
+        return own * (dmgBonus > 0 ? (dmgBonus + extra) / dmgBonus : 1);
+      };
+      const followRole = (r: (typeof results)[number]) => {
+        const party = MATRIX_ROLE_BOOSTS[r.item.characterId]?.party;
+        const liberation =
+          r.skillCategory === "Liberation" || r.attack.type === "Liberation" || r.attack.type === "Ultimate";
+        if (party && liberation && !partyBoosts.includes(party)) partyBoosts.push(party);
+      };
+
       const list = results.flatMap((r) => {
-        // 스테이지 버프는 「최종적으로」라 공격마다 따로 곱한다.
-        const scale = run.buff
-          ? run.buff.multiplier(
-              {
-                category: r.attack.damageBonusType ?? r.attack.type,
-                element: r.attack.element,
-                anomaly: r.attack.anomaly,
-              },
-              stage,
-            )
-          : 1;
+        // 스테이지 버프는 「최종적으로」라 공격마다 따로 곱한다. 캐릭터 강화도 같은 자리에서 곱한다.
+        const scale =
+          run.buff.multiplier(
+            {
+              category: r.attack.damageBonusType ?? r.attack.type,
+              element: r.attack.element,
+              anomaly: r.attack.anomaly,
+            },
+            stage,
+          ) * roleScale(r);
         const feature = featureScale(r.stats.syncAmplify);
         featureUp[monsterIndex] = Math.max(featureUp[monsterIndex], feature);
         stageUp[monsterIndex] = Math.max(stageUp[monsterIndex], scale);
         follow(r.item.characterId, r.attack.id);
+        followRole(r);
         return r.damage.hits.map(
           (h, i) =>
             (h.expectedDamage + (i === r.damage.hits.length - 1 ? (r.damage.fixedDamage ?? 0) : 0)) *
@@ -1420,7 +1472,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
         암흑 · 조화 밀집을 걸면 그때부터 받는 피해 배수가 붙고, 암흑을 태우는 공격이 나오면 20%가 더
         붙습니다. 조건을 못 채우는 파티에는 걸리지 않습니다(꼬리표에 마우스를 올리면 보입니다). 파티 순서대로 고른 사이클을 한 번씩 쓰고, 타수 순서대로
         기대 피해로 깎습니다. 몬스터가 쓰러지면 다음 타부터 다음 몬스터를 치고, 미믹을 잡으면 다음
-        라운드로 넘어갑니다. 넘친 피해 · 매트릭스 스테이지 버프는 넣지 않았습니다.
+        라운드로 넘어갑니다. 넘친 피해는 넣지 않았습니다. 스테이지 버프는 파티마다 넷 중 하나를 고르고,
+        이번 시즌 <b>강화 캐릭터</b>(최종 피해 20~25% · 일부는 공명 해방 뒤 파티 피해 보너스)도 같이 곱합니다.
       </p>
     </section>
   );
