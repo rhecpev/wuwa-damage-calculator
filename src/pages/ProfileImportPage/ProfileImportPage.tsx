@@ -434,6 +434,7 @@ export function ProfileImportPage() {
   }
 
   const chosenCharacter = characters.find((c) => c.id === draft?.characterId);
+  const chosenWeapon = weapons.find((w) => w.id === draft?.weaponId);
   /** 화음을 골라야 하는데 안 고른 에코가 있으면 적용을 막는다. */
   const missingFetter =
     draft?.echoes.some((e) => e.catalogId && fetterNamesOf(e.catalogId).length > 0 && !e.fetter) ??
@@ -464,301 +465,320 @@ export function ProfileImportPage() {
 
       {draft && read && (
         <>
-          <section className="panel">
-            <h3>캐릭터 · 무기</h3>
-            <div className="grid4">
-              <label>
-                <em>캐릭터</em>
-                {/* 고른 캐릭터를 얼굴로 확인할 수 있게 아이콘을 왼쪽에 붙인다.
-                    안 골랐을 때도 자리는 그대로 둔다 — 칸 높이가 들썩이지 않게. */}
-                <span className="with-face">
-                  <i className="face">
-                    {chosenCharacter?.iconUrl && (
-                      <img src={chosenCharacter.iconUrl} alt="" loading="lazy" />
-                    )}
-                  </i>
-                  <SearchPicker
-                    items={characterItems}
-                    value={draft.characterId}
-                    // 캐릭터를 바꾸면 체인도 그 캐릭터에 저장해 둔 값으로 따라간다 —
-                    // 앞 캐릭터의 단계가 남아 엉뚱한 캐릭터에 얹히지 않게.
-                    onChange={(id) =>
-                      patch({ characterId: id, resonanceChain: characterChains[id] ?? 0 })
-                    }
-                    placeholder="캐릭터 이름 검색"
-                  />
-                </span>
-                <small>읽은 글자: {read.characterName || "(못 읽음)"}</small>
-              </label>
+          {/* 한 판을 가로로 둘로 — 왼쪽은 캐릭터 · 무기, 오른쪽은 스킬 레벨. */}
+          <section className="panel profile-split">
+            <div className="profile-half">
+              <h3>캐릭터 · 무기</h3>
 
-              <label>
-                <em>캐릭터 레벨 · 공명체인</em>
-                <span className="row">
-                  <LevelSlider
-                    value={draft.characterLevel}
-                    min={1}
-                    max={90}
-                    onChange={(v) => patch({ characterLevel: v })}
-                  />
-                  <select
-                    value={draft.resonanceChain}
-                    onChange={(e) => patch({ resonanceChain: Number(e.target.value) })}
-                  >
-                    {[0, 1, 2, 3, 4, 5, 6].map((n) => (
-                      <option key={n} value={n}>
-                        체인 {n}
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <small>공명체인은 카드에 동그라미 그림으로만 있어 못 읽습니다 — 직접 고르세요.</small>
-              </label>
+              {/* 캐릭터 — 얼굴을 크게 두고 옆에 이름 · 레벨 · 체인. */}
+              <div className="profile-hero">
+                <i className="profile-face">
+                  {chosenCharacter?.iconUrl ? (
+                    <img src={chosenCharacter.iconUrl} alt="" loading="lazy" />
+                  ) : (
+                    <span>?</span>
+                  )}
+                </i>
+                <div className="profile-hero-body">
+                  <label>
+                    <em>캐릭터</em>
+                    <SearchPicker
+                      items={characterItems}
+                      value={draft.characterId}
+                      // 캐릭터를 바꾸면 체인도 그 캐릭터에 저장해 둔 값으로 따라간다 —
+                      // 앞 캐릭터의 단계가 남아 엉뚱한 캐릭터에 얹히지 않게.
+                      onChange={(id) =>
+                        patch({ characterId: id, resonanceChain: characterChains[id] ?? 0 })
+                      }
+                      placeholder="캐릭터 이름 검색"
+                    />
+                    <small>읽은 글자: {read.characterName || "(못 읽음)"}</small>
+                  </label>
+                  <label>
+                    <em>레벨 · 공명체인</em>
+                    <span className="row">
+                      <LevelSlider
+                        value={draft.characterLevel}
+                        min={1}
+                        max={90}
+                        onChange={(v) => patch({ characterLevel: v })}
+                      />
+                      <select
+                        value={draft.resonanceChain}
+                        onChange={(e) => patch({ resonanceChain: Number(e.target.value) })}
+                      >
+                        {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                          <option key={n} value={n}>
+                            체인 {n}
+                          </option>
+                        ))}
+                      </select>
+                    </span>
+                    <small>공명체인은 카드에 그림으로만 있어 못 읽습니다 — 직접 고르세요.</small>
+                  </label>
+                </div>
+              </div>
 
-              <label>
-                <em>무기</em>
-                <SearchPicker
-                  items={weaponItems}
-                  value={draft.weaponId}
-                  onChange={(id) => patch({ weaponId: id })}
-                  placeholder="무기 이름 검색"
-                />
-                <small>읽은 글자: {read.weaponName || "(못 읽음)"}</small>
-              </label>
-
-              <label>
-                <em>무기 레벨 · 정련</em>
-                <span className="row">
-                  <LevelSlider
-                    value={draft.weaponLevel}
-                    min={1}
-                    max={90}
-                    onChange={(v) => patch({ weaponLevel: v })}
-                  />
-                  <select
-                    value={draft.weaponRefine}
-                    onChange={(e) => patch({ weaponRefine: Number(e.target.value) })}
-                  >
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <option key={n} value={n}>
-                        정련 {n}
-                      </option>
-                    ))}
-                  </select>
-                </span>
-                <small>정련은 카드에 별 개수로만 있어 못 읽습니다 — 직접 고르세요.</small>
-              </label>
+              {/* 무기 — 같은 모양으로 그림 · 이름 · 레벨 · 정련. */}
+              <div className="profile-hero">
+                <i className="profile-face weapon">
+                  {chosenWeapon?.icon ? (
+                    <img src={chosenWeapon.icon} alt="" loading="lazy" />
+                  ) : (
+                    <span>?</span>
+                  )}
+                </i>
+                <div className="profile-hero-body">
+                  <label>
+                    <em>무기</em>
+                    <SearchPicker
+                      items={weaponItems}
+                      value={draft.weaponId}
+                      onChange={(id) => patch({ weaponId: id })}
+                      placeholder="무기 이름 검색"
+                    />
+                    <small>읽은 글자: {read.weaponName || "(못 읽음)"}</small>
+                  </label>
+                  <label>
+                    <em>무기 레벨 · 정련</em>
+                    <span className="row">
+                      <LevelSlider
+                        value={draft.weaponLevel}
+                        min={1}
+                        max={90}
+                        onChange={(v) => patch({ weaponLevel: v })}
+                      />
+                      <select
+                        value={draft.weaponRefine}
+                        onChange={(e) => patch({ weaponRefine: Number(e.target.value) })}
+                      >
+                        {[1, 2, 3, 4, 5].map((n) => (
+                          <option key={n} value={n}>
+                            정련 {n}
+                          </option>
+                        ))}
+                      </select>
+                    </span>
+                    <small>정련은 카드에 별 개수로만 있어 못 읽습니다 — 직접 고르세요.</small>
+                  </label>
+                </div>
+              </div>
             </div>
-          </section>
 
-          <section className="panel">
-            <h3>스킬 레벨</h3>
-            <p className="hint">
-              카드의 노드는 그림뿐이라 자리로만 구분됩니다. <b>12시에서 반시계 방향</b>으로
-              읽었습니다.
-            </p>
-            <div className="grid5">
-              {SKILL_SLOTS.map((slot, i) => (
-                <label key={slot.key}>
-                  <em>
-                    {slot.label} <i className="where">{slot.where}</i>
-                  </em>
-                  <LevelSlider
-                    value={draft.skillLevels[i]}
-                    min={1}
-                    max={10}
-                    suffix="/10"
-                    onChange={(level) =>
-                      patch({
-                        skillLevels: draft.skillLevels.map((v, n) => (n === i ? level : v)),
-                      })
-                    }
-                  />
-                </label>
-              ))}
+            <div className="profile-half">
+              <h3>스킬 레벨</h3>
+              <p className="hint">
+                카드의 노드는 <b>12시에서 반시계 방향</b> 순서로 읽었습니다.
+                읽은 값: {read.skillLevels.join(" · ") || "(못 읽음)"}
+              </p>
+              {/* 다섯 노드를 카드에서 읽은 순서대로 가로 한 줄에. */}
+              <div className="skill-row">
+                {SKILL_SLOTS.map((slot, i) => {
+                  const skill = chosenCharacter?.skills.find((s) => s.category === slot.key);
+                  return (
+                    <div key={slot.key} className="skill-node">
+                      <i className="skill-node-icon" title={skill?.name ?? slot.label}>
+                        {skill?.icon ? <img src={skill.icon} alt="" loading="lazy" /> : <span>?</span>}
+                      </i>
+                      <b>{slot.label}</b>
+                      <LevelSlider
+                        value={draft.skillLevels[i]}
+                        min={1}
+                        max={10}
+                        suffix="/10"
+                        onChange={(level) =>
+                          patch({
+                            skillLevels: draft.skillLevels.map((v, n) => (n === i ? level : v)),
+                          })
+                        }
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-            <small className="hint">읽은 값: {read.skillLevels.join(" · ") || "(못 읽음)"}</small>
           </section>
 
           <section className="panel">
             <h3>에코 5개</h3>
             <p className="hint">
-              카드에 <b>에코 이름도 화음 이름도 글자로 없습니다</b>(그림뿐입니다). 그래서
-              글자 대신 <b>그림을 도감과 견줘서</b> 채웠습니다 — 코스트 왼쪽의 동그란 화음
-              아이콘이 「우글글」과 「악몽 · 우글글」처럼 그림이 거의 같은 짝을 갈라 줍니다.
-              미덥지 않은 자리에는 표시를 남겼으니 그것만 확인하세요. 안 고른 에코는
-              등록하지 않고 넘어갑니다. 부옵션이 밀려 읽혔으면 칸을 <b>끌어서</b> 옮기거나
-              칸 사이의 <b>&lt;&gt;</b>로 양옆 자리를 바꾸세요.
+              카드에 <b>에코 이름도 화음 이름도 글자로 없어</b> 그림을 도감과 견줘 채웠습니다.
+              미덥지 않은 자리에는 표시를 남겼으니 그것만 확인하세요. 안 고른 에코는 등록하지 않고
+              넘어갑니다. 부옵션이 밀려 읽혔으면 줄을 <b>끌어서</b> 옮기거나 줄 사이의 <b>⇅</b>로
+              위아래 자리를 바꾸세요.
             </p>
 
-            <div className="echo-drafts">
+            {/* 에코 다섯을 가로로 — 에코 목록 카드와 같은 모양(그림 · 이름 · 주옵션 · 부옵션). */}
+            <div className="echo-cards">
               {draft.echoes.map((e, i) => {
                 const fetters = e.catalogId ? fetterNamesOf(e.catalogId) : [];
                 const icon = e.catalogId ? iconUrlOf(e.catalogId) : undefined;
+                const fetterIcon = fetters.find((f) => f.name === e.fetter)?.icon;
                 return (
-                  <div className="echo-draft" key={i}>
-                    {/* 왼쪽 = 찾아낸 에코 그림, 오른쪽 = 위아래 두 줄로 나눈 값들 */}
-                    <div className="echo-draft-icon">
-                      {icon ? <img src={icon} alt="" loading="lazy" /> : <span>?</span>}
-                      <em>{i + 1}번</em>
+                  <div className="echo-card" key={i}>
+                    <div className="echo-card-head">
+                      <span className="echo-card-icon">
+                        {icon ? <img src={icon} alt="" loading="lazy" /> : <span>?</span>}
+                        {fetterIcon && <img className="echo-card-fetter" src={fetterIcon} alt="" />}
+                      </span>
+                      <label className={e.iconNote ? "warn" : undefined}>
+                        <em>
+                          {i + 1}번 <i className="cost">COST {e.cost ?? "?"}</i>
+                        </em>
+                        <SearchPicker
+                          items={echoItems}
+                          value={e.catalogId}
+                          // 에코가 바뀌면 화음도 다시 골라야 한다.
+                          onChange={(id) => patchEcho(i, { catalogId: id, fetter: "", iconNote: "" })}
+                          placeholder="에코 이름 검색"
+                        />
+                      </label>
+                    </div>
+                    {/* 알림이 없어도 자리는 둔다 — 카드끼리 구역 높이를 맞추는 줄 하나다. */}
+                    <small className="warn-note echo-card-note" title={e.iconNote || undefined}>
+                      {e.iconNote}
+                    </small>
+
+                    <div className={fetters.length && !e.fetter ? "fetters need" : "fetters"}>
+                      <em>화음 효과</em>
+                      {!e.catalogId ? (
+                        <small>에코를 먼저 고르세요.</small>
+                      ) : fetters.length === 0 ? (
+                        <small>이 에코에는 화음이 없습니다.</small>
+                      ) : (
+                        fetters.map((f) => (
+                          <label key={f.name} className="radio">
+                            <input
+                              type="radio"
+                              name={`fetter-${i}`}
+                              checked={e.fetter === f.name}
+                              onChange={() => patchEcho(i, { fetter: f.name })}
+                            />
+                            {f.icon && <img src={f.icon} alt="" loading="lazy" />}
+                            <span>{f.name}</span>
+                          </label>
+                        ))
+                      )}
                     </div>
 
-                    <div className="echo-draft-body">
-                      <div className="echo-draft-line">
-                        <label className={e.iconNote ? "wide warn" : "wide"}>
-                          <em>
-                            어느 에코 <i className="cost">COST {e.cost ?? "?"}</i>
-                          </em>
-                          <SearchPicker
-                            items={echoItems}
-                            value={e.catalogId}
-                            // 에코가 바뀌면 화음도 다시 골라야 한다.
-                            onChange={(id) =>
-                              patchEcho(i, { catalogId: id, fetter: "", iconNote: "" })
-                            }
-                            placeholder="에코 이름 검색"
+                    <div className="echo-card-mains">
+                      <label className="echo-card-main">
+                        <em>주옵션</em>
+                        <span className="row">
+                          <OptionSelect
+                            value={e.mainKey}
+                            items={Object.keys(OPTIONS.mainOption)}
+                            onChange={(v) => patchEcho(i, { mainKey: v, mainValue: "" })}
                           />
-                          {e.iconNote && <small className="warn-note">{e.iconNote}</small>}
-                        </label>
+                          <OptionSelect
+                            value={e.mainValue}
+                            items={OPTIONS.mainOption[e.mainKey] ?? []}
+                            onChange={(v) => patchEcho(i, { mainValue: v })}
+                          />
+                        </span>
+                      </label>
+                      <label className="echo-card-mainsub">
+                        <em>메인 서브옵션</em>
+                        <span className="row">
+                          <OptionSelect
+                            value={e.subKey}
+                            items={Object.keys(OPTIONS.mainSubOption)}
+                            onChange={(v) => patchEcho(i, { subKey: v, subValue: "" })}
+                          />
+                          <OptionSelect
+                            value={e.subValue}
+                            items={OPTIONS.mainSubOption[e.subKey] ?? []}
+                            onChange={(v) => patchEcho(i, { subValue: v })}
+                          />
+                        </span>
+                      </label>
+                    </div>
 
-                        <label>
-                          <em>주옵션</em>
-                          <span className="row">
-                            <OptionSelect
-                              value={e.mainKey}
-                              items={Object.keys(OPTIONS.mainOption)}
-                              onChange={(v) => patchEcho(i, { mainKey: v, mainValue: "" })}
-                            />
-                            <OptionSelect
-                              value={e.mainValue}
-                              items={OPTIONS.mainOption[e.mainKey] ?? []}
-                              onChange={(v) => patchEcho(i, { mainValue: v })}
-                            />
-                          </span>
-                        </label>
-
-                        <label>
-                          <em>메인 서브옵션</em>
-                          <span className="row">
-                            <OptionSelect
-                              value={e.subKey}
-                              items={Object.keys(OPTIONS.mainSubOption)}
-                              onChange={(v) => patchEcho(i, { subKey: v, subValue: "" })}
-                            />
-                            <OptionSelect
-                              value={e.subValue}
-                              items={OPTIONS.mainSubOption[e.subKey] ?? []}
-                              onChange={(v) => patchEcho(i, { subValue: v })}
-                            />
-                          </span>
-                        </label>
-
-                        <div className={fetters.length && !e.fetter ? "fetters need" : "fetters"}>
-                          <em>화음 효과</em>
-                          {!e.catalogId ? (
-                            <small>에코를 먼저 고르세요.</small>
-                          ) : fetters.length === 0 ? (
-                            <small>이 에코에는 화음이 없습니다.</small>
-                          ) : (
-                            fetters.map((f) => (
-                              <label key={f.name} className="radio">
-                                <input
-                                  type="radio"
-                                  name={`fetter-${i}`}
-                                  checked={e.fetter === f.name}
-                                  onChange={() => patchEcho(i, { fetter: f.name })}
-                                />
-                                {f.icon && <img src={f.icon} alt="" loading="lazy" />}
-                                <span>{f.name}</span>
-                              </label>
-                            ))
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="echo-draft-line subs">
-                        {e.options.map((o, n) => {
-                          const held = drag?.echo === i && drag.from === n;
-                          const target = drag?.echo === i && drag.over === n && drag.from !== n;
-                          // 한 에코 안에서 같은 부옵션이 두 번 나올 수는 없다. 다른 칸이
-                          // 이미 쓰고 있는 이름은 목록에서 빼되, 이 칸이 든 것은 남긴다.
-                          const taken = new Set(
-                            e.options.filter((_, m) => m !== n).map((x) => x.key).filter(Boolean),
-                          );
-                          const subKeys = Object.keys(OPTIONS.subOption).filter(
-                            (k) => k === o.key || !taken.has(k),
-                          );
-                          return (
-                            <Fragment key={n}>
-                              {/* 칸과 칸 사이의 자리 바꾸기 단추. 한 칸씩 밀 때는 끄는 것보다 빠르다. */}
-                              {n > 0 && (
-                                <button
-                                  type="button"
-                                  className="swap"
-                                  title={`부옵션 ${n}과 ${n + 1}의 자리를 바꿉니다`}
-                                  onClick={() => moveOption(i, n, n - 1)}
-                                >
-                                  &lt;&gt;
-                                </button>
-                              )}
-                              <label
-                                className={[o.note ? "warn" : "", held ? "held" : "", target ? "target" : ""]
-                                  .filter(Boolean)
-                                  .join(" ")}
-                                // 칸 아무 데나 집어 끌 수 있다. 다만 드롭다운에서 시작한 것은
-                                // 끌기로 치지 않는다 — 그러면 목록을 열 수가 없다.
-                                draggable
-                                onDragStart={(ev) => {
-                                  if ((ev.target as HTMLElement).closest("select")) {
-                                    ev.preventDefault();
-                                    return;
-                                  }
-                                  setDrag({ echo: i, from: n, over: n });
-                                }}
-                                onDragEnd={() => setDrag(null)}
-                                // 같은 에코 안에서만 받는다. preventDefault를 해야 놓기가 열린다.
-                                onDragOver={(ev) => {
-                                  if (drag?.echo !== i) return;
-                                  ev.preventDefault();
-                                  if (drag.over !== n) setDrag({ ...drag, over: n });
-                                }}
-                                onDrop={(ev) => {
-                                  ev.preventDefault();
-                                  if (drag?.echo === i) moveOption(i, drag.from, n);
-                                  setDrag(null);
-                                }}
+                    <div className="echo-card-subs subs">
+                      {e.options.map((o, n) => {
+                        const held = drag?.echo === i && drag.from === n;
+                        const target = drag?.echo === i && drag.over === n && drag.from !== n;
+                        // 한 에코 안에서 같은 부옵션이 두 번 나올 수는 없다. 다른 줄이
+                        // 이미 쓰고 있는 이름은 목록에서 빼되, 이 줄이 든 것은 남긴다.
+                        const taken = new Set(
+                          e.options.filter((_, m) => m !== n).map((x) => x.key).filter(Boolean),
+                        );
+                        const subKeys = Object.keys(OPTIONS.subOption).filter(
+                          (k) => k === o.key || !taken.has(k),
+                        );
+                        return (
+                          <Fragment key={n}>
+                            {/* 줄과 줄 사이의 자리 바꾸기 단추. 한 칸씩 밀 때는 끄는 것보다 빠르다. */}
+                            {n > 0 && (
+                              <button
+                                type="button"
+                                className="swap"
+                                title={`부옵션 ${n}과 ${n + 1}의 자리를 바꿉니다`}
+                                onClick={() => moveOption(i, n, n - 1)}
                               >
-                                <em>부옵션 {n + 1}</em>
-                                <span className="row">
-                                  <OptionSelect
-                                    value={o.key}
-                                    items={subKeys}
-                                    blank="— 없음 —"
-                                    onChange={(v) =>
-                                      patchEcho(i, {
-                                        options: e.options.map((x, m) =>
-                                          m === n ? { ...x, key: v, value: "", note: "" } : x,
-                                        ),
-                                      })
-                                    }
-                                  />
-                                  <OptionSelect
-                                    value={o.value}
-                                    items={OPTIONS.subOption[o.key] ?? []}
-                                    onChange={(v) =>
-                                      patchEcho(i, {
-                                        options: e.options.map((x, m) =>
-                                          m === n ? { ...x, value: v, note: "" } : x,
-                                        ),
-                                      })
-                                    }
-                                  />
-                                </span>
-                                {o.note && <small className="warn-note">{o.note}</small>}
-                              </label>
-                            </Fragment>
-                          );
-                        })}
-                      </div>
+                                ⇅
+                              </button>
+                            )}
+                            <label
+                              className={[o.note ? "warn" : "", held ? "held" : "", target ? "target" : ""]
+                                .filter(Boolean)
+                                .join(" ")}
+                              // 줄 아무 데나 집어 끌 수 있다. 다만 드롭다운에서 시작한 것은
+                              // 끌기로 치지 않는다 — 그러면 목록을 열 수가 없다.
+                              draggable
+                              onDragStart={(ev) => {
+                                if ((ev.target as HTMLElement).closest("select")) {
+                                  ev.preventDefault();
+                                  return;
+                                }
+                                setDrag({ echo: i, from: n, over: n });
+                              }}
+                              onDragEnd={() => setDrag(null)}
+                              // 같은 에코 안에서만 받는다. preventDefault를 해야 놓기가 열린다.
+                              onDragOver={(ev) => {
+                                if (drag?.echo !== i) return;
+                                ev.preventDefault();
+                                if (drag.over !== n) setDrag({ ...drag, over: n });
+                              }}
+                              onDrop={(ev) => {
+                                ev.preventDefault();
+                                if (drag?.echo === i) moveOption(i, drag.from, n);
+                                setDrag(null);
+                              }}
+                            >
+                              <span className="row">
+                                <OptionSelect
+                                  value={o.key}
+                                  items={subKeys}
+                                  blank="— 없음 —"
+                                  onChange={(v) =>
+                                    patchEcho(i, {
+                                      options: e.options.map((x, m) =>
+                                        m === n ? { ...x, key: v, value: "", note: "" } : x,
+                                      ),
+                                    })
+                                  }
+                                />
+                                <OptionSelect
+                                  value={o.value}
+                                  items={OPTIONS.subOption[o.key] ?? []}
+                                  onChange={(v) =>
+                                    patchEcho(i, {
+                                      options: e.options.map((x, m) =>
+                                        m === n ? { ...x, value: v, note: "" } : x,
+                                      ),
+                                    })
+                                  }
+                                />
+                              </span>
+                              {/* 알림 칸은 비어 있어도 한 줄을 잡아 둔다 — 글자가 떴다 사라질 때 아래 줄이 들썩이지 않게. */}
+                              <small className="warn-note echo-card-sub-note" title={o.note || undefined}>
+                                {o.note}
+                              </small>
+                            </label>
+                          </Fragment>
+                        );
+                      })}
                     </div>
                   </div>
                 );

@@ -1456,10 +1456,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .profile-import .import-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .profile-import .import-head>div{flex:1 1 420px;min-width:0}
 .profile-import .import-head .file-button{margin-top:2px}
-.profile-import .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:10px}
-.profile-import .grid5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px;margin-top:10px}
-@media (max-width:1100px){.profile-import .grid5{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:1100px){.profile-import .grid4{grid-template-columns:repeat(2,1fr)}}
 .profile-import label{display:flex;flex-direction:column;gap:5px;font-size:12px}
 .profile-import label em{font-style:normal;color:var(--c-9aa4b6);font-weight:600}
 .profile-import label small{color:var(--c-9099ab);font-size:11px}
@@ -1472,29 +1468,75 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .level-slider b i{font-style:normal;font-size:10.5px;color:var(--c-9099ab)}
 /* 못 읽어서 아직 비어 있는 칸. 값이 들어간 칸과 눈에 띄게 달라야 그냥 넘어가지 않는다. */
 .profile-import select.blank{color:var(--c-978059);border-color:var(--c-66543a);background:var(--c-3f382b)}
-.profile-import .with-face{display:grid;grid-template-columns:34px minmax(0,1fr);gap:7px;align-items:center}
-.profile-import .with-face .face{display:flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:50%;background:var(--c-262d3f);border:1px solid var(--c-3c455c);overflow:hidden}
-.profile-import .with-face .face img{width:100%;height:100%;object-fit:cover}
 
-/* 에코 다섯 개는 세로로 쌓고, 한 장은 「왼쪽 그림 + 오른쪽 두 줄」로 짠다.
-   윗줄에 어느 에코인지·주옵션·메인 서브옵션·화음, 아랫줄에 부옵션 다섯 개. */
-.profile-import .echo-drafts{display:grid;gap:10px;margin-top:12px}
-.profile-import .echo-draft{display:grid;grid-template-columns:5% minmax(0,1fr);gap:14px;align-items:start;padding:12px;border:1px solid var(--c-3c4558);border-radius:10px;background:var(--c-2d3345)}
-.profile-import .echo-draft-icon{display:flex;flex-direction:column;align-items:center;gap:4px;min-width:48px}
-.profile-import .echo-draft-icon img,.profile-import .echo-draft-icon>span{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1;border-radius:9px;background:var(--c-262d3f);border:1px solid var(--c-3c455c);object-fit:contain}
-.profile-import .echo-draft-icon>span{color:var(--c-828d9f);font-size:20px}
-.profile-import .echo-draft-icon em{font-style:normal;font-size:11px;font-weight:600;color:var(--c-9aa3b3)}
-.profile-import .echo-draft-body{display:grid;gap:10px;min-width:0}
-.profile-import .echo-draft-line{display:grid;grid-template-columns:1.7fr 1.2fr 1.2fr 1.7fr;gap:10px;align-items:start}
-.profile-import .echo-draft-line.subs{display:flex;flex-wrap:wrap;align-items:flex-start;gap:6px}
-.profile-import .echo-draft-line.subs>label{flex:1 1 130px;min-width:0}
-.profile-import .echo-draft-line .cost{font-style:normal;margin-left:6px;padding:1px 7px;border-radius:999px;font-size:10.5px;color:var(--c-d8b98a);background:var(--c-4f412b);border:1px solid var(--c-66543a)}
+/* ── 위 판: 가로 이등분 ── 왼쪽 캐릭터 · 무기, 오른쪽 스킬 레벨. */
+.profile-import .profile-split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0}
+.profile-import .profile-half{display:flex;flex-direction:column;gap:12px;min-width:0;padding:0 20px}
+.profile-import .profile-half:first-child{padding-left:0;border-right:1px solid var(--c-384155)}
+.profile-import .profile-half:last-child{padding-right:0}
 @media (max-width:1000px){
-.profile-import .echo-draft{grid-template-columns:56px minmax(0,1fr)}
-.profile-import .echo-draft-line,.profile-import .echo-draft-line.subs{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .profile-import .profile-split{grid-template-columns:minmax(0,1fr);gap:16px}
+  .profile-import .profile-half{padding:0}
+  .profile-import .profile-half:first-child{border-right:none;padding-bottom:16px;border-bottom:1px solid var(--c-384155)}
 }
+/* 캐릭터 · 무기 한 줄 — 큰 그림 옆에 고르는 칸들. */
+.profile-import .profile-hero{display:grid;grid-template-columns:88px minmax(0,1fr);gap:14px;align-items:start}
+.profile-import .profile-face{display:grid;place-items:center;width:88px;height:88px;border-radius:50%;overflow:hidden;
+  background:var(--c-262d3f);border:1px solid var(--c-4a5266)}
+.profile-import .profile-face.weapon{border-radius:14px}
+.profile-import .profile-face img{width:100%;height:100%;object-fit:cover}
+.profile-import .profile-face.weapon img{object-fit:contain;padding:6px}
+.profile-import .profile-face span{font-size:26px;color:var(--c-6d7689)}
+.profile-import .profile-hero-body{display:grid;gap:10px;min-width:0}
 
-/* 화음은 두어 개뿐이라 윗줄 한 칸에 세로로 세운다. 안 골랐으면 테두리로 재촉한다. */
+/* 스킬 노드 — 다섯을 가로 한 줄에. */
+.profile-import .skill-row{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.profile-import .skill-node{display:flex;flex-direction:column;align-items:center;gap:5px;min-width:0;padding:10px 6px;
+  border-radius:12px;background:var(--c-2d3345);border:1px solid var(--c-384155)}
+.profile-import .skill-node-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;overflow:hidden;
+  background:var(--c-262d3f);border:1px solid var(--c-e8c66a)}
+.profile-import .skill-node-icon img{width:100%;height:100%;object-fit:contain}
+.profile-import .skill-node-icon span{color:var(--c-6d7689)}
+.profile-import .skill-node b{font-size:12px;font-weight:600;color:var(--c-c2c9d6);white-space:nowrap}
+.profile-import .skill-node .level-slider{width:100%}
+
+/* ── 에코 다섯 ── 가로로 늘어놓은 카드. 모양은 에코 목록(.echo-row)을 따른다. */
+/* 카드마다 구역(머리 · 알림 · 화음 · 주옵션 · 부옵션)이 줄 하나씩을 subgrid로 나눠 쓴다 —
+   어느 카드의 화음이 여러 개라 길어지면 같은 줄의 다른 카드 화음 구역도 그만큼 길어져 구역 높이가 맞는다. */
+.profile-import .echo-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));column-gap:10px;row-gap:0;margin-top:12px}
+@media (max-width:1000px){.profile-import .echo-cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:800px){.profile-import .echo-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.profile-import .echo-cards{grid-template-columns:minmax(0,1fr)}}
+/* 탭이 ☰로 접히는 세로 화면 — 에코 카드는 한 줄에 하나씩 세로로 늘어놓는다. */
+@media (orientation:portrait){.profile-import .echo-cards{grid-template-columns:minmax(0,1fr)}}
+/* 「못 읽음 — 직접 고르세요」 같은 알림 칸 — 비어 있어도 한 줄 높이를 미리 잡아 두고, 넘치면 말줄임(전체는 title). */
+.profile-import .echo-card-note,.profile-import .echo-card-sub-note{display:block;height:15px;line-height:15px;font-size:11px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.profile-import .echo-card>.fetters{align-content:start}
+.profile-import .echo-card{display:grid;grid-row:span 5;grid-template-rows:subgrid;row-gap:8px;align-content:start;min-width:0;margin-bottom:10px;padding:10px;border-radius:8px;
+  background:linear-gradient(135deg,var(--c-344059) 0%,var(--c-2d3a52) 100%);border:1px solid var(--c-4a5266)}
+:root:is([data-theme="light"],[data-theme="sepia"]) .profile-import .echo-card{background:var(--c-2d3a52)}
+.profile-import .echo-card-head{display:grid;grid-template-columns:52px minmax(0,1fr);gap:8px;align-items:start}
+.profile-import .echo-card-icon{position:relative;display:grid;place-items:center;width:52px;height:52px;border-radius:6px;
+  background:var(--c-262d3f);border:1px solid var(--c-4a5266)}
+.profile-import .echo-card-icon>img{width:100%;height:100%;object-fit:cover;border-radius:6px}
+.profile-import .echo-card-icon>span{color:var(--c-828d9f);font-size:18px}
+.profile-import .echo-card-icon img.echo-card-fetter{position:absolute;right:-5px;bottom:-5px;width:20px;height:20px;
+  object-fit:contain;border-radius:50%;background:var(--c-262d3f);border:1px solid var(--c-4a5266)}
+.profile-import .echo-card-head label>em{display:flex;align-items:center;gap:4px;color:var(--c-4a9eff)}
+.profile-import .echo-card .cost{font-style:normal;padding:0 6px;border-radius:999px;font-size:10px;color:var(--c-d8b98a);background:var(--c-4f412b);border:1px solid var(--c-66543a)}
+.profile-import .echo-card .fetters .radio{padding:3px 7px 3px 5px;font-size:11.5px}
+.profile-import .echo-card-mains{display:grid;gap:6px;padding-bottom:8px;border-bottom:1px solid var(--c-3c455c)}
+.profile-import .echo-card-main>em{color:var(--c-e8c66a)}
+.profile-import .echo-card-mainsub>em{color:var(--c-7fc3ff)}
+.profile-import .echo-card .row{grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:4px}
+.profile-import .echo-card select{padding:5px 4px;font-size:11.5px}
+/* 부옵션 다섯 줄 — 위아래로 쌓고 줄 사이에 ⇅ 단추. */
+.profile-import .echo-card-subs{display:flex;flex-direction:column;align-items:stretch;gap:2px}
+.profile-import .echo-card-subs>label{gap:2px}
+.profile-import .echo-card .echo-card-subs .row select{height:28px}
+.profile-import .echo-card .echo-card-subs .swap{align-self:center;margin:1px 0;height:16px;padding:0 12px;font-size:10px;line-height:1}
+/* 화음은 두어 개뿐이라 세로로 세운다. 안 골랐으면 테두리로 재촉한다. */
 .profile-import .fetters{display:flex;flex-direction:column;align-items:stretch;gap:5px;font-size:12px}
 .profile-import .fetters>em{font-style:normal;color:var(--c-9aa4b6);font-weight:600}
 .profile-import .fetters>small{color:var(--c-9099ab);font-size:11px}
