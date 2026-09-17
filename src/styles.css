@@ -2232,6 +2232,8 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-cycle-pick{margin-left:0}
 .matrix-row-result{margin:0 0 0 4px;flex:none;font-size:12.5px}
 .matrix-row-result b{font-variant-numeric:tabular-nums}
+.matrix-row-score{margin-left:4px;padding:1px 8px;border-radius:999px;font-style:normal;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;
+  color:var(--c-e8c66a);background:var(--c-443c2b);border:1px solid var(--c-574f3a)}
 
 /* 계산 탭 세부 탭 줄 — 공격 루틴(sticky) 바로 밑에 붙는 갈래 단추.
    아래 판과 **한 장으로 이어진 것처럼** 보이게 폴더 탭 모양으로 세운다.

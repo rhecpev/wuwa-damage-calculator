@@ -641,6 +641,17 @@ export function MatrixPlannerPage() {
   );
   const matrix = useMatrixSim(matrixRuns);
 
+  /**
+   * 파티가 얻은 점수. 몬스터마다 「그 파티가 깎은 체력 ÷ 몬스터 체력 × 그 몬스터 점수」를 더한다 —
+   * 몬스터 칸의 점수 규칙(깎은 만큼 점수, 처치하면 표 점수 그대로)을 파티별로 나눈 것이라
+   * 파티 점수를 모두 더하면 몬스터 판의 총점과 같다.
+   */
+  const partyScore = (index: number) =>
+    MATRIX_MONSTERS.reduce((sum, m, monsterIndex) => {
+      const hp = matrix.hpOf(m);
+      return hp > 0 ? sum + (m.score * (matrix.sim.dealt[monsterIndex][index] ?? 0)) / hp : sum;
+    }, 0);
+
   /** 파티 순서 줄의 사이클 고르개 — 캐릭터 오른쪽에 드롭다운 + 열기. 사이클이 여럿이어도 한 줄에 선다. */
   const cyclePicker = (party: PlannerParty) => {
     if (party.memberIds.length === 0) return null;
@@ -1020,6 +1031,10 @@ export function MatrixPlannerPage() {
                       <span className="matrix-row-result">
                         <i style={{ background: partyColor(index) }} />
                         <b>{Math.round(r.damage).toLocaleString()}</b>
+                        {/* 이 파티가 얻은 점수 — 깎은 체력만큼 몬스터 점수를 나눠 받는다. */}
+                        <em className="matrix-row-score" title="이 파티가 깎은 체력만큼 받은 점수">
+                          {Math.floor(partyScore(index)).toLocaleString()}점
+                        </em>
                       </span>
                     );
                   })()}
