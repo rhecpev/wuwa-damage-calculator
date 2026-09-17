@@ -14,6 +14,28 @@ import {
   storageMode,
   subscribePersist,
 } from "../utils/persist";
+import { Dialog } from "./Feedback";
+
+/**
+ * 첫 접속 때 「파일로 저장할지」 묻는 창을 다시 띄우지 않을지.
+ * 「나중에 하기」를 누르면 브라우저 저장소의 laterSaveFile 칸에 "y"를 넣는다.
+ * 설정 저장(persist)의 키 규칙(wuwa-calc:…) 밖에 두어, 저장본을 갈아 끼우거나 파일을 열어도 지워지지 않는다.
+ */
+const LATER_KEY = "laterSaveFile";
+const readLater = (): boolean => {
+  try {
+    return localStorage.getItem(LATER_KEY) === "y";
+  } catch {
+    return false;
+  }
+};
+const writeLater = () => {
+  try {
+    localStorage.setItem(LATER_KEY, "y");
+  } catch {
+    // 저장소를 못 쓰면 이번 화면에서만 닫힌다.
+  }
+};
 
 /** 저장 단추 아이콘 — 탭 아이콘과 같은 굵기의 선 아이콘. */
 const icon = (path: ReactNode) => (
@@ -60,6 +82,8 @@ export function StorageBar() {
   const fileName = useSyncExternalStore(subscribePersist, diskFileName);
   const needsPermission = useSyncExternalStore(subscribePersist, diskNeedsPermission);
   const [busy, setBusy] = useState(false);
+  // 첫 접속 안내 — 「나중에 하기」를 누른 적이 없을 때만. 바깥을 눌러 닫으면 이번 화면에서만 닫힌다.
+  const [askClosed, setAskClosed] = useState(readLater);
 
   /**
    * 파일을 고르는 동안 단추를 잠근다. 파일에서 읽어 온 내용으로 갈아치우는 경우
@@ -73,6 +97,12 @@ export function StorageBar() {
       setBusy(false);
     }
   };
+
+  /**
+   * 파일 저장을 권하는 자리 — 배포본에서 아직 브라우저에만 담고 있고, 파일을 고를 수 있는 브라우저일 때.
+   * 전에 골라 둔 파일이 있으면(needsPermission) 새로 만들 게 아니라 다시 연결하면 되므로 묻지 않는다.
+   */
+  const askSave = !askClosed && mode === "browser" && diskAvailable() && !needsPermission;
 
   const ok = mode !== "none" && !failed;
   const state = pending ? "쓰는 중…" : "최신 상태";
@@ -89,6 +119,39 @@ export function StorageBar() {
 
   return (
     <div className="storage-status">
+      {askSave && (
+        <Dialog
+          title="설정을 파일로 저장할까요?"
+          lines={[
+            "지금은 이 브라우저에만 저장되고 있습니다. 브라우저 데이터를 지우거나 다른 브라우저로 열면 캐릭터 · 무기 · 에코 · 사이클이 모두 사라집니다.",
+            "이 컴퓨터에 파일 하나를 만들어 두면 바꾼 내용이 그 파일에 바로바로 저장되고, 나중에 그 파일을 다시 고르면 그대로 이어집니다.",
+            "나중에 하려면 오른쪽 위 저장 아이콘을 누르세요.",
+          ]}
+          buttons={[
+            {
+              label: "저장하기",
+              primary: true,
+              onClick: async () => {
+                setBusy(true);
+                try {
+                  if (await connectNewDisk()) setAskClosed(true);
+                } finally {
+                  setBusy(false);
+                }
+              },
+            },
+            {
+              label: "나중에 하기",
+              onClick: () => {
+                writeLater();
+                setAskClosed(true);
+              },
+            },
+          ]}
+          onDismiss={() => setAskClosed(true)}
+        />
+      )}
+
       <span
         className={ok ? "storage-dot on" : "storage-dot off"}
         role="status"
