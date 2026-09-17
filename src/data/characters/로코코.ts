@@ -442,11 +442,12 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     condition: "변주 스킬 펠로, 도와줘 발동 후 15초간",
   },
   // 4체인 — DamageList에 162% 옆에 259.2%(= 162 × 1.6) 엔트리가 따로 들어 있다.
+  // 6체인 「현실 구축」(1002707_c6)에도 이 ×1.6이 붙는다 — 6체인의 방어력 60% 무시는 안 붙는다.
   {
     label: "4체인 · 현실에 비추는 환상 배율 상승",
     target: "motionValue",
     damageType: "All",
-    attackIds: ["1002707_1", "1002707_2", "1002707_3"],
+    attackIds: ["1002707_1", "1002707_2", "1002707_3", "1002707_c6"],
     value: 0.6, // 배율 60% 상승
     modifier: "amplify",
     uptime: "active",
@@ -481,6 +482,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     resonanceChain: 5,
   },
+  // 「현실 구축」(1002707_c6)은 여기 넣지 않는다 — 실제로 4체인의 ×1.6만 붙고
+  // 이 방어력 60% 무시는 붙지 않는다(현실에 비추는 환상 3단만 둘 다 받는다).
   {
     label: "6체인 · 현실에 비추는 환상 방어력 무시",
     target: "defIgnore",

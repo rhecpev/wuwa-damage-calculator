@@ -7,6 +7,7 @@ import { loadEchoLinks, loadMyEchoes, type EchoLink, type MyEcho } from "../data
 import { CATEGORY_BONUS_KEY, ELEMENT_BONUS_KEY } from "./damage";
 import type {
   Character,
+  CharacterBuffTemplate,
   CharacterWeaponConfig,
   ManualBuff,
   PartyMemberConfig,
@@ -90,6 +91,24 @@ function panelStacksAt(value: number | Record<number, number>, chain: number): n
   return stacks;
 }
 
+/**
+ * 스킬 레벨을 따라가는 버프의 값.
+ *
+ * 플로로 「잔음 1스택 당 배율 증가량」처럼 스킬 속성표에 레벨별로 적혀 있는 값이 있다.
+ * valuesByLevel(레벨 1~10)과 levelSkillId를 적어 두면 그 스킬의 레벨 칸을 읽어 고른다.
+ * 레벨을 정해 두지 않았으면 그 스킬의 기본값(10레벨)을 쓴다 — 계산 쪽 규칙과 같다.
+ */
+function levelValue(
+  template: CharacterBuffTemplate,
+  levels: Record<string, number> | undefined,
+): number {
+  const table = template.valuesByLevel;
+  if (!table || table.length === 0) return template.value;
+  const level = template.levelSkillId ? levels?.[template.levelSkillId] : undefined;
+  if (level === undefined) return table[table.length - 1];
+  return table[Math.min(Math.max(Math.round(level), 1), table.length) - 1];
+}
+
 /** 캐릭터 고유 버프의 id. 캐릭터·효과 순서로 고정된다. */
 export const characterBuffId = (characterId: string, index: number) =>
   `character:${characterId}:${index}`;
@@ -105,6 +124,7 @@ export const characterBuffId = (characterId: string, index: number) =>
 export function deriveCharacterBuffs(
   members: { character: Character; config: PartyMemberConfig }[],
   characterInherents: Record<string, string[] | undefined> = {},
+  characterSkillLevels: Record<string, Record<string, number>> = {},
 ): ManualBuff[] {
   const out: ManualBuff[] = [];
 
@@ -136,7 +156,8 @@ export function deriveCharacterBuffs(
         ...(template.element ? { element: template.element } : {}),
         ...(template.attackId ? { attackId: template.attackId } : {}),
         ...(template.attackIds ? { attackIds: template.attackIds } : {}),
-        value: template.value,
+        // 레벨 표가 있으면 그 스킬의 레벨 값을 쓴다(플로로 「잔음」 배율 증가량).
+        value: levelValue(template, characterSkillLevels[character.id]),
         // 수치가 스탯에서 나오는 버프(연무 3체인 등)는 그 스탯 종류와 상한을 그대로 넘긴다.
         ...(template.scaleFrom ? { scaleFrom: template.scaleFrom } : {}),
         ...(template.scaleOffset !== undefined ? { scaleOffset: template.scaleOffset } : {}),

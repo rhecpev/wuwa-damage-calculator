@@ -500,7 +500,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1003701_5"],
-    value: 0.8255, // 1스택당 82.55%p (레벨 10)
+    value: 0.8255, // 1스택당 82.55%p (레벨 10 — 레벨 표가 없을 때의 기본값)
+    // 기본 공격(1003701) 레벨을 따라간다. 속성표 「잔음 1스택 당 배율 증가량」 레벨 1~10.
+    valuesByLevel: [0.4153, 0.449, 0.4836, 0.5313, 0.565, 0.6038, 0.6588, 0.7132, 0.7675, 0.8255],
+    levelSkillId: "1003701",
     modifier: "increase",
     stacks: 10, // 전투 진입 시 받는 스택
     maxStacks: 24, // 잔음 최대 누적 24스택
@@ -513,7 +516,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "motionValue",
     damageType: "All",
     attackIds: ["1003701_5"],
-    value: 0.619125, // 1스택당 82.55%p × 75%
+    value: 0.619125, // 1스택당 82.55%p × 75% (레벨 10)
+    // 위 줄과 같은 레벨 표에 75%를 곱한 값이다.
+    valuesByLevel: [0.311475, 0.33675, 0.3627, 0.398475, 0.42375, 0.45285, 0.4941, 0.5349, 0.575625, 0.619125],
+    levelSkillId: "1003701",
     modifier: "increase",
     stacks: 10, // 위 「잔음」 버프와 같은 스택으로 맞춘다
     maxStacks: 24,

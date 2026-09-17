@@ -1110,7 +1110,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       .filter((m): m is NonNullable<typeof m> => m !== null);
 
     return [
-      ...deriveCharacterBuffs(members, characterInherents),
+      ...deriveCharacterBuffs(members, characterInherents, characterSkillLevels),
       ...deriveWeaponBuffs(
         characterWeapons,
         members.map((m) => m.character.id),
@@ -1150,7 +1150,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
 
     return [
       ...manualBuffs,
-      ...deriveCharacterBuffs(members, characterInherents),
+      ...deriveCharacterBuffs(members, characterInherents, characterSkillLevels),
       ...deriveWeaponBuffs(weapons, ids),
       ...(override.echoLinks ? deriveEchoBuffs(ids, override.echoLinks) : deriveEchoBuffs(ids)),
       ...anomalyStateBuffs(ids),
@@ -1180,7 +1180,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
 
     return [
       ...manualBuffs,
-      ...deriveCharacterBuffs(members, characterInherents),
+      ...deriveCharacterBuffs(members, characterInherents, characterSkillLevels),
       ...deriveWeaponBuffs(
         characterWeapons,
         members.map((m) => m.character.id),

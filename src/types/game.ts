@@ -77,7 +77,7 @@ export type SkillCategory="Basic"|"Skill"|"Circuit"|"Liberation"|"Variation"|"In
 //   공격 팔레트를 이 분류로 묶어서 보여준다.
 export interface SkillAttribute{attributeName:string;description:string;values:string[];}
 export interface Skill{id:string;name:string;category?:SkillCategory;attacks:Attack[];icon?:string;attributes?:SkillAttribute[];}
-export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];retired?:boolean;}
+export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];retired?:boolean;valuesByLevel?:number[];levelSkillId?:string;}
 // 캐릭터 고유효과·공명체인처럼 캐릭터가 스스로 들고 있는 버프를 계산 가능한 형태로 적어둔 것.
 //   무기 쪽 WeaponBuffTemplate과 같은 모양이되, 정련(values 5개) 대신 아래 두 조건을 쓴다.
 //   resonanceChain: 이 단계 이상 보유해야 걸린다. 생략하면 체인과 무관(고유효과 등).
@@ -94,6 +94,10 @@ export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType
 //   maxStacksByChain: 체인에 따라 오르는 스택 상한 {체인: 상한}. 보유 체인 이하에서 가장 높은 칸을 쓴다(maxStacks보다 우선).
 //   hideFromPanel: 상시 버프지만 게임 속성 창에는 찍히지 않는 것(감심 형식 무극).
 //     캐릭터 스탯창에서만 빠지고 피해 계산에는 그대로 걸린다.
+//   valuesByLevel / levelSkillId: 값이 **스킬 레벨을 따라가는** 버프(플로로 「잔음」의 배율
+//     증가량처럼 속성표에 레벨별로 적혀 있는 것). valuesByLevel에 레벨 1~10 값을 차례로 적고
+//     levelSkillId에 그 레벨을 읽을 스킬 id를 적는다. 레벨을 모르면 맨 끝(10레벨) 값을 쓴다.
+//     value에는 10레벨 값을 그대로 남겨 둔다 — 레벨 표가 없는 자리에서 쓰는 기본값이다.
 //   retired: **자리만 남긴 줄.** 버프를 아예 만들지 않으므로 목록·계산·스탯창 어디에도 안 뜬다.
 //     버프 id가 `character:<캐릭터id>:<배열 순번>`이라(equippedBuffs.ts) 줄을 빼면 뒤 줄의 id가
 //     당겨지고, 담아 둔 사이클·루틴이 켜 둔 체크가 말없이 다른 버프로 옮겨간다. 그래서 쓸모가
