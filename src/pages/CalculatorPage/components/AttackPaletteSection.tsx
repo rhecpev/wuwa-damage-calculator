@@ -9,10 +9,11 @@ import { anomaliesOf } from "../../../data/characterAnomalies";
 import { DISCORD_ATTACK_ID, DISCORD_BASE, DISCORD_DEFAULT_RATE } from "../../../data/discord";
 import {
   attackDisplayName,
+  attackNameByNickname,
+  setAttackNameByNickname,
   attackNicknamesVersion,
   subscribeAttackNicknames,
 } from "../../../data/attackNicknames";
-import { usePersistedState } from "../../../utils/usePersistedState";
 import type { Attack, Character, SkillCategory } from "../../../types/game";
 
 interface AttackPaletteSectionProps {
@@ -341,8 +342,9 @@ export function AttackPaletteSection({ onAddAttack }: AttackPaletteSectionProps)
   useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
   // 별명도 같은 방식으로 구독한다 — 별명 탭에서 적는 즉시 이 목록의 이름이 바뀐다.
   useSyncExternalStore(subscribeAttackNicknames, attackNicknamesVersion);
-  // 인게임 명칭으로 볼지 별명으로 볼지. 한 번 고르면 새로고침해도 그대로 둔다.
-  const [byNickname, setByNickname] = usePersistedState("attackNameMode", false);
+  // 인게임 명칭으로 볼지 별명으로 볼지. 사이클 구성 카드와 같은 값을 본다(data/attackNicknames.ts).
+  const byNickname = attackNameByNickname();
+  const setByNickname = setAttackNameByNickname;
 
   // 파티 세 자리 몫. 자리마다 그 캐릭터의 구역 목록을 미리 묶어 둔다.
   const slots = PARTY_SLOTS.map((slot, index) => {

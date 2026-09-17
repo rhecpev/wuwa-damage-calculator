@@ -1,4 +1,10 @@
-import { Fragment, useState } from "react";
+import { Fragment, useState, useSyncExternalStore } from "react";
+import {
+  attackDisplayName,
+  attackNameByNickname,
+  attackNicknamesVersion,
+  subscribeAttackNicknames,
+} from "../../../data/attackNicknames";
 import { createPortal } from "react-dom";
 import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
@@ -103,6 +109,13 @@ export const attackLabel = (name: string) => name.replace(/\s*피해$/, "");
 
 export function RotationSection({ results }: RotationSectionProps) {
   const { selectedId, setSelectedId } = useAppState();
+  // 공격 추가 목록의 「인게임 명칭 / 별명」 토글을 같이 따른다 — 토글이나 별명이 바뀌면 다시 그린다.
+  useSyncExternalStore(subscribeAttackNicknames, attackNicknamesVersion);
+  /** 카드에 적을 공격 이름. 별명 모드면 별명(없으면 규칙 별명), 아니면 인게임 명칭에서 「피해」를 뗀 것. */
+  const nameOf = (characterId: string, attack: { id: string; name: string }) =>
+    attackNameByNickname()
+      ? attackDisplayName(characterId, attack.id, attackLabel(attack.name), true)
+      : attackLabel(attack.name);
   const {
     removeAttack,
     duplicateAttack,
@@ -311,7 +324,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                   )}
                   {/* 공격명은 그냥 글자다 — 누르면 카드가 눌린 것으로 쳐서 버프 창이 열린다. */}
                   <span className="card-title">
-                    {index + 1}. {attackLabel(result.attack.name)}
+                    {index + 1}. {nameOf(result.character.id, result.attack)}
                   </span>
                 </span>
 
@@ -468,7 +481,7 @@ export function RotationSection({ results }: RotationSectionProps) {
             <div className="formula-head">
               <div>
                 <small>공격 바꾸기</small>
-                <h3>{attackLabel(swapResult.attack.name)}</h3>
+                <h3>{nameOf(swapResult.character.id, swapResult.attack)}</h3>
                 <span>{swapResult.character.name} · 버프 체크와 자리는 그대로 남습니다</span>
               </div>
               <button className="formula-close" onClick={() => setSwapId(null)}>
@@ -499,7 +512,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                           setSwapId(null);
                         }}
                       >
-                        {attackLabel(attack.name)}
+                        {nameOf(swapResult.character.id, attack)}
                       </button>
                     ))}
                   </div>

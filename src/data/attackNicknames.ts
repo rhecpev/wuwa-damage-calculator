@@ -84,6 +84,25 @@ export function clearCharacterNicknames(characterId: string): void {
   commit(next);
 }
 
+/**
+ * ── 인게임 명칭 / 별명 토글 ─────────────────────────────────
+ * 공격 추가 목록과 사이클 구성 카드가 **같은 값**을 봐야 한다. 화면마다 따로 들고 있으면
+ * 한쪽에서 바꿔도 다른 쪽은 그대로라, 표 하나로 두고 구독한다(저장 이름은 예전 그대로 attackNameMode).
+ */
+const MODE_KEY = "attackNameMode";
+let byNickname = loadPersisted<boolean>(MODE_KEY, false);
+
+/** 지금 별명으로 보고 있는지. */
+export const attackNameByNickname = (): boolean => byNickname;
+
+export function setAttackNameByNickname(next: boolean): void {
+  if (byNickname === next) return;
+  byNickname = next;
+  savePersisted(MODE_KEY, next);
+  version += 1;
+  listeners.forEach((fn) => fn());
+}
+
 /** 이 캐릭터에 별명을 몇 개 적어 두었는지. 목록에 표시할 때 쓴다. */
 export const nicknameCountOf = (characterId: string): number =>
   Object.keys(nicknames).filter((key) => key.startsWith(`${characterId}:`)).length;
