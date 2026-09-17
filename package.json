@@ -13,7 +13,8 @@
     "check:triggers": "node scripts/check-attack-triggers.mjs",
     "check:echoes": "node scripts/check-echo-excludes.mjs",
     "check": "npm run typecheck && npm run check:triggers && npm run check:echoes && npm run check:echobuffs",
-    "check:echobuffs": "node scripts/check-echo-ability-buffs.mjs"
+    "check:echobuffs": "node scripts/check-echo-ability-buffs.mjs",
+    "report:autobuffs": "node scripts/report-auto-buff-candidates.mjs"
   },
   "dependencies": {
     "cors": "^2.8.6",
