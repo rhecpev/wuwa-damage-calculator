@@ -1971,6 +1971,15 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
   background:var(--c-262d3f);border:1px solid var(--c-3c455c);border-radius:8px}
 .nick-row input:focus{outline:none;border-color:var(--c-8794aa)}
 .nick-row.on input{color:var(--c-e8c66a)}
+/* 줄마다 붙는 「나중에」 · 「완료」. 완료한 줄은 흐리게, 나중에 줄은 주황 테두리. */
+.nick-review{display:flex;gap:6px;flex:none}
+.nick-review button{padding:5px 9px;font-size:11px}
+.nick-row.done{opacity:.55}
+.nick-row.later{border-color:var(--c-66543a)}
+/* 내보내기 · 불러오기 */
+.nick-io{flex-basis:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.nick-io button{padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer}
+.nick-io small{font-size:11px;color:var(--c-8791a4)}
 @media(max-width:620px){.nick-row{flex-direction:column;align-items:stretch}
   .nick-row input{flex:none}}
 

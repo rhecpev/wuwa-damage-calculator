@@ -61,6 +61,20 @@ export function setAttackNickname(characterId: string, attackId: string, name: s
   commit(next);
 }
 
+/**
+ * 여러 칸을 한 번에 적는다. 내보낸 파일을 불러올 때 쓴다.
+ * 빈 값은 그 칸을 지운다 — setAttackNickname과 같은 규칙이다.
+ */
+export function mergeAttackNicknames(entries: Record<string, string>): void {
+  const next: AttackNicknameMap = { ...nicknames };
+  for (const [key, name] of Object.entries(entries)) {
+    const label = name.trim();
+    if (label) next[key] = label;
+    else delete next[key];
+  }
+  commit(next);
+}
+
 /** 이 캐릭터에 적어 둔 별명을 통째로 지운다. */
 export function clearCharacterNicknames(characterId: string): void {
   const next: AttackNicknameMap = { ...nicknames };
