@@ -207,57 +207,6 @@ export function NicknamesPage() {
   return (
     <div className="nick-workspace">
       <div className="nick-content">
-        <section className="panel nick-intro">
-          <div>
-            <small>NICKNAMES</small>
-            <h2>별명</h2>
-            <p>
-              공격마다 평소 부르는 이름을 적어 둡니다. <b>대미지 계산</b> 탭의 공격 추가에서{" "}
-              <b>인게임 명칭 / 별명</b> 토글로 갈아 볼 수 있습니다.
-            </p>
-            <p className="nick-note">
-              비워 두면 <b>규칙으로 지은 별명</b>이 대신 보입니다 — 일반 공격 <b>평</b>, 공명 스킬{" "}
-              <b>E</b>, 공명 해방 <b>R</b>, 조화도 파괴 <b>F</b>, 점프 공격 <b>점공</b>, 공중 공격{" "}
-              <b>공중공격</b>, 낙하 공격 <b>낙공</b>, 반주 · 변주 스킬 <b>반주 · 변주</b>에 단수를 붙여
-              「일반 공격 1단 피해」는 <b>평1</b>이 됩니다(그 밖에 강공격 <b>강공</b>, 회피 반격{" "}
-              <b>회피반격</b>, 협동 공격 <b>협공</b>). 한 캐릭터 안에서 겹치면 뒤에 -2 · -3이 붙으니 그것만 손보면 됩니다.
-            </p>
-          </div>
-
-          <div className="nick-tally">
-            {character && (
-              <>
-                <span>
-                  <b>{named}</b>
-                  <em>적어 둠</em>
-                </span>
-                <span>
-                  <b>{total}</b>
-                  <em>공격</em>
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* 별명을 파일로 주고받는다 — 전 캐릭터를 한 파일에 담는다. */}
-          <div className="nick-io">
-            <button onClick={exportFile}>내보내기</button>
-            <button onClick={() => fileInput.current?.click()}>불러오기</button>
-            <input
-              ref={fileInput}
-              type="file"
-              accept="application/json,.json"
-              hidden
-              onChange={(event) => {
-                const file = event.target.files?.[0];
-                if (file) void importFile(file);
-                event.target.value = "";
-              }}
-            />
-            {importNote && <small>{importNote}</small>}
-          </div>
-        </section>
-
         {!character ? (
           <section className="panel">
             <p className="nick-empty">오른쪽 목록에서 캐릭터를 고르세요.</p>
@@ -286,6 +235,28 @@ export function NicknamesPage() {
                 >
                   별명 지우기
                 </button>
+                {/* 별명을 파일로 주고받는다 — 전 캐릭터를 한 파일에 담는다. */}
+                <button title="모든 캐릭터의 별명을 파일로 내려받습니다" onClick={exportFile}>
+                  내보내기
+                </button>
+                <button
+                  title="내보낸 별명 파일을 불러옵니다"
+                  onClick={() => fileInput.current?.click()}
+                >
+                  불러오기
+                </button>
+                <input
+                  ref={fileInput}
+                  type="file"
+                  accept="application/json,.json"
+                  hidden
+                  onChange={(event) => {
+                    const file = event.target.files?.[0];
+                    if (file) void importFile(file);
+                    event.target.value = "";
+                  }}
+                />
+                {importNote && <small className="nick-import-note">{importNote}</small>}
               </div>
             </div>
 

@@ -603,6 +603,8 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .echo-row.taken{opacity:.62}
 .echo-row.dragging{opacity:.35}
 .echo-row[draggable="true"]{cursor:grab}
+/* 밝은 테마에서는 그라데이션 앞쪽 색(--c-344059)이 테두리용 진한 회색으로 뒤집혀 얼룩져 보인다 — 한 색으로 깐다. */
+:root:is([data-theme="light"],[data-theme="sepia"]) .echo-row{background:var(--c-2d3a52)}
 
 /* 왼쪽 칸 — 에코 그림과 그 아래 화음 세트. 폭을 고정해 줄이 여럿이어도 세로로 반듯하게 선다. */
 .echo-row-left{flex:none;width:62px;display:flex;flex-direction:column;align-items:center;gap:5px;align-self:flex-start}
@@ -1769,10 +1771,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .advice-col{display:flex;flex-direction:column;min-height:0}
 .advice-col>.advice-list{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
 @media(max-width:820px){.matrix-pool-split{grid-template-columns:minmax(0,1fr)}}
-.matrix-pool-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;margin:0 2px 6px;
+/* 제목 줄은 한 줄로 묶는다 — 설명(em)이 접히면 메인 딜러 칸과 2 · 3 캐릭터 칸의 제목 높이가 어긋난다. 넘치는 설명은 말줄임 + title. */
+.matrix-pool-head{display:flex;flex-wrap:nowrap;align-items:baseline;gap:4px 8px;margin:0 2px 6px;
   padding-bottom:5px;border-bottom:1px solid var(--c-31394c)}
-.matrix-pool-head b{font-size:12px;letter-spacing:.6px;color:var(--c-c2c9d6)}
-.matrix-pool-head em{font-style:normal;font-size:11px;color:var(--c-8791a4)}
+.matrix-pool-head b{flex:none;font-size:12px;letter-spacing:.6px;color:var(--c-c2c9d6)}
+.matrix-pool-head em{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-style:normal;font-size:11px;color:var(--c-8791a4)}
 .matrix-pool-clear{margin-left:auto;padding:2px 9px;font-size:11px;border-radius:7px;cursor:pointer;background:var(--c-2a3246)}
 /* 두 구역은 각자 스크롤하지 않는다 — 판 하나가 통째로 흐르는 편이 비교하기 쉽다. */
 .matrix-pool{max-height:none;overflow:visible;padding:2px}
@@ -1844,7 +1847,8 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 자리로 가른 작은 머리줄. 위 구역 머리줄보다 한 단 낮게 보이도록 줄여 둔다. */
 .matrix-pool-head.sub{margin-top:10px;border-bottom-style:dashed}
 .matrix-pool-head.sub b{font-size:11px;color:var(--c-e8c66a)}
-.matrix-pool-head.sub em{font-size:10px}
+.matrix-pool-head.sub{flex-wrap:wrap}
+.matrix-pool-head.sub em{font-size:10px;white-space:normal;overflow:visible}
 /* 교체하면 사라지는 버프 — 자리를 못 박는 줄이라 눈에 띄게 한다. */
 .advice-buff.switch{border-color:var(--c-7a4a52);background:var(--c-3a2c30)}
 /* 조건이 안 서서 점수에서 뺀 줄 — 눌러 두고 까닭은 말풍선에 둔다. */
@@ -1955,21 +1959,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .nick-content{min-width:0;display:flex;flex-direction:column;gap:12px}
 .nick-content>.panel{margin-top:0}
 
-.nick-intro{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
-.nick-intro h2{margin:5px 0 10px}
-.nick-intro p{margin:0 0 6px;max-width:62ch;color:var(--c-a8b0bf);font-size:13px;line-height:1.6}
-.nick-intro b{color:var(--c-e9edf5)}
-.nick-note{color:var(--c-8791a4)!important;font-size:12px!important}
 
-.nick-tally{display:flex;gap:8px;flex:none}
-.nick-tally span{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:58px;
-  padding:9px 11px;background:var(--c-2d3345);border:1px solid var(--c-384155);border-radius:12px}
-.nick-tally b{font-size:20px;color:var(--c-e9edf5);line-height:1.1}
-.nick-tally em{font-style:normal;font-size:11px;color:var(--c-8791a4)}
 
 .nick-title{display:flex;align-items:center;gap:8px}
 .nick-face{width:30px;height:30px;border-radius:50%;object-fit:cover;border:1px solid var(--c-4a5266)}
-.nick-actions{display:flex;align-items:center;gap:8px;margin-left:auto}
+.nick-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:8px;margin-left:auto}
 .nick-actions .panel-search{margin-left:0}
 .nick-actions button{padding:7px 13px;font-size:12px;border-radius:9px;cursor:pointer}
 .nick-actions button:disabled{opacity:.4;cursor:not-allowed}
@@ -1993,9 +1987,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .nick-row input:focus{outline:none;border-color:var(--c-8794aa)}
 .nick-row.on input{color:var(--c-e8c66a)}
 /* 내보내기 · 불러오기 */
-.nick-io{flex-basis:100%;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.nick-io button{padding:6px 12px;font-size:12px;border-radius:8px;cursor:pointer}
-.nick-io small{font-size:11px;color:var(--c-8791a4)}
+.nick-import-note{font-size:11px;color:var(--c-8791a4)}
 @media(max-width:620px){.nick-row{flex-direction:column;align-items:stretch}
   .nick-row input{flex:none}}
 

@@ -366,6 +366,14 @@ export function MatrixPlannerPage() {
   /** 목록을 「메인 딜러」와 「나머지」로 가른다 — 태그가 붙인 구분을 그대로 쓴다.
    *  기준으로 잡힌 캐릭터는 태그와 상관없이 왼쪽(메인 딜러) 칸에 세운다. */
   const mains = shown.filter((c) => isMainDps(c.id) || c.id === mainPick);
+
+  /** 두 칸 제목 옆의 설명. 한 줄로 잘리므로 title에도 같은 말을 단다. */
+  const mainHeadNote = mainPick
+    ? `${byId.get(mainPick)?.name} 기준 — ${pinnedMain ? "★로 고정" : "지금 채우는 파티의 1번 자리"}`
+    : "파티 1번 자리를 채우거나 ★를 누르면 같이 세울 캐릭터를 추천합니다";
+  const restHeadNote = mainPick
+    ? "추천 순 — 초록이 최선책, 노랑이 차선책입니다. 숫자는 버프를 전부 받았을 때의 어림값"
+    : "속성 순";
   const others = shown.filter((c) => !isMainDps(c.id) && c.id !== mainPick);
 
   /**
@@ -681,11 +689,8 @@ export function MatrixPlannerPage() {
                 <div className="matrix-pool-col">
                 <div className="matrix-pool-head">
                   <b>메인 딜러</b>
-                  <em>
-                    {mainPick
-                      ? `${byId.get(mainPick)?.name} 기준 — ${pinnedMain ? "★로 고정" : "지금 채우는 파티의 1번 자리"}`
-                      : "파티 1번 자리를 채우거나 ★를 누르면 같이 세울 캐릭터를 추천합니다"}
-                  </em>
+                  {/* 설명은 한 줄로 자른다 — 옆 칸 제목과 높이를 맞추려고. 전체는 title로 본다. */}
+                  <em title={mainHeadNote}>{mainHeadNote}</em>
                   {pinnedMain && (
                     <button
                       className="matrix-pool-clear"
@@ -718,11 +723,7 @@ export function MatrixPlannerPage() {
                 <div className="matrix-pool-col">
                 <div className="matrix-pool-head">
                   <b>2 · 3 캐릭터</b>
-                  <em>
-                    {mainPick
-                      ? "추천 순 — 초록이 최선책, 노랑이 차선책입니다. 숫자는 버프를 전부 받았을 때의 어림값"
-                      : "속성 순"}
-                  </em>
+                  <em title={restHeadNote}>{restHeadNote}</em>
                 </div>
                 {mainPick ? (
                   // 추천 순일 때는 격자 대신 한 줄짜리 카드로 — 무슨 버프인지 다 적으려면 가로가 필요하다.

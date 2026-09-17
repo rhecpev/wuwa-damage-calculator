@@ -155,27 +155,32 @@ export function EchoesPage() {
     }
   };
 
+  /** 고른 그림을 차례로 읽는다. 한 장이면 한 개, 여러 장이면 여러 개가 등록 창에 뜬다. */
   const handleBatchImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+    // await 뒤에는 event.currentTarget이 비므로 입력 칸을 먼저 붙잡아 둔다.
+    const input = event.currentTarget;
+    const files = input.files ? Array.from(input.files) : [];
+    if (files.length === 0) return;
 
     setBatchProcessing(true);
     const results: any[] = [];
     for (let i = 0; i < files.length; i += 1) {
       const result = await processImageFile(files[i], (step, done, total) =>
         setBatchProgress({
-          label: `${files.length}장 중 ${i + 1}번째 — ${step}`,
+          label: files.length > 1 ? `${files.length}장 중 ${i + 1}번째 — ${step}` : step,
           done: i * total + done,
           total: files.length * total,
         }),
       );
       if (result) results.push(result);
     }
-    setBatchEchos(results);
-    setShowBatchDialog(true);
+    if (results.length > 0) {
+      setBatchEchos(results);
+      setShowBatchDialog(true);
+    }
     setBatchProcessing(false);
     setBatchProgress(null);
-    event.currentTarget.value = "";
+    input.value = "";
   };
 
   const handleSelectEchoForBatch = (batchIndex: number, selectedEchoItem: any) => {
@@ -326,26 +331,11 @@ export function EchoesPage() {
           </button>
           <button
             disabled={batchProcessing}
-            onClick={() => document.getElementById("singleImageUpload")?.click()}
+            onClick={() => document.getElementById("imageUpload")?.click()}
+            title="에코 스크린샷을 고릅니다 — 여러 장을 한꺼번에 골라도 됩니다"
             style={{
               padding: "8px 16px",
-              background: "var(--c-6a7aef)",
-              color: "white",
-              border: "none",
-              borderRadius: "4px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              fontSize: "14px",
-            }}
-          >
-            그림으로 등록
-          </button>
-          <button
-            onClick={() => document.getElementById("batchImageUpload")?.click()}
-            disabled={batchProcessing}
-            style={{
-              padding: "8px 16px",
-              background: batchProcessing ? "var(--c-727272)" : "var(--c-f0ad4e)",
+              background: batchProcessing ? "var(--c-727272)" : "var(--c-6a7aef)",
               color: "white",
               border: "none",
               borderRadius: "4px",
@@ -354,39 +344,11 @@ export function EchoesPage() {
               fontSize: "14px",
             }}
           >
-            {batchProcessing ? "처리 중..." : "📸 여러 장 일괄등록"}
+            {batchProcessing ? "처리 중..." : "그림으로 등록"}
           </button>
+          {/* 한 장이든 여러 장이든 같은 단추 — 고른 장수만큼 읽어 한 창에 모아 등록한다. */}
           <input
-            id="singleImageUpload"
-            type="file"
-            accept="image/*"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const file = e.currentTarget.files?.[0];
-              const inputElement = e.currentTarget;
-              if (file) {
-                setBatchProcessing(true);
-                processImageFile(file, (step, done, total) =>
-                  setBatchProgress({ label: step, done, total }),
-                ).then(result => {
-                  if (result) {
-                    setBatchEchos([result]);
-                    setShowBatchDialog(true);
-                  }
-                  setBatchProcessing(false);
-                  setBatchProgress(null);
-                  inputElement.value = "";
-                }).catch(err => {
-                  console.error("이미지 처리 실패:", err);
-                  setBatchProcessing(false);
-                  setBatchProgress(null);
-                  inputElement.value = "";
-                });
-              }
-            }}
-          />
-          <input
-            id="batchImageUpload"
+            id="imageUpload"
             type="file"
             accept="image/*"
             multiple
@@ -757,7 +719,7 @@ export function EchoesPage() {
             gap: "16px",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h3 style={{ color: "var(--c-4a9eff)", margin: 0 }}>에코 일괄 등록 ({batchEchos.filter(b => b.success).length}개)</h3>
+              <h3 style={{ color: "var(--c-4a9eff)", margin: 0 }}>에코 등록 ({batchEchos.filter(b => b.success).length}개)</h3>
               <button
                 onClick={() => { setShowBatchDialog(false); setBatchEchos([]); }}
                 style={{
