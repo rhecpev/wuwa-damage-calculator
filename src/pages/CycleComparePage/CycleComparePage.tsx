@@ -749,8 +749,6 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   const [state, setState] = usePersistedState<GearState>("compare.gear", EMPTY_GEAR);
   /** 무기 변경 창을 연 캐릭터. */
   const [pickingFor, setPickingFor] = useState<string | null>(null);
-  /** 무기 변경 창에서 도감 전체를 볼지. 기본은 무기 관리 탭에 담아 둔(보유한) 것만. */
-  const [allWeapons, setAllWeapons] = useState(false);
   /** 에코 교체 창을 연 자리. */
   const [echoPick, setEchoPick] = useState<{ characterId: string; slot: number } | null>(null);
   const [echoQuery, setEchoQuery] = useState("");
@@ -991,26 +989,20 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   // ── 무기 변경 창 ──
   const picking = pickingFor ? characters.find((c) => c.id === pickingFor) : undefined;
   const pickingType = picking ? weaponsFor(picking.weaponType) : [];
+  // 무기 변경은 **보유한 무기에서만** 고른다(무기 관리 탭에 담아 둔 자루) — 도감 전체로 넓히는 길은 없다.
   const choices: WeaponChoice[] = !picking
     ? []
-    : allWeapons
-      ? pickingType.map((w) => ({
-          key: `all-${w.id}`,
-          weapon: w,
-          refine: 1,
-          level: DEFAULT_WEAPON_LEVEL,
-        }))
-      : myWeapons
-          .flatMap((m) => {
-            const w = weaponsById.get(m.weaponId);
-            return w && w.weaponType === picking.weaponType
-              ? [{ key: `pk-${m.pk}`, weapon: w, refine: m.refine, level: m.level }]
-              : [];
-          })
-          .sort(
-            (x, y) =>
-              y.weapon.rarity - x.weapon.rarity || x.weapon.name.localeCompare(y.weapon.name),
-          );
+    : myWeapons
+        .flatMap((m) => {
+          const w = weaponsById.get(m.weaponId);
+          return w && w.weaponType === picking.weaponType
+            ? [{ key: `pk-${m.pk}`, weapon: w, refine: m.refine, level: m.level }]
+            : [];
+        })
+        .sort(
+          (x, y) =>
+            y.weapon.rarity - x.weapon.rarity || x.weapon.name.localeCompare(y.weapon.name),
+        );
 
   // ── 에코 교체 창 ──
   // 바꾼 뒤 기준으로 누가 어느 에코를 끼고 있는지. 한 에코는 한 자리에만 낄 수 있어서,
@@ -1644,18 +1636,10 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                 ×
               </button>
             </div>
-            <label className="gear-weapon-tools">
-              <input
-                type="checkbox"
-                checked={!allWeapons}
-                onChange={() => setAllWeapons((v) => !v)}
-              />
-              보유한 무기만
-            </label>
             {choices.length === 0 ? (
               <p className="enemy-hint">
                 무기 관리 탭에 담아 둔 {pickingType[0]?.typeName ?? picking.weaponType} 무기가
-                없습니다. 「보유한 무기만」을 끄면 도감 전체에서 고를 수 있습니다.
+                없습니다. 무기 관리 탭에서 먼저 담아 주세요.
               </p>
             ) : (
               <ul className="gear-weapon-list">
