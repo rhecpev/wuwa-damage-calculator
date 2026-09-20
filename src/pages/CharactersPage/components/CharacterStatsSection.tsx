@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useSyncExternalStore } from "react";
 import { characters } from "../../../data/sampleData";
 import { DEFAULT_WEAPON_LEVEL, weaponAtLevel, weaponsById } from "../../../data/weapons";
 import {
@@ -14,6 +14,8 @@ import { usePartyConfig } from "../../../context/PartyConfigContext";
 import { calculateFinalStats } from "../../../calculator/stats";
 import { equippedPanelStats } from "../../../calculator/equippedBuffs";
 import { equippedEchoes } from "../../../data/echoStore";
+import { rentalBuildOf } from "../../../data/rentalBuilds";
+import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../../../data/rentalStore";
 import type { Echo, Element } from "../../../types/game";
 import type { Stats } from "../../../types/stats";
 import { flat } from "../../../utils/format";
@@ -110,6 +112,11 @@ export function CharacterStatsSection({
     characterNodes,
   } =
     usePartyConfig();
+  // 대여로 두면 무기 · 에코 · 레벨 · 스킬 레벨이 통째로 대여 빌드로 바뀐다(rentalStore).
+  // 무기 · 레벨은 컨텍스트가 이미 갈아 끼워 주고, 에코는 아래 memo가 이 번호를 보고 다시 낸다.
+  const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
+  const rented = isRentalCharacter(characterId);
+  const rentalBuild = rentalBuildOf(characterId);
   const found = characters.find((c) => c.id === characterId);
   // 고른 레벨의 기초 스탯을 채운 사본으로 계산·표시한다. 레벨이 없으면 90.
   const level = characterLevels[characterId] ?? DEFAULT_CHARACTER_LEVEL;
@@ -127,7 +134,9 @@ export function CharacterStatsSection({
   // 계산 탭과 같은 헬퍼를 쓴다 — 두 화면의 스탯이 어긋날 수 없게.
   const echoes = useMemo<Echo[]>(
     () => equippedEchoes(characterId, characterEchoLinks),
-    [characterId, characterEchoLinks],
+    // rentalVersion이 바뀌면 대여 에코로 갈린다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [characterId, characterEchoLinks, rentalVersion],
   );
 
   // 누른 스탯 한 칸 — 어느 목록에서 눌렀는지까지 들고 있어야 그 목록 아래에 펼칠 수 있다.
@@ -210,6 +219,14 @@ export function CharacterStatsSection({
               {ELEMENT_NAMES[character.element]}
             </span>
             <span>공명체인 {chain}단계</span>
+            {rented && (
+              <span
+                className="char-head-rent"
+                title={`매트릭스 대여 빌드로 보고 있습니다 — ${rentalBuild?.weapon?.name ?? ""} ${rentalBuild?.weapon?.level ?? ""}레벨 ${rentalBuild?.weapon?.refine ?? ""}정련 · 에코 ${rentalBuild?.echoes.length ?? 0}개. 공명체인은 내가 가진 ${chain}단계 그대로입니다. 캐릭터 목록의 「대」 단추로 내 세팅으로 되돌립니다`}
+              >
+                대여
+              </span>
+            )}
           </div>
         </div>
       </div>

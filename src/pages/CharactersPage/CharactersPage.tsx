@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useSyncExternalStore } from "react";
 import { characters } from "../../data/sampleData";
 import { useAppState } from "../../context/AppStateContext";
 import { CharacterRoster } from "./components/CharacterRoster";
@@ -8,6 +8,8 @@ import { CharacterBuffSection } from "./components/CharacterBuffSection";
 import { SkillLevelSection } from "./components/SkillLevelSection";
 import { CharacterStatsSection } from "./components/CharacterStatsSection";
 import { loadEchoLinks, saveEchoLinks } from "../../data/echoStore";
+import { rentalBuildOf } from "../../data/rentalBuilds";
+import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../../data/rentalStore";
 
 /** 왼쪽 세로 탭. 순서가 화면 순서이고, id는 어떤 창을 띄울지 고르는 데만 쓴다. */
 const TABS = [
@@ -33,6 +35,11 @@ export function CharactersPage() {
   // 캐릭터-에코 연결도 브라우저에 저장한다(src/data/echoStore.ts). 서버는 쓰지 않는다.
   const [characterEchoLinks, setCharacterEchoLinks] = useState(loadEchoLinks);
   const [tab, setTab] = useState<TabId>("basic");
+  // 대여로 둔 캐릭터는 아래 설정이 계산에 쓰이지 않는다 — 그 사실을 판 위에 적어 둔다.
+  const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
+  const rented = selectedCharacterId ? isRentalCharacter(selectedCharacterId) : false;
+  const rentalBuild = selectedCharacterId ? rentalBuildOf(selectedCharacterId) : undefined;
+  void rentalVersion;
 
   useEffect(() => {
     saveEchoLinks(characterEchoLinks);
@@ -137,7 +144,22 @@ export function CharactersPage() {
                 characterEchoLinks={characterEchoLinks}
               />
             </div>
-            {tab !== "basic" && <div className="char-pane">{content()}</div>}
+            {tab !== "basic" && (
+              <div className="char-pane">
+                {rented && rentalBuild && (
+                  <p className="char-rent-note">
+                    <b>대여</b>
+                    지금은 <b>매트릭스 대여 빌드</b>로 계산합니다 — {rentalBuild.weapon?.name}{" "}
+                    {rentalBuild.weapon?.level}레벨 {rentalBuild.weapon?.refine}정련 · 에코{" "}
+                    {rentalBuild.echoes.length}개 · Lv.{rentalBuild.level} · 스킬{" "}
+                    {rentalBuild.skillLevel}레벨. <b>공명체인은 내가 가진 단계</b>를 그대로
+                    따릅니다. 나머지 설정은 내 것이라 그대로 남고, 캐릭터 목록의 「대」 단추를
+                    끄면 다시 쓰입니다.
+                  </p>
+                )}
+                {content()}
+              </div>
+            )}
           </>
         ) : (
           content()

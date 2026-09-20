@@ -318,6 +318,28 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .char-list-own:hover{color:var(--c-d99a9a);border-color:var(--c-8a5a5a)}
 .char-list-own.on{color:var(--c-e8c66a);background:var(--c-3f382b);border-color:var(--c-66543a)}
 .char-list-own.on:hover{color:var(--c-f0d68a);border-color:var(--c-8a7551)}
+/* 대여 단추 — 「내 세팅 / 매트릭스 대여 빌드」를 갈아 끼운다. 보유 ✓ 옆에 같은 크기로 선다. */
+.char-list-rent{flex:none;width:22px;height:22px;padding:0;display:grid;place-items:center;
+  font-size:11px;font-weight:700;line-height:1;border-radius:50%;cursor:pointer;
+  color:var(--c-8a6262);background:var(--c-3a2e2e);border:1px solid var(--c-553e3e)}
+.char-list-rent:hover:not(:disabled){color:var(--c-d99a9a);border-color:var(--c-8a5a5a)}
+.char-list-rent:disabled{opacity:.35;cursor:default}
+.char-list-rent.on{color:var(--c-8fd6da);background:var(--c-1f3845);border-color:var(--c-476176)}
+.char-list-rent.on:hover{color:var(--c-6ad6f0);border-color:var(--c-4fa3a8)}
+/* 이름 아래 속성 옆에 붙는 「대여」 꼬리표. */
+.char-list-tag{margin-left:6px;padding:0 5px;font-style:normal;font-size:10px;font-weight:700;
+  line-height:15px;border-radius:5px;color:var(--c-8fd6da);background:var(--c-1f3845);
+  border:1px solid var(--c-476176)}
+.char-list-item.rented img,.char-list-item.rented .char-list-blank{border-color:var(--c-476176)}
+/* 대여로 볼 때 무기 · 에코 판 위에 붙는 안내줄. */
+.char-rent-note{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:0 0 12px;
+  padding:9px 12px;font-size:12px;line-height:1.6;color:var(--c-9ea7b7);
+  background:var(--c-1f3845);border:1px solid var(--c-476176);border-radius:9px}
+.char-rent-note b:first-child{padding:1px 7px;font-size:11px;border-radius:6px;
+  color:var(--c-8fd6da);background:var(--c-2a3246);border:1px solid var(--c-476176)}
+/* 스탯 머리줄의 「대여」 표시 — 목록 꼬리표와 같은 색이다. */
+.char-head-rent{padding:1px 7px;font-size:11px;font-weight:700;border-radius:6px;
+  color:var(--c-8fd6da);background:var(--c-1f3845);border:1px solid var(--c-476176)}
 .char-list-search{width:100%;margin-top:8px;padding:8px 11px;font:inherit;font-size:12px;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:9px}
 .char-list-filter{display:flex;align-items:center;gap:6px;margin-top:7px;padding:0 4px;color:var(--c-9aa3b3);font-size:12px;cursor:pointer}
 .char-list-item img,.char-list-blank{width:42px;height:42px;flex:none;border-radius:50%;object-fit:cover;background:var(--c-262d3f);border:1px solid var(--c-3c455c)}
@@ -2225,6 +2247,8 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-chip.matrix-chip-tall img{width:48px;height:48px}
 .matrix-chip.matrix-chip-tall .matrix-chip-el{position:absolute;top:4px;right:6px;width:16px;height:16px}
 /* 이번 시즌 매트릭스 강화 캐릭터 — 얼굴 왼쪽 위 작은 꼬리표 */
+/* 파티 줄의 「대여」 표시 — 강화 꼬리표와 같은 모양으로 반대쪽 귀퉁이에 붙는다. */
+.matrix-chip-rent{position:absolute;top:3px;right:3px;padding:0 5px;font-style:normal;font-size:9.5px;font-weight:700;line-height:15px;border-radius:999px;color:var(--c-1f3845);background:var(--c-8fd6da)}
 .matrix-chip-boost{position:absolute;top:3px;left:3px;padding:0 5px;font-style:normal;font-size:9.5px;font-weight:700;line-height:15px;border-radius:999px;color:var(--c-242a39);background:var(--c-e8c66a)}
 .matrix-chip.matrix-chip-tall b{max-width:100%;font-size:11px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .matrix-row-line>.matrix-row-members{flex:0 1 auto}

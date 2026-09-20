@@ -28,6 +28,8 @@ import {
 } from "../data/characterStats";
 import { inherentSkillsOf, nodesOf } from "../data/characterNodes";
 import { echoStoreVersion, subscribeEchoStore } from "../data/echoStore";
+import { rentalBuildOf, rentalSkillLevelsOf, rentalWeaponOf } from "../data/rentalBuilds";
+import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../data/rentalStore";
 import type { EchoLink } from "../data/echoStore";
 import { anomalyFromAttackId } from "../data/anomalies";
 import { anomalyStateBuffs } from "../data/anomalyBuffs";
@@ -268,7 +270,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   const [config, setConfig] = useState<PartyConfig>(defaultConfig);
   // 캐릭터 id -> {무기 id, 정련 단계, 무기 레벨}. 파티 편성과 무관하게 캐릭터마다 하나씩 기억한다.
   // 새로고침해도 남도록 localStorage에 저장된다.
-  const [characterWeapons, setCharacterWeapons] = usePersistedState<
+  const [ownWeapons, setCharacterWeapons] = usePersistedState<
     Record<string, CharacterWeaponConfig>
   >("characterWeapons", {});
 
@@ -276,7 +278,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   const [manualBuffs, setManualBuffs] = usePersistedState<ManualBuff[]>("manualBuffs-v2", []);
 
   // 공명체인 단계(0~6)와 공명 모드도 캐릭터 단위로 기억한다. 무기와 같은 자리.
-  const [characterChains, setCharacterChains] = usePersistedState<Record<string, number>>(
+  const [ownChains, setCharacterChains] = usePersistedState<Record<string, number>>(
     "characterChains",
     {},
   );
@@ -297,7 +299,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   };
 
   // 캐릭터 레벨도 같은 자리 — 캐릭터마다 하나씩, 새로고침해도 남는다.
-  const [characterLevels, setCharacterLevels] = usePersistedState<Record<string, number>>(
+  const [ownLevels, setCharacterLevels] = usePersistedState<Record<string, number>>(
     "characterLevels",
     {},
   );
@@ -370,9 +372,47 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
   };
 
   // 스킬 레벨도 캐릭터 단위로 기억한다. 비어 있으면 데이터의 Attack.skillLevel(보통 10)을 쓴다.
-  const [characterSkillLevels, setCharacterSkillLevels] = usePersistedState<
+  const [ownSkillLevels, setCharacterSkillLevels] = usePersistedState<
     Record<string, Record<string, number>>
   >("characterSkillLevels", {});
+
+  /**
+   * 대여로 둔 캐릭터(rentalStore)는 **읽을 때만** 대여 빌드로 갈아 끼운다.
+   *
+   * 저장본(own*)은 건드리지 않는다 — 대여를 껐을 때 내가 맞춰 둔 무기 · 레벨 · 스킬 레벨이
+   * 그대로 돌아와야 하기 때문이다. 여기서 한 번 얹어 두면 계산 탭 · 비교 탭 ·
+   * 매트릭스가 전부 같은 값을 본다(에코는 echoStore.echoesOf가 같은 일을 한다).
+   * 모드로 갈린 캐릭터는 한 명이라 갈린 id 양쪽에 똑같이 얹는다.
+   *
+   * **공명체인만은 내 것을 그대로 쓴다.** 대여 빌드 표에는 0단계로 적혀 있지만, 게임에서는
+   * 빌려 쓰더라도 내가 가진 체인 단계를 따라간다. 그래서 chains는 덮어쓰지 않는다.
+   */
+  const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
+  const rental = useMemo(() => {
+    const weapons = { ...ownWeapons };
+    const levels = { ...ownLevels };
+    const skillLevels = { ...ownSkillLevels };
+
+    for (const character of characters) {
+      if (!isRentalCharacter(character.id)) continue;
+      const build = rentalBuildOf(character.id);
+      if (!build) continue;
+      const weapon = rentalWeaponOf(character.id);
+      if (weapon) weapons[character.id] = weapon;
+      levels[character.id] = build.level;
+      skillLevels[character.id] = rentalSkillLevelsOf(character.id);
+    }
+
+    return { weapons, levels, skillLevels };
+    // rentalVersion이 바뀌면 대여 표시가 달라진다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ownWeapons, ownLevels, ownSkillLevels, rentalVersion]);
+
+  const characterWeapons = rental.weapons;
+  const characterLevels = rental.levels;
+  // 공명체인은 대여로 둬도 내 단계 그대로다(위 설명 참고).
+  const characterChains = ownChains;
+  const characterSkillLevels = rental.skillLevels;
 
   const clampLevel = (level: number) => Math.min(Math.max(Math.round(level), 1), 10);
 

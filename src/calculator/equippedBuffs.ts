@@ -3,7 +3,7 @@ import { echoAbilityBuffs, echoSetBuffs } from "../data/echoBuffs";
 import { anomaliesOf } from "../data/characterAnomalies";
 import { baseCharacterId } from "../data/modeVariants";
 import { echoesById, fetterGroupByName } from "../data/echoes";
-import { loadEchoLinks, loadMyEchoes, type EchoLink, type MyEcho } from "../data/echoStore";
+import { echoesOf, loadEchoLinks, loadMyEchoes, type EchoLink, type MyEcho } from "../data/echoStore";
 import { CATEGORY_BONUS_KEY, ELEMENT_BONUS_KEY } from "./damage";
 import type {
   Character,
@@ -261,10 +261,8 @@ export function deriveEchoBuffs(
 
   for (const characterId of characterIds) {
     // 순서가 곧 슬롯 순서다. 목록에 없는(지운) 에코는 걸러낸다.
-    const equipped = links
-      .filter((link) => link.characterId === characterId)
-      .map((link) => owned.find((e) => e.pk === link.echoId))
-      .filter((e): e is MyEcho => e !== undefined);
+    // 대여로 둔 캐릭터면 대여 빌드의 에코가 나온다(echoStore.echoesOf).
+    const equipped = echoesOf(characterId, links, owned);
 
     if (equipped.length === 0) continue;
 

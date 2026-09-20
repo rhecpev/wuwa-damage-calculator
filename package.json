@@ -7,6 +7,7 @@
     "dev": "vite",
     "fetch:api": "node scripts/fetch-encore.mjs",
     "build:weapons": "node scripts/build-weapons.mjs",
+    "build:rental": "node scripts/build-rental-builds.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",

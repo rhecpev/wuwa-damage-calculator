@@ -7,6 +7,13 @@ import {
   toggleOwnedCharacter,
 } from "../../../data/ownedStore";
 import { baseCharacterId } from "../../../data/modeVariants";
+import { hasRentalBuild, rentalBuildOf } from "../../../data/rentalBuilds";
+import {
+  isRentalCharacter,
+  rentalStoreVersion,
+  subscribeRentalStore,
+  toggleRentalCharacter,
+} from "../../../data/rentalStore";
 
 interface CharacterRosterProps {
   characters: Character[];
@@ -33,6 +40,8 @@ const ELEMENT_NAMES: Record<Character["element"], string> = {
  */
 export function CharacterRoster({ characters, selectedId, onSelect }: CharacterRosterProps) {
   const version = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
+  // 대여 표시가 바뀌면 줄의 꼬리표와 단추 색이 달라진다.
+  const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
   const [query, setQuery] = useState("");
   const [ownedOnly, setOwnedOnly] = useState(false);
 
@@ -51,9 +60,13 @@ export function CharacterRoster({ characters, selectedId, onSelect }: CharacterR
       });
     // version이 바뀌면 보유 필터와 정렬 결과가 달라진다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [characters, query, ownedOnly, version]);
+  }, [characters, query, ownedOnly, version, rentalVersion]);
 
   // 모드로 갈린 캐릭터는 게임에서 한 명이라 원래 id로 묶어 센다 — 데니아가 둘로 세어지면 안 된다.
+  const rentalCount = new Set(
+    characters.filter((c) => isRentalCharacter(c.id)).map((c) => baseCharacterId(c.id)),
+  ).size;
+
   const ownedCount = new Set(
     characters.filter((c) => isOwnedCharacter(c.id)).map((c) => baseCharacterId(c.id)),
   ).size;
@@ -64,6 +77,7 @@ export function CharacterRoster({ characters, selectedId, onSelect }: CharacterR
         <small>ROSTER</small>
         <span>
           {list.length}명 · 보유 {ownedCount}
+          {rentalCount > 0 ? ` · 대여 ${rentalCount}` : ""}
         </span>
       </div>
 
@@ -86,10 +100,19 @@ export function CharacterRoster({ characters, selectedId, onSelect }: CharacterR
       <div className="char-list-scroll">
         {list.map((character) => {
           const owned = isOwnedCharacter(character.id);
+          // 대여는 「내 세팅 대신 매트릭스 대여 빌드로 계산한다」는 표시다(rentalStore).
+          const rented = isRentalCharacter(character.id);
+          const build = rentalBuildOf(character.id);
           return (
             <div
               key={character.id}
-              className={character.id === selectedId ? "char-list-item on" : "char-list-item"}
+              className={[
+                "char-list-item",
+                character.id === selectedId ? "on" : "",
+                rented ? "rented" : "",
+              ]
+                .filter(Boolean)
+                .join(" ")}
             >
               <button className="char-list-pick" onClick={() => onSelect(character.id)}>
                 {character.iconUrl ? (
@@ -99,8 +122,27 @@ export function CharacterRoster({ characters, selectedId, onSelect }: CharacterR
                 )}
                 <span className="char-list-name">
                   <b>{character.name}</b>
-                  <em>{ELEMENT_NAMES[character.element]}</em>
+                  <em>
+                    {ELEMENT_NAMES[character.element]}
+                    {rented && <i className="char-list-tag">대여</i>}
+                  </em>
                 </span>
+              </button>
+
+              {/* 스탯을 어디서 가져올지 — 내 세팅이냐 매트릭스 대여 빌드냐. */}
+              <button
+                className={rented ? "char-list-rent on" : "char-list-rent"}
+                disabled={!hasRentalBuild(character.id)}
+                title={
+                  !hasRentalBuild(character.id)
+                    ? "이 캐릭터의 대여 빌드 데이터가 아직 없습니다"
+                    : rented
+                      ? `대여 빌드로 계산 중 — ${build?.weapon?.name ?? ""} ${build?.weapon?.level ?? ""}레벨 ${build?.weapon?.refine ?? ""}정련 · 에코 ${build?.echoes.length ?? 0}개. 공명체인은 내가 가진 단계 그대로입니다. 누르면 내 세팅으로 돌아갑니다`
+                      : "내 세팅으로 계산 중 — 누르면 매트릭스 대여 빌드로 봅니다"
+                }
+                onClick={() => toggleRentalCharacter(character.id)}
+              >
+                대
               </button>
 
               {/* 보유는 ✓, 미보유는 ✕. 목록이 좁아 글자 대신 기호를 쓴다. */}

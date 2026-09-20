@@ -3,6 +3,8 @@ import characterEchoLinksData from "./characterEchoLinks.json";
 import { loadPersisted, savePersisted } from "../utils/persist";
 import { echoStats, echoSubStats } from "../calculator/echoStats";
 import { fetterGroupByName } from "./echoes";
+import { rentalEchoesOf } from "./rentalBuilds";
+import { isRentalCharacter } from "./rentalStore";
 import type { Echo } from "../types/game";
 
 /**
@@ -78,6 +80,25 @@ export const saveEchoLinks = (links: EchoLink[]): void => {
 };
 
 /**
+ * 이 캐릭터가 지금 차고 있는 에코 다섯 자리. **대여로 둔 캐릭터는 대여 빌드의 에코**다
+ * (rentalBuilds) — 내 보유 에코와 연결은 그대로 두고 읽을 때만 갈아 끼운다.
+ *
+ * 에코를 보는 자리는 전부 이 함수를 거친다 — 스탯 · 화음 세트 · 에코 어빌리티가
+ * 서로 다른 에코를 보면 안 되기 때문이다.
+ */
+export function echoesOf(
+  characterId: string,
+  links: EchoLink[] = loadEchoLinks(),
+  owned: MyEcho[] = loadMyEchoes(),
+): MyEcho[] {
+  if (isRentalCharacter(characterId)) return rentalEchoesOf(characterId) as MyEcho[];
+  return links
+    .filter((link) => link.characterId === characterId)
+    .map((link) => owned.find((e) => e.pk === link.echoId))
+    .filter((e): e is MyEcho => e !== undefined);
+}
+
+/**
  * 이 캐릭터의 메인 에코 — 다섯 자리 중 첫 번째에 낀 것.
  *
  * 자리 순서는 연결 목록(EchoLink)의 순서가 그대로다(CharactersPage의 setEchoes 참고).
@@ -93,8 +114,7 @@ export function mainEchoOf(
   links: EchoLink[] = loadEchoLinks(),
   owned: MyEcho[] = loadMyEchoes(),
 ): MyEcho | undefined {
-  const first = links.find((link) => link.characterId === characterId);
-  return first && owned.find((e) => e.pk === first.echoId);
+  return echoesOf(characterId, links, owned)[0];
 }
 
 /**
@@ -109,10 +129,7 @@ export function equippedEchoes(
   links: EchoLink[] = loadEchoLinks(),
   owned: MyEcho[] = loadMyEchoes(),
 ): Echo[] {
-  return links
-    .filter((link) => link.characterId === characterId)
-    .map((link) => owned.find((e) => e.pk === link.echoId))
-    .filter((e): e is MyEcho => e !== undefined)
+  return echoesOf(characterId, links, owned)
     .map((e) => ({
       // 같은 도감 에코를 여러 개 들 수 있어 pk를 id로 쓴다.
       id: String(e.pk),
@@ -138,9 +155,8 @@ export function equippedFetterSets(
 ): { name: string; icon: string | null | undefined; count: number }[] {
   const counts = new Map<string, number>();
 
-  for (const link of links.filter((l) => l.characterId === characterId)) {
-    const echo = owned.find((e) => e.pk === link.echoId);
-    const name = (echo?.options as { selectedFetter?: string } | undefined)?.selectedFetter;
+  for (const echo of echoesOf(characterId, links, owned)) {
+    const name = (echo.options as { selectedFetter?: string } | undefined)?.selectedFetter;
     if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
   }
 
