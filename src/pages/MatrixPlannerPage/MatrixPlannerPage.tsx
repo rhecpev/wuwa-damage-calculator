@@ -23,6 +23,7 @@ import { triggersFor } from "../../data/attackTriggers";
 import type { MatrixBuff, MatrixMonster, MatrixRoleBoost } from "../../data/matrixSeason";
 import { isMainDps, tagsOf } from "../../data/characterTags";
 import { baseCharacterId } from "../../data/modeVariants";
+import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../../data/rentalStore";
 import { adviseFor } from "../../data/partyAdvice";
 import type { AdviceRow } from "../../data/partyAdvice";
 
@@ -73,11 +74,21 @@ const EXTRA_STAMINA: Record<string, string> = {
 };
 
 /**
- * 이 캐릭터를 몇 번까지 담을 수 있는지. 모드로 갈린 캐릭터는 게임에서 한 명이라
- * **원래 id로 묶어** 센다 — 데니아 · 불꽃과 데니아 · 조화 밀집이 각각 한 번씩이 아니다.
+ * **게임에서 한 명**인 캐릭터를 하나로 묶는 열쇠. 횟수를 세는 단위가 이것이다.
+ *
+ *   모드로 갈린 캐릭터  데니아 · 불꽃 / 데니아 · 조화 밀집 → 한 명(baseCharacterId)
+ *   방랑자              기류 · 인멸 · 회절 · 전도 → **한 명**. 속성을 갈아 끼우는 것이지
+ *                       네 명이 아니다. 한 속성을 쓰면 나머지 방랑자는 못 쓴다.
+ */
+const personId = (characterId: string): string =>
+  characterId.startsWith("rover-") ? "rover" : baseCharacterId(characterId);
+
+/**
+ * 이 캐릭터를 몇 번까지 담을 수 있는지. 갈래가 여럿이어도 한 명으로 묶어 센다(personId) —
+ * 데니아 · 불꽃과 데니아 · 조화 밀집이 각각 한 번씩이 아니다.
  */
 const useLimit = (characterId: string): number => {
-  const base = baseCharacterId(characterId);
+  const base = personId(characterId);
   return (USE_LIMIT[base] ?? 1) + (EXTRA_STAMINA[base] ? 1 : 0);
 };
 
@@ -301,6 +312,9 @@ type ViewId = (typeof VIEWS)[number]["id"];
 
 export function MatrixPlannerPage() {
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
+  // 대여로 둔 캐릭터는 파티 줄에 그렇게 적는다 — 내 세팅이 아니라 대여 빌드로 점수가 난다.
+  const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
+  void rentalVersion;
   const { cyclePresets, applyCyclePreset, characterChains, characterModes } = usePartyConfig();
   const { setTab } = useAppState();
   const [stored, setParties] = usePersistedState<PlannerParty[]>("matrixParties", []);
@@ -341,14 +355,14 @@ export function MatrixPlannerPage() {
   }, [stored]);
 
   /**
-   * 원래 캐릭터 id -> 앉아 있는 자리들(「1파티」 꼴). 목록에 몇 번 썼는지 적는 근거다.
-   * 모드로 갈린 캐릭터는 게임에서 한 명이라 **원래 id로 묶어** 센다.
+   * 캐릭터(한 명) -> 앉아 있는 자리들(「1파티」 꼴). 목록에 몇 번 썼는지 적는 근거다.
+   * 모드로 갈린 캐릭터와 방랑자는 게임에서 한 명이라 **묶어서** 센다(personId).
    */
   const placedIn = useMemo(() => {
     const map = new Map<string, string[]>();
     parties.forEach((party, index) => {
       for (const id of party.memberIds) {
-        const base = baseCharacterId(id);
+        const base = personId(id);
         map.set(base, [...(map.get(base) ?? []), `${index + 1}파티`]);
       }
     });
@@ -357,21 +371,27 @@ export function MatrixPlannerPage() {
 
   /** 그 캐릭터가 지금 앉아 있는 자리들. */
   const usedAt = (characterId: string): string[] =>
-    placedIn.get(baseCharacterId(characterId)) ?? [];
+    placedIn.get(personId(characterId)) ?? [];
 
   /** 쓸 수 있는 횟수를 다 썼는지. 더 담을 수 없고 목록에서도 맨 아래로 내려간다. */
   const isSpent = (characterId: string): boolean =>
     usedAt(characterId).length >= useLimit(characterId);
 
   /**
-   * 원래 캐릭터 -> 이미 담아 둔 모드.
-   * 한 모드를 담으면 나머지 모드는 목록에서 **감춘다** — 게임에서는 한 명이라 같은 판에
-   * 두 모드를 함께 낼 수 없고, 담을 수도 없는 카드가 목록만 어지럽힌다.
+   * 한 명이 담긴 갈래들(모드 · 방랑자 속성). 목록에서 나머지 갈래를 감출 때 본다.
+   *
+   * 감추는 때는 **횟수를 다 썼을 때뿐이다.** 한 갈래를 담았다고 바로 감추면, 두 번 쓸 수 있는
+   * 캐릭터의 남은 한 번을 다른 갈래로 쓰지 못한다 — 데니아는 「추가 피로도」로 두 번 나가므로
+   * 조화 밀집으로 한 번 담고도 불꽃으로 한 번 더 담을 수 있어야 한다.
+   * 다 쓰고 나면 담기지 않은 갈래는 목록에서 빠지고, 담은 갈래만 「N/N회 다 씀」으로 남는다.
    */
-  const pickedMode = useMemo(() => {
-    const map = new Map<string, string>();
+  const placedForms = useMemo(() => {
+    const map = new Map<string, Set<string>>();
     for (const party of parties) {
-      for (const id of party.memberIds) map.set(baseCharacterId(id), id);
+      for (const id of party.memberIds) {
+        const key = personId(id);
+        map.set(key, (map.get(key) ?? new Set()).add(id));
+      }
     }
     return map;
   }, [parties]);
@@ -398,8 +418,8 @@ export function MatrixPlannerPage() {
       (!needle ||
         c.name.toLowerCase().includes(needle) ||
         ELEMENT_NAMES[c.element].includes(needle)) &&
-      // 다른 모드를 이미 담았으면 이쪽 모드는 세우지 않는다.
-      (pickedMode.get(baseCharacterId(c.id)) ?? c.id) === c.id,
+      // 횟수를 다 쓴 뒤에는 담아 둔 갈래만 남긴다(모드 · 방랑자 속성).
+      (!isSpent(c.id) || (placedForms.get(personId(c.id))?.has(c.id) ?? false)),
   );
 
   /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
@@ -499,8 +519,8 @@ export function MatrixPlannerPage() {
    */
   const blockedReason = (characterId: string): string | null => {
     if (!active) return "채울 파티가 없습니다";
-    const base = baseCharacterId(characterId);
-    if (active.memberIds.some((id) => baseCharacterId(id) === base))
+    const base = personId(characterId);
+    if (active.memberIds.some((id) => personId(id) === base))
       return "이미 이 파티에 있습니다";
     if (active.memberIds.length >= PARTY_SIZE)
       return "채우는 파티가 꽉 찼습니다 — 다른 파티를 고르세요";
@@ -1059,6 +1079,14 @@ export function MatrixPlannerPage() {
                           <span key={id} className="matrix-chip matrix-chip-tall" title={char.name}>
                             {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
                             {icon && <img className="matrix-chip-el" src={icon} alt="" />}
+                            {isRentalCharacter(id) && (
+                              <i
+                                className="matrix-chip-rent"
+                                title="대여 빌드로 셉니다 — 캐릭터 관리 탭의 「대」 단추로 내 세팅과 바꿉니다"
+                              >
+                                대여
+                              </i>
+                            )}
                             {MATRIX_ROLE_BOOSTS[id] && (
                               <i
                                 className="matrix-chip-boost"
