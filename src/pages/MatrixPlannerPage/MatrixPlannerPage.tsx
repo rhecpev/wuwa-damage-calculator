@@ -22,6 +22,7 @@ import {
 import { triggersFor } from "../../data/attackTriggers";
 import type { MatrixBuff, MatrixMonster, MatrixRoleBoost } from "../../data/matrixSeason";
 import { isMainDps, tagsOf } from "../../data/characterTags";
+import { baseCharacterId } from "../../data/modeVariants";
 import { adviseFor } from "../../data/partyAdvice";
 import type { AdviceRow } from "../../data/partyAdvice";
 
@@ -36,7 +37,8 @@ import type { AdviceRow } from "../../data/partyAdvice";
  *   파티 순서 구성하기  담아 둔 파티를 도는 순서대로 끌어 옮긴다
  *
  * 파티는 **담은 순서대로** 쭉 선다(속성으로 나누지 않는다) — 그 순서가 곧 도는 순서다.
- * 한 캐릭터를 여러 파티에 넣는 것도 막지 않는다. 대신 몇 번 썼고 어느 파티에 있는지 늘 적어 둔다.
+ * 한 캐릭터는 정해진 횟수만큼만 담을 수 있다(USE_LIMIT · EXTRA_STAMINA). 다 쓰면 목록에서
+ * 눌리지 않고 맨 아래로 내려가며, 어느 파티에 있는지는 카드에 그대로 적어 둔다.
  *
  * 계산 탭 · 파티 관리 탭의 편성과는 **따로 논다.** 저장소도 따로고(matrixParties),
  * 여기서 자리를 옮겨도 계산 중인 파티는 그대로다.
@@ -50,7 +52,7 @@ const ELEMENT_ORDER: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectr
 
 /**
  * 콘텐츠 규칙상 겹쳐 쓸 수 있는 횟수 — 치유·보조만 둘이고 나머지는 하나다.
- * 넘겨 담는 것을 **막지는 않는다.** 넘겼다는 것만 눈에 띄게 표시한다.
+ * **넘겨 담을 수 없다.** 다 쓴 캐릭터는 목록에서 눌리지 않고 맨 아래로 내려간다.
  */
 const USE_LIMIT: Record<string, number> = {
   shorekeeper: 2, // 파수인
@@ -61,7 +63,23 @@ const USE_LIMIT: Record<string, number> = {
   shushu: 2, // 수수
 };
 
-const useLimit = (characterId: string): number => USE_LIMIT[characterId] ?? 1;
+/**
+ * 「추가 피로도」로 한 번 더 나갈 수 있는 캐릭터 — 이번 시즌 강화다
+ * (dpmatrix API의 `Roles[].EnhanceSkillDesc`, 데니아 「캐릭터가 추가 피로도를 보유한다」).
+ * 피해가 오르는 강화(MATRIX_ROLE_BOOSTS)와 달리 **쓸 수 있는 횟수**만 늘려 주므로 여기서 본다.
+ */
+const EXTRA_STAMINA: Record<string, string> = {
+  denia: "추가 피로도(S2 2단계 한정)",
+};
+
+/**
+ * 이 캐릭터를 몇 번까지 담을 수 있는지. 모드로 갈린 캐릭터는 게임에서 한 명이라
+ * **원래 id로 묶어** 센다 — 데니아 · 불꽃과 데니아 · 조화 밀집이 각각 한 번씩이 아니다.
+ */
+const useLimit = (characterId: string): number => {
+  const base = baseCharacterId(characterId);
+  return (USE_LIMIT[base] ?? 1) + (EXTRA_STAMINA[base] ? 1 : 0);
+};
 
 /** 툴팁 줄바꿈. title 속성은 줄바꿈 문자를 그대로 쓴다. */
 const LF = String.fromCharCode(10);
@@ -95,7 +113,6 @@ function PoolCard({
   onBasis?: () => void;
 }) {
   const limit = useLimit(char.id);
-  const over = at.length > limit;
   // 겹쳐 쓸 수 있는 횟수가 남아 있으면 아직 「다 쓴 것」이 아니다 — 흐리게 하지 않는다.
   // (수수 · 파수인처럼 두 번 쓸 수 있는 캐릭터가 한 번 담겼다고 꺼져 보이면 안 된다)
   const spent = at.length >= limit;
@@ -132,14 +149,10 @@ function PoolCard({
         </em>
         {at.length > 0 && (
           <i
-            className={over ? "over" : undefined}
-            title={
-              over
-                ? `겹쳐 쓸 수 있는 ${limit}회를 넘겼습니다 — ${at.join(" · ")}`
-                : `${at.length}/${limit} 사용 — ${at.join(" · ")}`
-            }
+            className={spent ? "over" : undefined}
+            title={`${at.length}/${limit} 사용 — ${at.join(" · ")}`}
           >
-            {at.length}/{limit}회{over ? " 초과" : ""}
+            {at.length}/{limit}회{spent ? " 다 씀" : ""}
           </i>
         )}
       </button>
@@ -196,7 +209,6 @@ function AdviceCard({
   advice?: AdviceRow;
 }) {
   const limit = useLimit(char.id);
-  const over = at.length > limit;
   // 위 PoolCard와 같은 규칙 — 횟수가 남았으면 흐리게 하지 않는다.
   const spent = at.length >= limit;
 
@@ -226,7 +238,7 @@ function AdviceCard({
           {ELEMENT_NAMES[char.element]}
         </em>
         {at.length > 0 && (
-          <i className={over ? "over" : undefined}>
+          <i className={spent ? "over" : undefined} title={`${at.length}/${limit} 사용`}>
             {at.join(" · ")}
           </i>
         )}
@@ -328,14 +340,39 @@ export function MatrixPlannerPage() {
     return out.length > 0 ? out : [{ id: 1, memberIds: [] }];
   }, [stored]);
 
-  /** 캐릭터 id -> 앉아 있는 자리들(「1파티」 꼴). 목록에 몇 번 썼는지 적는 근거다. */
+  /**
+   * 원래 캐릭터 id -> 앉아 있는 자리들(「1파티」 꼴). 목록에 몇 번 썼는지 적는 근거다.
+   * 모드로 갈린 캐릭터는 게임에서 한 명이라 **원래 id로 묶어** 센다.
+   */
   const placedIn = useMemo(() => {
     const map = new Map<string, string[]>();
     parties.forEach((party, index) => {
       for (const id of party.memberIds) {
-        map.set(id, [...(map.get(id) ?? []), `${index + 1}파티`]);
+        const base = baseCharacterId(id);
+        map.set(base, [...(map.get(base) ?? []), `${index + 1}파티`]);
       }
     });
+    return map;
+  }, [parties]);
+
+  /** 그 캐릭터가 지금 앉아 있는 자리들. */
+  const usedAt = (characterId: string): string[] =>
+    placedIn.get(baseCharacterId(characterId)) ?? [];
+
+  /** 쓸 수 있는 횟수를 다 썼는지. 더 담을 수 없고 목록에서도 맨 아래로 내려간다. */
+  const isSpent = (characterId: string): boolean =>
+    usedAt(characterId).length >= useLimit(characterId);
+
+  /**
+   * 원래 캐릭터 -> 이미 담아 둔 모드.
+   * 한 모드를 담으면 나머지 모드는 목록에서 **감춘다** — 게임에서는 한 명이라 같은 판에
+   * 두 모드를 함께 낼 수 없고, 담을 수도 없는 카드가 목록만 어지럽힌다.
+   */
+  const pickedMode = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const party of parties) {
+      for (const id of party.memberIds) map.set(baseCharacterId(id), id);
+    }
     return map;
   }, [parties]);
 
@@ -360,7 +397,9 @@ export function MatrixPlannerPage() {
       (!elementFilter || c.element === elementFilter) &&
       (!needle ||
         c.name.toLowerCase().includes(needle) ||
-        ELEMENT_NAMES[c.element].includes(needle)),
+        ELEMENT_NAMES[c.element].includes(needle)) &&
+      // 다른 모드를 이미 담았으면 이쪽 모드는 세우지 않는다.
+      (pickedMode.get(baseCharacterId(c.id)) ?? c.id) === c.id,
   );
 
   /** 지금 채우는 파티. 아직 안 골랐거나 지워졌으면 자리가 남은 첫 파티를 쓴다. */
@@ -383,7 +422,11 @@ export function MatrixPlannerPage() {
 
   /** 목록을 「메인 딜러」와 「나머지」로 가른다 — 태그가 붙인 구분을 그대로 쓴다.
    *  기준으로 잡힌 캐릭터는 태그와 상관없이 왼쪽(메인 딜러) 칸에 세운다. */
-  const mains = shown.filter((c) => isMainDps(c.id) || c.id === mainPick);
+  //  다 쓴 캐릭터는 맨 아래로 민다 — 남은 횟수가 있는 쪽이 늘 위에 선다(sort는 안정 정렬이라
+  //  같은 처지끼리는 속성 순서가 그대로 남는다).
+  const mains = shown
+    .filter((c) => isMainDps(c.id) || c.id === mainPick)
+    .sort((a, b) => Number(isSpent(a.id)) - Number(isSpent(b.id)));
 
   /** 두 칸 제목 옆의 설명. 한 줄로 잘리므로 title에도 같은 말을 단다. */
   const mainHeadNote = mainPick
@@ -399,7 +442,12 @@ export function MatrixPlannerPage() {
    * 점수는 태그와 그 캐릭터의 파티 버프를 함께 본다(data/partyAdvice.ts).
    */
   const rest = useMemo(() => {
-    if (!mainPick) return others.map((char) => ({ char, advice: undefined }));
+    //  추천 순이든 속성 순이든 다 쓴 캐릭터는 맨 아래다.
+    const spentLast = (a: string, b: string) => Number(isSpent(a)) - Number(isSpent(b));
+    if (!mainPick)
+      return others
+        .map((char) => ({ char, advice: undefined }))
+        .sort((a, b) => spentLast(a.char.id, b.char.id));
     // 체인 · 모드를 같이 넘긴다 — 보유하지 않은 체인의 버프가 세어지면 안 된다.
     const table = new Map(
       adviseFor(
@@ -411,7 +459,11 @@ export function MatrixPlannerPage() {
     );
     return others
       .map((char) => ({ char, advice: table.get(char.id) }))
-      .sort((a, b) => (b.advice?.score ?? -1) - (a.advice?.score ?? -1));
+      .sort(
+        (a, b) =>
+          spentLast(a.char.id, b.char.id) ||
+          (b.advice?.score ?? -1) - (a.advice?.score ?? -1),
+      );
     // others는 shown에서 나온 파생값이라 needle · ownedVersion이 바뀔 때 같이 바뀐다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mainPick, needle, elementFilter, ownedVersion, characterChains, characterModes, parties]);
@@ -441,14 +493,31 @@ export function MatrixPlannerPage() {
   /**
    * 이 캐릭터를 지금 더 앉힐 수 있는지. 못 앉히는 까닭까지 같이 돌려준다.
    *
-   * 겹쳐 쓰는 횟수는 여기서 보지 않는다 — 넘겨 담는 것도 해 볼 수 있어야 해서,
-   * 막는 대신 목록에 「N회 사용」으로 적어 둔다. 한 파티 안의 중복만 막는다.
+   * 쓸 수 있는 횟수를 **넘겨 담을 수 없다.** 한 번씩이 규칙이고, 치유 · 보조 몇몇만 두 번이며
+   * (USE_LIMIT), 「추가 피로도」가 붙은 캐릭터는 거기에 한 번이 더 붙는다(EXTRA_STAMINA).
+   * 모드로 갈린 캐릭터는 원래 한 명이라 모드를 바꿔 담는 것으로 횟수를 늘릴 수 없다.
    */
   const blockedReason = (characterId: string): string | null => {
     if (!active) return "채울 파티가 없습니다";
-    if (active.memberIds.includes(characterId)) return "이미 이 파티에 있습니다";
+    const base = baseCharacterId(characterId);
+    if (active.memberIds.some((id) => baseCharacterId(id) === base))
+      return "이미 이 파티에 있습니다";
     if (active.memberIds.length >= PARTY_SIZE)
       return "채우는 파티가 꽉 찼습니다 — 다른 파티를 고르세요";
+
+    const at = usedAt(characterId);
+    const limit = useLimit(characterId);
+    if (at.length >= limit) {
+      const extra = EXTRA_STAMINA[base];
+      return [
+        limit > 1
+          ? `쓸 수 있는 ${limit}회를 다 썼습니다 — ${at.join(" · ")}`
+          : `한 번만 쓸 수 있습니다 — ${at.join(" · ")}에 있습니다`,
+        extra ? `(${extra}로 한 번이 더 붙은 것입니다)` : "",
+      ]
+        .filter(Boolean)
+        .join(LF);
+    }
     return null;
   };
 
@@ -736,7 +805,7 @@ export function MatrixPlannerPage() {
                     <PoolCard
                       key={char.id}
                       char={char}
-                      at={placedIn.get(char.id) ?? []}
+                      at={usedAt(char.id)}
                       blocked={blockedReason(char.id)}
                       onPlace={() => place(char.id)}
                       basis={char.id === mainPick}
@@ -777,7 +846,7 @@ export function MatrixPlannerPage() {
                               <AdviceCard
                                 key={char.id}
                                 char={char}
-                                at={placedIn.get(char.id) ?? []}
+                                at={usedAt(char.id)}
                                 blocked={blockedReason(char.id)}
                                 onPlace={() => place(char.id)}
                                 advice={advice}
@@ -797,7 +866,7 @@ export function MatrixPlannerPage() {
                       <PoolCard
                         key={char.id}
                         char={char}
-                        at={placedIn.get(char.id) ?? []}
+                        at={usedAt(char.id)}
                         blocked={blockedReason(char.id)}
                         onPlace={() => place(char.id)}
                       />
@@ -902,7 +971,7 @@ export function MatrixPlannerPage() {
                       if (!char)
                         return <div key={slot} className="matrix-slot empty" aria-hidden="true" />;
 
-                      const used = (placedIn.get(char.id) ?? []).length;
+                      const used = usedAt(char.id).length;
                       const over = used > useLimit(char.id);
 
                       return (

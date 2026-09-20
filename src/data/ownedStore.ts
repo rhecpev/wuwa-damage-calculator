@@ -33,17 +33,28 @@ const bump = () => {
 
 const CHARACTER_KEY = "ownedCharacters";
 
-let ownedCharacters = loadPersisted<string[]>(CHARACTER_KEY, []);
+/**
+ * 보유 표시는 **원래 캐릭터 한 명**에 붙인다(baseCharacterId).
+ *
+ * 모드로 갈린 캐릭터(데니아 · 불꽃 / 조화 밀집)는 게임에서 한 명이다 — 한쪽만 가지고 있을 수
+ * 없으므로 갈린 id마다 따로 표시할 까닭이 없다. 예전 저장분도 원래 id로 적혀 있어서
+ * (denia · lucila · aymes), 갈린 id로 물으면 「없음」이 나와 목록에서 통째로 빠졌다.
+ * 불러올 때 한 번 원래 id로 되돌리고, 묻고 답하는 것도 전부 원래 id로 한다.
+ */
+let ownedCharacters = [
+  ...new Set(loadPersisted<string[]>(CHARACTER_KEY, []).map(baseCharacterId)),
+];
 
 export const ownedCharacterIds = (): string[] => ownedCharacters;
 
 export const isOwnedCharacter = (characterId: string): boolean =>
-  ownedCharacters.includes(characterId);
+  ownedCharacters.includes(baseCharacterId(characterId));
 
 export function toggleOwnedCharacter(characterId: string): void {
-  ownedCharacters = ownedCharacters.includes(characterId)
-    ? ownedCharacters.filter((id) => id !== characterId)
-    : [...ownedCharacters, characterId];
+  const id = baseCharacterId(characterId);
+  ownedCharacters = ownedCharacters.includes(id)
+    ? ownedCharacters.filter((other) => other !== id)
+    : [...ownedCharacters, id];
   savePersisted(CHARACTER_KEY, ownedCharacters);
   bump();
 }

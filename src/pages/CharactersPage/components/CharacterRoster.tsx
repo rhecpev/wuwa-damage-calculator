@@ -6,6 +6,7 @@ import {
   subscribeOwnedStore,
   toggleOwnedCharacter,
 } from "../../../data/ownedStore";
+import { baseCharacterId } from "../../../data/modeVariants";
 
 interface CharacterRosterProps {
   characters: Character[];
@@ -52,7 +53,10 @@ export function CharacterRoster({ characters, selectedId, onSelect }: CharacterR
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [characters, query, ownedOnly, version]);
 
-  const ownedCount = characters.filter((c) => isOwnedCharacter(c.id)).length;
+  // 모드로 갈린 캐릭터는 게임에서 한 명이라 원래 id로 묶어 센다 — 데니아가 둘로 세어지면 안 된다.
+  const ownedCount = new Set(
+    characters.filter((c) => isOwnedCharacter(c.id)).map((c) => baseCharacterId(c.id)),
+  ).size;
 
   return (
     <aside className="char-list">
