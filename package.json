@@ -18,6 +18,7 @@
     "report:autobuffs": "node scripts/report-auto-buff-candidates.mjs"
   },
   "dependencies": {
+    "@vercel/analytics": "^2.0.1",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "react": "^19.1.1",

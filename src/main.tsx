@@ -1,5 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Analytics } from "@vercel/analytics/react";
 import { hydrate } from "./utils/persist";
 import { initTheme } from "./utils/theme";
 import "./styles.css";
@@ -28,6 +29,7 @@ hydrate()
     createRoot(document.getElementById("root")!).render(
       <StrictMode>
         <App />
+        <Analytics />
       </StrictMode>,
     );
   });
