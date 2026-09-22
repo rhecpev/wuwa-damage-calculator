@@ -53,7 +53,7 @@ export const ENEMY_RES_PRESETS: {
   { id: "field", label: "필드", baseRes: 0.1, sameElementRes: 0.4 },
   { id: "hologram", label: "홀로그램", baseRes: 0.1, sameElementRes: 0.8 },
   { id: "tower", label: "역경의 탑", baseRes: 0.2, sameElementRes: 0.6 },
-  { id: "matrix", label: "종말 매트릭스", baseRes: 0.2, sameElementRes: 0.6, fixedLevel: 100 },
+  { id: "matrix", label: "종말 매트릭스", baseRes: 0.2, sameElementRes: 0.4, fixedLevel: 100 },
 ];
 
 export const resPresetOf = (id: EnemyResPreset) =>
