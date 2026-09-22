@@ -128,6 +128,18 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
       </>,
     ),
   },
+  {
+    id: "updates",
+    label: "업데이트 내역",
+    hint: "무엇이 바뀌었나",
+    icon: icon(
+      <>
+        <path d="M12 8v4l2.5 2.5" />
+        <path d="M3.5 12a8.5 8.5 0 1 0 2.5-6" />
+        <path d="M3 3v4h4" />
+      </>,
+    ),
+  },
 ];
 
 /**

@@ -2367,3 +2367,23 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .slot-pick-head{gap:8px;margin-bottom:12px}
 .slot-pick-head .party-load{margin-left:0}
 .slot-pick-grid{max-height:min(56vh,440px);overflow-y:auto;padding:2px 8px 2px 2px}
+
+/* 업데이트 내역 — 날짜별 타임라인 */
+.updates{max-width:860px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.updates-head h2{margin:0 0 4px;font-size:18px;color:var(--c-e9edf5)}
+.updates-head p{margin:0;font-size:13px;color:var(--c-8a94a6)}
+.updates-timeline{list-style:none;margin:0;padding:0 0 0 22px;position:relative;display:flex;flex-direction:column;gap:12px}
+.updates-timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:var(--c-2e3852);border-radius:1px}
+.updates-day{position:relative}
+.updates-dot{position:absolute;left:-21px;top:16px;width:12px;height:12px;border-radius:50%;background:var(--c-4a9eff);box-shadow:0 0 0 3px rgba(var(--rgb-3987e5),.25)}
+.updates-day:not(:first-child) .updates-dot{background:var(--c-445671);box-shadow:none}
+.updates-card{margin:0}
+.updates-card header{display:flex;align-items:baseline;flex-wrap:wrap;gap:4px 12px;margin-bottom:10px}
+.updates-card time{font-size:13px;font-weight:600;color:var(--c-8fc0ff);font-variant-numeric:tabular-nums}
+.updates-card header b{font-size:15px;color:var(--c-e9edf5)}
+.updates-card ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:7px}
+.updates-card li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;line-height:1.5;color:var(--c-c8cfda)}
+.updates-tag{flex:none;min-width:48px;text-align:center;padding:1px 7px;border-radius:5px;font-size:11.5px;font-weight:600;line-height:1.6}
+.updates-tag.new{color:var(--c-7fd1a8);background:var(--c-1f3a2b)}
+.updates-tag.improve{color:var(--c-8fc0ff);background:var(--c-1f3550)}
+.updates-tag.fix{color:var(--c-f0ad4e);background:var(--c-3d2e1d)}

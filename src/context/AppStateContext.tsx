@@ -12,7 +12,8 @@ export type TabType =
   | "matrixPlanner"
   | "nicknames"
   | "weapons"
-  | "profileImport";
+  | "profileImport"
+  | "updates";
 
 interface AppStateContextType {
   tab: TabType;

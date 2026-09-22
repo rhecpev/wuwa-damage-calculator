@@ -12,6 +12,7 @@ import { CyclePage } from "./pages/CyclePage/CyclePage";
 import { CycleComparePage } from "./pages/CycleComparePage/CycleComparePage";
 import { MatrixPlannerPage } from "./pages/MatrixPlannerPage/MatrixPlannerPage";
 import { NicknamesPage } from "./pages/NicknamesPage/NicknamesPage";
+import { UpdatesPage } from "./pages/UpdatesPage/UpdatesPage";
 
 function AppContent() {
   const { tab } = useAppState();
@@ -33,6 +34,7 @@ function AppContent() {
         {tab === "matrixPlanner" && <MatrixPlannerPage />}
         {tab === "nicknames" && <NicknamesPage />}
         {tab === "profileImport" && <ProfileImportPage />}
+        {tab === "updates" && <UpdatesPage />}
 
         <Footer />
       </main>
