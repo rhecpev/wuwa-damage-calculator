@@ -366,7 +366,9 @@ export function adviseFor(
     });
   }
 
-  rows.sort((a, b) => b.score - a.score);
+  // 메인 딜러 태그가 붙은 후보는 점수와 상관없이 뒤로 민다 — 2번 · 3번 자리는 서포터 몫이 먼저다.
+  const isMain = (row: AdviceRow) => Number(tagsOf(row.character.id).includes("메인 딜러"));
+  rows.sort((a, b) => isMain(a) - isMain(b) || b.score - a.score);
 
   // 최선책 · 차선책은 1등 대비 몇 할인지로 가른다 — 딜러마다 판이 다르므로 절대값으로는 못 가른다.
   const top = rows[0]?.score ?? 0;

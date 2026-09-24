@@ -440,53 +440,17 @@ export function MatrixPlannerPage() {
    */
   const mainPick = pinnedMain ?? active?.memberIds[0] ?? null;
 
-  /** 목록을 「메인 딜러」와 「나머지」로 가른다 — 태그가 붙인 구분을 그대로 쓴다.
-   *  기준으로 잡힌 캐릭터는 태그와 상관없이 왼쪽(메인 딜러) 칸에 세운다. */
-  //  다 쓴 캐릭터는 맨 아래로 민다 — 남은 횟수가 있는 쪽이 늘 위에 선다(sort는 안정 정렬이라
-  //  같은 처지끼리는 속성 순서가 그대로 남는다).
-  const mains = shown
-    .filter((c) => isMainDps(c.id) || c.id === mainPick)
-    .sort((a, b) => Number(isSpent(a.id)) - Number(isSpent(b.id)));
-
-  /** 두 칸 제목 옆의 설명. 한 줄로 잘리므로 title에도 같은 말을 단다. */
-  const mainHeadNote = mainPick
-    ? `${byId.get(mainPick)?.name} 기준 — ${pinnedMain ? "★로 고정" : "지금 채우는 파티의 1번 자리"}`
-    : "파티 1번 자리를 채우거나 ★를 누르면 같이 세울 캐릭터를 추천합니다";
-  const restHeadNote = mainPick
-    ? "추천 순 — 초록이 최선책, 노랑이 차선책입니다. 숫자는 버프를 전부 받았을 때의 어림값"
-    : "속성 순";
-  const others = shown.filter((c) => !isMainDps(c.id) && c.id !== mainPick);
-
   /**
-   * 나머지 칸. 기준 딜러가 있으면 추천 순으로 다시 세우고, 없으면 속성 순 그대로다.
-   * 점수는 태그와 그 캐릭터의 파티 버프를 함께 본다(data/partyAdvice.ts).
+   * 기준 딜러가 없을 때의 목록 — 메인 딜러 · 2 · 3 구분 없이 전부 한 격자에 세운다.
+   * 다 쓴 캐릭터는 맨 아래로 민다(sort는 안정 정렬이라 같은 처지끼리는 속성 순서가 그대로 남는다).
    */
-  const rest = useMemo(() => {
-    //  추천 순이든 속성 순이든 다 쓴 캐릭터는 맨 아래다.
-    const spentLast = (a: string, b: string) => Number(isSpent(a)) - Number(isSpent(b));
-    if (!mainPick)
-      return others
-        .map((char) => ({ char, advice: undefined }))
-        .sort((a, b) => spentLast(a.char.id, b.char.id));
-    // 체인 · 모드를 같이 넘긴다 — 보유하지 않은 체인의 버프가 세어지면 안 된다.
-    const table = new Map(
-      adviseFor(
-        mainPick,
-        others.map((c) => c.id),
-        characterChains,
-        characterModes,
-      ).map((r) => [r.character.id, r]),
-    );
-    return others
-      .map((char) => ({ char, advice: table.get(char.id) }))
-      .sort(
-        (a, b) =>
-          spentLast(a.char.id, b.char.id) ||
-          (b.advice?.score ?? -1) - (a.advice?.score ?? -1),
-      );
-    // others는 shown에서 나온 파생값이라 needle · ownedVersion이 바뀔 때 같이 바뀐다.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mainPick, needle, elementFilter, ownedVersion, characterChains, characterModes, parties]);
+  const allPool = [...shown].sort((a, b) => Number(isSpent(a.id)) - Number(isSpent(b.id)));
+
+  /** 제목 옆의 설명. 한 줄로 잘리므로 title에도 같은 말을 단다. */
+  const poolHeadNote = mainPick
+    ? `${byId.get(mainPick)?.name} 기준 — ${pinnedMain ? "★로 고정" : "지금 채우는 파티의 1번 자리"} · 초록이 최선책, 노랑이 차선책`
+    : "속성 순 — 캐릭터를 파티 1번 자리에 담거나 ★를 누르면 2번 · 3번 추천으로 바뀝니다";
+
 
   /**
    * 이 파티의 캐릭터들**만으로** 담아 둔 사이클.
@@ -540,6 +504,36 @@ export function MatrixPlannerPage() {
     }
     return null;
   };
+
+  /**
+   * 기준 딜러가 있을 때의 세 탭 — 2번 추천 · 3번 추천 · 사용 불가.
+   *
+   * 지금 채우는 파티에 못 앉히는 캐릭터(횟수를 다 씀 · 이미 이 파티에 있음 · 파티가 꽉 참)는
+   * 2번 · 3번 어느 쪽에도 세우지 않고 「사용 불가」로 모은다. 나머지는 추천 순으로 자리를 가른다.
+   * 점수는 태그와 그 캐릭터의 파티 버프를 함께 본다(data/partyAdvice.ts).
+   */
+  const adviceTabs = useMemo(() => {
+    if (!mainPick) return null;
+    const blocked = shown.filter((c) => blockedReason(c.id) !== null);
+    const open = shown.filter((c) => blockedReason(c.id) === null && c.id !== mainPick);
+    // 체인 · 모드를 같이 넘긴다 — 보유하지 않은 체인의 버프가 세어지면 안 된다.
+    const rows = adviseFor(
+      mainPick,
+      open.map((c) => c.id),
+      characterChains,
+      characterModes,
+    ).map((advice) => ({ char: advice.character, advice }));
+    return {
+      second: rows.filter((r) => r.advice.group === 2),
+      third: rows.filter((r) => r.advice.group === 1),
+      blocked,
+    };
+    // shown · blockedReason은 needle · 필터 · 보유 · 파티에서 나온 파생값이다.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mainPick, needle, elementFilter, ownedVersion, characterChains, characterModes, parties, activeId]);
+
+  /** 기준 딜러가 있을 때 보고 있는 탭. */
+  const [adviceTab, setAdviceTab] = useState<"second" | "third" | "blocked">("second");
 
   /**
    * 캐릭터를 지금 채우는 파티에 앉힌다.
@@ -803,99 +797,105 @@ export function MatrixPlannerPage() {
                 눌러 가지고 있는 캐릭터를 먼저 표시해 주세요.
               </p>
             ) : (
-              <div className="matrix-pool-split">
-                {/* ── 메인 딜러 ── 고르면 오른쪽 「나머지」가 그 딜러에 맞는 순서로 다시 선다. */}
+              <div className="matrix-pool-split one">
                 <div className="matrix-pool-col">
-                <div className="matrix-pool-head">
-                  <b>메인 딜러</b>
-                  {/* 설명은 한 줄로 자른다 — 옆 칸 제목과 높이를 맞추려고. 전체는 title로 본다. */}
-                  <em title={mainHeadNote}>{mainHeadNote}</em>
-                  {pinnedMain && (
-                    <button
-                      className="matrix-pool-clear"
-                      title="지금 채우는 파티의 1번 자리를 기준으로 되돌립니다"
-                      onClick={() => setPinnedMain(null)}
-                    >
-                      기준 해제
-                    </button>
-                  )}
-                </div>
-                <div className="pick-grid matrix-pool">
-                  {mains.map((char) => (
-                    <PoolCard
-                      key={char.id}
-                      char={char}
-                      at={usedAt(char.id)}
-                      blocked={blockedReason(char.id)}
-                      onPlace={() => place(char.id)}
-                      basis={char.id === mainPick}
-                      onBasis={() => setPinnedMain(char.id === pinnedMain ? null : char.id)}
-                    />
-                  ))}
-                  {mains.length === 0 && (
-                    <p className="matrix-empty">이름에 맞는 메인 딜러가 없습니다.</p>
-                  )}
-                </div>
-                </div>
+                  <div className="matrix-pool-head">
+                    <b>{mainPick ? `${byId.get(mainPick)?.name} 파티` : "전체"}</b>
+                    <em title={poolHeadNote}>{poolHeadNote}</em>
+                    {pinnedMain && (
+                      <button
+                        className="matrix-pool-clear"
+                        title="지금 채우는 파티의 1번 자리를 기준으로 되돌립니다"
+                        onClick={() => setPinnedMain(null)}
+                      >
+                        기준 해제
+                      </button>
+                    )}
+                  </div>
 
-                {/* ── 나머지 ── 기준 딜러가 있으면 추천 순, 없으면 원래 순서. */}
-                <div className="matrix-pool-col">
-                <div className="matrix-pool-head">
-                  <b>2 · 3 캐릭터</b>
-                  <em title={restHeadNote}>{restHeadNote}</em>
-                </div>
-                {mainPick ? (
-                  // 추천 순일 때는 격자 대신 한 줄짜리 카드로 — 무슨 버프인지 다 적으려면 가로가 필요하다.
-                  // 자리로 한 번 더 가른다. 교체로 끊기는 버프는 메인 딜러 **바로 앞**에서만 값어치를 한다.
-                  <div className="advice-split">
-                    {([2, 1] as const).map((group) => {
-                      const list = rest.filter((r) => r.advice?.group === group);
-                      if (list.length === 0) return null;
-                      return (
-                        <div key={group} className="advice-col">
-                          <div className="matrix-pool-head sub">
-                            <b>{group === 2 ? "2번 자리" : "3번 자리"}</b>
-                            <em>
-                              {group === 2
-                                ? "「교체 시 해제」가 붙은 버프를 줍니다 — 메인 딜러 바로 앞에 세워야 살아납니다"
-                                : "교체해도 남는 파티 버프만 줍니다 — 앞에서 미리 깔아 두면 됩니다"}
-                            </em>
-                          </div>
-                          <div className="advice-list">
-                            {list.map(({ char, advice }) => (
-                              <AdviceCard
-                                key={char.id}
-                                char={char}
-                                at={usedAt(char.id)}
-                                blocked={blockedReason(char.id)}
-                                onPlace={() => place(char.id)}
-                                advice={advice}
-                              />
-                            ))}
-                          </div>
+                  {!adviceTabs ? (
+                    // 기준 딜러가 없으면 구분 없이 전부. ★는 메인 딜러 태그가 붙은 캐릭터에만 단다.
+                    <div className="pick-grid matrix-pool">
+                      {allPool.map((char) => (
+                        <PoolCard
+                          key={char.id}
+                          char={char}
+                          at={usedAt(char.id)}
+                          blocked={blockedReason(char.id)}
+                          onPlace={() => place(char.id)}
+                          {...(isMainDps(char.id) && {
+                            basis: false,
+                            onBasis: () => setPinnedMain(char.id),
+                          })}
+                        />
+                      ))}
+                      {allPool.length === 0 && (
+                        <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <nav className="matrix-pool-tabs">
+                        {(
+                          [
+                            ["second", "2번 추천", adviceTabs.second.length],
+                            ["third", "3번 추천", adviceTabs.third.length],
+                            ["blocked", "사용 불가", adviceTabs.blocked.length],
+                          ] as const
+                        ).map(([id, label, count]) => (
+                          <button
+                            key={id}
+                            className={id === adviceTab ? "on" : undefined}
+                            onClick={() => setAdviceTab(id)}
+                          >
+                            {label}
+                            <small>{count}</small>
+                          </button>
+                        ))}
+                      </nav>
+                      <p className="matrix-pool-tab-note">
+                        {adviceTab === "second"
+                          ? "「교체 시 해제」가 붙은 버프를 줍니다 — 메인 딜러 바로 앞에 세워야 살아납니다"
+                          : adviceTab === "third"
+                            ? "교체해도 남는 파티 버프만 줍니다 — 앞에서 미리 깔아 두면 됩니다"
+                            : "지금 채우는 파티에 넣을 수 없는 캐릭터입니다 — 카드에 마우스를 올리면 까닭이 보입니다"}
+                      </p>
+
+                      {adviceTab === "blocked" ? (
+                        <div className="pick-grid matrix-pool">
+                          {adviceTabs.blocked.map((char) => (
+                            <PoolCard
+                              key={char.id}
+                              char={char}
+                              at={usedAt(char.id)}
+                              blocked={blockedReason(char.id)}
+                              onPlace={() => place(char.id)}
+                            />
+                          ))}
+                          {adviceTabs.blocked.length === 0 && (
+                            <p className="matrix-empty">사용 불가 캐릭터가 없습니다.</p>
+                          )}
                         </div>
-                      );
-                    })}
-                    {rest.length === 0 && (
-                      <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
-                    )}
-                  </div>
-                ) : (
-                  <div className="pick-grid matrix-pool">
-                    {rest.map(({ char }) => (
-                      <PoolCard
-                        key={char.id}
-                        char={char}
-                        at={usedAt(char.id)}
-                        blocked={blockedReason(char.id)}
-                        onPlace={() => place(char.id)}
-                      />
-                    ))}
-                    {rest.length === 0 && (
-                      <p className="matrix-empty">이름에 맞는 캐릭터가 없습니다.</p>
-                    )}
-                  </div>
-                )}
+                      ) : (
+                        // 한 줄짜리 카드로 — 무슨 버프인지 다 적으려면 가로가 필요하다.
+                        <div className="advice-list">
+                          {adviceTabs[adviceTab].map(({ char, advice }) => (
+                            <AdviceCard
+                              key={char.id}
+                              char={char}
+                              at={usedAt(char.id)}
+                              blocked={null}
+                              onPlace={() => place(char.id)}
+                              advice={advice}
+                            />
+                          ))}
+                          {adviceTabs[adviceTab].length === 0 && (
+                            <p className="matrix-empty">이 자리에 추천할 캐릭터가 없습니다.</p>
+                          )}
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
             )}

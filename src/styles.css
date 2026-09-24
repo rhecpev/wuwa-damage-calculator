@@ -327,7 +327,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .char-list-rent.on{color:var(--c-8fd6da);background:var(--c-1f3845);border-color:var(--c-476176)}
 .char-list-rent.on:hover{color:var(--c-6ad6f0);border-color:var(--c-4fa3a8)}
 /* 이름 아래 속성 옆에 붙는 「대여」 꼬리표. */
-.char-list-tag{margin-left:6px;padding:0 5px;font-style:normal;font-size:10px;font-weight:700;
+.char-list-tag{flex:none;white-space:nowrap;margin-left:6px;padding:0 5px;font-style:normal;font-size:10px;font-weight:700;
   line-height:15px;border-radius:5px;color:var(--c-8fd6da);background:var(--c-1f3845);
   border:1px solid var(--c-476176)}
 .char-list-item.rented img,.char-list-item.rented .char-list-blank{border-color:var(--c-476176)}
@@ -346,7 +346,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .char-list-item:hover{background:var(--c-2d3345)}
 .char-list-name{display:flex;flex-direction:column;gap:2px;min-width:0}
 .char-list-name b{font-size:13px;font-weight:600;color:var(--c-c2c9d6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.char-list-name em{font-style:normal;font-size:11px;color:var(--c-8791a4)}
+.char-list-name em{display:flex;align-items:center;white-space:nowrap;font-style:normal;font-size:11px;color:var(--c-8791a4)}
 .char-list-item.on{background:var(--c-30394a);border-color:var(--c-574f3a)}
 .char-list-item.on img,.char-list-item.on .char-list-blank{border-color:var(--c-e8c66a);box-shadow:0 0 0 2px rgba(var(--rgb-e8c66a),.25)}
 .char-list-item.on .char-list-name b{color:var(--c-e8c66a)}
@@ -357,8 +357,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .char-tabs,.char-list{position:static}
 .char-tabs{flex-direction:row;flex-wrap:wrap}
 .char-tab{flex:1 1 140px}
-.char-list-scroll{flex-direction:row;flex-wrap:wrap;max-height:none}
-.char-list-item{width:auto;flex:0 1 auto}
+/* 아래로 내려오면 같은 폭의 칸으로 격자를 짜고, 구역 높이를 정해 그 안에서 스크롤한다. */
+.char-list-scroll{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));
+  align-content:start;max-height:min(46vh,420px);overflow-y:auto}
+.char-list-item{width:100%;min-width:0}
+.char-workspace>.char-list>.char-list-scroll{flex:none;max-height:min(46vh,420px)}
 /* 한 줄로 쌓일 때는 높이를 맞추지 않는다 — 목록이 제 내용만큼 서야 한다. */
 .char-workspace>.char-list{contain:none}
 }
@@ -1955,6 +1958,17 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 둘로 갈리면 한 칸이 좁아진다 — 카드를 두 줄로 접는다. */
 .advice-split .advice-card{grid-template-columns:auto minmax(0,1fr) auto}
 .advice-split .advice-buffs{grid-column:1/-1}
+
+/* 기준 딜러가 잡히면 목록은 한 칸이 되고 2번 추천 · 3번 추천 · 사용 불가 세 탭으로 갈린다. */
+.matrix-pool-split.one{grid-template-columns:minmax(0,1fr)}
+.matrix-pool-col>.advice-list{flex:1;min-height:0;overflow-y:auto;padding-right:4px}
+.matrix-pool-tabs{display:flex;gap:6px;margin:0 2px 6px}
+.matrix-pool-tabs button{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:7px 10px;
+  font-size:12px;font-weight:600;color:var(--c-a8b0bf);background:var(--c-282f41);border:1px solid var(--c-384155);border-radius:9px;cursor:pointer}
+.matrix-pool-tabs button:hover{background:var(--c-2d3345);color:var(--c-e9edf5)}
+.matrix-pool-tabs button.on{background:var(--c-30394a);border-color:var(--c-574f3a);color:var(--c-e8c66a)}
+.matrix-pool-tabs small{font-size:10.5px;font-weight:500;color:var(--c-8791a4)}
+.matrix-pool-tab-note{margin:0 2px 8px;font-size:11px;color:var(--c-8791a4)}
 
 /* 자리로 가른 작은 머리줄. 위 구역 머리줄보다 한 단 낮게 보이도록 줄여 둔다. */
 .matrix-pool-head.sub{margin-top:10px;border-bottom-style:dashed}

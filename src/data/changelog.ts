@@ -23,6 +23,15 @@ export type ChangeDay = {
 
 export const CHANGELOG: ChangeDay[] = [
   {
+    date: "2026-09-24",
+    items: [
+      { kind: "improve", text: "매트릭스 파티 플래너 — 처음엔 전체 목록, 메인 딜러가 정해지면 2번 추천 · 3번 추천 · 사용 불가 탭으로 나눠 보기" },
+      { kind: "improve", text: "2번 · 3번 추천에서 메인 딜러는 뒤로 정렬" },
+      { kind: "fix", text: "캐릭터 로스터의 「대여」 표시가 잘리던 문제 수정" },
+      { kind: "improve", text: "좁은 화면에서 캐릭터 로스터를 같은 폭 격자로, 높이를 정해 스크롤" },
+    ],
+  },
+  {
     date: "2026-09-22",
     items: [
       { kind: "new", text: "업데이트 내역 탭 추가" },
