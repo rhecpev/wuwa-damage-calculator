@@ -77,7 +77,7 @@ export type SkillCategory="Basic"|"Skill"|"Circuit"|"Liberation"|"Variation"|"In
 //   공격 팔레트를 이 분류로 묶어서 보여준다.
 export interface SkillAttribute{attributeName:string;description:string;values:string[];}
 export interface Skill{id:string;name:string;category?:SkillCategory;attacks:Attack[];icon?:string;attributes?:SkillAttribute[];}
-export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];retired?:boolean;valuesByLevel?:number[];levelSkillId?:string;}
+export interface CharacterBuffTemplate{label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks?:number;modifier?:BuffModifier;resonanceChain?:number;resonanceMode?:ResonanceMode;inherentSkillId?:string;condition?:string;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];maxStacks?:number;maxStacksByChain?:Record<number,number>;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];retired?:boolean;valuesByLevel?:number[];levelSkillId?:string;rampsWithRepeat?:boolean;}
 // 캐릭터 고유효과·공명체인처럼 캐릭터가 스스로 들고 있는 버프를 계산 가능한 형태로 적어둔 것.
 //   무기 쪽 WeaponBuffTemplate과 같은 모양이되, 정련(values 5개) 대신 아래 두 조건을 쓴다.
 //   resonanceChain: 이 단계 이상 보유해야 걸린다. 생략하면 체인과 무관(고유효과 등).
@@ -203,7 +203,7 @@ export type BuffTarget="motionValue"|"damageBonus"|"boost"|"critRate"|"critDamag
 //   atkPercent / hpPercent / defPercent = 공격력·HP·방어력 % 증가
 //     이 셋은 기초 스탯에 곱해지기 전에 합산돼야 해서, 다른 타깃과 달리
 //     calculateFinalStats의 곱연산 이전 단계에 얹힌다(manualBuffDelta 참고).
-export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];}
+export interface ManualBuff{id:string;label:string;target:BuffTarget;damageType:BuffDamageType;element?:Element;attackId?:string;attackIds?:string[];value:number;scaleFrom?:BuffScaleStat;scaleOffset?:number;maxValue?:number;statGroup?:StatGroup;stacks:number;modifier:BuffModifier;enabled:boolean;uptime?:BuffUptime;scope?:BuffScope;excludeOwner?:boolean;onlyFor?:string[];ownerId?:string;iconUrl?:string;maxStacks?:number;exclusiveGroup?:string;anomalyStacks?:AnomalyKind;raisesAnomalyStacks?:number;raisesAnomalyKinds?:AnomalyKind[];switchesDamageBonusType?:AttackType;hideFromPanel?:boolean;panelStacks?:number|Record<number,number>;allElements?:boolean;triggeredBy?:string[];triggeredByType?:AttackType[];endsOn?:BuffEnd;stacksPerTrigger?:number;statusStacks?:TriggerStatus;raisesStatusStacks?:number;raisesStatusKinds?:TriggerStatus[];rampsWithRepeat?:boolean;}
 // 수기로 입력하는 버프 프로토타입.
 //   label: 메모용 이름(선택). 계산에는 쓰이지 않는다.
 //   target: 위 BuffTarget — 계산의 어느 자리에 붙는지
@@ -253,7 +253,7 @@ export interface Enemy{id:string;name:string;level:number;element:Element;resPre
 // baseRes: 몬스터 속성과 다른 속성 공격에 적용되는 기본 속성 저항.
 // sameElementRes: 몬스터 속성과 같은 속성 공격에 적용되는 저항.
 // damageTakenBonus: 받는피해(DMG Taken) — 역경의 탑 스테이지 전용 버프 등 적이 받는 피해를 늘리는 독립 배율
-export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];disabledBuffIds?:string[];buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;}
+export interface RotationAttack{id:string;attackId:string;characterId:string;cycle?:number;enabledBuffIds:string[];disabledBuffIds?:string[];buffStacks?:Record<string,number>;anomalyStacks?:number;anomalyOccurrences?:number;discordRate?:number;discordOccurrences?:number;repeat?:number;}
 // disabledBuffIds: 상시(passive) 버프 중 이 공격에서만 꺼 둔 것. 상시는 조건이 없어 늘 걸리지만
 //   「이 버프가 얼마나 보태는지」를 보려고 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 두었다.
 //   비어 있으면(대개) 상시는 전부 걸린다.
@@ -261,6 +261,8 @@ export interface RotationAttack{id:string;attackId:string;characterId:string;cyc
 //   그 경계를 자료에 남겨 화면에서 구분선을 긋는다. 생략(예전에 담은 공격)은 1사이클로 본다.
 // discordRate: 조화도 파괴 항목일 때 그 스킬의 배율(16 = 1600%). 생략하면 기본 조화도 파괴 배율.
 // discordOccurrences: 조화도 파괴가 몇 번 터졌는지. 생략하면 1.
+// repeat: 이 카드를 몇 발로 볼지(1~99). 생략하면 1. 발마다 따로 계산해 더한다 —
+//   rampsWithRepeat 버프(모르테피 「자유로운 리듬」)는 1발째에 카드에 정한 스택, 그 뒤로 발마다 +1.
 // anomalyStacks: 이상 효과 항목일 때 적에게 몇 스택이 쌓인 상태인지. 기초값이 스택에서 나온다.
 //   생략하면 그 효과의 최대 스택으로 본다(폭발형은 최대 스택에서만 터지므로 그게 기본값이다).
 // anomalyOccurrences: 그 상태로 몇 번 터졌는지(발생 횟수). 생략하면 1.

@@ -38,6 +38,7 @@ import type {
   CharacterWeaponConfig,
   ManualBuff,
   PartyConfig,
+  RotationAttack,
   SkillCategory,
 } from "../../../types/game";
 
@@ -173,9 +174,10 @@ export function computeResults(
     attackTypeOf(item.characterId, item.attackId, links, owned),
   );
 
-  for (const item of config.rotation) {
+  /** 카드 한 장(또는 그 한 발)의 결과. 계산할 수 없는 카드면 null. */
+  const computeOne = (item: RotationAttack): CalculationResult | null => {
     const baseCharacter = characters.find((c) => c.id === item.characterId);
-    if (!baseCharacter) continue;
+    if (!baseCharacter) return null;
 
     // 캐릭터 관리 탭에서 정한 레벨의 기초 스탯으로 바꾼 사본을 쓴다.
     // 레벨은 기초 스탯뿐 아니라 방어저항 배율(내 레벨)에도 들어간다.
@@ -193,9 +195,9 @@ export function computeResults(
       ? { attack: anomalyAttack(anomalyDef.id), skill: { id: `anomaly:${anomalyDef.id}` } }
       : (findAttack(character, item.attackId) ??
         findEchoAttack(character.id, item.attackId, links, owned));
-    if (!found) continue;
+    if (!found) return null;
     // 체인 조건이 있는 공격을 담아 둔 뒤 체인을 내리면 그 공격은 생기지 않는다 — 계산에서 뺀다.
-    if ((found.attack.resonanceChain ?? 0) > (characterChains[character.id] ?? 0)) continue;
+    if ((found.attack.resonanceChain ?? 0) > (characterChains[character.id] ?? 0)) return null;
 
     // 캐릭터 관리 탭에서 정한 스킬 레벨을 걸어준다. 없으면 데이터 기본값(보통 10).
     const level = characterSkillLevels[character.id]?.[found.skill.id] ?? found.attack.skillLevel;
@@ -354,7 +356,7 @@ export function computeResults(
     if (fixedCrit.critRate !== undefined) stats.critRate = fixedCrit.critRate;
     if (fixedCrit.critDamage !== undefined) stats.critDamage = fixedCrit.critDamage;
 
-    output.push({
+    return {
       item,
       character,
       ownerPanels,
@@ -389,6 +391,52 @@ export function computeResults(
             enemy,
           )
         : calculateDamage(attack, character, stats, activeBuffs, enemy),
+    };
+  };
+
+  /**
+   * 발수(item.repeat)가 있는 카드는 발마다 따로 계산해 한 장으로 합친다.
+   * 발마다 스택이 오르는 버프(rampsWithRepeat)는 1발째에 카드에 정한 스택(없으면 0),
+   * 그 뒤로 발마다 +1 — 모르테피 「자유로운 리듬」이 강화음 한 발마다 한 스택씩 쌓이는 모양이다.
+   * 상한은 버프 쪽(maxStacks)에서 자른다. 이상 효과 · 조화도 파괴 카드는 발수를 보지 않는다.
+   */
+  const ramping = manualBuffs.filter((b) => b.rampsWithRepeat);
+  for (const item of config.rotation) {
+    const count = item.repeat ?? 1;
+    const first = computeOne(item);
+    if (!first) continue;
+    if (count <= 1 || first.damage.kind !== "normal") {
+      output.push(first);
+      continue;
+    }
+    const shots = [first];
+    for (let k = 1; k < count; k++) {
+      const buffStacks = { ...item.buffStacks };
+      for (const b of ramping) buffStacks[b.id] = (item.buffStacks?.[b.id] ?? 0) + k;
+      const shot = computeOne({ ...item, buffStacks });
+      if (shot) shots.push(shot);
+    }
+    if (ramping.length) {
+      // 1발째도 같은 규칙(정한 스택, 없으면 0)으로 다시 낸다 — 버프의 기본 스택(최대)이 들어가면 안 된다.
+      const buffStacks = { ...item.buffStacks };
+      for (const b of ramping) buffStacks[b.id] = item.buffStacks?.[b.id] ?? 0;
+      shots[0] = computeOne({ ...item, buffStacks }) ?? first;
+    }
+    const normal = shots.map((r) => r.damage).filter((d) => d.kind === "normal");
+    const sum = (key: "normalDamage" | "criticalDamage" | "expectedDamage" | "fixedDamage") =>
+      normal.reduce((total, d) => total + d[key], 0);
+    const base = shots[0].damage as (typeof normal)[number];
+    output.push({
+      ...shots[0],
+      damage: {
+        ...base,
+        normalDamage: sum("normalDamage"),
+        criticalDamage: sum("criticalDamage"),
+        expectedDamage: sum("expectedDamage"),
+        fixedDamage: sum("fixedDamage"),
+        hits: normal.flatMap((d) => d.hits),
+        hitCount: normal.reduce((total, d) => total + d.hitCount, 0),
+      },
     });
   }
 

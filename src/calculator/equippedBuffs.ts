@@ -172,6 +172,8 @@ export function deriveCharacterBuffs(
           ? { switchesDamageBonusType: template.switchesDamageBonusType }
           : {}),
         ...(template.maxValue !== undefined ? { maxValue: template.maxValue } : {}),
+        // 카드의 발수만큼 발마다 스택이 오르는 버프(모르테피 「자유로운 리듬」)
+        ...(template.rampsWithRepeat ? { rampsWithRepeat: true } : {}),
         // 캐릭터 쪽 버프(공명체인·고유효과)는 전투 중에 얹히는 묶음이 기본이다.
         statGroup: template.statGroup ?? "buff",
         stacks: template.stacks ?? 1,

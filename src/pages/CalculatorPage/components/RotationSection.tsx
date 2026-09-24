@@ -123,6 +123,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     setAnomalyStacks,
     setDiscordRate,
     setDiscordOccurrences,
+    setRepeat,
     addCycle,
     moveAttack,
     duplicateCycle,
@@ -365,6 +366,33 @@ export function RotationSection({ results }: RotationSectionProps) {
                       </label>
                     );
                   })()}
+                  {/* 발수 — 발마다 스택이 오르는 버프(모르테피 「자유로운 리듬」)가 걸리는 공격에만 연다.
+                      N발을 카드 한 장으로 담고, 발마다 스택을 1씩 올려 따로 계산한 뒤 더한다. */}
+                  {result.damage.kind === "normal" &&
+                    ((result.item.repeat ?? 1) > 1 ||
+                      allBuffs.some(
+                        (b) =>
+                          b.rampsWithRepeat &&
+                          (b.attackId === result.attack.id ||
+                            b.attackIds?.includes(result.attack.id)),
+                      )) && (
+                      <label
+                        className="card-stack"
+                        title="이 카드를 몇 발로 볼지 — 발마다 따로 계산해 더합니다. 「자유로운 리듬」을 켜 두면 1발째는 버프 창에서 정한 스택(없으면 0), 그 뒤로 발마다 +1스택입니다"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <em>발</em>
+                        <input
+                          type="number"
+                          min={1}
+                          max={99}
+                          value={result.item.repeat ?? 1}
+                          onChange={(event) =>
+                            setRepeat(result.item.id, Number(event.target.value))
+                          }
+                        />
+                      </label>
+                    )}
                   <span className="card-exp">
                     {num(result.damage.expectedDamage)}
                     {multi && <i>{result.damage.hits.length}타</i>}

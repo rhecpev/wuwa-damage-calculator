@@ -359,6 +359,8 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     condition: "해방 지속 중 강화음 명중마다 1스택(0.35초마다) · 최대 50스택 · 해방 종료 시 초기화",
+    // 강화음 카드에 발수를 넣으면 1발째는 카드에 정한 스택, 그 뒤로 발마다 +1로 센다.
+    rampsWithRepeat: true,
   },
 
   // ── 공명체인 ──

@@ -201,6 +201,8 @@ interface PartyConfigContextType {
   /** 조화도 파괴 항목의 배율(16 = 1600%)과 발생 횟수. */
   setDiscordRate: (rotationId: string, rate: number) => void;
   setDiscordOccurrences: (rotationId: string, occurrences: number) => void;
+  /** 이 카드를 몇 발로 볼지(1~99). 발마다 따로 계산해 더한다. */
+  setRepeat: (rotationId: string, repeat: number) => void;
   setMainResonanceChain: (chain: number) => void;
   setMainResonanceMode: (mode: ResonanceMode) => void;
   toggleCharacter: (characterId: string) => void;
@@ -814,6 +816,22 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     }));
   };
 
+  const setRepeat = (rotationId: string, repeat: number) => {
+    const n = Math.min(Math.max(Math.round(repeat) || 1, 1), 99);
+    setConfig((current) => ({
+      ...current,
+      rotation: current.rotation.map((item) => {
+        if (item.id !== rotationId) return item;
+        if (n === 1) {
+          const { repeat: _drop, ...rest } = item;
+          void _drop;
+          return rest;
+        }
+        return { ...item, repeat: n };
+      }),
+    }));
+  };
+
   const setAnomalyOccurrences = (rotationId: string, occurrences: number) => {
     setConfig((current) => ({
       ...current,
@@ -1324,6 +1342,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setAnomalyOccurrences,
     setDiscordRate,
     setDiscordOccurrences,
+    setRepeat,
     setMainResonanceChain,
     setMainResonanceMode,
     toggleCharacter,
