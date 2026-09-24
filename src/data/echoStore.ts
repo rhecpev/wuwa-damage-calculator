@@ -64,15 +64,30 @@ export const loadMyEchoes = (): MyEcho[] =>
 
 export const saveMyEchoes = (echoes: MyEcho[]): void => {
   savePersisted(ECHO_KEY, echoes);
+  // 지운 에코를 가리키던 장착 칸도 같이 걷어 낸다 — 남겨 두면 화면에는 안 보이면서
+  // 다섯 자리 중 하나를 차지해 새 에코를 못 끼운다.
+  const links = loadPersisted(LINK_KEY, (characterEchoLinksData.links ?? []) as EchoLink[]);
+  const kept = pruneLinks(links, echoes);
+  if (kept.length !== links.length) savePersisted(LINK_KEY, kept);
   bump();
 };
+
+/** 없는 에코(지웠거나 pk가 바뀐 것)를 가리키는 연결을 뺀다. */
+function pruneLinks(links: EchoLink[], echoes: MyEcho[]): EchoLink[] {
+  const pks = new Set(echoes.map((e) => e.pk));
+  return links.filter((link) => pks.has(link.echoId));
+}
 
 /** 다음 pk. 지운 자리를 다시 쓰지 않도록 지금 있는 최대값 다음을 준다. */
 export const nextPk = (echoes: MyEcho[]): number =>
   echoes.reduce((max, e) => Math.max(max, e.pk), 0) + 1;
 
+/** 장착 연결. 이미 저장된 자료에 남은 「지운 에코를 가리키는 칸」은 읽을 때 걸러 낸다. */
 export const loadEchoLinks = (): EchoLink[] =>
-  loadPersisted(LINK_KEY, (characterEchoLinksData.links ?? []) as EchoLink[]);
+  pruneLinks(
+    loadPersisted(LINK_KEY, (characterEchoLinksData.links ?? []) as EchoLink[]),
+    loadMyEchoes(),
+  );
 
 export const saveEchoLinks = (links: EchoLink[]): void => {
   savePersisted(LINK_KEY, links);
