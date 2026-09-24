@@ -184,6 +184,8 @@ interface PartyConfigContextType {
   moveAttack: (id: string, beforeId: string | null) => void;
   /** 사이클 하나를 통째로 복사해 맨 뒤에 새 사이클로 붙인다(버프 체크·스택 그대로). */
   duplicateCycle: (cycle: number) => void;
+  /** 사이클 하나를 통째로 지운다. 뒤 사이클 번호는 하나씩 당긴다. 빈 사이클이면 자리만 거둔다. */
+  removeCycle: (cycle: number) => void;
   toggleBuff: (rotationId: string, buffId: string) => void;
   /** 스택형 버프를 이 공격에서 몇 스택으로 볼지 정한다. */
   setBuffStacks: (rotationId: string, buffId: string, stacks: number) => void;
@@ -588,6 +590,16 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         ],
       };
     });
+  };
+
+  const removeCycle = (cycle: number) => {
+    setConfig((current) => ({
+      ...current,
+      rotation: current.rotation
+        .filter((item) => (item.cycle ?? 1) !== cycle)
+        .map((item) => ((item.cycle ?? 1) > cycle ? { ...item, cycle: (item.cycle ?? 1) - 1 } : item)),
+    }));
+    setOpenCycle((cur) => (cur >= cycle ? Math.max(1, cur - 1) : cur));
   };
 
   /** 카드가 가리키는 공격만 갈아 끼운다. 버프 체크·스택·사이클은 그대로 둔다. */
@@ -1300,6 +1312,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setAttackCycle,
     moveAttack,
     duplicateCycle,
+    removeCycle,
     setAttackId,
     removeAttack,
     duplicateAttack,

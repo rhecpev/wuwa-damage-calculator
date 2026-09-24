@@ -126,6 +126,7 @@ export function RotationSection({ results }: RotationSectionProps) {
     addCycle,
     moveAttack,
     duplicateCycle,
+    removeCycle,
     setAttackId,
     openCycle,
     saveCyclePreset,
@@ -254,6 +255,13 @@ export function RotationSection({ results }: RotationSectionProps) {
                   onClick={() => duplicateCycle(cycle)}
                 >
                   ⧉ 사이클 복제
+                </button>
+                <button
+                  className="cycle-copy cycle-remove"
+                  title={`${cycle}사이클의 공격 ${cycleCount}대를 통째로 지웁니다 — 뒤 사이클 번호는 하나씩 당겨집니다`}
+                  onClick={() => removeCycle(cycle)}
+                >
+                  × 사이클 삭제
                 </button>
               </div>
             )}
@@ -460,6 +468,13 @@ export function RotationSection({ results }: RotationSectionProps) {
                 <div className="cycle-head">
                   <b>{openCycle}사이클</b>
                   <span>아직 비어 있음</span>
+                  <button
+                    className="cycle-copy cycle-remove"
+                    title="열어 둔 빈 사이클을 거둡니다"
+                    onClick={() => removeCycle(openCycle)}
+                  >
+                    × 사이클 삭제
+                  </button>
                 </div>
                 <div className="cycle-empty">여기에 담으면 {openCycle}사이클에 들어갑니다.</div>
               </>
