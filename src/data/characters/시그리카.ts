@@ -169,7 +169,7 @@ const basicSkill: Skill = {
   id: "1005101",
   category: "Basic",
   name: "하나, 둘, 셋...",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["26.64%", "28.83%", "31.01%", "34.07%", "36.26%", "38.77%", "42.26%", "45.76%", "49.25%", "52.97%", "57.34%", "61.71%", "66.07%", "70.44%", "74.81%", "79.18%", "83.55%", "87.92%", "92.29%", "96.66%"] },
@@ -241,7 +241,7 @@ const resonanceSkill: Skill = {
   id: "1005102",
   category: "Skill",
   name: "로야 근접 격투기",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "펑펑! 피해", description: "", values: ["14.40%+14.40%+14.40%+28.80%", "15.59%+15.59%+15.59%+31.17%", "16.77%+16.77%+16.77%+33.53%", "18.42%+18.42%+18.42%+36.83%", "19.60%+19.60%+19.60%+39.20%", "20.96%+20.96%+20.96%+41.91%", "22.85%+22.85%+22.85%+45.69%", "24.74%+24.74%+24.74%+49.47%", "26.63%+26.63%+26.63%+53.25%", "28.63%+28.63%+28.63%+57.26%", "31.00%+31.00%+31.00%+61.99%", "33.36%+33.36%+33.36%+66.71%", "35.72%+35.72%+35.72%+71.43%", "38.08%+38.08%+38.08%+76.16%", "40.44%+40.44%+40.44%+80.88%", "42.80%+42.80%+42.80%+85.60%", "45.16%+45.16%+45.16%+90.32%", "47.53%+47.53%+47.53%+95.05%", "49.89%+49.89%+49.89%+99.77%", "52.25%+52.25%+52.25%+104.49%"] },
@@ -271,7 +271,7 @@ const liberationSkill: Skill = {
   id: "1005103",
   category: "Liberation",
   name: "바라던 대로!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["433.29%", "468.82%", "504.35%", "554.10%", "589.63%", "630.49%", "687.33%", "744.18%", "801.03%", "861.43%", "932.49%", "1003.55%", "1074.61%", "1145.67%", "1216.73%", "1287.79%", "1358.85%", "1429.91%", "1500.96%", "1572.02%"] },
@@ -300,7 +300,7 @@ const variationSkill: Skill = {
   id: "1005106",
   category: "Variation",
   name: "밝은 날의 어원",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["82.20%", "88.94%", "95.68%", "105.12%", "111.86%", "119.61%", "130.39%", "141.17%", "151.96%", "163.42%", "176.90%", "190.38%", "203.86%", "217.34%", "230.82%", "244.30%", "257.78%", "271.26%", "284.74%", "298.22%"] },
@@ -390,7 +390,7 @@ const circuitSkill: Skill = {
   id: "1005107",
   category: "Circuit",
   name: "드넓고 깊은 아득함 속에",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "강공격 · 룬 · 근원 피해", description: "", values: ["66.65%", "72.12%", "77.59%", "85.24%", "90.70%", "96.99%", "105.73%", "114.48%", "123.22%", "132.51%", "143.44%", "154.37%", "165.30%", "176.23%", "187.16%", "198.10%", "209.03%", "219.96%", "230.89%", "241.82%"] },
@@ -406,7 +406,7 @@ const passive5104: Skill = {
   id: "1005104",
   category: "Passive",
   name: "함의의 재현",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaD1.webp",
   attacks: [],
 };
 
@@ -414,7 +414,7 @@ const passive5105: Skill = {
   id: "1005105",
   category: "Passive",
   name: "함의의 공명",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaD2.webp",
   attacks: [],
 };
 
@@ -422,7 +422,7 @@ const passive5108: Skill = {
   id: "1005108",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaY.webp",
   attacks: [],
 };
 
@@ -447,7 +447,7 @@ const passive5109: Skill = {
   id: "1005109",
   category: "Intro",
   name: "지금 이 순간",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXigelika/SP_IconXigelikaT.webp",
   attacks: introSkillAttacks1005109,
 };
 
@@ -455,7 +455,7 @@ const passive5110: Skill = {
   id: "1005110",
   category: "Sync",
   name: "조화도 파괴 · 권갑",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
   attacks: [],
 };
 /** 1체인의 「배율 70% 상승」이 붙는 넷. DamageList에 ×1.7 짝이 들어 있다. */
@@ -695,8 +695,8 @@ export const sigrica: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1412)가 아니라 별도 번호(65)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_65_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_65_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_65_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_65_UI.webp",
   echoIds: [],
 };

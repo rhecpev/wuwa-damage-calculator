@@ -230,7 +230,7 @@ const basicSkill: Skill = {
   id: "1004701",
   category: "Basic",
   name: "변치 않는 빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["20.40%+20.40%", "22.08%+22.08%", "23.75%+23.75%", "26.09%+26.09%", "27.77%+27.77%", "29.69%+29.69%", "32.37%+32.37%", "35.04%+35.04%", "37.72%+37.72%", "40.56%+40.56%", "43.91%+43.91%", "47.25%+47.25%", "50.60%+50.60%", "53.94%+53.94%", "57.29%+57.29%", "60.64%+60.64%", "63.98%+63.98%", "67.33%+67.33%", "70.67%+70.67%", "74.02%+74.02%"] },
@@ -337,7 +337,7 @@ const resonanceSkill: Skill = {
   id: "1004702",
   category: "Skill",
   name: "이곳에 지는 모든 것들, 결국 재회하리니",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "되살아난 금빛의 흐름 피해", description: "", values: ["101.20%", "109.50%", "117.80%", "129.42%", "137.72%", "147.26%", "160.54%", "173.82%", "187.09%", "201.20%", "217.80%", "234.39%", "250.99%", "267.59%", "284.18%", "300.78%", "317.38%", "333.98%", "350.57%", "367.17%"] },
@@ -375,7 +375,7 @@ const liberationSkill: Skill = {
   id: "1004703",
   category: "Liberation",
   name: "얼음 속의 의미",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["375.00%+25.00%*5", "405.75%+27.05%*5", "436.50%+29.10%*5", "479.55%+31.97%*5", "510.30%+34.02%*5", "545.67%+36.38%*5", "594.87%+39.66%*5", "644.07%+42.94%*5", "693.27%+46.22%*5", "745.54%+49.71%*5", "807.04%+53.81%*5", "868.54%+57.91%*5", "930.04%+62.01%*5", "991.54%+66.11%*5", "1053.04%+70.21%*5", "1114.54%+74.31%*5", "1176.04%+78.41%*5", "1237.54%+82.51%*5", "1299.04%+86.61%*5", "1360.54%+90.71%*5"] },
@@ -406,7 +406,7 @@ const variationSkill: Skill = {
   id: "1004706",
   category: "Variation",
   name: "새벽빛을 주입하기 전에",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["36.55%*3", "39.55%*3", "42.55%*3", "46.75%*3", "49.74%*3", "53.19%*3", "57.98%*3", "62.78%*3", "67.57%*3", "72.67%*3", "78.66%*3", "84.66%*3", "90.65%*3", "96.65%*3", "102.64%*3", "108.64%*3", "114.63%*3", "120.62%*3", "126.62%*3", "132.61%*3"] },
@@ -435,7 +435,7 @@ const circuitSkill: Skill = {
   id: "1004707",
   category: "Circuit",
   name: "서리 속에서 태어난 불빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "대지를 가르는 판결 피해", description: "", values: ["154.37%", "167.03%", "179.68%", "197.41%", "210.06%", "224.62%", "244.87%", "265.12%", "285.38%", "306.90%", "332.21%", "357.53%", "382.84%", "408.16%", "433.47%", "458.79%", "484.11%", "509.42%", "534.74%", "560.05%"] },
@@ -449,7 +449,7 @@ const passive4704: Skill = {
   id: "1004704",
   category: "Passive",
   name: "눈속에 묻힌 맥박",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiD1.webp",
   attacks: [],
 };
 
@@ -457,7 +457,7 @@ const passive4705: Skill = {
   id: "1004705",
   category: "Passive",
   name: "이유 없이 찾아온 치유의 계시",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiD2.webp",
   attacks: [],
 };
 
@@ -465,7 +465,7 @@ const passive4708: Skill = {
   id: "1004708",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -490,7 +490,7 @@ const passive4709: Skill = {
   id: "1004709",
   category: "Intro",
   name: "죽음으로 내린 답",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuhesi/SP_IconLuhesiT.webp",
   attacks: introSkillAttacks1004709,
 };
 
@@ -498,7 +498,7 @@ const passive4710: Skill = {
   id: "1004710",
   category: "Sync",
   name: "빛에 대한 무언의 논쟁",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
   attacks: [],
 };
 /** 3체인 · 6체인이 함께 가리키는 햇무리 참살 계열과 이코르 배열 · 대지를 가르는 판결. */
@@ -755,8 +755,8 @@ export const luke: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1510)가 아니라 별도 번호(54)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_54_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_54_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_54_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_54_UI.webp",
   echoIds: [],
 };

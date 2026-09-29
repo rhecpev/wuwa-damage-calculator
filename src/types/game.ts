@@ -18,13 +18,13 @@ export type BuffScaleStat=ScalingStat|"EnergyRegen"|"DiscordEfficiency"|"SyncAmp
 //   SyncAmplify         조화도 파괴 증폭. 표시값을 pt(=퍼센트포인트)로 본다
 //   뒤의 셋은 공격력·HP·방어력에 기대지 않아서 스탯 확정 전에 값을 낼 수 있다
 //   — 그래서 공격력% 자리에도 쓸 수 있다(calculator/manualBuffs.ts의 SCALE_PHASE 참고).
-export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo";
+export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo"|"Union"|"Flare";
 // 공명 모드 — 에이메스처럼 캐릭터가 두 가지 모드 중 하나를 선택하고, 그에 따라
 //   발동 가능한 공격과 적용되는 버프가 통째로 달라지는 경우에 사용하는 상태값.
 //   "Discord" = 조화 파동, "Flame" = 불꽃, "Cluster" = 조화 밀집,
-//   "Frost" = 서리, "Echo" = 에코.
-//   이중 모드 캐릭터는 넷이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
-//   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집).
+//   "Frost" = 서리, "Echo" = 에코, "Union" = 합일, "Flare" = 전자.
+//   이중 모드 캐릭터는 다섯이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
+//   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집), 여우의 별자리(합일·전자).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
 export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;noCrit?:boolean;trigger?:AttackTrigger[];}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다

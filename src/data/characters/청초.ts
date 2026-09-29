@@ -202,7 +202,7 @@ const basicSkill: Skill = {
   id: "1005801",
   category: "Basic",
   name: "현으로 이은 검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 현검 1단 피해", description: "", values: ["15.16%*2", "16.40%*2", "17.65%*2", "19.39%*2", "20.63%*2", "22.06%*2", "24.05%*2", "26.03%*2", "28.02%*2", "30.13%*2", "32.62%*2", "35.11%*2", "37.59%*2", "40.08%*2", "42.56%*2", "45.05%*2", "47.53%*2", "50.02%*2", "52.50%*2", "54.99%*2"] },
@@ -255,7 +255,7 @@ const resonanceSkill: Skill = {
   id: "1005802",
   category: "Skill",
   name: "찰나의 울림",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "찰나의 울림 · 단죄 피해", description: "", values: ["10.50%*2+49.00%", "11.37%*2+53.02%", "12.23%*2+57.04%", "13.43%*2+62.67%", "14.29%*2+66.68%", "15.28%*2+71.30%", "16.66%*2+77.73%", "18.04%*2+84.16%", "19.42%*2+90.59%", "20.88%*2+97.42%", "22.60%*2+105.46%", "24.32%*2+113.49%", "26.05%*2+121.53%", "27.77%*2+129.57%", "29.49%*2+137.60%", "31.21%*2+145.64%", "32.93%*2+153.67%", "34.66%*2+161.71%", "36.38%*2+169.75%", "38.10%*2+177.78%"] },
@@ -293,7 +293,7 @@ const liberationSkill: Skill = {
   id: "1005803",
   category: "Liberation",
   name: "빛과 구름에 일렁이는 푸른 물결",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["16.80%*10+672.00%", "18.18%*10+727.11%", "19.56%*10+782.21%", "21.49%*10+859.36%", "22.87%*10+914.46%", "24.45%*10+977.83%", "26.65%*10+1066.00%", "28.86%*10+1154.16%", "31.06%*10+1242.33%", "33.41%*10+1336.01%", "36.16%*10+1446.22%", "38.92%*10+1556.42%", "41.67%*10+1666.63%", "44.43%*10+1776.84%", "47.18%*10+1887.05%", "49.94%*10+1997.26%", "52.69%*10+2107.46%", "55.45%*10+2217.67%", "58.20%*10+2327.88%", "60.96%*10+2438.09%"] },
@@ -324,7 +324,7 @@ const variationSkill: Skill = {
   id: "1005806",
   category: "Variation",
   name: "선율 전환",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["20.02%+23.35%*2", "21.66%+25.27%*2", "23.30%+27.18%*2", "25.60%+29.86%*2", "27.24%+31.78%*2", "29.13%+33.98%*2", "31.75%+37.04%*2", "34.38%+40.11%*2", "37.00%+43.17%*2", "39.79%+46.42%*2", "43.07%+50.25%*2", "46.36%+54.08%*2", "49.64%+57.91%*2", "52.92%+61.74%*2", "56.20%+65.57%*2", "59.49%+69.40%*2", "62.77%+73.23%*2", "66.05%+77.06%*2", "69.33%+80.89%*2", "72.61%+84.72%*2"] },
@@ -435,7 +435,7 @@ const circuitSkill: Skill = {
   id: "1005807",
   category: "Circuit",
   name: "무형의 심검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 선인의 몸 1단 피해", description: "", values: ["22.58%+11.29%*2", "24.43%+12.22%*2", "26.28%+13.14%*2", "28.87%+14.44%*2", "30.73%+15.37%*2", "32.85%+16.43%*2", "35.82%+17.91%*2", "38.78%+19.39%*2", "41.74%+20.87%*2", "44.89%+22.45%*2", "48.59%+24.30%*2", "52.29%+26.15%*2", "55.99%+28.00%*2", "59.70%+29.85%*2", "63.40%+31.70%*2", "67.10%+33.55%*2", "70.80%+35.40%*2", "74.50%+37.25%*2", "78.21%+39.11%*2", "81.91%+40.96%*2"] },
@@ -452,7 +452,7 @@ const passive5804: Skill = {
   id: "1005804",
   category: "Passive",
   name: "아득한 바다, 무수한 존재",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoD1.webp",
   attacks: [],
 };
 
@@ -460,7 +460,7 @@ const passive5805: Skill = {
   id: "1005805",
   category: "Passive",
   name: "만물의 통찰, 가려낸 악의",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoD2.webp",
   attacks: [],
 };
 
@@ -468,7 +468,7 @@ const passive5808: Skill = {
   id: "1005808",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -493,7 +493,7 @@ const passive5809: Skill = {
   id: "1005809",
   category: "Intro",
   name: "끝없는 선율",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQingxiao/SP_IconQingxiaoT.webp",
   attacks: introSkillAttacks1005809,
 };
 
@@ -501,7 +501,7 @@ const passive5810: Skill = {
   id: "1005810",
   category: "Sync",
   name: "만법을 깨는 검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 고유 「만물의 통찰, 가려낸 악의」가 강화하는 「다음 스킬」 목록. */
@@ -862,8 +862,8 @@ export const qingchao: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1413)가 아니라 별도 번호(73)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_73_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_73_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_73_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_73_UI.webp",
   echoIds: [],
 };

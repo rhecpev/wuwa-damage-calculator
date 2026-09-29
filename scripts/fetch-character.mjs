@@ -15,7 +15,7 @@ if (!id) {
   process.exit(2);
 }
 
-const res = await fetch(`https://api.encore.moe/ko/character/${id}`);
+const res = await fetch(`https://api-v2.encore.moe/api/ko/character/${id}`);
 if (!res.ok) {
   console.error(`${id}: HTTP ${res.status}`);
   process.exit(1);

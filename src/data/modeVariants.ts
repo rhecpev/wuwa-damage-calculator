@@ -20,6 +20,8 @@ export const MODE_LABEL: Record<ResonanceMode, string> = {
   Cluster: "조화 밀집",
   Frost: "서리",
   Echo: "에코",
+  Union: "합일",
+  Flare: "전자",
 };
 
 const MODE_SLUG: Record<ResonanceMode, string> = {
@@ -28,6 +30,8 @@ const MODE_SLUG: Record<ResonanceMode, string> = {
   Cluster: "cluster",
   Frost: "frost",
   Echo: "echo",
+  Union: "union",
+  Flare: "flare",
 };
 
 const SLUGS = new Set(Object.values(MODE_SLUG));

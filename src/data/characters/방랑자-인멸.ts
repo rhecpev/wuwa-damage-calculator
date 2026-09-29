@@ -135,7 +135,7 @@ const basicSkill: Skill = {
   id: "1001701",
   category: "Basic",
   name: "깃털의 소리",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["28.50%", "30.84%", "33.18%", "36.45%", "38.79%", "41.48%", "45.21%", "48.95%", "52.69%", "56.67%", "61.34%", "66.01%", "70.69%", "75.36%", "80.04%", "84.71%", "89.38%", "94.06%", "98.73%", "103.41%"] },
@@ -171,7 +171,7 @@ const resonanceSkill: Skill = {
   id: "1001702",
   category: "Skill",
   name: "평정의 칼날",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["144.00%*2", "155.81%*2", "167.62%*2", "184.15%*2", "195.96%*2", "209.54%*2", "228.43%*2", "247.32%*2", "266.22%*2", "286.29%*2", "309.91%*2", "333.52%*2", "357.14%*2", "380.76%*2", "404.37%*2", "427.99%*2", "451.60%*2", "475.22%*2", "498.84%*2", "522.45%*2"] },
@@ -199,7 +199,7 @@ const liberationSkill: Skill = {
   id: "1001703",
   category: "Liberation",
   name: "임연사적",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "격비 피해", description: "", values: ["765.00%", "827.73%", "890.46%", "978.29%", "1041.02%", "1113.16%", "1213.52%", "1313.89%", "1414.26%", "1520.90%", "1646.36%", "1771.82%", "1897.28%", "2022.74%", "2148.20%", "2273.66%", "2399.12%", "2524.58%", "2650.04%", "2775.50%"] },
@@ -228,7 +228,7 @@ const variationSkill: Skill = {
   id: "1001706",
   category: "Variation",
   name: "화찰",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["100.00%", "108.20%", "116.40%", "127.88%", "136.08%", "145.51%", "158.63%", "171.75%", "184.87%", "198.81%", "215.21%", "231.61%", "248.01%", "264.41%", "280.81%", "297.21%", "313.61%", "330.01%", "346.41%", "362.81%"] },
@@ -400,7 +400,7 @@ const circuitSkill: Skill = {
   id: "1001707",
   category: "Circuit",
   name: "영야개명",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "멸음 피해", description: "", values: ["114.75%", "124.16%", "133.57%", "146.75%", "156.16%", "166.98%", "182.03%", "197.09%", "212.14%", "228.14%", "246.96%", "265.78%", "284.60%", "303.42%", "322.23%", "341.05%", "359.87%", "378.69%", "397.51%", "416.33%"] },
@@ -424,7 +424,7 @@ const passive1704: Skill = {
   id: "1001704",
   category: "Passive",
   name: "변격",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkD1.webp",
   attacks: [],
 };
 
@@ -432,7 +432,7 @@ const passive1705: Skill = {
   id: "1001705",
   category: "Passive",
   name: "음향 전달 효과",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkD2.webp",
   attacks: [],
 };
 
@@ -440,7 +440,7 @@ const passive1708: Skill = {
   id: "1001708",
   category: "Passive",
   name: "생활 스킬",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -448,7 +448,7 @@ const passive1709: Skill = {
   id: "1001709",
   category: "Intro",
   name: "소리의 부름",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconZhujueDark/SP_IconZhujueDarkT.webp",
   // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치를 옮겼다 — 인멸 필드가 2초마다
   // 공격력 143.3%, 6초간. 6 ÷ 2 = 3번으로 봤다(적이 범위 안에 계속 있을 때). 레벨과 무관한 고정값.
   attacks: [
@@ -472,7 +472,7 @@ const passive1710: Skill = {
   id: "1001710",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 
@@ -558,8 +558,8 @@ export const roverHavoc: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 1604(여) 기준 번호 5, 1605(남)는 4다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_5.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_5.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_5_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_5_UI.webp",
   echoIds: [],
 };

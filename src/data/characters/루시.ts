@@ -293,7 +293,7 @@ const basicSkill: Skill = {
   id: "1004901",
   category: "Basic",
   name: "타겟 스레드",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["6.11%*6+24.44%", "6.62%*6+26.45%", "7.12%*6+28.45%", "7.82%*6+31.26%", "8.32%*6+33.26%", "8.90%*6+35.57%", "9.70%*6+38.77%", "10.50%*6+41.98%", "11.30%*6+45.19%", "12.15%*6+48.59%", "13.15%*6+52.60%", "14.16%*6+56.61%", "15.16%*6+60.62%", "16.16%*6+64.63%", "17.16%*6+68.63%", "18.16%*6+72.64%", "19.17%*6+76.65%", "20.17%*6+80.66%", "21.17%*6+84.67%", "22.17%*6+88.68%"] },
@@ -400,7 +400,7 @@ const resonanceSkill: Skill = {
   id: "1004902",
   category: "Skill",
   name: "프로토콜 돌파",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 페이로드 돌진 공격 피해", description: "", values: ["10.08%+5.04%", "10.91%+5.46%", "11.74%+5.87%", "12.90%+6.45%", "13.72%+6.86%", "14.67%+7.34%", "15.99%+8.00%", "17.32%+8.66%", "18.64%+9.32%", "20.05%+10.03%", "21.70%+10.85%", "23.35%+11.68%", "25.00%+12.50%", "26.66%+13.33%", "28.31%+14.16%", "29.96%+14.98%", "31.62%+15.81%", "33.27%+16.64%", "34.92%+17.46%", "36.58%+18.29%"] },
@@ -483,7 +483,7 @@ const liberationSkill: Skill = {
   id: "1004903",
   category: "Liberation",
   name: "넷러너",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "공명 해방 · 넷러너 · 오버라이드 피해", description: "", values: ["450.00%", "486.90%", "523.80%", "575.46%", "612.36%", "654.80%", "713.84%", "772.88%", "831.92%", "894.65%", "968.45%", "1042.25%", "1116.05%", "1189.85%", "1263.65%", "1337.45%", "1411.25%", "1485.05%", "1558.85%", "1632.65%"] },
@@ -517,7 +517,7 @@ const variationSkill: Skill = {
   id: "1004906",
   category: "Variation",
   name: "과거의 환각",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "변주 스킬 · 과거의 환각 피해", description: "", values: ["34.78%+34.78%", "37.63%+37.63%", "40.48%+40.48%", "44.48%+44.48%", "47.33%+47.33%", "50.61%+50.61%", "55.17%+55.17%", "59.73%+59.73%", "64.29%+64.29%", "69.14%+69.14%", "74.84%+74.84%", "80.55%+80.55%", "86.25%+86.25%", "91.95%+91.95%", "97.66%+97.66%", "103.36%+103.36%", "109.06%+109.06%", "114.77%+114.77%", "120.47%+120.47%", "126.17%+126.17%"] },
@@ -549,7 +549,7 @@ const circuitSkill: Skill = {
   id: "1004907",
   category: "Circuit",
   name: "블랙월 뎁스",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "해킹 대응 · 데이터 크래시 피해", description: "", values: ["550.37%+34.40%*4", "595.50%+37.22%*4", "640.63%+40.04%*4", "703.82%+43.99%*4", "748.95%+46.81%*4", "800.85%+50.06%*4", "873.05%+54.57%*4", "945.26%+59.08%*4", "1017.47%+63.60%*4", "1094.19%+68.39%*4", "1184.45%+74.03%*4", "1274.71%+79.67%*4", "1364.97%+85.32%*4", "1455.23%+90.96%*4", "1545.49%+96.60%*4", "1635.75%+102.24%*4", "1726.01%+107.88%*4", "1816.27%+113.52%*4", "1906.53%+119.16%*4", "1996.80%+124.80%*4"] },
@@ -559,7 +559,7 @@ const passive4904: Skill = {
   id: "1004904",
   category: "Passive",
   name: "고스트 사이버웨어",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyD2.webp",
   attacks: [],
 };
 
@@ -567,7 +567,7 @@ const passive4905: Skill = {
   id: "1004905",
   category: "Passive",
   name: "프로세스 크랙",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyB5.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyB5.webp",
   attacks: [],
 };
 
@@ -575,7 +575,7 @@ const passive4908: Skill = {
   id: "1004908",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyY.webp",
   attacks: [],
 };
 
@@ -583,7 +583,7 @@ const passive4909: Skill = {
   id: "1004909",
   category: "Intro",
   name: "카운터 프로그램",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLucy/SP_SkillIconLucyT.webp",
   attacks: [],
 };
 
@@ -591,7 +591,7 @@ const passive4910: Skill = {
   id: "1004910",
   category: "Sync",
   name: "데이터 크래시",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 /** 「해킹」 판정으로 잡히는 둘. 고유 스킬과 3체인 · 6체인이 이 묶음을 가리킨다. */
@@ -858,8 +858,8 @@ export const lucy: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1511)가 아니라 별도 번호(68)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_68_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_68_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_68_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_68_UI.webp",
   echoIds: [],
 };

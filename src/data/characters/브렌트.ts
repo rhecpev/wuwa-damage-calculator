@@ -280,7 +280,7 @@ const basicSkill: Skill = {
   id: "1002901",
   category: "Basic",
   name: "선장의 랩소디",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["25.42%", "27.50%", "29.59%", "32.51%", "34.59%", "36.99%", "40.32%", "43.66%", "46.99%", "50.53%", "54.70%", "58.87%", "63.04%", "67.20%", "71.37%", "75.54%", "79.71%", "83.88%", "88.05%", "92.21%"] },
@@ -339,7 +339,7 @@ const resonanceSkill: Skill = {
   id: "1002902",
   category: "Skill",
   name: "닻을 올려라!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["100.77%+67.18%", "109.04%+72.69%", "117.30%+78.20%", "128.87%+85.91%", "137.13%+91.42%", "146.64%+97.76%", "159.86%+106.57%", "173.08%+115.39%", "186.30%+124.20%", "200.35%+133.57%", "216.87%+144.58%", "233.40%+155.60%", "249.92%+166.62%", "266.45%+177.64%", "282.98%+188.65%", "299.50%+199.67%", "316.03%+210.69%", "332.56%+221.71%", "349.08%+232.72%", "365.61%+243.74%"] },
@@ -373,7 +373,7 @@ const liberationSkill: Skill = {
   id: "1002903",
   category: "Liberation",
   name: "세상 끝까지",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["42.78%*4+171.12%", "46.29%*4+185.16%", "49.80%*4+199.19%", "54.71%*4+218.83%", "58.22%*4+232.87%", "62.25%*4+249.00%", "67.87%*4+271.45%", "73.48%*4+293.90%", "79.09%*4+316.35%", "85.06%*4+340.21%", "92.07%*4+368.27%", "99.09%*4+396.34%", "106.10%*4+424.40%", "113.12%*4+452.46%", "120.14%*4+480.53%", "127.15%*4+508.59%", "134.17%*4+536.65%", "141.18%*4+564.72%", "148.20%*4+592.78%", "155.22%*4+620.85%"] },
@@ -405,7 +405,7 @@ const variationSkill: Skill = {
   id: "1002906",
   category: "Variation",
   name: "나를 위하여!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["102.00%+25.50%", "110.37%+27.60%", "118.73%+29.69%", "130.44%+32.61%", "138.81%+34.71%", "148.43%+37.11%", "161.81%+40.46%", "175.19%+43.80%", "188.57%+47.15%", "202.79%+50.70%", "219.52%+54.88%", "236.25%+59.07%", "252.98%+63.25%", "269.70%+67.43%", "286.43%+71.61%", "303.16%+75.79%", "319.89%+79.98%", "336.62%+84.16%", "353.34%+88.34%", "370.07%+92.52%"] },
@@ -448,7 +448,7 @@ const circuitSkill: Skill = {
   id: "1002907",
   category: "Circuit",
   name: "해상 연극",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "화염 귀멸의 서곡 피해", description: "", values: ["23.75%*2+47.50%+95.00%*2+665.00%", "25.70%*2+51.40%+102.79%*2+719.53%", "27.65%*2+55.29%+110.58%*2+774.06%", "30.38%*2+60.75%+121.49%*2+850.41%", "32.32%*2+64.64%+129.28%*2+904.94%", "34.56%*2+69.12%+138.24%*2+967.65%", "37.68%*2+75.35%+150.70%*2+1054.89%", "40.80%*2+81.59%+163.17%*2+1142.14%", "43.91%*2+87.82%+175.63%*2+1229.39%", "47.22%*2+94.44%+188.87%*2+1322.09%", "51.12%*2+102.23%+204.45%*2+1431.15%", "55.01%*2+110.02%+220.03%*2+1540.21%", "58.91%*2+117.81%+235.61%*2+1649.27%", "62.80%*2+125.60%+251.19%*2+1758.33%", "66.70%*2+133.39%+266.77%*2+1867.39%", "70.59%*2+141.18%+282.35%*2+1976.45%", "74.49%*2+148.97%+297.93%*2+2085.51%", "78.38%*2+156.76%+313.51%*2+2194.57%", "82.28%*2+164.55%+329.09%*2+2303.63%", "86.17%*2+172.34%+344.67%*2+2412.69%"] },
@@ -462,7 +462,7 @@ const passive2904: Skill = {
   id: "1002904",
   category: "Passive",
   name: "인도의 불꽃",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteD1.webp",
   attacks: [],
 };
 
@@ -470,7 +470,7 @@ const passive2905: Skill = {
   id: "1002905",
   category: "Passive",
   name: "파도에 맞서는 결심",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteD2.webp",
   attacks: [],
 };
 
@@ -478,7 +478,7 @@ const passive2908: Skill = {
   id: "1002908",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -486,7 +486,7 @@ const passive2909: Skill = {
   id: "1002909",
   category: "Intro",
   name: "항로 확정!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconBulante/SP_IconBulanteT.webp",
   attacks: [
     // 2체인 — 반주 후 20초 안에 파티원이 공명 스킬로 명중하면 브렌트가 폭발을 일으킨다.
     // 설명문 수치(공격력 440%)를 옮긴 고정값. 1초마다 1회 · 최대 2회라 필요한 만큼 카드를 담는다.
@@ -510,7 +510,7 @@ const passive2910: Skill = {
   id: "1002910",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 
@@ -689,8 +689,8 @@ export const brant: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1206)가 아니라 별도 번호(44)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_44_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_44_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_44_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_44_UI.webp",
   echoIds: [],
 };

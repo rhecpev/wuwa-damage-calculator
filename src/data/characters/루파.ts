@@ -238,7 +238,7 @@ const basicSkill: Skill = {
   id: "1003601",
   category: "Basic",
   name: "불타는 별",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "2단 피해", description: "", values: ["45.31%", "49.03%", "52.74%", "57.94%", "61.66%", "65.93%", "71.87%", "77.82%", "83.76%", "90.08%", "97.51%", "104.94%", "112.37%", "119.80%", "127.23%", "134.66%", "142.09%", "149.52%", "156.95%", "164.38%"] },
@@ -294,7 +294,7 @@ const resonanceSkill: Skill = {
   id: "1003602",
   category: "Skill",
   name: "포위 사냥",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["70.81%", "76.62%", "82.42%", "90.55%", "96.36%", "103.03%", "112.32%", "121.61%", "130.90%", "140.77%", "152.38%", "164.00%", "175.61%", "187.22%", "198.83%", "210.44%", "222.06%", "233.67%", "245.28%", "256.89%"] },
@@ -334,7 +334,7 @@ const liberationSkill: Skill = {
   id: "1003603",
   category: "Liberation",
   name: "영광이 그려내는 불꽃의 단꿈",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["412.68%", "446.52%", "480.36%", "527.73%", "561.57%", "600.48%", "654.63%", "708.77%", "762.91%", "820.44%", "888.12%", "955.79%", "1023.47%", "1091.15%", "1158.83%", "1226.51%", "1294.19%", "1361.86%", "1429.54%", "1497.22%"] },
@@ -385,7 +385,7 @@ const variationSkill: Skill = {
   id: "1003606",
   category: "Variation",
   name: "한 눈 팔지마!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["14.97%+21.21%*4", "16.20%+22.95%*4", "17.43%+24.69%*4", "19.15%+27.12%*4", "20.37%+28.86%*4", "21.79%+30.86%*4", "23.75%+33.64%*4", "25.71%+36.43%*4", "27.68%+39.21%*4", "29.76%+42.16%*4", "32.22%+45.64%*4", "34.67%+49.12%*4", "37.13%+52.60%*4", "39.58%+56.07%*4", "42.04%+59.55%*4", "44.49%+63.03%*4", "46.95%+66.51%*4", "49.40%+69.98%*4", "51.86%+73.46%*4", "54.31%+76.94%*4"] },
@@ -450,7 +450,7 @@ const circuitSkill: Skill = {
   id: "1003607",
   category: "Circuit",
   name: "불꽃 늑대의 선고",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "늑대의 춤에 비롯된 결심 피해", description: "", values: ["28.18%+21.14%*4+169.06%", "30.49%+22.87%*4+182.93%", "32.80%+24.60%*4+196.79%", "36.04%+27.03%*4+216.20%", "38.35%+28.76%*4+230.06%", "41.00%+30.75%*4+246.00%", "44.70%+33.53%*4+268.18%", "48.40%+36.30%*4+290.36%", "52.09%+39.07%*4+312.54%", "56.02%+42.02%*4+336.11%", "60.64%+45.48%*4+363.83%", "65.26%+48.95%*4+391.56%", "69.89%+52.42%*4+419.29%", "74.51%+55.88%*4+447.01%", "79.13%+59.35%*4+474.74%", "83.75%+62.81%*4+502.46%", "88.37%+66.28%*4+530.19%", "92.99%+69.74%*4+557.91%", "97.61%+73.21%*4+585.64%", "102.23%+76.67%*4+613.36%"] },
@@ -462,7 +462,7 @@ const passive3604: Skill = {
   id: "1003604",
   category: "Passive",
   name: "내 이름을 기억하라",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaD1.webp",
   attacks: [],
 };
 
@@ -470,7 +470,7 @@ const passive3605: Skill = {
   id: "1003605",
   category: "Passive",
   name: "승리의 박수갈채",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaD2.webp",
   attacks: [],
 };
 
@@ -478,7 +478,7 @@ const passive3608: Skill = {
   id: "1003608",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -486,7 +486,7 @@ const passive3609: Skill = {
   id: "1003609",
   category: "Intro",
   name: "함께 싸우자 파트너!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLupa/SP_IconLupaT.webp",
   attacks: [],
 };
 
@@ -494,7 +494,7 @@ const passive3610: Skill = {
   id: "1003610",
   category: "Sync",
   name: "조화도 파괴 · 대검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
   attacks: [],
 };
 
@@ -725,8 +725,8 @@ export const lupa: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1207)가 아니라 별도 번호(46)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_46_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_46_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_46_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_46_UI.webp",
   echoIds: [],
 };

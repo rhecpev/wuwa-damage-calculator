@@ -123,7 +123,7 @@ const basicSkill: Skill = {
   id: "1001401",
   category: "Basic",
   name: "사냥꾼의 검술·날카로운 이빨",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["23.00%*2", "24.89%*2", "26.78%*2", "29.42%*2", "31.30%*2", "33.47%*2", "36.49%*2", "39.51%*2", "42.53%*2", "45.73%*2", "49.50%*2", "53.28%*2", "57.05%*2", "60.82%*2", "64.59%*2", "68.36%*2", "72.14%*2", "75.91%*2", "79.68%*2", "83.45%*2"] },
@@ -184,7 +184,7 @@ const resonanceSkill: Skill = {
   id: "1001402",
   category: "Skill",
   name: "척살 명령",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "척살 명령 1단 피해", description: "", values: ["25.94%*2+34.59%", "28.07%*2+37.42%", "30.20%*2+40.26%", "33.17%*2+44.23%", "35.30%*2+47.07%", "37.75%*2+50.33%", "41.15%*2+54.87%", "44.55%*2+59.40%", "47.96%*2+63.94%", "51.57%*2+68.76%", "55.83%*2+74.43%", "60.08%*2+80.11%", "64.33%*2+85.78%", "68.59%*2+91.45%", "72.84%*2+97.12%", "77.10%*2+102.79%", "81.35%*2+108.46%", "85.60%*2+114.14%", "89.86%*2+119.81%", "94.11%*2+125.48%"] },
@@ -323,7 +323,7 @@ const liberationSkill: Skill = {
   id: "1001403",
   category: "Liberation",
   name: "환영의 각인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["300.00%", "324.60%", "349.20%", "383.64%", "408.24%", "436.53%", "475.89%", "515.25%", "554.61%", "596.43%", "645.63%", "694.83%", "744.03%", "793.23%", "842.43%", "891.63%", "940.83%", "990.03%", "1039.23%", "1088.43%"] },
@@ -365,7 +365,7 @@ const variationSkill: Skill = {
   id: "1001406",
   category: "Variation",
   name: "전역 수배",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["20.00%*2+30.00%*2", "21.64%*2+32.46%*2", "23.28%*2+34.92%*2", "25.58%*2+38.37%*2", "27.22%*2+40.83%*2", "29.11%*2+43.66%*2", "31.73%*2+47.59%*2", "34.35%*2+51.53%*2", "36.98%*2+55.47%*2", "39.77%*2+59.65%*2", "43.05%*2+64.57%*2", "46.33%*2+69.49%*2", "49.61%*2+74.41%*2", "52.89%*2+79.33%*2", "56.17%*2+84.25%*2", "59.45%*2+89.17%*2", "62.73%*2+94.09%*2", "66.01%*2+99.01%*2", "69.29%*2+103.93%*2", "72.57%*2+108.85%*2"] },
@@ -420,7 +420,7 @@ const circuitSkill: Skill = {
   id: "1001407",
   category: "Circuit",
   name: "사냥 임무",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "「자애」피해", description: "", values: ["19.67%*8+39.34%", "21.29%*8+42.57%", "22.90%*8+45.80%", "25.16%*8+50.31%", "26.77%*8+53.54%", "28.63%*8+57.25%", "31.21%*8+62.41%", "33.79%*8+67.57%", "36.37%*8+72.73%", "39.11%*8+78.22%", "42.34%*8+84.67%", "45.56%*8+91.12%", "48.79%*8+97.57%", "52.01%*8+104.02%", "55.24%*8+110.48%", "58.47%*8+116.93%", "61.69%*8+123.38%", "64.92%*8+129.83%", "68.14%*8+136.28%", "71.37%*8+142.73%"] },
@@ -437,7 +437,7 @@ const passive1404: Skill = {
   id: "1001404",
   category: "Passive",
   name: "핏빛의 각오",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoD1.webp",
   attacks: [],
 };
 
@@ -446,7 +446,7 @@ const passive1405: Skill = {
   id: "1001405",
   category: "Passive",
   name: "용감한 헌신",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoD2.webp",
   attacks: [],
 };
 
@@ -455,7 +455,7 @@ const passive1408: Skill = {
   id: "1001408",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -482,7 +482,7 @@ const introSkill: Skill = {
   id: "1001409",
   category: "Intro",
   name: "그림자의 기습",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKakaluo/SP_IconKakaluoT.webp",
   attacks: introSkillAttacks1001409,
 };
 
@@ -491,7 +491,7 @@ const syncSkill: Skill = {
   id: "1001410",
   category: "Sync",
   name: "조화도 파괴 · 대검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
   attacks: [],
 };
 
@@ -587,8 +587,8 @@ export const calcharo: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id가 아니라 별도 번호(18)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_18.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_18.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_18_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_18_UI.webp",
   echoIds: [],
 };

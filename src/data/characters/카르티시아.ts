@@ -152,7 +152,7 @@ const basicSkill: Skill = {
   id: "1003501",
   category: "Basic",
   name: "내 자신을 바친 검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "2단 피해", description: "", values: ["1.98%+1.98%+2.64%", "2.14%+2.14%+2.86%", "2.31%+2.31%+3.07%", "2.53%+2.53%+3.38%", "2.70%+2.70%+3.59%", "2.88%+2.88%+3.84%", "3.14%+3.14%+4.19%", "3.40%+3.40%+4.53%", "3.66%+3.66%+4.88%", "3.94%+3.94%+5.25%", "4.26%+4.26%+5.68%", "4.58%+4.58%+6.11%", "4.91%+4.91%+6.54%", "5.23%+5.23%+6.97%", "5.56%+5.56%+7.41%", "5.88%+5.88%+7.84%", "6.20%+6.20%+8.27%", "6.53%+6.53%+8.70%", "6.85%+6.85%+9.14%", "7.18%+7.18%+9.57%"] },
@@ -193,7 +193,7 @@ const resonanceSkill: Skill = {
   id: "1003502",
   category: "Skill",
   name: "사람의 이름으로 바치는 검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaB3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaB3.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["3.47%*3+4.46%", "3.75%*3+4.83%", "4.04%*3+5.19%", "4.44%*3+5.70%", "4.72%*3+6.07%", "5.05%*3+6.49%", "5.50%*3+7.07%", "5.96%*3+7.66%", "6.41%*3+8.24%", "6.89%*3+8.86%", "7.46%*3+9.59%", "8.03%*3+10.32%", "8.60%*3+11.05%", "9.17%*3+11.78%", "9.74%*3+12.52%", "10.30%*3+13.25%", "10.87%*3+13.98%", "11.44%*3+14.71%", "12.01%*3+15.44%", "12.58%*3+16.17%"] },
@@ -227,7 +227,7 @@ const liberationSkill: Skill = {
   id: "1003503",
   category: "Liberation",
   name: "기사의 소원대로",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "폭풍의 울음을 가르는 칼날 피해", description: "", values: ["6.60%*7", "7.14%*7", "7.68%*7", "8.44%*7", "8.98%*7", "9.61%*7", "10.47%*7", "11.34%*7", "12.20%*7", "13.12%*7", "14.20%*7", "15.29%*7", "16.37%*7", "17.45%*7", "18.53%*7", "19.61%*7", "20.70%*7", "21.78%*7", "22.86%*7", "23.94%*7"] },
@@ -274,7 +274,7 @@ const variationSkill: Skill = {
   id: "1003506",
   category: "Variation",
   name: "지나간 폭풍을 위한 검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "지나간 폭풍을 위한 검 피해", description: "", values: ["1.05%*3+3.14%", "1.14%*3+3.40%", "1.22%*3+3.65%", "1.34%*3+4.01%", "1.43%*3+4.27%", "1.53%*3+4.57%", "1.66%*3+4.98%", "1.80%*3+5.39%", "1.94%*3+5.80%", "2.08%*3+6.24%", "2.25%*3+6.75%", "2.43%*3+7.27%", "2.60%*3+7.78%", "2.77%*3+8.29%", "2.94%*3+8.81%", "3.11%*3+9.32%", "3.28%*3+9.84%", "3.45%*3+10.35%", "3.62%*3+10.86%", "3.80%*3+11.38%"] },
@@ -482,7 +482,7 @@ const circuitSkill: Skill = {
   id: "1003507",
   category: "Circuit",
   name: "폭풍우",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["3.27%", "3.54%", "3.80%", "4.18%", "4.45%", "4.75%", "5.18%", "5.61%", "6.04%", "6.49%", "7.03%", "7.56%", "8.10%", "8.64%", "9.17%", "9.71%", "10.24%", "10.78%", "11.31%", "11.85%"] },
@@ -515,7 +515,7 @@ const passive3504: Skill = {
   id: "1003504",
   category: "Passive",
   name: "마음으로 엮어낸 기도",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaD1.webp",
   attacks: [],
 };
 
@@ -524,7 +524,7 @@ const passive3505: Skill = {
   id: "1003505",
   category: "Passive",
   name: "바람으로 새긴 흔적",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaD2.webp",
   attacks: [],
 };
 
@@ -533,7 +533,7 @@ const passive3508: Skill = {
   id: "1003508",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaY.webp",
   attacks: [],
 };
 
@@ -542,7 +542,7 @@ const introSkill: Skill = {
   id: "1003509",
   category: "Intro",
   name: "폭풍에 실린 축복",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKatixiya/SP_IconKatixiyaT.webp",
   attacks: [],
 };
 
@@ -551,7 +551,7 @@ const syncSkill: Skill = {
   id: "1003510",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 
@@ -770,8 +770,8 @@ export const cartethyia: Character = {
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1409)가 아니라 별도 번호(40)다.
   // 다른 캐릭터와 규격을 맞췄다(예전에는 Circle256 / Head175를 쓰고 있었다).
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_40_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_40_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_40_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_40_UI.webp",
   echoIds: [],
 };

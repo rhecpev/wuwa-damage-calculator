@@ -274,7 +274,7 @@ const basicSkill: Skill = {
   id: "1005201",
   category: "Basic",
   name: "타오르는 벚꽃의 도법",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 현세의 나 1단 피해", description: "", values: ["18.97%+18.97%", "20.53%+20.53%", "22.09%+22.09%", "24.26%+24.26%", "25.82%+25.82%", "27.61%+27.61%", "30.10%+30.10%", "32.59%+32.59%", "35.07%+35.07%", "37.72%+37.72%", "40.83%+40.83%", "43.94%+43.94%", "47.05%+47.05%", "50.16%+50.16%", "53.27%+53.27%", "56.39%+56.39%", "59.50%+59.50%", "62.61%+62.61%", "65.72%+65.72%", "68.83%+68.83%"] },
@@ -358,7 +358,7 @@ const resonanceSkill: Skill = {
   id: "1005202",
   category: "Skill",
   name: "서리의 징벌",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 현세의 나 피해", description: "", values: ["12.32%*4+49.28%", "13.34%*4+53.33%", "14.35%*4+57.37%", "15.76%*4+63.02%", "16.77%*4+67.07%", "17.93%*4+71.71%", "19.55%*4+78.18%", "21.16%*4+84.64%", "22.78%*4+91.11%", "24.50%*4+97.98%", "26.52%*4+106.06%", "28.54%*4+114.14%", "30.56%*4+122.22%", "32.58%*4+130.31%", "34.60%*4+138.39%", "36.62%*4+146.47%", "38.64%*4+154.55%", "40.66%*4+162.63%", "42.68%*4+170.72%", "44.70%*4+178.80%"] },
@@ -400,7 +400,7 @@ const liberationSkill: Skill = {
   id: "1005203",
   category: "Liberation",
   name: "끌어온 내 가능성",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "끌어온 내 가능성 · 독심 피해", description: "", values: ["200.00%", "216.40%", "232.80%", "255.76%", "272.16%", "291.02%", "317.26%", "343.50%", "369.74%", "397.62%", "430.42%", "463.22%", "496.02%", "528.82%", "561.62%", "594.42%", "627.22%", "660.02%", "692.82%", "725.62%"] },
@@ -434,7 +434,7 @@ const variationSkill: Skill = {
   id: "1005206",
   category: "Variation",
   name: "서리의 칼날",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["78.54%", "84.99%", "91.43%", "100.44%", "106.88%", "114.29%", "124.59%", "134.90%", "145.20%", "156.15%", "169.03%", "181.91%", "194.79%", "207.67%", "220.55%", "233.43%", "246.31%", "259.19%", "272.08%", "284.96%"] },
@@ -466,7 +466,7 @@ const circuitSkill: Skill = {
   id: "1005207",
   category: "Circuit",
   name: "영원의 서리 하늘",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 거합 피해", description: "", values: ["142.76%+23.80%*4", "154.47%+25.75%*4", "166.18%+27.70%*4", "182.56%+30.43%*4", "194.27%+32.38%*4", "207.73%+34.63%*4", "226.46%+37.75%*4", "245.19%+40.87%*4", "263.92%+43.99%*4", "283.82%+47.31%*4", "307.23%+51.21%*4", "330.65%+55.11%*4", "354.06%+59.01%*4", "377.47%+62.92%*4", "400.88%+66.82%*4", "424.30%+70.72%*4", "447.71%+74.62%*4", "471.12%+78.52%*4", "494.53%+82.43%*4", "517.95%+86.33%*4"] },
@@ -477,7 +477,7 @@ const passive5204: Skill = {
   id: "1005204",
   category: "Passive",
   name: "속삭이는 눈",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixue1D1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixue1D1.webp",
   // 「눈의 침식」 2스택 — 「서리 효과」를 추가할 때마다 추가로 「냉해 효과」 피해를 1회 더 넣는다.
   // 공명 회로에 얹혀 있던 것을 이리로 옮겼다(2026-09-16). 회로 공격이 아니라 이 고유 스킬이 내는 피해다.
   // id는 그대로 둔다 — 배율을 대는 버프 두 줄이 attackIds로 이 id를 가리키고, 담아 둔 루틴도 이 id로 남는다.
@@ -504,7 +504,7 @@ const passive5205: Skill = {
   id: "1005205",
   category: "Passive",
   name: "변하는 세상",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixue2D2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixue2D2.webp",
   attacks: [],
 };
 
@@ -512,7 +512,7 @@ const passive5208: Skill = {
   id: "1005208",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueY.webp",
   attacks: [],
 };
 
@@ -520,7 +520,7 @@ const passive5209: Skill = {
   id: "1005209",
   category: "Intro",
   name: "눈에 비춰진 모습",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFeixue/SP_IconFeixueT.webp",
   attacks: [],
 };
 
@@ -528,7 +528,7 @@ const passive5210: Skill = {
   id: "1005210",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 1체인의 「배율 120% 상승」이 붙는 선견력 계열. DamageList에 ×2.2 짝이 들어 있다. */
@@ -783,8 +783,8 @@ export const hiyuki: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1108)가 아니라 별도 번호(67)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_67_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_67_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_67_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_67_UI.webp",
   echoIds: [],
 };

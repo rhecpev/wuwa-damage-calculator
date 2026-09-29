@@ -123,7 +123,7 @@ const basicSkill: Skill = {
   id: "1000901",
   category: "Basic",
   name: "숨기는 칼날",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["45.34%", "49.06%", "52.78%", "57.99%", "61.7%", "65.98%", "71.93%", "77.88%", "83.83%", "90.15%", "97.58%", "105.02%", "112.45%", "119.89%", "127.32%", "134.76%", "142.2%", "149.63%", "157.07%", "164.5%"] },
@@ -159,7 +159,7 @@ const resonanceSkill: Skill = {
   id: "1000902",
   category: "Skill",
   name: "난공불락",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["67.86%", "73.43%", "78.99%", "86.78%", "92.35%", "98.75%", "107.65%", "116.55%", "125.46%", "134.92%", "146.05%", "157.18%", "168.3%", "179.43%", "190.56%", "201.69%", "212.82%", "223.95%", "235.08%", "246.21%"] },
@@ -189,7 +189,7 @@ const liberationSkill: Skill = {
   id: "1000903",
   category: "Liberation",
   name: "불굴의 의지",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "공명 에너지 소모", description: "", values: ["125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125", "125"] },
@@ -218,7 +218,7 @@ const variationSkill: Skill = {
   id: "1000906",
   category: "Variation",
   name: "협공 방어진",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["105%", "113.61%", "122.22%", "134.28%", "142.89%", "152.79%", "166.57%", "180.34%", "194.12%", "208.76%", "225.98%", "243.2%", "260.42%", "277.64%", "294.86%", "312.08%", "329.3%", "346.52%", "363.74%", "380.96%"] },
@@ -267,7 +267,7 @@ const circuitSkill: Skill = {
   id: "1000907",
   category: "Circuit",
   name: "공방전환",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "방어의 틈새 1단 피해", description: "", values: ["43.36%", "46.92%", "50.47%", "55.45%", "59%", "63.09%", "68.78%", "74.47%", "80.16%", "86.2%", "93.31%", "100.42%", "107.53%", "114.64%", "121.75%", "128.86%", "135.97%", "143.08%", "150.19%", "157.3%"] },
@@ -285,7 +285,7 @@ const passive0904: Skill = {
   id: "1000904",
   category: "Passive",
   name: "마음 보호",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaD1.webp",
   attacks: [],
 };
 
@@ -294,7 +294,7 @@ const passive0905: Skill = {
   id: "1000905",
   category: "Passive",
   name: "우뚝 솟은 산",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaoHuaD2.webp",
   attacks: [],
 };
 
@@ -303,7 +303,7 @@ const passive0908: Skill = {
   id: "1000908",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -312,7 +312,7 @@ const introSkill: Skill = {
   id: "1000909",
   category: "Intro",
   name: "위기의 일순",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaohuaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconTaohua/SP_IconTaohuaT.webp",
   attacks: [],
 };
 
@@ -321,7 +321,7 @@ const syncSkill: Skill = {
   id: "1000910",
   category: "Sync",
   name: "조화도 파괴 · 대검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
   attacks: [],
 };
 
@@ -449,8 +449,8 @@ export const taoqi: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id가 아니라 별도 번호(9)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_9.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_9.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_9_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_9_UI.webp",
   echoIds: [],
 };

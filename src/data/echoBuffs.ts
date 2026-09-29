@@ -1353,6 +1353,124 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
       scope: "self",
     },
   ],
+  // 꿈으로 세상을 비추는 마음
+  //   2세트 전도 피해가 10% 증가된다
+  //   5세트 캐릭터가 목표에게 「전자 효과」 추가 시, 혹은 자신이 합일을 획득하거나 합일 대응 시,
+  //         자신의 크리티컬이 15% 증가되고, 전도 피해가 22.5% 증가되며, 30초간 지속된다
+  //
+  // 조건이 같은 두 효과지만 붙는 자리가 달라(크리티컬 확률 · 피해 보너스) 각각 한 줄로 적는다.
+  // 합일로도 켜지므로 전자 효과를 못 붙이는 캐릭터에게도 띄운다 — requiresAnomaly를 달지 않는다.
+  "꿈으로 세상을 비추는 마음": [
+    {
+      setKey: 2,
+      label: "전도 피해 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.1,
+      uptime: "passive", // 세트만 맞추면 늘 걸린다
+      scope: "self",
+    },
+    {
+      setKey: 5,
+      label: "전자 효과 · 합일 시 크리티컬",
+      target: "critRate",
+      damageType: "All",
+      value: 0.15,
+      uptime: "active",
+      scope: "self",
+      condition: "목표에게 「전자 효과」 추가 시, 혹은 합일 획득 · 합일 대응 시, 30초간",
+    },
+    {
+      setKey: 5,
+      label: "전자 효과 · 합일 시 전도 피해 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.225,
+      uptime: "active",
+      scope: "self",
+      condition: "목표에게 「전자 효과」 추가 시, 혹은 합일 획득 · 합일 대응 시, 30초간",
+    },
+  ],
+
+  // 거울 그림자에 번개가 스치는 찰나
+  //   2세트 전도 피해가 10% 증가된다
+  //   5세트 목표에게 「전자 효과」 추가 시 자신의 전도 피해가 10% 증가되고 15초간 지속된다.
+  //         그 지속 시간 내에 반주 스킬 발동 후, 다음 변주 스킬로 등장하는 캐릭터의
+  //         전도 피해를 25% 증가시키고 15초간 지속된다
+  //
+  // 오색찬란한 거품(용융)과 같은 꼴이고 속성만 전도다.
+  "거울 그림자에 번개가 스치는 찰나": [
+    {
+      setKey: 2,
+      label: "전도 피해 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.1,
+      uptime: "passive", // 세트만 맞추면 늘 걸린다
+      scope: "self",
+    },
+    {
+      setKey: 5,
+      label: "전자 효과 추가 시 전도 피해 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.1,
+      uptime: "active",
+      scope: "self",
+      condition: "목표에게 「전자 효과」 추가 시, 15초간",
+      requiresAnomaly: "ElectroFlare",
+    },
+    {
+      setKey: 5,
+      label: "변주 등장 캐릭터 전도 피해 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.25,
+      uptime: "active",
+      scope: "party", // 변주 스킬로 등장하는 캐릭터
+      condition: "위 효과가 걸려 있는 동안 반주 스킬 발동 후, 다음 변주 스킬로 등장하는 캐릭터에게 15초간",
+    },
+  ],
+
+  // 추억에 붉게 물든 꽃
+  //   2세트 치료 효과가 10% 증가된다
+  //   5세트 캐릭터가 파티원 치료 시, 파티 내 캐릭터의 공격력이 10% 증가되고 30초간 지속된다.
+  //         같은 이름의 효과는 중첩이 불가하다. 해당 효과 지속 기간 동안, 캐릭터가 합일을
+  //         획득하고 합일 대응 시, 공격력이 추가로 15% 증가된다
+  //
+  // 2세트 「치료 효과 10% 증가」는 피해식에 안 들어가지만 스탯창에 찍히도록 healingBonus로 옮긴다.
+  // 추가 15%는 앞의 파티 공격력이 걸려 있어야 열려 조건이 한 겹 더 깊다. 받는 쪽이 파티원이다.
+  "추억에 붉게 물든 꽃": [
+    {
+      setKey: 2,
+      label: "치료 효과 증가",
+      target: "healingBonus",
+      damageType: "All",
+      value: 0.1,
+      uptime: "passive", // 세트만 맞추면 늘 걸린다
+      scope: "self",
+    },
+    {
+      setKey: 5,
+      label: "파티원 치료 시 파티 공격력",
+      target: "atkPercent",
+      damageType: "All",
+      value: 0.1,
+      uptime: "active",
+      scope: "party",
+      condition: "파티원 치료 시, 30초간 (같은 이름의 효과는 중첩 불가)",
+    },
+    {
+      setKey: 5,
+      label: "합일 시 공격력 추가 증가",
+      target: "atkPercent",
+      damageType: "All",
+      value: 0.15,
+      uptime: "active",
+      scope: "party",
+      condition: "위 효과가 걸려 있는 동안 캐릭터가 합일 획득 · 합일 대응 시",
+    },
+  ],
 };
 
 /**
@@ -1370,6 +1488,67 @@ export const echoSetBuffs: Record<string, EchoSetBuffTemplate[]> = {
  * 계산에 붙일 때는 mainEchoOf(캐릭터)가 돌려준 에코의 것만 넣어야 한다 — echoStore.ts 참고.
  */
 export const echoAbilityBuffs: Record<string, EchoBuffTemplate[]> = {
+  // 공명의 메아리 · 태초의 여우의 별자리 · 천연 (6000225)
+  //   메인 슬롯 장착 시 전도 피해 보너스 10.00%
+  //   「전자 효과」 추가 후, 혹은 합일 획득 · 합일 대응 시 전도 피해 보너스가 추가로 10.00%(30초)
+  //
+  // 미반영 — 어빌리티 자체의 피해(여우의 별자리가 끼면 갈래가 바뀐다)는 공격 데이터 쪽이다
+  "6000225": [
+    {
+      label: "메인 슬롯 장착 시 전도 피해 보너스",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.1,
+      uptime: "passive", // 메인 슬롯에 끼면 조건 없이 늘 걸린다
+      scope: "self",
+      condition: "메인 슬롯에 장착 시",
+    },
+    {
+      label: "전자 효과 · 합일 시 전도 피해 보너스",
+      target: "damageBonus",
+      damageType: "Electro",
+      value: 0.1,
+      uptime: "active",
+      scope: "self",
+      condition: "목표에게 「전자 효과」 추가 후, 혹은 합일 획득 · 합일 대응 시, 30초간",
+    },
+  ],
+
+  // 절식백 (6000224)
+  //   어빌리티 후 15초 내에 반주 스킬을 쓰면, 다음 변주 스킬로 등장하는 캐릭터의
+  //   전도 피해 보너스가 12.00% 증가한다(15초). 데니아(6000200)의 전도판이다.
+  //
+  // 미반영 — 3단 91.18% 전도 피해는 어빌리티 자체 배율이라 공격 데이터 쪽이다
+  "6000224": [
+    {
+      label: "변주 등장 캐릭터 전도 피해 보너스",
+      target: "damageBonus",
+      damageType: "All",
+      element: "Electro",
+      value: 0.12,
+      uptime: "active",
+      scope: "party", // 변주 스킬로 등장하는 캐릭터
+      condition: "에코 어빌리티 후 15초 내에 반주 스킬 발동 시, 다음 변주 등장 캐릭터에게 15초간",
+    },
+  ],
+
+  // 해형살 (6000223)
+  //   메인 슬롯 장착 시 공명 효율 10.00%
+  //
+  // 공명 효율은 피해식에 들어가지 않지만 스탯창에는 찍히는 값이라 한 줄로 넣어 둔다.
+  // 미반영 — 273.60% 용융 피해는 어빌리티 자체 배율이라 공격 데이터 쪽이다
+  "6000223": [
+    {
+      label: "메인 슬롯 장착 시 공명 효율",
+      target: "energyRegen",
+      damageType: "All",
+      value: 0.1,
+      uptime: "passive", // 메인 슬롯에 끼면 조건 없이 늘 걸린다
+      scope: "self",
+      condition: "메인 슬롯에 장착 시",
+    },
+  ],
+
   // 공명의 메아리 · 플뢰르 드 리스 (6000106)
   //   메인 슬롯에 장착 시 자신의 기류 피해 보너스 10.00% 증가
   //   장착 캐릭터가 방랑자 · 기류 혹은 카르티시아면 기류 피해 보너스가 추가로 10.00% 증가

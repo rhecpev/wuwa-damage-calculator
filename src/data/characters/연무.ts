@@ -140,7 +140,7 @@ const basicSkill: Skill = {
   id: "1001601",
   category: "Basic",
   name: "뇌황권",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["24.70%", "26.73%", "28.76%", "31.59%", "33.62%", "35.95%", "39.19%", "42.43%", "45.67%", "49.11%", "53.16%", "57.21%", "61.26%", "65.31%", "69.36%", "73.41%", "77.47%", "81.52%", "85.57%", "89.62%"] },
@@ -210,7 +210,7 @@ const resonanceSkill: Skill = {
   id: "1001602",
   category: "Skill",
   name: "진동의 일격",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["12.00%", "12.99%", "13.97%", "15.35%", "16.33%", "17.47%", "19.04%", "20.61%", "22.19%", "23.86%", "25.83%", "27.80%", "29.77%", "31.73%", "33.70%", "35.67%", "37.64%", "39.61%", "41.57%", "43.54%"] },
@@ -244,7 +244,7 @@ const liberationSkill: Skill = {
   id: "1001603",
   category: "Liberation",
   name: "적토중명",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["88.00%*2", "95.22%*2", "102.44%*2", "112.54%*2", "119.76%*2", "128.05%*2", "139.60%*2", "151.14%*2", "162.69%*2", "174.96%*2", "189.39%*2", "203.82%*2", "218.25%*2", "232.69%*2", "247.12%*2", "261.55%*2", "275.98%*2", "290.41%*2", "304.85%*2", "319.28%*2"] },
@@ -273,7 +273,7 @@ const variationSkill: Skill = {
   id: "1001606",
   category: "Variation",
   name: "천둥의 울림",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["32.00%", "34.63%", "37.25%", "40.93%", "43.55%", "46.57%", "50.77%", "54.96%", "59.16%", "63.62%", "68.87%", "74.12%", "79.37%", "84.62%", "89.86%", "95.11%", "100.36%", "105.61%", "110.86%", "116.10%"] },
@@ -405,7 +405,7 @@ const circuitSkill: Skill = {
   id: "1001607",
   category: "Circuit",
   name: "숨은 뇌전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "신뢰 피해", description: "", values: ["20.00%", "21.64%", "23.28%", "25.58%", "27.22%", "29.11%", "31.73%", "34.35%", "36.98%", "39.77%", "43.05%", "46.33%", "49.61%", "52.89%", "56.17%", "59.45%", "62.73%", "66.01%", "69.29%", "72.57%"] },
@@ -425,7 +425,7 @@ const passive1604: Skill = {
   id: "1001604",
   category: "Passive",
   name: "결전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuD1.webp",
   attacks: [],
 };
 
@@ -433,7 +433,7 @@ const passive1605: Skill = {
   id: "1001605",
   category: "Passive",
   name: "빛의 제약",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuD2.webp",
   attacks: [],
 };
 
@@ -441,7 +441,7 @@ const passive1608: Skill = {
   id: "1001608",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -449,7 +449,7 @@ const passive1609: Skill = {
   id: "1001609",
   category: "Intro",
   name: "번개의 팬텀",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYuanwu/SP_IconYuanwuT.webp",
   attacks: [],
 };
 
@@ -457,7 +457,7 @@ const passive1610: Skill = {
   id: "1001610",
   category: "Sync",
   name: "조화도 파괴 · 권갑",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
   attacks: [],
 };
 
@@ -568,8 +568,8 @@ export const yuanwu: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1303)가 아니라 별도 번호(15)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_15.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_15.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_15_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_15_UI.webp",
   echoIds: [],
 };

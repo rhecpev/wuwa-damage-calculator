@@ -283,7 +283,7 @@ const basicSkill: Skill = {
   id: "1004501",
   category: "Basic",
   name: "찬란히 흐르는 빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["43.35%", "46.91%", "50.46%", "55.44%", "59.00%", "63.08%", "68.77%", "74.46%", "80.15%", "86.19%", "93.30%", "100.41%", "107.52%", "114.63%", "121.74%", "128.85%", "135.95%", "143.06%", "150.17%", "157.28%"] },
@@ -345,7 +345,7 @@ const resonanceSkill: Skill = {
   id: "1004502",
   category: "Skill",
   name: "린네식 아이디어",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "린네식 아이디어 피해", description: "", values: ["70.08%+23.36%*3", "75.82%+25.28%*3", "81.57%+27.19%*3", "89.61%+29.87%*3", "95.36%+31.79%*3", "101.97%+33.99%*3", "111.16%+37.06%*3", "120.35%+40.12%*3", "129.55%+43.19%*3", "139.31%+46.44%*3", "150.81%+50.27%*3", "162.30%+54.10%*3", "173.79%+57.93%*3", "185.28%+61.76%*3", "196.77%+65.59%*3", "208.26%+69.42%*3", "219.76%+73.26%*3", "231.25%+77.09%*3", "242.74%+80.92%*3", "254.23%+84.75%*3"] },
@@ -415,7 +415,7 @@ const liberationSkill: Skill = {
   id: "1004503",
   category: "Liberation",
   name: "컬러 스프레이 폭발",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "컬러 스프레이 폭발 피해", description: "", values: ["44.00%*10", "47.61%*10", "51.22%*10", "56.27%*10", "59.88%*10", "64.03%*10", "69.80%*10", "75.57%*10", "81.35%*10", "87.48%*10", "94.70%*10", "101.91%*10", "109.13%*10", "116.35%*10", "123.56%*10", "130.78%*10", "137.99%*10", "145.21%*10", "152.43%*10", "159.64%*10"] },
@@ -454,7 +454,7 @@ const variationSkill: Skill = {
   id: "1004506",
   category: "Variation",
   name: "너의 색깔을 보여줘!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "너의 색깔을 보여줘! 피해", description: "", values: ["11.31%*10", "12.24%*10", "13.16%*10", "14.46%*10", "15.39%*10", "16.45%*10", "17.94%*10", "19.42%*10", "20.90%*10", "22.48%*10", "24.33%*10", "26.19%*10", "28.04%*10", "29.90%*10", "31.75%*10", "33.60%*10", "35.46%*10", "37.31%*10", "39.17%*10", "41.02%*10"] },
@@ -539,7 +539,7 @@ const circuitSkill: Skill = {
   id: "1004507",
   category: "Circuit",
   name: "색과 빛의 혼합률",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiY1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiY1.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 레인보우 스플래시 피해", description: "", values: ["153.00%", "165.55%", "178.10%", "195.66%", "208.21%", "222.64%", "242.71%", "262.78%", "282.86%", "304.18%", "329.28%", "354.37%", "379.46%", "404.55%", "429.64%", "454.74%", "479.83%", "504.92%", "530.01%", "555.10%"] },
@@ -580,7 +580,7 @@ const syncSkill: Skill = {
   id: "1004510",
   category: "Sync",
   name: "스펙트럼 분석",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: syncSkillAttacks,
   attributes: [
     { attributeName: "스펙트럼 분석 · 조화 파동 피해", description: "", values: ["946.00%", "1023.58%", "1101.15%", "1209.75%", "1287.32%", "1376.53%", "1500.64%", "1624.76%", "1748.88%", "1880.75%", "2035.89%", "2191.04%", "2346.18%", "2501.32%", "2656.47%", "2811.61%", "2966.76%", "3121.90%", "3277.04%", "3432.19%"] },
@@ -590,7 +590,7 @@ const passive4504: Skill = {
   id: "1004504",
   category: "Passive",
   name: "영원히 빛바래지 않는 색채!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNai1D1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNai1D1.webp",
   attacks: [],
 };
 
@@ -598,7 +598,7 @@ const passive4505: Skill = {
   id: "1004505",
   category: "Passive",
   name: "『적응형 광학의 생활 속 실제 응용』",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNai2D2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNai2D2.webp",
   attacks: [],
 };
 
@@ -606,7 +606,7 @@ const passive4508: Skill = {
   id: "1004508",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiY1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiY1.webp",
   attacks: [],
 };
 
@@ -632,7 +632,7 @@ const passive4509: Skill = {
   id: "1004509",
   category: "Intro",
   name: "시간 날땐 함께 드라이브!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLinNai/SP_IconLinNaiT.webp",
   attacks: introSkillAttacks1004509,
 };
 /** 1체인의 「환각빛 배율 120% 상승」이 붙는 셋. */
@@ -864,9 +864,9 @@ const linne: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1509)가 아니라 별도 번호(60)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_60_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_60_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_60_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_60_UI.webp",
   echoIds: [],
 };
 

@@ -114,7 +114,7 @@ const basicSkill: Skill = {
   id: "1005001",
   category: "Basic",
   name: "스냅샷",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["29.82%", "32.27%", "34.72%", "38.14%", "40.58%", "43.40%", "47.31%", "51.22%", "55.13%", "59.29%", "64.18%", "69.07%", "73.96%", "78.85%", "83.74%", "88.63%", "93.52%", "98.41%", "103.30%", "108.19%"] },
@@ -173,7 +173,7 @@ const resonanceSkill: Skill = {
   id: "1005002",
   category: "Skill",
   name: "환상 프레임",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "환상 프레임 피해", description: "", values: ["6.67%*3", "7.22%*3", "7.76%*3", "8.53%*3", "9.08%*3", "9.71%*3", "10.58%*3", "11.45%*3", "12.33%*3", "13.26%*3", "14.35%*3", "15.45%*3", "16.54%*3", "17.63%*3", "18.73%*3", "19.82%*3", "20.91%*3", "22.01%*3", "23.10%*3", "24.19%*3"] },
@@ -286,7 +286,7 @@ const liberationSkill: Skill = {
   id: "1005003",
   category: "Liberation",
   name: "생생한 기억",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "생생한 기억 피해", description: "", values: ["71.80%", "77.69%", "83.57%", "91.82%", "97.70%", "104.47%", "113.89%", "123.31%", "132.73%", "142.74%", "154.52%", "166.29%", "178.06%", "189.84%", "201.61%", "213.39%", "225.16%", "236.94%", "248.71%", "260.48%"] },
@@ -332,7 +332,7 @@ const variationSkill: Skill = {
   id: "1005006",
   category: "Variation",
   name: "편집",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "편집 피해", description: "", values: ["49.00%", "53.02%", "57.04%", "62.67%", "66.68%", "71.30%", "77.73%", "84.16%", "90.59%", "97.42%", "105.46%", "113.49%", "121.53%", "129.57%", "137.60%", "145.64%", "153.67%", "161.71%", "169.75%", "177.78%"] },
@@ -362,7 +362,7 @@ const circuitSkill: Skill = {
   id: "1005007",
   category: "Circuit",
   name: "기억 궁전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "망각 피해", description: "", values: ["143.59%", "155.37%", "167.14%", "183.63%", "195.40%", "208.94%", "227.78%", "246.62%", "265.46%", "285.48%", "309.03%", "332.57%", "356.12%", "379.67%", "403.22%", "426.77%", "450.32%", "473.87%", "497.42%", "520.96%"] },
@@ -372,7 +372,7 @@ const passive5004: Skill = {
   id: "1005004",
   category: "Passive",
   name: "슬로우 모션",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaD1.webp",
   attacks: [],
 };
 
@@ -380,7 +380,7 @@ const passive5005: Skill = {
   id: "1005005",
   category: "Passive",
   name: "명심",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaD2.webp",
   attacks: [],
 };
 
@@ -388,7 +388,7 @@ const passive5008: Skill = {
   id: "1005008",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaY.webp",
   attacks: [],
 };
 
@@ -396,7 +396,7 @@ const passive5009: Skill = {
   id: "1005009",
   category: "Intro",
   name: "몽타주",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLuosela/SP_SkillIconLuoselaT.webp",
   attacks: [],
 };
 
@@ -404,7 +404,7 @@ const passive5010: Skill = {
   id: "1005010",
   category: "Sync",
   name: "조화도 파괴 · 증폭기",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
   attacks: [],
 };
 /**
@@ -637,9 +637,9 @@ const lucila: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1109)가 아니라 별도 번호(66)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_66_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_66_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_66_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_66_UI.webp",
   echoIds: [],
 };
 

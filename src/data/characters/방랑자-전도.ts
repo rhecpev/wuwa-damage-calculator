@@ -191,7 +191,7 @@ const basicSkill: Skill = {
   id: "1005501",
   category: "Basic",
   name: "종결",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["25.69%", "27.80%", "29.91%", "32.86%", "34.96%", "37.39%", "40.76%", "44.13%", "47.50%", "51.08%", "55.29%", "59.51%", "63.72%", "67.93%", "72.15%", "76.36%", "80.57%", "84.78%", "89.00%", "93.21%"] },
@@ -246,7 +246,7 @@ const resonanceSkill: Skill = {
   id: "1005502",
   category: "Skill",
   name: "번개의 인도",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuA1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuA1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["50.40%*2", "54.53%*2", "58.67%*2", "64.45%*2", "68.59%*2", "73.34%*2", "79.95%*2", "86.56%*2", "93.17%*2", "100.20%*2", "108.46%*2", "116.73%*2", "124.99%*2", "133.26%*2", "141.52%*2", "149.79%*2", "158.05%*2", "166.32%*2", "174.58%*2", "182.85%*2"] },
@@ -274,7 +274,7 @@ const liberationSkill: Skill = {
   id: "1005503",
   category: "Liberation",
   name: "최종 전략",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["600.00%", "649.20%", "698.40%", "767.28%", "816.48%", "873.06%", "951.78%", "1030.50%", "1109.22%", "1192.86%", "1291.26%", "1389.66%", "1488.06%", "1586.46%", "1684.86%", "1783.26%", "1881.66%", "1980.06%", "2078.46%", "2176.86%"] },
@@ -305,7 +305,7 @@ const variationSkill: Skill = {
   id: "1005506",
   category: "Variation",
   name: "몰아치는 뇌전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["16.80%*2+50.40%", "18.18%*2+54.54%", "19.56%*2+58.67%", "21.49%*2+64.46%", "22.87%*2+68.59%", "24.45%*2+73.34%", "26.65%*2+79.95%", "28.86%*2+86.57%", "31.06%*2+93.18%", "33.41%*2+100.21%", "36.16%*2+108.47%", "38.92%*2+116.74%", "41.67%*2+125.00%", "44.43%*2+133.27%", "47.18%*2+141.53%", "49.94%*2+149.80%", "52.69%*2+158.06%", "55.45%*2+166.33%", "58.20%*2+174.60%", "60.96%*2+182.86%"] },
@@ -528,7 +528,7 @@ const circuitSkill: Skill = {
   id: "1005507",
   category: "Circuit",
   name: "천기만상",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuY1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuY1.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "과부하 피해", description: "", values: ["40.60%*7+213.15%+213.15%", "43.93%*7+230.63%+230.63%", "47.26%*7+248.11%+248.11%", "51.92%*7+272.58%+272.58%", "55.25%*7+290.06%+290.06%", "59.08%*7+310.16%+310.16%", "64.41%*7+338.12%+338.12%", "69.74%*7+366.09%+366.09%", "75.06%*7+394.06%+394.06%", "80.72%*7+423.77%+423.77%", "87.38%*7+458.73%+458.73%", "94.04%*7+493.68%+493.68%", "100.70%*7+528.64%+528.64%", "107.36%*7+563.59%+563.59%", "114.01%*7+598.55%+598.55%", "120.67%*7+633.51%+633.51%", "127.33%*7+668.46%+668.46%", "133.99%*7+703.42%+703.42%", "140.65%*7+738.38%+738.38%", "147.31%*7+773.33%+773.33%"] },
@@ -555,7 +555,7 @@ const passive5504: Skill = {
   id: "1005504",
   category: "Passive",
   name: "해명",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuD1.webp",
   attacks: [],
 };
 
@@ -563,7 +563,7 @@ const passive5505: Skill = {
   id: "1005505",
   category: "Passive",
   name: "중추 귀환",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuD2.webp",
   attacks: [],
 };
 
@@ -571,7 +571,7 @@ const passive5508: Skill = {
   id: "1005508",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -579,7 +579,7 @@ const passive5509: Skill = {
   id: "1005509",
   category: "Intro",
   name: "천둥의 울림",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconThunderzhu/SP_IconThunderzhuT.webp",
   attacks: [],
 };
 
@@ -587,7 +587,7 @@ const passive5510: Skill = {
   id: "1005510",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 6체인의 「배율 20% 상승」이 붙는 밀려온 천개의 소리 계열과 천둥의 추락. */
@@ -728,8 +728,8 @@ export const roverElectro: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 1309 기준 번호 4, 1310은 5다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_4.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_4.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_4_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_4_UI.webp",
   echoIds: [],
 };

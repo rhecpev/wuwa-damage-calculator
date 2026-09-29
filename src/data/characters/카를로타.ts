@@ -170,7 +170,7 @@ const basicSkill: Skill = {
   id: "1002801",
   category: "Basic",
   name: "침묵 집행",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["27.20%", "29.44%", "31.67%", "34.79%", "37.02%", "39.58%", "43.15%", "46.72%", "50.29%", "54.08%", "58.54%", "63.00%", "67.46%", "71.92%", "76.39%", "80.85%", "85.31%", "89.77%", "94.23%", "98.69%"] },
@@ -222,7 +222,7 @@ const resonanceSkill: Skill = {
   id: "1002802",
   category: "Skill",
   name: "폭력 미학",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["72.49%+72.49%", "78.43%+78.43%", "84.37%+84.37%", "92.69%+92.69%", "98.64%+98.64%", "105.47%+105.47%", "114.98%+114.98%", "124.49%+124.49%", "134.00%+134.00%", "144.11%+144.11%", "155.99%+155.99%", "167.88%+167.88%", "179.77%+179.77%", "191.65%+191.65%", "203.54%+203.54%", "215.43%+215.43%", "227.31%+227.31%", "239.20%+239.20%", "251.09%+251.09%", "262.98%+262.98%"] },
@@ -304,7 +304,7 @@ const liberationSkill: Skill = {
   id: "1002803",
   category: "Liberation",
   name: "새로운 트렌드",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["202.56%", "219.17%", "235.78%", "259.03%", "275.64%", "294.74%", "321.32%", "347.89%", "374.47%", "402.71%", "435.92%", "469.14%", "502.36%", "535.58%", "568.80%", "602.02%", "635.24%", "668.46%", "701.68%", "734.90%"] },
@@ -341,7 +341,7 @@ const variationSkill: Skill = {
   id: "1002806",
   category: "Variation",
   name: "겨울의 음률",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["90.00%+30.00%*2", "97.38%+32.46%*2", "104.76%+34.92%*2", "115.10%+38.37%*2", "122.48%+40.83%*2", "130.96%+43.66%*2", "142.77%+47.59%*2", "154.58%+51.53%*2", "166.39%+55.47%*2", "178.93%+59.65%*2", "193.69%+64.57%*2", "208.45%+69.49%*2", "223.21%+74.41%*2", "237.97%+79.33%*2", "252.73%+84.25%*2", "267.49%+89.17%*2", "282.25%+94.09%*2", "297.01%+99.01%*2", "311.77%+103.93%*2", "326.53%+108.85%*2"] },
@@ -374,7 +374,7 @@ const circuitSkill: Skill = {
   id: "1002807",
   category: "Circuit",
   name: "예술의 순례",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "마지막 길 피해", description: "", values: ["33.62%*5+252.11%", "36.38%*5+272.78%", "39.13%*5+293.45%", "42.99%*5+322.39%", "45.75%*5+343.07%", "48.92%*5+366.84%", "53.33%*5+399.92%", "57.74%*5+432.99%", "62.15%*5+466.07%", "66.83%*5+501.21%", "72.35%*5+542.56%", "77.86%*5+583.90%", "83.37%*5+625.25%", "88.88%*5+666.59%", "94.40%*5+707.94%", "99.91%*5+749.28%", "105.42%*5+790.63%", "110.93%*5+831.97%", "116.45%*5+873.32%", "121.96%*5+914.66%"] },
@@ -387,7 +387,7 @@ const passive2804: Skill = {
   id: "1002804",
   category: "Passive",
   name: "맑은 순수함",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaD1.webp",
   attacks: [],
 };
 
@@ -395,7 +395,7 @@ const passive2805: Skill = {
   id: "1002805",
   category: "Passive",
   name: "예술지상주의",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaD2.webp",
   attacks: [],
 };
 
@@ -403,7 +403,7 @@ const passive2808: Skill = {
   id: "1002808",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -441,7 +441,7 @@ const passive2809: Skill = {
   id: "1002809",
   category: "Intro",
   name: "연설",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconKelaita/SP_IconKelaitaT.webp",
   attacks: introSkillAttacks1002809,
 };
 
@@ -449,7 +449,7 @@ const passive2810: Skill = {
   id: "1002810",
   category: "Sync",
   name: "조화도 파괴 · 권총",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 
@@ -577,8 +577,8 @@ export const carlotta: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1107)가 아니라 별도 번호(32)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_32_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_32_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_32_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_32_UI.webp",
   echoIds: [],
 };

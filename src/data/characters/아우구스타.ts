@@ -227,7 +227,7 @@ const basicSkill: Skill = {
   id: "1003901",
   category: "Basic",
   name: "사냥",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["28.90%", "31.27%", "33.64%", "36.96%", "39.33%", "42.06%", "45.85%", "49.64%", "53.43%", "57.46%", "62.20%", "66.94%", "71.68%", "76.42%", "81.16%", "85.90%", "90.64%", "95.38%", "100.12%", "104.86%"] },
@@ -272,7 +272,7 @@ const resonanceSkill: Skill = {
   id: "1003902",
   category: "Skill",
   name: "검날",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaB3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaB3.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["110.00%*3", "119.02%*3", "128.04%*3", "140.67%*3", "149.69%*3", "160.07%*3", "174.50%*3", "188.93%*3", "203.36%*3", "218.70%*3", "236.74%*3", "254.78%*3", "272.82%*3", "290.86%*3", "308.90%*3", "326.94%*3", "344.98%*3", "363.02%*3", "381.06%*3", "399.10%*3"] },
@@ -343,7 +343,7 @@ const liberationSkill: Skill = {
   id: "1003903",
   category: "Liberation",
   name: "태양의 정벌",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaC2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaC2.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "공명 해방 · 꺾이지 않는 검의 맹세 피해", description: "", values: ["16.59%*2+66.36%*3+16.59%*2+287.56%", "17.96%*2+71.81%*3+17.96%*2+311.14%", "19.32%*2+77.25%*3+19.32%*2+334.72%", "21.22%*2+84.87%*3+21.22%*2+367.74%", "22.58%*2+90.31%*3+22.58%*2+391.32%", "24.15%*2+96.57%*3+24.15%*2+418.43%", "26.32%*2+105.27%*3+26.32%*2+456.16%", "28.50%*2+113.98%*3+28.50%*2+493.89%", "30.67%*2+122.68%*3+30.67%*2+531.62%", "32.99%*2+131.94%*3+32.99%*2+571.7%", "35.71%*2+142.82%*3+35.71%*2+618.86%", "38.43%*2+153.70%*3+38.43%*2+666.02%", "41.15%*2+164.58%*3+41.15%*2+713.18%", "43.87%*2+175.47%*3+43.87%*2+760.34%", "46.59%*2+186.35%*3+46.59%*2+807.5%", "49.31%*2+197.23%*3+49.31%*2+854.66%", "52.03%*2+208.12%*3+52.03%*2+901.82%", "54.75%*2+219.00%*3+54.75%*2+948.98%", "57.47%*2+229.88%*3+57.47%*2+996.14%", "60.20%*2+240.77%*3+60.20%*2+1043.3%"] },
@@ -377,7 +377,7 @@ const variationSkill: Skill = {
   id: "1003906",
   category: "Variation",
   name: "불타는 황금빛 여정",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["50.00%*2", "54.10%*2", "58.20%*2", "63.94%*2", "68.04%*2", "72.76%*2", "79.32%*2", "85.88%*2", "92.44%*2", "99.41%*2", "107.61%*2", "115.81%*2", "124.01%*2", "132.21%*2", "140.41%*2", "148.61%*2", "156.81%*2", "165.01%*2", "173.21%*2", "181.41%*2"] },
@@ -445,7 +445,7 @@ const circuitSkill: Skill = {
   id: "1003907",
   category: "Circuit",
   name: "나처럼 빛나는 태양",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 영원한 불패의 태양 · 신속 공격 피해", description: "", values: ["70.00%*2", "75.74%*2", "81.48%*2", "89.52%*2", "95.26%*2", "101.86%*2", "111.05%*2", "120.23%*2", "129.41%*2", "139.17%*2", "150.65%*2", "162.13%*2", "173.61%*2", "185.09%*2", "196.57%*2", "208.05%*2", "219.53%*2", "231.01%*2", "242.49%*2", "253.97%*2"] },
@@ -461,7 +461,7 @@ const passive3904: Skill = {
   id: "1003904",
   category: "Passive",
   name: "영예의 가호",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaD1.webp",
   attacks: [],
 };
 
@@ -469,7 +469,7 @@ const passive3905: Skill = {
   id: "1003905",
   category: "Passive",
   name: "타오르는 결의",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaD2.webp",
   attacks: [],
 };
 
@@ -477,7 +477,7 @@ const passive3908: Skill = {
   id: "1003908",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaY.webp",
   attacks: [],
 };
 
@@ -485,7 +485,7 @@ const passive3909: Skill = {
   id: "1003909",
   category: "Intro",
   name: "불굴의 군가",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAogusita/SP_IconAogusitaT.webp",
   attacks: [],
 };
 
@@ -493,7 +493,7 @@ const passive3910: Skill = {
   id: "1003910",
   category: "Sync",
   name: "조화도 파괴 · 대검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
   attacks: [],
 };
 /** 3체인의 「배율 25% 상승」이 붙는 일곱. DamageList에 ×1.25 짝이 하나씩 들어 있다. */
@@ -646,8 +646,8 @@ export const augusta: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1306)가 아니라 별도 번호(51)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_51_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_51_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_51_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_51_UI.webp",
   echoIds: [],
 };

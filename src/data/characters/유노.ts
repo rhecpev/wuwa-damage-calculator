@@ -158,7 +158,7 @@ const basicSkill: Skill = {
   id: "1003801",
   category: "Basic",
   name: "예언자의 발걸음",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "달의 고리 · 일반 공격 1단 피해", description: "", values: ["44.10%", "47.72%", "51.34%", "56.40%", "60.02%", "64.17%", "69.96%", "75.75%", "81.53%", "87.68%", "94.91%", "102.15%", "109.38%", "116.61%", "123.84%", "131.07%", "138.31%", "145.54%", "152.77%", "160.00%"] },
@@ -239,7 +239,7 @@ const resonanceSkill: Skill = {
   id: "1003802",
   category: "Skill",
   name: "예언의 인도",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "최초의 움직임 피해", description: "", values: ["9.38%*7+65.65%", "10.15%*7+71.04%", "10.92%*7+76.42%", "12.00%*7+83.96%", "12.77%*7+89.34%", "13.65%*7+95.53%", "14.88%*7+104.15%", "16.11%*7+112.76%", "17.34%*7+121.37%", "18.65%*7+130.52%", "20.19%*7+141.29%", "21.73%*7+152.06%", "23.26%*7+162.82%", "24.80%*7+173.59%", "26.34%*7+184.36%", "27.88%*7+195.12%", "29.42%*7+205.89%", "30.96%*7+216.66%", "32.49%*7+227.42%", "34.03%*7+238.19%"] },
@@ -275,7 +275,7 @@ const liberationSkill: Skill = {
   id: "1003803",
   category: "Liberation",
   name: "추락한 달의 바다",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["550.00%", "595.10%", "640.20%", "703.34%", "748.44%", "800.31%", "872.47%", "944.63%", "1016.79%", "1093.46%", "1183.66%", "1273.86%", "1364.06%", "1454.26%", "1544.46%", "1634.66%", "1724.86%", "1815.06%", "1905.26%", "1995.46%"] },
@@ -311,7 +311,7 @@ const variationSkill: Skill = {
   id: "1003806",
   category: "Variation",
   name: "내가 비추어 낸 모습",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["8.00%*7+24.00%", "8.66%*7+25.97%", "9.32%*7+27.94%", "10.24%*7+30.70%", "10.89%*7+32.66%", "11.65%*7+34.93%", "12.70%*7+38.08%", "13.74%*7+41.22%", "14.79%*7+44.37%", "15.91%*7+47.72%", "17.22%*7+51.66%", "18.53%*7+55.59%", "19.85%*7+59.53%", "21.16%*7+63.46%", "22.47%*7+67.40%", "23.78%*7+71.34%", "25.09%*7+75.27%", "26.41%*7+79.21%", "27.72%*7+83.14%", "29.03%*7+87.08%"] },
@@ -434,7 +434,7 @@ const circuitSkill: Skill = {
   id: "1003807",
   category: "Circuit",
   name: "차고 기울 때의 움직임",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "달의 순환 지속 시간", description: "", values: ["15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15", "15"] },
@@ -469,7 +469,7 @@ const passive3804: Skill = {
   id: "1003804",
   category: "Passive",
   name: "가득 차오른 달",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoD1.webp",
   attacks: [],
 };
 
@@ -477,7 +477,7 @@ const passive3805: Skill = {
   id: "1003805",
   category: "Passive",
   name: "새로운 탄생",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoD2.webp",
   attacks: [],
 };
 
@@ -485,7 +485,7 @@ const passive3808: Skill = {
   id: "1003808",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoY.webp",
   attacks: [],
 };
 
@@ -493,7 +493,7 @@ const passive3809: Skill = {
   id: "1003809",
   category: "Intro",
   name: "밤을 건너 새벽으로",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYounuo/SP_IconYounuoT.webp",
   // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치(100% 기류 피해, 공격력 기준으로 봄)를 옮겼다.
   attacks: [
     {
@@ -514,7 +514,7 @@ const passive3810: Skill = {
   id: "1003810",
   category: "Sync",
   name: "조화도 파괴 · 권갑",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
   attacks: [],
 };
 /** 3체인의 「65% 부스트」가 붙는 달의 활 계열(강화판 포함). */
@@ -652,8 +652,8 @@ export const iuno: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1410)가 아니라 별도 번호(48)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_48_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_48_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_48_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_48_UI.webp",
   echoIds: [],
 };

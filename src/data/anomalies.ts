@@ -43,7 +43,7 @@ export interface AnomalyDef {
 
 /** 속성 아이콘 주소. 파일 이름만 다르고 앞부분은 같다. */
 const ATTR_ICON = (name: string) =>
-  `https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconAttribute/T_Iconproperty${name}_UI.webp`;
+  `https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconAttribute/T_Iconproperty${name}_UI.webp`;
 
 /**
  * 공명자 레벨별 이상 기준값 B(L). 90레벨 값만 알려져 있다.

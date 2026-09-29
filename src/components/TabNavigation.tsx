@@ -40,7 +40,7 @@ const DISCORD_MARK =
 const ENCORE = "https://encore.moe/_nuxt/";
 
 /** 인게임 아이콘 원본 서버. 무기 종류 아이콘이 여기 있다(API의 WeaponTypeIcon). */
-const AKI = "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/";
+const AKI = "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/";
 
 const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }> = [
   {

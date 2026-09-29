@@ -118,7 +118,7 @@ const basicSkill: Skill = {
   id: "1005701",
   category: "Basic",
   name: "녹아든 봄바람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 먼지를 씻어낼 무렵 1단 피해", description: "", values: ["31.76%", "34.37%", "36.97%", "40.62%", "43.22%", "46.22%", "50.39%", "54.55%", "58.72%", "63.15%", "68.36%", "73.56%", "78.77%", "83.98%", "89.19%", "94.40%", "99.61%", "104.82%", "110.02%", "115.23%"] },
@@ -184,7 +184,7 @@ const resonanceSkill: Skill = {
   id: "1005702",
   category: "Skill",
   name: "병풍에 내린 초록빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 먼지를 씻어낼 무렵 피해", description: "", values: ["12.00%*6", "12.99%*6", "13.97%*6", "15.35%*6", "16.33%*6", "17.47%*6", "19.04%*6", "20.61%*6", "22.19%*6", "23.86%*6", "25.83%*6", "27.80%*6", "29.77%*6", "31.73%*6", "33.70%*6", "35.67%*6", "37.64%*6", "39.61%*6", "41.57%*6", "43.54%*6"] },
@@ -202,7 +202,7 @@ const liberationSkill: Skill = {
   id: "1005703",
   category: "Liberation",
   name: "태평의 노래",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiC1.webp",
   attacks: [],
   attributes: [
     { attributeName: "쿨타임", description: "", values: ["25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25", "25"] },
@@ -231,7 +231,7 @@ const variationSkill: Skill = {
   id: "1005706",
   category: "Variation",
   name: "청량한 옥소리",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["14.40%", "15.59%", "16.77%", "18.42%", "19.60%", "20.96%", "22.85%", "24.74%", "26.63%", "28.63%", "31.00%", "33.36%", "35.72%", "38.08%", "40.44%", "42.80%", "45.16%", "47.53%", "49.89%", "52.25%"] },
@@ -356,7 +356,7 @@ const circuitSkill: Skill = {
   id: "1005707",
   category: "Circuit",
   name: "흩날리는 금빛 이삭",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 비에 젖어들 무렵 1단 피해", description: "", values: ["9.84%*2+9.84%*2", "10.65%*2+10.65%*2", "11.46%*2+11.46%*2", "12.59%*2+12.59%*2", "13.40%*2+13.40%*2", "14.32%*2+14.32%*2", "15.61%*2+15.61%*2", "16.91%*2+16.91%*2", "18.20%*2+18.20%*2", "19.57%*2+19.57%*2", "21.18%*2+21.18%*2", "22.80%*2+22.80%*2", "24.41%*2+24.41%*2", "26.02%*2+26.02%*2", "27.64%*2+27.64%*2", "29.25%*2+29.25%*2", "30.86%*2+30.86%*2", "32.48%*2+32.48%*2", "34.09%*2+34.09%*2", "35.71%*2+35.71%*2"] },
@@ -376,7 +376,7 @@ const passive5704: Skill = {
   id: "1005704",
   category: "Passive",
   name: "물가에 닿은 하늘빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiD1.webp",
   attacks: [],
 };
 
@@ -384,7 +384,7 @@ const passive5705: Skill = {
   id: "1005705",
   category: "Passive",
   name: "윤슬에 떠오른 금빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiD2.webp",
   attacks: [],
 };
 
@@ -392,7 +392,7 @@ const passive5708: Skill = {
   id: "1005708",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiY.webp",
   attacks: [],
 };
 
@@ -400,7 +400,7 @@ const passive5709: Skill = {
   id: "1005709",
   category: "Intro",
   name: "일렁이는 맑은 물결",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconSuisui/SP_IconSuisuiT.webp",
   // 피해가 없는 반주다. 그래도 카드로 세울 수 있게 히트 0짜리 한 줄을 둔다 —
   // 이 카드가 루틴에 놓이면 뒤따르는 카드에 반주 버프가 저절로 켜진다(calculator/autoBuffs.ts).
   attacks: [
@@ -420,7 +420,7 @@ const passive5710: Skill = {
   id: "1005710",
   category: "Sync",
   name: "조화도 파괴 · 증폭기",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
   attacks: [],
 };
 /** 고유 스킬과 6체인이 함께 가리키는 「깨어난 봄기운」 · 「청량한 옥소리」. */
@@ -622,8 +622,8 @@ export const shushu: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1110)가 아니라 별도 번호(71)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_71_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_71_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_71_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_71_UI.webp",
   echoIds: [],
 };

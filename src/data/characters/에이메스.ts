@@ -156,7 +156,7 @@ const basicSkill: Skill = {
   id: "1004601",
   category: "Basic",
   name: "끝없는 조준",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 에이메스 1단 피해", description: "", values: ["23.31%", "25.23%", "27.14%", "29.81%", "31.73%", "33.92%", "36.98%", "40.04%", "43.10%", "46.35%", "50.17%", "53.99%", "57.82%", "61.64%", "65.46%", "69.28%", "73.11%", "76.93%", "80.75%", "84.58%"] },
@@ -322,7 +322,7 @@ const resonanceSkill: Skill = {
   id: "1004602",
   category: "Skill",
   name: "함께 떠난 긴 여정",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "협공 · 돌진 · 무기 융합 피해", description: "", values: ["13.54%+20.31%+33.85%", "14.65%+21.98%+36.63%", "15.76%+23.64%+39.40%", "17.32%+25.97%+43.29%", "18.43%+27.64%+46.06%", "19.70%+29.55%+49.25%", "21.48%+32.22%+53.69%", "23.26%+34.88%+58.13%", "25.03%+37.55%+62.57%", "26.92%+40.38%+67.29%", "29.14%+43.71%+72.84%", "31.36%+47.04%+78.39%", "33.58%+50.37%+83.94%", "35.80%+53.70%+89.49%", "38.02%+57.03%+95.05%", "40.24%+60.36%+100.60%", "42.46%+63.69%+106.15%", "44.68%+67.02%+111.70%", "46.90%+70.35%+117.25%", "49.12%+73.68%+122.80%"] },
@@ -374,7 +374,7 @@ const liberationSkill: Skill = {
   id: "1004603",
   category: "Liberation",
   name: "샛별을 향한 비행",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "경계를 부순 별빛 · 과부하 피해", description: "", values: ["101.00%+134.67%*3", "109.29%+145.71%*3", "117.57%+156.76%*3", "129.16%+172.22%*3", "137.45%+183.26%*3", "146.97%+195.96%*3", "160.22%+213.63%*3", "173.47%+231.29%*3", "186.72%+248.96%*3", "200.80%+267.74%*3", "217.37%+289.82%*3", "233.93%+311.91%*3", "250.50%+333.99%*3", "267.06%+356.08%*3", "283.62%+378.16%*3", "300.19%+400.25%*3", "316.75%+422.33%*3", "333.32%+444.42%*3", "349.88%+466.50%*3", "366.44%+488.59%*3"] },
@@ -420,7 +420,7 @@ const variationSkill: Skill = {
   id: "1004606",
   category: "Variation",
   name: "여정을 시작하는 신호",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "먼하늘에 울려퍼지는 멜로디 피해", description: "", values: ["6.77%*2+54.16%", "7.33%*2+58.60%", "7.88%*2+63.04%", "8.66%*2+69.25%", "9.22%*2+73.70%", "9.85%*2+78.80%", "10.74%*2+85.91%", "11.63%*2+93.01%", "12.52%*2+100.12%", "13.46%*2+107.66%", "14.57%*2+116.55%", "15.68%*2+125.43%", "16.79%*2+134.31%", "17.90%*2+143.19%", "19.01%*2+152.07%", "20.12%*2+160.95%", "21.23%*2+169.83%", "22.34%*2+178.71%", "23.45%*2+187.59%", "24.56%*2+196.47%"] },
@@ -514,7 +514,7 @@ const circuitSkill: Skill = {
   id: "1004607",
   category: "Circuit",
   name: "적막을 깎아 빚어낸 형태",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "빛나는 날개의 합주 · 등장 피해", description: "", values: ["9.00%*4+18.00%*3+90.00%", "9.74%*4+19.48%*3+97.38%", "10.48%*4+20.96%*3+104.76%", "11.51%*4+23.02%*3+115.10%", "12.25%*4+24.50%*3+122.48%", "13.10%*4+26.20%*3+130.96%", "14.28%*4+28.56%*3+142.77%", "15.46%*4+30.92%*3+154.58%", "16.64%*4+33.28%*3+166.39%", "17.90%*4+35.79%*3+178.93%", "19.37%*4+38.74%*3+193.69%", "20.85%*4+41.69%*3+208.45%", "22.33%*4+44.65%*3+223.21%", "23.80%*4+47.60%*3+237.97%", "25.28%*4+50.55%*3+252.73%", "26.75%*4+53.50%*3+267.49%", "28.23%*4+56.45%*3+282.25%", "29.71%*4+59.41%*3+297.01%", "31.18%*4+62.36%*3+311.77%", "32.66%*4+65.31%*3+326.53%"] },
@@ -527,7 +527,7 @@ const passive4604: Skill = {
   id: "1004604",
   category: "Passive",
   name: "만물이 있기 전에",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiD1.webp",
   attacks: [],
 };
 
@@ -535,7 +535,7 @@ const passive4605: Skill = {
   id: "1004605",
   category: "Passive",
   name: "별과 별 사이",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiD2.webp",
   attacks: [],
 };
 
@@ -543,7 +543,7 @@ const passive4608: Skill = {
   id: "1004608",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -551,7 +551,7 @@ const passive4609: Skill = {
   id: "1004609",
   category: "Intro",
   name: "보이지 않는 기다림",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAimisi/SP_IconAimisiT.webp",
   attacks: [],
 };
 
@@ -559,7 +559,7 @@ const passive4610: Skill = {
   id: "1004610",
   category: "Sync",
   name: "불리지 못한 멜로디",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 즉시 대응 상태에서 강화되는 강공격 · 차지 넷. */
@@ -903,9 +903,9 @@ const aymes: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1210)가 아니라 별도 번호(53)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_53_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_53_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_53_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_53_UI.webp",
   echoIds: [],
 };
 

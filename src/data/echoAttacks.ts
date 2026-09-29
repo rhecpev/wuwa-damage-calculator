@@ -2,6 +2,7 @@ import echoAttackData from "./echoAttacks.json";
 import { echoAttackOverrides } from "./echoAttackOverrides";
 import { ELEMENT_NAMES } from "./elements";
 import { isExcludedEcho } from "./echoExcludes";
+import { baseCharacterId } from "./modeVariants";
 import type { Attack, DamageElement, ScalingStat, Skill } from "../types/game";
 
 /**
@@ -109,8 +110,10 @@ function attacksFromOverride(echoId: string, characterId?: string): Attack[] {
     .map((def, index) => ({ def, index }))
     .filter(({ def }) => {
       if (!characterId) return true;
-      if (def.onlyCharacters && !def.onlyCharacters.includes(characterId)) return false;
-      if (def.exceptCharacters && def.exceptCharacters.includes(characterId)) return false;
+      // 모드로 갈린 id(hsin-union)는 원래 id(hsin)로도 본다.
+      const ids = [characterId, baseCharacterId(characterId)];
+      if (def.onlyCharacters && !ids.some((id) => def.onlyCharacters!.includes(id))) return false;
+      if (def.exceptCharacters && ids.some((id) => def.exceptCharacters!.includes(id))) return false;
       return true;
     })
     .map(({ def, index }) => ({

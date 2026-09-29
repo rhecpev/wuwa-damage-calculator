@@ -16,7 +16,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const IN = "src/data/echo.json";
 const OUT = "src/data/echoDetails.json";
-const BASE = "https://api.encore.moe/ko/echo";
+const BASE = "https://api-v2.encore.moe/api/ko/echo";
 const CONCURRENCY = 8;
 
 /** <br>은 줄바꿈으로, 나머지 태그는 지운다. */

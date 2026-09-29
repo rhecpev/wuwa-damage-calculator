@@ -175,7 +175,7 @@ const basicSkill: Skill = {
   id: "1004001",
   category: "Basic",
   name: "헌터의 트리거",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 1단 피해", description: "", values: ["29.77%", "32.21%", "34.65%", "38.07%", "40.51%", "43.31%", "47.22%", "51.12%", "55.03%", "59.18%", "64.06%", "68.94%", "73.82%", "78.70%", "83.58%", "88.46%", "93.34%", "98.23%", "103.11%", "107.99%"] },
@@ -230,7 +230,7 @@ const resonanceSkill: Skill = {
   id: "1004002",
   category: "Skill",
   name: "경계를 넘는 날개짓",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 임박 피해", description: "", values: ["5.40%+12.60%", "5.85%+13.63%", "6.29%+14.66%", "6.91%+16.11%", "7.35%+17.14%", "7.86%+18.33%", "8.57%+19.98%", "9.28%+21.64%", "9.98%+23.29%", "10.74%+25.04%", "11.62%+27.11%", "12.51%+29.17%", "13.39%+31.24%", "14.28%+33.30%", "15.16%+35.37%", "16.05%+37.44%", "16.93%+39.50%", "17.82%+41.57%", "18.70%+43.63%", "19.59%+45.70%"] },
@@ -272,7 +272,7 @@ const liberationSkill: Skill = {
   id: "1004003",
   category: "Liberation",
   name: "연옥 정화",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "공명 해방 · 연옥 정화 피해", description: "", values: ["55.79%+45.64%*11", "60.36%+49.39%*11", "64.93%+53.13%*11", "71.34%+58.37%*11", "75.91%+62.11%*11", "81.17%+66.41%*11", "88.49%+72.40%*11", "95.81%+78.39%*11", "103.13%+84.38%*11", "110.90%+90.74%*11", "120.05%+98.22%*11", "129.20%+105.71%*11", "138.35%+113.19%*11", "147.49%+120.68%*11", "156.64%+128.16%*11", "165.79%+135.65%*11", "174.94%+143.13%*11", "184.09%+150.62%*11", "193.23%+158.10%*11", "202.38%+165.59%*11"] },
@@ -301,7 +301,7 @@ const variationSkill: Skill = {
   id: "1004006",
   category: "Variation",
   name: "불멸의 불꽃 장전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "변주 스킬 · 불멸의 불꽃 장전 피해", description: "", values: ["47.34%", "51.23%", "55.11%", "60.54%", "64.43%", "68.89%", "75.10%", "81.31%", "87.52%", "94.12%", "101.89%", "109.65%", "117.41%", "125.18%", "132.94%", "140.70%", "148.47%", "156.23%", "164.00%", "171.76%"] },
@@ -495,7 +495,7 @@ const circuitSkill: Skill = {
   id: "1004007",
   category: "Circuit",
   name: "초월한 경계",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "지옥 관통 피해", description: "", values: ["666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666", "666"] },
@@ -544,7 +544,7 @@ const introSkill: Skill = {
   id: "1004009",
   category: "Intro",
   name: "섬멸의 추격",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaT.webp",
   attacks: introSkillAttacks,
   attributes: [
     { attributeName: "반주 스킬 피해", description: "", values: ["39.99%*3+279.92%", "43.27%*3+302.87%", "46.55%*3+325.83%", "51.14%*3+357.96%", "54.42%*3+380.91%", "58.19%*3+407.31%", "63.44%*3+444.03%", "68.68%*3+480.76%", "73.93%*3+517.48%", "79.50%*3+556.50%", "86.06%*3+602.41%", "92.62%*3+648.32%", "99.18%*3+694.22%", "105.74%*3+740.13%", "112.30%*3+786.04%", "118.85%*3+831.94%", "125.41%*3+877.85%", "131.97%*3+923.75%", "138.53%*3+969.66%", "145.09%*3+1015.57%"] },
@@ -554,7 +554,7 @@ const passive4004: Skill = {
   id: "1004004",
   category: "Passive",
   name: "사냥의 맹세",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNa1D1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNa1D1.webp",
   attacks: [],
 };
 
@@ -562,7 +562,7 @@ const passive4005: Skill = {
   id: "1004005",
   category: "Passive",
   name: "폭식의 죄",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNa2D2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNa2D2.webp",
   attacks: [],
 };
 
@@ -570,7 +570,7 @@ const passive4008: Skill = {
   id: "1004008",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJiaBeiLiNa/SP_IconJiaBeiLiNaY.webp",
   attacks: [],
 };
 
@@ -578,7 +578,7 @@ const passive4010: Skill = {
   id: "1004010",
   category: "Sync",
   name: "조화도 파괴 · 권총",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 /** 악마의 자격 상태에서 쓰는 공격들. 1체인 · 6체인이 이 묶음을 대상으로 한다. */
@@ -772,8 +772,8 @@ export const galbrena: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1208)가 아니라 별도 번호(55)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_55_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_55_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_55_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_55_UI.webp",
   echoIds: [],
 };

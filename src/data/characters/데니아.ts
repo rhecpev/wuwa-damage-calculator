@@ -270,7 +270,7 @@ const basicSkill: Skill = {
   id: "1005301",
   category: "Basic",
   name: "꿈을 엮은 연회",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 연극의 모습 1단 피해", description: "", values: ["16.44%", "17.79%", "19.14%", "21.03%", "22.38%", "23.93%", "26.08%", "28.24%", "30.40%", "32.69%", "35.39%", "38.08%", "40.78%", "43.47%", "46.17%", "48.87%", "51.56%", "54.26%", "56.95%", "59.65%"] },
@@ -363,7 +363,7 @@ const resonanceSkill: Skill = {
   id: "1005302",
   category: "Skill",
   name: "거품의 달콤한 미끼",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "흉내낸 거품 · 연극의 모습 피해", description: "", values: ["8.76%*3+26.28%", "9.48%*3+28.44%", "10.20%*3+30.59%", "11.21%*3+33.61%", "11.93%*3+35.77%", "12.75%*3+38.25%", "13.90%*3+41.69%", "15.05%*3+45.14%", "16.20%*3+48.59%", "17.42%*3+52.25%", "18.86%*3+56.56%", "20.29%*3+60.87%", "21.73%*3+65.18%", "23.17%*3+69.49%", "24.60%*3+73.80%", "26.04%*3+78.11%", "27.48%*3+82.42%", "28.91%*3+86.73%", "30.35%*3+91.04%", "31.79%*3+95.35%"] },
@@ -409,7 +409,7 @@ const liberationSkill: Skill = {
   id: "1005303",
   category: "Liberation",
   name: "막이 내리는 순간",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "막이 내리는 순간 · 연극의 모습 피해", description: "", values: ["200.00%", "216.40%", "232.80%", "255.76%", "272.16%", "291.02%", "317.26%", "343.50%", "369.74%", "397.62%", "430.42%", "463.22%", "496.02%", "528.82%", "561.62%", "594.42%", "627.22%", "660.02%", "692.82%", "725.62%"] },
@@ -454,7 +454,7 @@ const variationSkill: Skill = {
   id: "1005306",
   category: "Variation",
   name: "정중한 방문",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "오랜만이야! 피해", description: "", values: ["52.62%", "56.94%", "61.25%", "67.30%", "71.61%", "76.57%", "83.48%", "90.38%", "97.28%", "104.62%", "113.25%", "121.88%", "130.51%", "139.14%", "147.77%", "156.40%", "165.03%", "173.66%", "182.29%", "190.92%"] },
@@ -484,7 +484,7 @@ const circuitSkill: Skill = {
   id: "1005307",
   category: "Circuit",
   name: "「완전무결」",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "침식 영역 피해(회당)", description: "", values: ["68.58%", "74.20%", "79.82%", "87.69%", "93.32%", "99.78%", "108.78%", "117.78%", "126.77%", "136.33%", "147.58%", "158.82%", "170.07%", "181.31%", "192.56%", "203.81%", "215.05%", "226.30%", "237.54%", "248.79%"] },
@@ -494,7 +494,7 @@ const passive5304: Skill = {
   id: "1005304",
   category: "Passive",
   name: "남겨진 거짓말",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaD1.webp",
   attacks: [],
 };
 
@@ -502,7 +502,7 @@ const passive5305: Skill = {
   id: "1005305",
   category: "Passive",
   name: "새겨진 찬란한 빛깔",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaD2.webp",
   attacks: [],
 };
 
@@ -510,7 +510,7 @@ const passive5308: Skill = {
   id: "1005308",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -518,7 +518,7 @@ const passive5309: Skill = {
   id: "1005309",
   category: "Intro",
   name: "이루지 못한 거짓말",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconDaniya/SP_IconDaniyaT.webp",
   attacks: [],
 };
 
@@ -526,7 +526,7 @@ const passive5310: Skill = {
   id: "1005310",
   category: "Sync",
   name: "시간의 궤멸",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
   attacks: [],
 };
 /**
@@ -893,9 +893,9 @@ const denia: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1211)가 아니라 별도 번호(64)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_64_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_64_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_64_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_64_UI.webp",
   echoIds: [],
 };
 

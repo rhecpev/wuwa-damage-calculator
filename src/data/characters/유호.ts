@@ -131,7 +131,7 @@ const basicSkill: Skill = {
   id: "1002401",
   category: "Basic",
   name: "서리의 낙하",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorFist.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["23.83%", "25.79%", "27.74%", "30.48%", "32.43%", "34.68%", "37.80%", "40.93%", "44.05%", "47.38%", "51.28%", "55.19%", "59.10%", "63.01%", "66.91%", "70.82%", "74.73%", "78.64%", "82.55%", "86.45%"] },
@@ -234,7 +234,7 @@ const resonanceSkill: Skill = {
   id: "1002402",
   category: "Skill",
   name: "상자 속 축복",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuB4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuB4.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["78.70%", "85.16%", "91.61%", "100.64%", "107.10%", "114.52%", "124.84%", "135.17%", "145.49%", "156.46%", "169.37%", "182.28%", "195.18%", "208.09%", "221.00%", "233.90%", "246.81%", "259.72%", "272.62%", "285.53%"] },
@@ -271,7 +271,7 @@ const liberationSkill: Skill = {
   id: "1002403",
   category: "Liberation",
   name: "여의점",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["164.58%", "178.07%", "191.57%", "210.46%", "223.95%", "239.47%", "261.06%", "282.66%", "304.25%", "327.19%", "354.18%", "381.17%", "408.16%", "435.15%", "462.14%", "489.13%", "516.12%", "543.11%", "570.10%", "597.09%"] },
@@ -301,7 +301,7 @@ const variationSkill: Skill = {
   id: "1002406",
   category: "Variation",
   name: "마음의 상자",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["45.00%+55.00%", "48.69%+59.51%", "52.38%+64.02%", "57.55%+70.34%", "61.24%+74.85%", "65.48%+80.04%", "71.39%+87.25%", "77.29%+94.47%", "83.20%+101.68%", "89.47%+109.35%", "96.85%+118.37%", "104.23%+127.39%", "111.61%+136.41%", "118.99%+145.43%", "126.37%+154.45%", "133.75%+163.47%", "141.13%+172.49%", "148.51%+181.51%", "155.89%+190.53%", "163.27%+199.55%"] },
@@ -339,7 +339,7 @@ const circuitSkill: Skill = {
   id: "1002407",
   category: "Circuit",
   name: "시의 형상화",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "시의 형상화 스킬 피해", description: "", values: ["18.72%*10", "20.26%*10", "21.79%*10", "23.94%*10", "25.47%*10", "27.24%*10", "29.69%*10", "32.15%*10", "34.60%*10", "37.21%*10", "40.28%*10", "43.35%*10", "46.42%*10", "49.49%*10", "52.56%*10", "55.63%*10", "58.70%*10", "61.77%*10", "64.84%*10", "67.91%*10"] },
@@ -352,7 +352,7 @@ const passive2404: Skill = {
   id: "1002404",
   category: "Passive",
   name: "편옥",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuD1.webp",
   attacks: [],
 };
 
@@ -360,7 +360,7 @@ const passive2405: Skill = {
   id: "1002405",
   category: "Passive",
   name: "구슬",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuD2.webp",
   attacks: [],
 };
 
@@ -368,7 +368,7 @@ const passive2408: Skill = {
   id: "1002408",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -376,7 +376,7 @@ const passive2409: Skill = {
   id: "1002409",
   category: "Intro",
   name: "감진",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconYouhu/SP_IconYouhuT.webp",
   attacks: [],
 };
 
@@ -384,7 +384,7 @@ const passive2410: Skill = {
   id: "1002410",
   category: "Sync",
   name: "조화도 파괴 · 권갑",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakFist.webp",
   attacks: [],
 };
 
@@ -536,8 +536,8 @@ export const youhu: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1106)가 아니라 별도 번호(31)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_31_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_31_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_31_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_31_UI.webp",
   echoIds: [],
 };

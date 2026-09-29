@@ -19,7 +19,9 @@ for (const [name, url] of fetters) jobs.push(["tmp/fetters", `${name}.webp`, url
 // 캐릭터는 프로필 카드에 쓰이는 반신 그림(FormationRoleCard)이 필요하다.
 for (const f of fs.readdirSync("api/characters")) {
   const c = JSON.parse(fs.readFileSync(path.join("api/characters", f), "utf8"));
-  if (c.FormationRoleCard) jobs.push(["tmp/piles", `${c.Id}.webp`, c.FormationRoleCard]);
+  // 원본에는 옛 호스트(api.encore.moe) 주소로 들어 있는데, 그쪽은 캐시에 없는 그림을 502로 돌려준다.
+  if (c.FormationRoleCard)
+    jobs.push(["tmp/piles", `${c.Id}.webp`, c.FormationRoleCard.replace("https://api.encore.moe/", "https://api-v2.encore.moe/")]);
 }
 
 for (const dir of new Set(jobs.map((j) => j[0]))) fs.mkdirSync(dir, { recursive: true });

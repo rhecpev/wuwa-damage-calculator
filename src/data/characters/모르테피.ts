@@ -135,7 +135,7 @@ const basicSkill: Skill = {
   id: "1001201",
   category: "Basic",
   name: "즉흥적 발휘",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["24.29%", "26.29%", "28.28%", "31.07%", "33.06%", "35.35%", "38.54%", "41.72%", "44.91%", "48.30%", "52.28%", "56.26%", "60.25%", "64.23%", "68.21%", "72.20%", "76.18%", "80.16%", "84.15%", "88.13%"] },
@@ -170,7 +170,7 @@ const resonanceSkill: Skill = {
   id: "1001202",
   category: "Skill",
   name: "분노의 연주",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["105.00%", "113.61%", "122.22%", "134.28%", "142.89%", "152.79%", "166.57%", "180.34%", "194.12%", "208.76%", "225.98%", "243.20%", "260.42%", "277.64%", "294.86%", "312.08%", "329.30%", "346.52%", "363.74%", "380.96%"] },
@@ -209,7 +209,7 @@ const liberationSkill: Skill = {
   id: "1001203",
   category: "Liberation",
   name: "격렬한 피날레",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "격렬한 피날레 피해", description: "", values: ["80.00%", "86.56%", "93.12%", "102.31%", "108.87%", "116.41%", "126.91%", "137.40%", "147.90%", "159.05%", "172.17%", "185.29%", "198.41%", "211.53%", "224.65%", "237.77%", "250.89%", "264.01%", "277.13%", "290.25%"] },
@@ -240,7 +240,7 @@ const variationSkill: Skill = {
   id: "1001206",
   category: "Variation",
   name: "불협화음",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["85.00%", "91.97%", "98.94%", "108.70%", "115.67%", "123.69%", "134.84%", "145.99%", "157.14%", "168.99%", "182.93%", "196.87%", "210.81%", "224.75%", "238.69%", "252.63%", "266.57%", "280.51%", "294.45%", "308.39%"] },
@@ -267,7 +267,7 @@ const circuitSkill: Skill = {
   id: "1001207",
   category: "Circuit",
   name: "분노의 후가",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "분노의 후가 피해", description: "", values: ["164.00%", "177.45%", "190.90%", "209.73%", "223.18%", "238.64%", "260.16%", "281.67%", "303.19%", "326.05%", "352.95%", "379.85%", "406.74%", "433.64%", "460.53%", "487.43%", "514.33%", "541.22%", "568.12%", "595.01%"] },
@@ -280,7 +280,7 @@ const passive1204: Skill = {
   id: "1001204",
   category: "Passive",
   name: "친절한 접대",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiD1.webp",
   attacks: [],
 };
 
@@ -289,7 +289,7 @@ const passive1205: Skill = {
   id: "1001205",
   category: "Passive",
   name: "자유로운 리듬",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiD2.webp",
   attacks: [],
 };
 
@@ -298,7 +298,7 @@ const passive1208: Skill = {
   id: "1001208",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -307,7 +307,7 @@ const introSkill: Skill = {
   id: "1001209",
   category: "Intro",
   name: "분노의 노래",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMotefei/SP_IconMotefeiT.webp",
   attacks: [],
 };
 
@@ -316,7 +316,7 @@ const syncSkill: Skill = {
   id: "1001210",
   category: "Sync",
   name: "조화도 파괴 · 권총",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 
@@ -430,8 +430,8 @@ export const mortefi: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id가 아니라 별도 번호(13)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_13.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_13.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_13_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_13_UI.webp",
   echoIds: [],
 };

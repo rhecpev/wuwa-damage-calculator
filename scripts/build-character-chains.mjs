@@ -23,7 +23,7 @@ const SOURCES = Object.entries(
   JSON.parse(readFileSync("src/data/characterApiIds.json", "utf8")),
 ).map(([id, apiId]) => ({ id, file: `api/characters/${apiId}.json` }));
 
-const ICON_BASE = "https://api.encore.moe/resource/Data";
+const ICON_BASE = "https://api-v2.encore.moe/resource/Data";
 
 /** 설명문에는 색 강조용 span과 용어 링크(te) 태그가 섞여 있다. 글자만 남긴다. */
 const stripHtml = (t) =>

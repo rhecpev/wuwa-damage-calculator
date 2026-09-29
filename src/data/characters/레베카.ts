@@ -249,7 +249,7 @@ const basicSkill: Skill = {
   id: "1004801",
   category: "Basic",
   name: "믹스 앤 매치",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 헌트리스 1단 피해", description: "", values: ["18.49%+18.49%", "20.01%+20.01%", "21.52%+21.52%", "23.65%+23.65%", "25.16%+25.16%", "26.91%+26.91%", "29.33%+29.33%", "31.76%+31.76%", "34.18%+34.18%", "36.76%+36.76%", "39.79%+39.79%", "42.82%+42.82%", "45.86%+45.86%", "48.89%+48.89%", "51.92%+51.92%", "54.95%+54.95%", "57.98%+57.98%", "61.02%+61.02%", "64.05%+64.05%", "67.08%+67.08%"] },
@@ -321,7 +321,7 @@ const resonanceSkill: Skill = {
   id: "1004802",
   category: "Skill",
   name: "전술 조정",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "공명 스킬 · 이건 꽤 아플걸! 피해", description: "", values: ["11.90%+11.90%+11.90%+11.90%+17.85%+17.85%+17.85%+17.85%", "12.88%+12.88%+12.88%+12.88%+19.32%+19.32%+19.32%+19.32%", "13.86%+13.86%+13.86%+13.86%+20.78%+20.78%+20.78%+20.78%", "15.22%+15.22%+15.22%+15.22%+22.83%+22.83%+22.83%+22.83%", "16.20%+16.20%+16.20%+16.20%+24.30%+24.30%+24.30%+24.30%", "17.32%+17.32%+17.32%+17.32%+25.98%+25.98%+25.98%+25.98%", "18.88%+18.88%+18.88%+18.88%+28.32%+28.32%+28.32%+28.32%", "20.44%+20.44%+20.44%+20.44%+30.66%+30.66%+30.66%+30.66%", "22.00%+22.00%+22.00%+22.00%+33.00%+33.00%+33.00%+33.00%", "23.66%+23.66%+23.66%+23.66%+35.49%+35.49%+35.49%+35.49%", "25.61%+25.61%+25.61%+25.61%+38.42%+38.42%+38.42%+38.42%", "27.57%+27.57%+27.57%+27.57%+41.35%+41.35%+41.35%+41.35%", "29.52%+29.52%+29.52%+29.52%+44.27%+44.27%+44.27%+44.27%", "31.47%+31.47%+31.47%+31.47%+47.20%+47.20%+47.20%+47.20%", "33.42%+33.42%+33.42%+33.42%+50.13%+50.13%+50.13%+50.13%", "35.37%+35.37%+35.37%+35.37%+53.06%+53.06%+53.06%+53.06%", "37.32%+37.32%+37.32%+37.32%+55.98%+55.98%+55.98%+55.98%", "39.28%+39.28%+39.28%+39.28%+58.91%+58.91%+58.91%+58.91%", "41.23%+41.23%+41.23%+41.23%+61.84%+61.84%+61.84%+61.84%", "43.18%+43.18%+43.18%+43.18%+64.77%+64.77%+64.77%+64.77%"] },
@@ -389,7 +389,7 @@ const liberationSkill: Skill = {
   id: "1004803",
   category: "Liberation",
   name: "파티 타임!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "「Mk. 31 HMG」 피해", description: "", values: ["12.23%", "13.23%", "14.23%", "15.63%", "16.64%", "17.79%", "19.39%", "21.00%", "22.60%", "24.30%", "26.31%", "28.31%", "30.32%", "32.32%", "34.33%", "36.33%", "38.34%", "40.34%", "42.34%", "44.35%"] },
@@ -444,7 +444,7 @@ const variationSkill: Skill = {
   id: "1004806",
   category: "Variation",
   name: "내 차례다!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "훗, 이건 꽤 아플걸! 피해", description: "", values: ["13.60%+13.60%+13.60%+13.60%+13.60%+13.60%+20.40%+34.00%", "14.72%+14.72%+14.72%+14.72%+14.72%+14.72%+22.08%+36.79%", "15.84%+15.84%+15.84%+15.84%+15.84%+15.84%+23.75%+39.58%", "17.40%+17.40%+17.40%+17.40%+17.40%+17.40%+26.09%+43.48%", "18.51%+18.51%+18.51%+18.51%+18.51%+18.51%+27.77%+46.27%", "19.79%+19.79%+19.79%+19.79%+19.79%+19.79%+29.69%+49.48%", "21.58%+21.58%+21.58%+21.58%+21.58%+21.58%+32.37%+53.94%", "23.36%+23.36%+23.36%+23.36%+23.36%+23.36%+35.04%+58.40%", "25.15%+25.15%+25.15%+25.15%+25.15%+25.15%+37.72%+62.86%", "27.04%+27.04%+27.04%+27.04%+27.04%+27.04%+40.56%+67.60%", "29.27%+29.27%+29.27%+29.27%+29.27%+29.27%+43.91%+73.18%", "31.50%+31.50%+31.50%+31.50%+31.50%+31.50%+47.25%+78.75%", "33.73%+33.73%+33.73%+33.73%+33.73%+33.73%+50.60%+84.33%", "35.96%+35.96%+35.96%+35.96%+35.96%+35.96%+53.94%+89.90%", "38.20%+38.20%+38.20%+38.20%+38.20%+38.20%+57.29%+95.48%", "40.43%+40.43%+40.43%+40.43%+40.43%+40.43%+60.64%+101.06%", "42.66%+42.66%+42.66%+42.66%+42.66%+42.66%+63.98%+106.63%", "44.89%+44.89%+44.89%+44.89%+44.89%+44.89%+67.33%+112.21%", "47.12%+47.12%+47.12%+47.12%+47.12%+47.12%+70.67%+117.78%", "49.35%+49.35%+49.35%+49.35%+49.35%+49.35%+74.02%+123.36%"] },
@@ -528,7 +528,7 @@ const circuitSkill: Skill = {
   id: "1004807",
   category: "Circuit",
   name: "이제부터가 진짜야!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "탕탕탕! · 헌트리스 피해", description: "", values: ["10.00%+10.00%+10.00%+160.00%+10.00%", "10.82%+10.82%+10.82%+173.12%+10.82%", "11.64%+11.64%+11.64%+186.24%+11.64%", "12.79%+12.79%+12.79%+204.61%+12.79%", "13.61%+13.61%+13.61%+217.73%+13.61%", "14.56%+14.56%+14.56%+232.82%+14.56%", "15.87%+15.87%+15.87%+253.81%+15.87%", "17.18%+17.18%+17.18%+274.80%+17.18%", "18.49%+18.49%+18.49%+295.80%+18.49%", "19.89%+19.89%+19.89%+318.10%+19.89%", "21.53%+21.53%+21.53%+344.34%+21.53%", "23.17%+23.17%+23.17%+370.58%+23.17%", "24.81%+24.81%+24.81%+396.82%+24.81%", "26.45%+26.45%+26.45%+423.06%+26.45%", "28.09%+28.09%+28.09%+449.30%+28.09%", "29.73%+29.73%+29.73%+475.54%+29.73%", "31.37%+31.37%+31.37%+501.78%+31.37%", "33.01%+33.01%+33.01%+528.02%+33.01%", "34.65%+34.65%+34.65%+554.26%+34.65%", "36.29%+36.29%+36.29%+580.50%+36.29%"] },
@@ -540,7 +540,7 @@ const passive4804: Skill = {
   id: "1004804",
   category: "Passive",
   name: "네 차례야!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaD1.webp",
   attacks: [],
 };
 
@@ -548,7 +548,7 @@ const passive4805: Skill = {
   id: "1004805",
   category: "Passive",
   name: "빈틈 발견!",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaD2.webp",
   attacks: [],
 };
 
@@ -556,7 +556,7 @@ const passive4808: Skill = {
   id: "1004808",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaY.webp",
   attacks: [],
 };
 
@@ -582,7 +582,7 @@ const passive4809: Skill = {
   id: "1004809",
   category: "Intro",
   name: "최고의 동료",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconLibeika/SP_IconLibeikaT.webp",
   attacks: introSkillAttacks1004809,
 };
 
@@ -590,7 +590,7 @@ const passive4810: Skill = {
   id: "1004810",
   category: "Sync",
   name: "해킹 · 멜트다운",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 /** 1체인의 「다음 스킬 배율 50% 상승」이 가리키는 목록. */
@@ -842,8 +842,8 @@ export const rebecca: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1308)가 아니라 별도 번호(69)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_69_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_69_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_69_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_69_UI.webp",
   echoIds: [],
 };

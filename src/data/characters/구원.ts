@@ -114,7 +114,7 @@ const basicSkill: Skill = {
   id: "1004101",
   category: "Basic",
   name: "어둠 속 푸른 빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["21.00%", "22.73%", "24.45%", "26.86%", "28.58%", "30.56%", "33.32%", "36.07%", "38.83%", "41.76%", "45.20%", "48.64%", "52.09%", "55.53%", "58.98%", "62.42%", "65.86%", "69.31%", "72.75%", "76.20%"] },
@@ -180,7 +180,7 @@ const resonanceSkill: Skill = {
   id: "1004102",
   category: "Skill",
   name: "숲을 가르는 바람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["36.14%*3", "39.10%*3", "42.06%*3", "46.21%*3", "49.18%*3", "52.58%*3", "57.32%*3", "62.06%*3", "66.80%*3", "71.84%*3", "77.77%*3", "83.69%*3", "89.62%*3", "95.55%*3", "101.47%*3", "107.40%*3", "113.32%*3", "119.25%*3", "125.17%*3", "131.10%*3"] },
@@ -211,7 +211,7 @@ const liberationSkill: Skill = {
   id: "1004103",
   category: "Liberation",
   name: "진중한 한 수",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["400.00%", "432.80%", "465.60%", "511.52%", "544.32%", "582.04%", "634.52%", "687.00%", "739.48%", "795.24%", "860.84%", "926.44%", "992.04%", "1057.64%", "1123.24%", "1188.84%", "1254.44%", "1320.04%", "1385.64%", "1451.24%"] },
@@ -247,7 +247,7 @@ const variationSkill: Skill = {
   id: "1004106",
   category: "Variation",
   name: "치명적인 한 획",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["4.80%*5+24.00%+72.00%", "5.20%*5+25.97%+77.91%", "5.59%*5+27.94%+83.81%", "6.14%*5+30.70%+92.08%", "6.54%*5+32.66%+97.98%", "6.99%*5+34.93%+104.77%", "7.62%*5+38.08%+114.22%", "8.25%*5+41.22%+123.66%", "8.88%*5+44.37%+133.11%", "9.55%*5+47.72%+143.15%", "10.34%*5+51.66%+154.96%", "11.12%*5+55.59%+166.76%", "11.91%*5+59.53%+178.57%", "12.70%*5+63.46%+190.38%", "13.48%*5+67.40%+202.19%", "14.27%*5+71.34%+214.00%", "15.06%*5+75.27%+225.80%", "15.85%*5+79.21%+237.61%", "16.63%*5+83.14%+249.42%", "17.42%*5+87.08%+261.23%"] },
@@ -376,7 +376,7 @@ const circuitSkill: Skill = {
   id: "1004107",
   category: "Circuit",
   name: "예리하게 다듬어진 푸른 의지",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "검의 회답 · 어둠 속 푸른 빛 1단 피해", description: "", values: ["30.00%+30.00%", "32.46%+32.46%", "34.92%+34.92%", "38.37%+38.37%", "40.83%+40.83%", "43.66%+43.66%", "47.59%+47.59%", "51.53%+51.53%", "55.47%+55.47%", "59.65%+59.65%", "64.57%+64.57%", "69.49%+69.49%", "74.41%+74.41%", "79.33%+79.33%", "84.25%+84.25%", "89.17%+89.17%", "94.09%+94.09%", "99.01%+99.01%", "103.93%+103.93%", "108.85%+108.85%"] },
@@ -392,7 +392,7 @@ const passive4104: Skill = {
   id: "1004104",
   category: "Passive",
   name: "고요한 걸음으로",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanD1.webp",
   attacks: [],
 };
 
@@ -400,7 +400,7 @@ const passive4105: Skill = {
   id: "1004105",
   category: "Passive",
   name: "그대와 함께 달래는 만고의 고뇌",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanD2.webp",
   attacks: [],
 };
 
@@ -408,7 +408,7 @@ const passive4108: Skill = {
   id: "1004108",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -416,7 +416,7 @@ const passive4109: Skill = {
   id: "1004109",
   category: "Intro",
   name: "달아나지 않는 마음",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconQiuyuan/SP_IconQiuyuanT.webp",
   // DamageList: 100%(1411900009)와 3체인 대체 반주 500%(1411900019). 둘 다 에코 어빌리티 판정.
   attacks: [
     {
@@ -451,7 +451,7 @@ const passive4110: Skill = {
   id: "1004110",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 고유 「고요한 걸음으로」와 3체인이 함께 가리키는 검의 회답 셋. */
@@ -661,8 +661,8 @@ export const qiuyuan: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1411)가 아니라 별도 번호(56)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_56_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_56_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_56_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_56_UI.webp",
   echoIds: [],
 };

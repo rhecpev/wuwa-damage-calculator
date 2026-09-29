@@ -53,17 +53,18 @@ function atLevel(prop, level) {
 
 const stripHtml = (t) => String(t ?? "").replace(/<[^>]+>/g, "").trim();
 
-const ICON_BASE = "https://api.encore.moe/resource/Data";
+const ICON_BASE = "https://api-v2.encore.moe/resource/Data";
 
 /**
  * 아이콘 경로를 실제로 불러올 수 있는 URL로 바꾼다.
  * 원본은 언리얼 애셋 경로라 파일명이 "이름.이름"으로 중복되고 확장자가 없다.
  *   /Game/.../T_IconWeapon21010066_UI.T_IconWeapon21010066_UI
- *   -> https://api.encore.moe/resource/Data/Game/.../T_IconWeapon21010066_UI.webp
+ *   -> https://api-v2.encore.moe/resource/Data/Game/.../T_IconWeapon21010066_UI.webp
  */
 function iconUrl(path) {
   if (!path) return null;
-  if (String(path).startsWith("http")) return path; // 이미 URL이면 그대로
+  // 이미 URL이면 그대로 — 다만 옛 호스트(api.encore.moe)는 캐시에 없는 그림을 502로 돌려주므로 v2로 바꾼다.
+  if (String(path).startsWith("http")) return String(path).replace("https://api.encore.moe/", "https://api-v2.encore.moe/");
   const slash = String(path).lastIndexOf("/");
   const dir = String(path).slice(0, slash);
   const name = String(path).slice(slash + 1).split(".")[0];

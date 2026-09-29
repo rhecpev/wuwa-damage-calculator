@@ -170,7 +170,7 @@ const basicSkill: Skill = {
   id: "1003401",
   category: "Basic",
   name: "네박자 무도곡",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "2단 피해", description: "", values: ["24.60%+12.30%*2+32.80%", "26.62%+13.31%*2+35.49%", "28.64%+14.32%*2+38.18%", "31.46%+15.73%*2+41.95%", "33.48%+16.74%*2+44.64%", "35.80%+17.90%*2+47.73%", "39.03%+19.52%*2+52.04%", "42.26%+21.13%*2+56.34%", "45.48%+22.74%*2+60.64%", "48.91%+24.46%*2+65.21%", "52.95%+26.48%*2+70.59%", "56.98%+28.49%*2+75.97%", "61.02%+30.51%*2+81.35%", "65.05%+32.53%*2+86.73%", "69.08%+34.54%*2+92.11%", "73.12%+36.56%*2+97.49%", "77.15%+38.58%*2+102.87%", "81.19%+40.60%*2+108.25%", "85.22%+42.61%*2+113.63%", "89.26%+44.63%*2+119.01%"] },
@@ -211,7 +211,7 @@ const resonanceSkill: Skill = {
   id: "1003402",
   category: "Skill",
   name: "하모니의 속주",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["20.32%*4", "21.98%*4", "23.65%*4", "25.98%*4", "27.65%*4", "29.56%*4", "32.23%*4", "34.89%*4", "37.56%*4", "40.39%*4", "43.72%*4", "47.05%*4", "50.38%*4", "53.71%*4", "57.04%*4", "60.38%*4", "63.71%*4", "67.04%*4", "70.37%*4", "73.70%*4"] },
@@ -282,7 +282,7 @@ const liberationSkill: Skill = {
   id: "1003403",
   category: "Liberation",
   name: "트리오의 카덴차",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "즉흥 교향시 피해", description: "", values: ["553.50%", "598.89%", "644.28%", "707.82%", "753.21%", "805.40%", "878.02%", "950.64%", "1023.26%", "1100.42%", "1191.19%", "1281.97%", "1372.74%", "1463.51%", "1554.29%", "1645.06%", "1735.84%", "1826.61%", "1917.38%", "2008.16%"] },
@@ -313,7 +313,7 @@ const variationSkill: Skill = {
   id: "1003406",
   category: "Variation",
   name: "바람 속의 음유시인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["95.12%", "102.92%", "110.72%", "121.64%", "129.44%", "138.41%", "150.89%", "163.37%", "175.85%", "189.11%", "204.71%", "220.31%", "235.91%", "251.51%", "267.11%", "282.71%", "298.31%", "313.91%", "329.51%", "345.11%"] },
@@ -350,7 +350,7 @@ const circuitSkill: Skill = {
   id: "1003407",
   category: "Circuit",
   name: "바람과 시의 심포니",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "네박자 중주 피해", description: "", values: ["15.80%*10+157.95%", "17.10%*10+170.91%", "18.39%*10+183.86%", "20.20%*10+201.99%", "21.50%*10+214.94%", "22.99%*10+229.84%", "25.06%*10+250.56%", "27.13%*10+271.28%", "29.21%*10+292.01%", "31.41%*10+314.03%", "34.00%*10+339.93%", "36.59%*10+365.83%", "39.18%*10+391.74%", "41.77%*10+417.64%", "44.36%*10+443.54%", "46.95%*10+469.45%", "49.54%*10+495.35%", "52.13%*10+521.26%", "54.72%*10+547.16%", "57.31%*10+573.06%"] },
@@ -361,7 +361,7 @@ const passive3404: Skill = {
   id: "1003404",
   category: "Passive",
   name: "막간의 반주",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongD1.webp",
   attacks: [],
 };
 
@@ -369,7 +369,7 @@ const passive3405: Skill = {
   id: "1003405",
   category: "Passive",
   name: "리나시타의 바람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongD2.webp",
   attacks: [],
 };
 
@@ -377,7 +377,7 @@ const passive3408: Skill = {
   id: "1003408",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -385,7 +385,7 @@ const passive3409: Skill = {
   id: "1003409",
   category: "Intro",
   name: "화음이 부르는 바람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXiakong/SP_IconXiakongT.webp",
   attacks: [],
 };
 
@@ -393,7 +393,7 @@ const passive3410: Skill = {
   id: "1003410",
   category: "Sync",
   name: "조화도 파괴 · 권총",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 
@@ -512,8 +512,8 @@ export const ciaccona: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1407)가 아니라 별도 번호(37)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_37_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_37_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_37_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_37_UI.webp",
   echoIds: [],
 };

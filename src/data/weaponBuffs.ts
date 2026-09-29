@@ -2696,4 +2696,92 @@ export const weaponBuffs: Record<string, WeaponBuffTemplate[]> = {
       condition: "조화 파동 · 이탈 혹은 불꽃 효과 추가 시, 8초간",
     },
   ],
+  // 적막한 어둠 (직검 ★5)
+  //
+  // 「못다 한 그리움」(합일 획득)과 「애틋한 그리움」(협주 에너지 소모)은 서로를 지우는 상태라
+  // 같은 배타 묶음에 넣는다. 합일 획득 시의 본인 전도 피해 증가는 그와 별개로 30초 걸린다.
+  "21020107": [
+    {
+      label: "공격력 증가",
+      target: "atkPercent",
+      damageType: "All",
+      values: [0.12, 0.15, 0.18, 0.21, 0.24],
+      uptime: "passive", // 조건 없이 늘 걸린다
+      scope: "self",
+    },
+    {
+      label: "합일 획득 시 전도 피해",
+      target: "damageBonus",
+      damageType: "Electro",
+      values: [0.3, 0.375, 0.45, 0.525, 0.6],
+      uptime: "active",
+      scope: "self",
+      condition: "합일 획득 시, 30초간",
+    },
+    {
+      label: "못다 한 그리움 · 파티 전도 피해 보너스",
+      target: "damageBonus",
+      damageType: "Electro",
+      values: [0.24, 0.3, 0.36, 0.42, 0.48],
+      uptime: "active",
+      scope: "party",
+      statGroup: "buff",
+      condition: "합일 획득 시, 30초간 (「애틋한 그리움」 제거 · 같은 이름의 효과는 중첩 불가)",
+      exclusiveGroup: "적막한 어둠 그리움",
+    },
+    {
+      label: "애틋한 그리움 · 전도 피해 추가 증가",
+      target: "damageBonus",
+      damageType: "Electro",
+      values: [0.4, 0.5, 0.6, 0.7, 0.8],
+      uptime: "active",
+      scope: "self",
+      condition: "자신의 협주 에너지 소모 시, 14초간 (「못다 한 그리움」 제거 · 전환하면 즉시 종료)",
+      exclusiveGroup: "적막한 어둠 그리움",
+    },
+  ],
+
+  // 옥궐에 피는 꽃 (증폭기 ★5)
+  //
+  // 조건 하나(전자 효과 추가 혹은 합일 대응)에 세 효과가 딸린다. 붙는 자리가 모두 달라
+  // (부스트 · 저항 무시 · 이상 효과 부스트) 한 줄씩 적는다.
+  "21050116": [
+    {
+      label: "전체 속성 피해 보너스",
+      target: "damageBonus",
+      damageType: "All",
+      values: [0.12, 0.15, 0.18, 0.21, 0.24],
+      uptime: "passive", // 조건 없이 늘 걸린다
+      scope: "self",
+    },
+    {
+      label: "공명 스킬 피해 부스트",
+      target: "boost",
+      damageType: "Skill",
+      values: [0.36, 0.45, 0.54, 0.63, 0.72],
+      uptime: "active",
+      scope: "self",
+      condition: "전자 효과 추가 후 혹은 합일 대응 시, 30초간",
+    },
+    {
+      label: "공명 스킬 전도 저항 무시",
+      target: "resPen",
+      damageType: "Skill",
+      element: "Electro",
+      values: [0.1, 0.135, 0.17, 0.205, 0.24],
+      uptime: "active",
+      scope: "self",
+      condition: "전자 효과 추가 후 혹은 합일 대응 시, 30초간",
+    },
+    {
+      label: "파티 전자 효과 피해 부스트",
+      target: "anomalyBoost",
+      damageType: "ElectroFlare",
+      values: [0.3, 0.375, 0.45, 0.525, 0.6],
+      uptime: "active",
+      scope: "party", // 「일정 범위 내의 목표가 받는」 — 누가 붙인 전자든 세진다
+      condition: "전자 효과 추가 후 혹은 합일 대응 시, 자신이 파티 내 등장 캐릭터일 때 30초간 (같은 이름은 더 높은 수치가 적용)",
+    },
+  ],
 };
+

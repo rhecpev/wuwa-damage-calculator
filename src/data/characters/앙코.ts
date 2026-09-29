@@ -123,7 +123,7 @@ const basicSkill: Skill = {
   id: "1000701",
   category: "Basic",
   name: "그늘이와 구름이 출격",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorMagic.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["28.00%", "30.29%", "32.59%", "35.80%", "38.10%", "40.74%", "44.41%", "48.09%", "51.76%", "55.66%", "60.25%", "64.85%", "69.44%", "74.03%", "78.62%", "83.21%", "87.81%", "92.40%", "96.99%", "101.58%"] },
@@ -176,7 +176,7 @@ const resonanceSkill: Skill = {
   id: "1000702",
   category: "Skill",
   name: "불꽃 양",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "불꽃 양 피해", description: "", values: ["38.53%*8", "41.69%*8", "44.85%*8", "49.28%*8", "52.44%*8", "56.07%*8", "61.13%*8", "66.18%*8", "71.24%*8", "76.61%*8", "82.93%*8", "89.25%*8", "95.57%*8", "101.89%*8", "108.21%*8", "114.53%*8", "120.85%*8", "127.17%*8", "133.49%*8", "139.79%*8"] },
@@ -287,7 +287,7 @@ const liberationSkill: Skill = {
   id: "1000703",
   category: "Liberation",
   name: "그늘이의 대폭주",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "그늘이·난리법석 1단 피해", description: "", values: ["45.36%*2", "49.08%*2", "52.80%*2", "58.01%*2", "61.73%*2", "66.01%*2", "71.96%*2", "77.91%*2", "83.86%*2", "90.18%*2", "97.62%*2", "105.06%*2", "112.50%*2", "119.94%*2", "127.38%*2", "134.81%*2", "142.25%*2", "149.69%*2", "157.13%*2", "164.57%*2"] },
@@ -325,7 +325,7 @@ const variationSkill: Skill = {
   id: "1000706",
   category: "Variation",
   name: "양들의 도움",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["100.00%", "108.20%", "116.40%", "127.88%", "136.08%", "145.51%", "158.63%", "171.75%", "184.87%", "198.81%", "215.21%", "231.61%", "248.01%", "264.41%", "280.81%", "297.21%", "313.61%", "330.01%", "346.41%", "362.81%"] },
@@ -371,7 +371,7 @@ const circuitSkill: Skill = {
   id: "1000707",
   category: "Circuit",
   name: "그늘이와 구름이",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "구름이·제어불가의 화염 피해", description: "", values: ["168.00%", "181.77%", "195.55%", "214.83%", "228.61%", "244.45%", "266.49%", "288.53%", "310.58%", "334.00%", "361.55%", "389.10%", "416.65%", "444.20%", "471.76%", "499.31%", "526.86%", "554.41%", "581.96%", "609.52%"] },
@@ -386,7 +386,7 @@ const passive0704: Skill = {
   id: "1000704",
   category: "Passive",
   name: "화난 그늘이",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeD1.webp",
   attacks: [],
 };
 
@@ -395,7 +395,7 @@ const passive0705: Skill = {
   id: "1000705",
   category: "Passive",
   name: "음메음메 응원가",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeD2.webp",
   attacks: [],
 };
 
@@ -404,7 +404,7 @@ const passive0708: Skill = {
   id: "1000708",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -413,7 +413,7 @@ const introSkill: Skill = {
   id: "1000709",
   category: "Intro",
   name: "워밍업",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconAnke/SP_IconAnkeT.webp",
   // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치를 옮겼다 — 「대지의 불길」이 1.5초마다
   // 공격력 176.76%, 6초간. 6 ÷ 1.5 = 4번으로 봤다(적이 범위 안에 계속 있을 때). 레벨과 무관한 고정값.
   attacks: [
@@ -439,7 +439,7 @@ const syncSkill: Skill = {
   id: "1000710",
   category: "Sync",
   name: "조화도 파괴 · 증폭기",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakMagic.webp",
   attacks: [],
 };
 
@@ -556,8 +556,8 @@ export const encore: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id가 아니라 별도 번호(8)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_8.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_8.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_8_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_8_UI.webp",
   echoIds: [],
 };

@@ -697,4 +697,28 @@ export const echoAttackOverrides: Record<string, EchoAttackOverride> = {
       },
     ],
   },
+  // 공명의 메아리 · 태초의 여우의 별자리 · 천연 (6000225)
+  //   기본        4단 27.36% + 1단 164.16% 전도
+  //   여우의 별자리  더 넓은 범위로 최대 5단 13.68% + 1단 232.56% 전도
+  //
+  // 자동 추출은 두 갈래를 한 공격에 더해 놓고 있었다. 낀 사람에 따라 하나만 들어간다.
+  "6000225": {
+    note: "장착 캐릭터가 여우의 별자리면 어빌리티가 바뀐다 — 낀 사람의 갈래만 팔레트에 뜬다",
+    attacks: [
+      {
+        name: "에코 스킬",
+        element: "Electro",
+        scalingStat: "ATK",
+        hits: [0.2736, 0.2736, 0.2736, 0.2736, 1.6416],
+        exceptCharacters: ["hsin"],
+      },
+      {
+        name: "여우의 별자리 · 에코 스킬",
+        element: "Electro",
+        scalingStat: "ATK",
+        hits: [0.1368, 0.1368, 0.1368, 0.1368, 0.1368, 2.3256],
+        onlyCharacters: ["hsin"],
+      },
+    ],
+  },
 };

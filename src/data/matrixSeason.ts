@@ -95,7 +95,7 @@ export const MATRIX_SEASON = {
   level: "특이점 확장",
 };
 
-const BOSS_ICON = "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/ImgBoss/";
+const BOSS_ICON = "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/ImgBoss/";
 
 /** 라운드마다 같은 다섯. hp · score는 1 · 2 · 3 · 4라운드 순서다(실측표 그대로). */
 const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaultHp" | "score"> & {

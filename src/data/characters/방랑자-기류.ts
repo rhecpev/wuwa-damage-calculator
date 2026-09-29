@@ -186,7 +186,7 @@ const basicSkill: Skill = {
   id: "1003201",
   category: "Basic",
   name: "바람의 필력",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "1단 피해", description: "", values: ["17.76%", "19.22%", "20.68%", "22.72%", "24.17%", "25.85%", "28.18%", "30.51%", "32.84%", "35.31%", "38.22%", "41.14%", "44.05%", "46.96%", "49.87%", "52.79%", "55.70%", "58.61%", "61.52%", "64.44%"] },
@@ -237,7 +237,7 @@ const resonanceSkill: Skill = {
   id: "1003202",
   category: "Skill",
   name: "분열 형상",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "하늘의 돌파 피해", description: "", values: ["33.42%+50.13%", "36.16%+54.24%", "38.90%+58.35%", "42.74%+64.11%", "45.48%+68.22%", "48.63%+72.94%", "53.02%+79.52%", "57.40%+86.10%", "61.78%+92.67%", "66.44%+99.66%", "71.92%+107.88%", "77.40%+116.10%", "82.88%+124.32%", "88.36%+132.54%", "93.84%+140.76%", "99.33%+148.99%", "104.81%+157.21%", "110.29%+165.43%", "115.77%+173.65%", "121.25%+181.87%"] },
@@ -268,7 +268,7 @@ const liberationSkill: Skill = {
   id: "1003203",
   category: "Liberation",
   name: "만물의 허상",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["270.00%", "292.14%", "314.28%", "345.28%", "367.42%", "392.88%", "428.31%", "463.73%", "499.15%", "536.79%", "581.07%", "625.35%", "669.63%", "713.91%", "758.19%", "802.47%", "846.75%", "891.03%", "935.31%", "979.59%"] },
@@ -299,7 +299,7 @@ const variationSkill: Skill = {
   id: "1003206",
   category: "Variation",
   name: "소멸하지 않는 폭풍",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["40.00%+60.00%", "43.28%+64.92%", "46.56%+69.84%", "51.16%+76.73%", "54.44%+81.65%", "58.21%+87.31%", "63.46%+95.18%", "68.70%+103.05%", "73.95%+110.93%", "79.53%+119.29%", "86.09%+129.13%", "92.65%+138.97%", "99.21%+148.81%", "105.77%+158.65%", "112.33%+168.49%", "118.89%+178.33%", "125.45%+188.17%", "132.01%+198.01%", "138.57%+207.85%", "145.13%+217.69%"] },
@@ -366,7 +366,7 @@ const circuitSkill: Skill = {
   id: "1003207",
   category: "Circuit",
   name: "바람의 회전",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "비바람 속의 춤 1단 피해", description: "", values: ["64.79%", "70.10%", "75.41%", "82.85%", "88.16%", "94.27%", "102.77%", "111.27%", "119.77%", "128.80%", "139.42%", "150.05%", "160.67%", "171.30%", "181.92%", "192.54%", "203.17%", "213.79%", "224.42%", "235.04%"] },
@@ -381,7 +381,7 @@ const passive3204: Skill = {
   id: "1003204",
   category: "Passive",
   name: "허공의 먼지",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuD1.webp",
   attacks: [],
 };
 
@@ -389,7 +389,7 @@ const passive3205: Skill = {
   id: "1003205",
   category: "Passive",
   name: "끝없는 바람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuD2.webp",
   attacks: [],
 };
 
@@ -397,7 +397,7 @@ const passive3208: Skill = {
   id: "1003208",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconRun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconRun.webp",
   attacks: [],
 };
 
@@ -405,7 +405,7 @@ const passive3209: Skill = {
   id: "1003209",
   category: "Intro",
   name: "바람의 메아리",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconFengzhu/SP_IconFengzhuT.webp",
   attacks: [],
 };
 
@@ -413,7 +413,7 @@ const passive3210: Skill = {
   id: "1003210",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 
@@ -530,8 +530,8 @@ export const roverAero: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 1406 기준 번호 4, 1408은 5다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_4.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_4.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_4_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_4_UI.webp",
   echoIds: [],
 };

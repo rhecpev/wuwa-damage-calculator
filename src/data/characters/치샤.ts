@@ -121,7 +121,7 @@ const basicSkill: Skill = {
   id: "1000201",
   category: "Basic",
   name: "펑펑",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorGun.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "3단 피해", description: "", values: ["16.88%*4", "18.26%*4", "19.65%*4", "21.58%*4", "22.97%*4", "24.56%*4", "26.77%*4", "28.99%*4", "31.20%*4", "33.55%*4", "36.32%*4", "39.09%*4", "41.86%*4", "44.62%*4", "47.39%*4", "50.16%*4", "52.93%*4", "55.69%*4", "58.46%*4", "61.23%*4"] },
@@ -162,7 +162,7 @@ const resonanceSkill: Skill = {
   id: "1000202",
   category: "Skill",
   name: "투쟁의 마음",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["16.00%*8", "17.32%*8", "18.63%*8", "20.47%*8", "21.78%*8", "23.29%*8", "25.39%*8", "27.48%*8", "29.58%*8", "31.81%*8", "34.44%*8", "37.06%*8", "39.69%*8", "42.31%*8", "44.93%*8", "47.56%*8", "50.18%*8", "52.81%*8", "55.43%*8", "58.05%*8"] },
@@ -201,7 +201,7 @@ const liberationSkill: Skill = {
   id: "1000203",
   category: "Liberation",
   name: "뜨거운 불길",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["480.00%+29.10%*11", "519.36%+31.48%*11", "558.72%+33.87%*11", "613.83%+37.21%*11", "653.19%+39.59%*11", "698.45%+42.34%*11", "761.43%+46.15%*11", "824.40%+49.97%*11", "887.38%+53.79%*11", "954.29%+57.84%*11", "1033.01%+62.61%*11", "1111.73%+67.38%*11", "1190.45%+72.15%*11", "1269.17%+76.92%*11", "1347.89%+81.70%*11", "1426.61%+86.47%*11", "1505.33%+91.24%*11", "1584.05%+96.01%*11", "1662.77%+100.78%*11", "1741.49%+105.55%*11"] },
@@ -235,7 +235,7 @@ const variationSkill: Skill = {
   id: "1000206",
   category: "Variation",
   name: "당당히 등장",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["24.75%*2+12.38%*4", "26.78%*2+13.39%*4", "28.81%*2+14.41%*4", "31.66%*2+15.83%*4", "33.68%*2+16.84%*4", "36.02%*2+18.01%*4", "39.27%*2+19.64%*4", "42.51%*2+21.26%*4", "45.76%*2+22.88%*4", "49.21%*2+24.61%*4", "53.27%*2+26.64%*4", "57.33%*2+28.67%*4", "61.39%*2+30.70%*4", "65.45%*2+32.73%*4", "69.51%*2+34.76%*4", "73.56%*2+36.78%*4", "77.62%*2+38.81%*4", "81.68%*2+40.84%*4", "85.74%*2+42.87%*4", "89.80%*2+44.90%*4"] },
@@ -273,7 +273,7 @@ const circuitSkill: Skill = {
   id: "1000207",
   category: "Circuit",
   name: "영웅의 불길",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "열압탄 피해", description: "", values: ["10.00%", "10.82%", "11.64%", "12.79%", "13.61%", "14.56%", "15.87%", "17.18%", "18.49%", "19.89%", "21.53%", "23.17%", "24.81%", "26.45%", "28.09%", "29.73%", "31.37%", "33.01%", "34.65%", "36.29%"] },
@@ -288,7 +288,7 @@ const passive0204: Skill = {
   id: "1000204",
   category: "Passive",
   name: "뜨거운 탄창",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangD1.webp",
   attacks: [],
 };
 
@@ -297,7 +297,7 @@ const passive0205: Skill = {
   id: "1000205",
   category: "Passive",
   name: "극도로 매운맛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangD2.webp",
   attacks: [],
 };
 
@@ -306,7 +306,7 @@ const passive0208: Skill = {
   id: "1000208",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconRun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconRun.webp",
   attacks: [],
 };
 
@@ -315,7 +315,7 @@ const introSkill: Skill = {
   id: "1000209",
   category: "Intro",
   name: "도약의 불빛",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconMaxiaofang/SP_IconMaxiaofangT.webp",
   // 반주 스킬에 DamageList · 속성표가 없어 설명문 수치(공격력 530%)를 옮겼다. 레벨과 무관한 고정값.
   attacks: [
     {
@@ -337,7 +337,7 @@ const syncSkill: Skill = {
   id: "1000210",
   category: "Sync",
   name: "조화도 파괴 · 권총",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakGun.webp",
   attacks: [],
 };
 
@@ -445,8 +445,8 @@ export const qishar: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id가 아니라 별도 번호(2)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_2.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_2.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_2_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_2_UI.webp",
   echoIds: [],
 };

@@ -204,7 +204,7 @@ const basicSkill: Skill = {
   id: "1005901",
   category: "Basic",
   name: "생사의 경계를 맴도는 발걸음",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorSword.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 혼백 소환 1단 피해", description: "", values: ["22.50%", "24.35%", "26.19%", "28.78%", "30.62%", "32.74%", "35.70%", "38.65%", "41.60%", "44.74%", "48.43%", "52.12%", "55.81%", "59.50%", "63.19%", "66.88%", "70.57%", "74.26%", "77.95%", "81.64%"] },
@@ -292,7 +292,7 @@ const resonanceSkill: Skill = {
   id: "1005902",
   category: "Skill",
   name: "흉살과 마주한 순간",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "뼈를 갉는 음기 피해", description: "", values: ["33.00%+16.50%*3", "35.71%+17.86%*3", "38.42%+19.21%*3", "42.21%+21.11%*3", "44.91%+22.46%*3", "48.02%+24.01%*3", "52.35%+26.18%*3", "56.68%+28.34%*3", "61.01%+30.51%*3", "65.61%+32.81%*3", "71.02%+35.51%*3", "76.44%+38.22%*3", "81.85%+40.93%*3", "87.26%+43.63%*3", "92.67%+46.34%*3", "98.08%+49.04%*3", "103.50%+51.75%*3", "108.91%+54.46%*3", "114.32%+57.16%*3", "119.73%+59.87%*3"] },
@@ -343,7 +343,7 @@ const liberationSkill: Skill = {
   id: "1005903",
   category: "Liberation",
   name: "만귀를 거두는 무덤",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "만귀를 거두는 무덤 피해", description: "", values: ["46.86%*8", "50.70%*8", "54.54%*8", "59.92%*8", "63.76%*8", "68.18%*8", "74.33%*8", "80.47%*8", "86.62%*8", "93.15%*8", "100.84%*8", "108.52%*8", "116.20%*8", "123.89%*8", "131.57%*8", "139.26%*8", "146.94%*8", "154.62%*8", "162.31%*8", "169.99%*8"] },
@@ -373,7 +373,7 @@ const variationSkill: Skill = {
   id: "1005906",
   category: "Variation",
   name: "등불 들고 무덤에 던지는 질문",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "스킬 피해", description: "", values: ["100.00%", "108.20%", "116.40%", "127.88%", "136.08%", "145.51%", "158.63%", "171.75%", "184.87%", "198.81%", "215.21%", "231.61%", "248.01%", "264.41%", "280.81%", "297.21%", "313.61%", "330.01%", "346.41%", "362.81%"] },
@@ -423,7 +423,7 @@ const circuitSkill: Skill = {
   id: "1005907",
   category: "Circuit",
   name: "삼도천을 거스르는 유람",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "강공격 · 혼백 탈취 피해", description: "", values: ["8.25%*2+10.61%*3+69.53%", "8.93%*2+11.48%*3+75.23%", "9.61%*2+12.35%*3+80.93%", "10.55%*2+13.57%*3+88.91%", "11.23%*2+14.44%*3+94.61%", "12.01%*2+15.44%*3+101.16%", "13.09%*2+16.83%*3+110.29%", "14.17%*2+18.22%*3+119.41%", "15.25%*2+19.61%*3+128.53%", "16.40%*2+21.09%*3+138.22%", "17.76%*2+22.83%*3+149.62%", "19.11%*2+24.57%*3+161.02%", "20.46%*2+26.31%*3+172.42%", "21.81%*2+28.05%*3+183.82%", "23.17%*2+29.78%*3+195.22%", "24.52%*2+31.52%*3+206.63%", "25.87%*2+33.26%*3+218.03%", "27.22%*2+35.00%*3+229.43%", "28.58%*2+36.74%*3+240.83%", "29.93%*2+38.48%*3+252.23%"] },
@@ -436,7 +436,7 @@ const passive5904: Skill = {
   id: "1005904",
   category: "Passive",
   name: "벽에 기대어 듣게 된 속세",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranD1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranD1.webp",
   attacks: [],
 };
 
@@ -444,7 +444,7 @@ const passive5905: Skill = {
   id: "1005905",
   category: "Passive",
   name: "흔적을 훑어 좇는 자취",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranD2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranD2.webp",
   attacks: [],
 };
 
@@ -452,7 +452,7 @@ const passive5908: Skill = {
   id: "1005908",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld3.webp",
   attacks: [],
 };
 
@@ -477,7 +477,7 @@ const passive5909: Skill = {
   id: "1005909",
   category: "Intro",
   name: "수산출살(收山出煞)",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconJingran/SP_IconJingranT.webp",
   attacks: introSkillAttacks1005909,
 };
 
@@ -485,7 +485,7 @@ const passive5910: Skill = {
   id: "1005910",
   category: "Sync",
   name: "조화도 파괴 · 대검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakSword.webp",
   attacks: [],
 };
 /** 1체인의 「배율 80% 상승」이 붙는 공명 스킬 넷. DamageList에 ×1.8 짝이 들어 있다. */
@@ -708,8 +708,8 @@ export const jingyan: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1212)가 아니라 별도 번호(74)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_74_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_74_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_74_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_74_UI.webp",
   echoIds: [],
 };

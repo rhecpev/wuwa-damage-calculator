@@ -27,6 +27,8 @@ export const CHARACTER_ANOMALIES: Record<string, AnomalyKind[]> = {
   // 전자 효과 — 전도
   "rover-electro": ["ElectroFlare"],
   bochi: ["ElectroFlare"],
+  // 전자 모드에서만 붙인다 — 합일 모드는 전자 효과를 붙이지 않으므로 모드로 가른 id에 적는다.
+  "hsin-flare": ["ElectroFlare"],
 
   // 서리 효과 — 응결
   lucila: ["FrostChafe"],
@@ -44,6 +46,6 @@ export const CHARACTER_ANOMALIES: Record<string, AnomalyKind[]> = {
 };
 
 /** 이 캐릭터가 붙일 수 있는 이상 효과. 없으면 빈 배열.
- *  모드로 가른 캐릭터는 원래 id로 찾는다 — 이상 효과는 모드를 가리지 않는다. */
+ *  모드로 가른 캐릭터는 가른 id(hsin-flare)를 먼저 보고, 없으면 원래 id로 찾는다. */
 export const anomaliesOf = (characterId: string): AnomalyKind[] =>
-  CHARACTER_ANOMALIES[baseCharacterId(characterId)] ?? [];
+  CHARACTER_ANOMALIES[characterId] ?? CHARACTER_ANOMALIES[baseCharacterId(characterId)] ?? [];

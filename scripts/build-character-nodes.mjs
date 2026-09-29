@@ -48,7 +48,7 @@ const STAT_MAP = {
   "공명해방 피해 보너스": "liberationDamageBonus",
 };
 
-const ICON_BASE = "https://api.encore.moe/resource/Data";
+const ICON_BASE = "https://api-v2.encore.moe/resource/Data";
 
 /** "인멸 피해 보너스가 4.20% 증가한다" -> { havocDamageBonus: 0.042 } */
 function parseStats(describe, unmapped) {

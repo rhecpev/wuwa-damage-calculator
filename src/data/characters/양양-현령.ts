@@ -194,7 +194,7 @@ const basicSkill: Skill = {
   id: "1005401",
   category: "Basic",
   name: "권선징악",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconNorKnife.webp",
   attacks: basicSkillAttacks,
   attributes: [
     { attributeName: "일반 공격 · 검술 · 푸름 1단 피해", description: "", values: ["24.00%", "25.97%", "27.94%", "30.70%", "32.66%", "34.93%", "38.08%", "41.22%", "44.37%", "47.72%", "51.66%", "55.59%", "59.53%", "63.46%", "67.40%", "71.34%", "75.27%", "79.21%", "83.14%", "87.08%"] },
@@ -251,7 +251,7 @@ const resonanceSkill: Skill = {
   id: "1005402",
   category: "Skill",
   name: "깃털로 닦은 푸른 검날",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingB1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingB1.webp",
   attacks: resonanceSkillAttacks,
   attributes: [
     { attributeName: "검술의 전환 · 깃털 피해", description: "", values: ["16.88%*3", "18.27%*3", "19.65%*3", "21.59%*3", "22.98%*3", "24.57%*3", "26.78%*3", "29.00%*3", "31.21%*3", "33.56%*3", "36.33%*3", "39.10%*3", "41.87%*3", "44.64%*3", "47.41%*3", "50.17%*3", "52.94%*3", "55.71%*3", "58.48%*3", "61.25%*3"] },
@@ -331,7 +331,7 @@ const liberationSkill: Skill = {
   id: "1005403",
   category: "Liberation",
   name: "만음을 잠재운 깃털",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingC1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingC1.webp",
   attacks: liberationSkillAttacks,
   attributes: [
     { attributeName: "만음을 잠재운 깃털 피해", description: "", values: ["1000.00%", "1082.00%", "1164.00%", "1278.80%", "1360.80%", "1455.10%", "1586.30%", "1717.50%", "1848.70%", "1988.10%", "2152.10%", "2316.10%", "2480.10%", "2644.10%", "2808.10%", "2972.10%", "3136.10%", "3300.10%", "3464.10%", "3628.10%"] },
@@ -361,7 +361,7 @@ const variationSkill: Skill = {
   id: "1005406",
   category: "Variation",
   name: "깃털에 품은 창공",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingQTE.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingQTE.webp",
   attacks: variationSkillAttacks,
   attributes: [
     { attributeName: "깃털에 품은 창공 피해", description: "", values: ["58.64%", "63.45%", "68.26%", "74.99%", "79.80%", "85.33%", "93.03%", "100.72%", "108.41%", "116.59%", "126.20%", "135.82%", "145.44%", "155.06%", "164.67%", "174.29%", "183.91%", "193.52%", "203.14%", "212.76%"] },
@@ -538,7 +538,7 @@ const circuitSkill: Skill = {
   id: "1005407",
   category: "Circuit",
   name: "만음이 떠오른 길",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingY.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingY.webp",
   attacks: circuitSkillAttacks,
   attributes: [
     { attributeName: "강공격 · 검술 · 푸름 피해", description: "", values: ["67.99%+67.99%+90.65%", "73.56%+73.56%+98.08%", "79.14%+79.14%+105.51%", "86.94%+86.94%+115.92%", "92.52%+92.52%+123.35%", "98.93%+98.93%+131.90%", "107.85%+107.85%+143.79%", "116.77%+116.77%+155.69%", "125.69%+125.69%+167.58%", "135.16%+135.16%+180.21%", "146.31%+146.31%+195.08%", "157.46%+157.46%+209.95%", "168.61%+168.61%+224.81%", "179.76%+179.76%+239.68%", "190.91%+190.91%+254.54%", "202.06%+202.06%+269.41%", "213.21%+213.21%+284.27%", "224.36%+224.36%+299.14%", "235.50%+235.50%+314.00%", "246.65%+246.65%+328.87%"] },
@@ -562,7 +562,7 @@ const passive5404: Skill = {
   id: "1005404",
   category: "Passive",
   name: "영원한 맹세",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLing1D1.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLing1D1.webp",
   attacks: [],
 };
 
@@ -570,7 +570,7 @@ const passive5405: Skill = {
   id: "1005405",
   category: "Passive",
   name: "인생의 악기",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLing2D2.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLing2D2.webp",
   attacks: [],
 };
 
@@ -578,7 +578,7 @@ const passive5408: Skill = {
   id: "1005408",
   category: "Passive",
   name: "요리의 달인",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWorld4.webp",
   attacks: [],
 };
 
@@ -603,7 +603,7 @@ const passive5409: Skill = {
   id: "1005409",
   category: "Intro",
   name: "바람이 이끄는 대로",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingT.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconXuanLing/SP_IconXuanLingT.webp",
   attacks: introSkillAttacks1005409,
 };
 
@@ -611,7 +611,7 @@ const passive5410: Skill = {
   id: "1005410",
   category: "Sync",
   name: "조화도 파괴 · 직검",
-  icon: "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
+  icon: "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Atlas/SkillIcon/SkillIconNor/SP_IconWeakPointBreakKnife.webp",
   attacks: [],
 };
 /** 2체인의 「피해 100% 증가」가 붙는 공명 회로 공격들. */
@@ -850,8 +850,8 @@ export const yangyangXuanling: Character = {
   chainEffects: [],
   // API RoleHeadIconBig / RoleHeadIconLarge. 파일 번호는 캐릭터 Id(1610)가 아니라 별도 번호(70)다.
   iconUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_70_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead150/T_IconRoleHead150_70_UI.webp",
   artUrl:
-    "https://api.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_70_UI.webp",
+    "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/IconRoleHead256/T_IconRoleHead256_70_UI.webp",
   echoIds: [],
 };
