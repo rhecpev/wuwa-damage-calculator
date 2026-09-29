@@ -445,11 +445,13 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     inherentSkillId: "1000804",
     target: "damageBonus",
     damageType: "All",
-    // 주식 1단 · 2단 피해에만 걸린다. 지목한 공격에만 붙으므로 상시로 두어 주식에서 자동으로 켜진다.
+    // 주식 1단 · 2단 피해에만 걸린다. 원문이 「회피 반격 · 그림자 추격」을 통해 나간 주식만이라
+    // 상시가 아니라 발동으로 둔다 — 그냥 공명 스킬로 낸 주식에는 켜지 않는다.
     attackIds: ["1000802_2", "1000802_3"],
     value: 0.2, // 20% 증가
-    uptime: "passive",
+    uptime: "active",
     scope: "self",
+    condition: "회피 반격 · 그림자 추격을 통해 발생한 주식일 때",
   },
   {
     label: "영예",
