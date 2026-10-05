@@ -2509,3 +2509,4 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .update-notice-list{flex:1;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:9px}
 .update-notice-list li{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.55;color:var(--c-c2c9d6)}
 .update-notice-list .updates-tag{flex:none}
+.buff-dialog-split.solo{grid-template-columns:minmax(0,1fr)}

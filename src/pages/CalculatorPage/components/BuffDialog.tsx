@@ -189,7 +189,8 @@ export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
           ))}
         </div>
       )}
-    <div className="buff-dialog-split">
+    {/* 여러 장을 골랐을 때는 히트별 칸이 없다 — 버프 목록이 폭을 다 쓰게 한다. */}
+    <div className={multi ? "buff-dialog-split solo" : "buff-dialog-split"}>
     <div className="buff-dialog-body">
       {usable.length === 0 ? (
         <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>

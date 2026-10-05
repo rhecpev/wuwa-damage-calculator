@@ -293,8 +293,20 @@ export function EchoSelector({
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  onClick={() => askBeforeTaking(e.pk, () => onToggleEcho(characterId, String(e.pk)))}
-                  title={taken ? `${owner!.name} 사용 중 — 누르면 가져올지 묻습니다` : e.name}
+                  onClick={() => {
+                    const run = () => onToggleEcho(characterId, String(e.pk));
+                    // 다섯 칸이 다 찼으면 눌러도 들어갈 자리가 없다 — 가져올지 묻고 나서
+                    // 아무 일도 안 일어나면 안 되므로 묻지 않는다(슬롯으로 끌어 갈아 끼우는 것은 된다).
+                    if (!on && equippedIds.length >= SLOTS) run();
+                    else askBeforeTaking(e.pk, run);
+                  }}
+                  title={
+                    taken
+                      ? equippedIds.length >= SLOTS
+                        ? `${owner!.name} 사용 중 — 칸이 다 차서 누르는 것으로는 못 가져옵니다(슬롯으로 끌어다 놓으세요)`
+                        : `${owner!.name} 사용 중 — 누르면 가져올지 묻습니다`
+                      : e.name
+                  }
                   draggable={canDrag}
                   onDragStart={() => setDrag({ pk: e.pk, from: null })}
                   onDragEnd={endDrag}
