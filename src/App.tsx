@@ -2,6 +2,7 @@ import { AppStateProvider } from "./context/AppStateContext";
 import { PartyConfigProvider } from "./context/PartyConfigContext";
 import { useAppState } from "./context/AppStateContext";
 import { TabNavigation, Footer } from "./components";
+import { UpdateNotice } from "./components/UpdateNotice";
 import { CalculatorPage } from "./pages/CalculatorPage/CalculatorPage";
 import { CharactersPage } from "./pages/CharactersPage/CharactersPage";
 import { EchoesPage } from "./pages/EchoesPage/EchoesPage";
@@ -38,6 +39,9 @@ function AppContent() {
 
         <Footer />
       </main>
+
+      {/* 알림을 건 업데이트 뒤 처음 들어온 사람에게 한 번 띄운다. */}
+      <UpdateNotice />
     </>
   );
 }

@@ -640,7 +640,10 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .echo-row{display:flex;align-items:flex-start;gap:10px;width:100%;padding:10px 12px;text-align:left;color:var(--c-ffffff);background:linear-gradient(135deg,var(--c-344059) 0%,var(--c-2d3a52) 100%);border:1px solid var(--c-4a5266);border-radius:6px;cursor:pointer}
 .echo-row:hover{border-color:var(--c-4a9eff)}
 .echo-row.on{border-color:var(--c-e8c66a);box-shadow:0 0 0 1px rgba(var(--rgb-e8c66a),.35)}
-.echo-row.taken{opacity:.62}
+/* 다른 캐릭터가 낀 에코 — 내용은 확 죽이고 색도 뺀다. 누가 꼈는지 보이도록 주인 아이콘(.echo-row-state)은 그대로 둔다.
+   투명도 · 회색조라 테마 색과 상관없이 똑같이 죽는다. */
+.echo-row.taken>.echo-row-left,.echo-row.taken>.echo-row-right{opacity:.25;filter:grayscale(1)}
+.echo-row.taken{border-style:dashed}
 .echo-row.dragging{opacity:.35}
 .echo-row[draggable="true"]{cursor:grab}
 /* 밝은 테마에서는 그라데이션 앞쪽 색(--c-344059)이 테두리용 진한 회색으로 뒤집혀 얼룩져 보인다 — 한 색으로 깐다. */
@@ -820,10 +823,63 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 /* 파티 관리 탭 — 왼쪽에 캐릭터 선택, 오른쪽에 파티 목록. */
 .party-page{display:flex;flex-direction:column;gap:12px}
 /* 두 판은 같은 높이로 선다 — 짧은 쪽이 긴 쪽에 맞춰 늘어난다. */
-.party-page-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:12px;align-items:stretch}
+/* 파티 카드는 계산 탭 「파티 구성」의 자리 카드 셋(96px × 3)과 같은 크기로 묶고, 화면 폭만큼 옆으로 늘어놓는다. */
+.party-page .party-list{flex-direction:row;flex-wrap:wrap;align-items:flex-start}
+.party-page .party-list-slots{grid-template-columns:repeat(3,96px);gap:10px}
+.party-page .party-slot{gap:5px;padding:12px 8px 10px}
+.party-page .party-slot img{width:52px;height:52px}
+.party-page .party-slot strong{font-size:13px;line-height:1.3}
+/* 캐릭터 고르는 창 — 「파티 추가」나 파티 카드를 누르면 뜬다. */
+.party-pick-modal{width:min(720px,100%)}
+.party-pick-modal>.panel{margin:0;padding:0;background:none;border:none}
+.party-pick-modal .panel-head{flex-wrap:wrap;row-gap:8px}
+.party-pick-modal .pick-grid{align-content:start;max-height:min(40vh,340px);overflow-y:auto;padding:2px 8px 2px 2px}
+/* 창 안의 세 항목 — 파티명 · 캐릭터 · 그룹. 캐릭터 목록의 제 제목은 항목 이름과 겹쳐 감춘다. */
+.party-pick-modal .formula-head{align-items:center;margin-bottom:14px}
+.party-pick-modal .formula-head h3{margin:0}
+.party-form-field{display:flex;flex-direction:column;gap:7px;margin-bottom:16px}
+.party-form-field>b{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--c-c2c9d6)}
+.party-form-field>b em{font-style:normal;font-size:11px;font-weight:400;color:var(--c-9aa3b3)}
+.party-form-field>input,.party-form-field>select{padding:8px 12px;font:inherit;font-size:13px;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:9px}
+.party-form-field>input:focus,.party-form-field>select:focus{outline:none;border-color:var(--c-8794aa)}
+.party-pick-modal .panel-head h2{display:none}
+.party-pick-modal .panel-head .panel-search{margin-left:0}
+/* 「파티 추가」 오른쪽의 「그룹 추가」 — 누르면 그 자리가 이름 적는 칸으로 바뀐다. */
+.party-add+.party-add,.party-group-input+.party-add{margin-left:0}
+.party-add:disabled{opacity:.5;cursor:not-allowed}
+/* 카드 머리의 체크박스 — 다중 그룹 변경에 넣을 파티를 고른다. */
+.party-list-check{flex:none;width:16px;height:16px;margin:0;cursor:pointer}
+.party-group-input{flex:0 1 200px}
+/* 그룹 거르기 단추 줄. 고른 그룹 오른쪽에 붉은 휴지통이 붙는다 — 경고색이라 테마 변수를 쓰지 않는다. */
+.party-groups{margin-bottom:12px}
+.party-group-chip{display:inline-flex;align-items:center;gap:4px}
+.echo-filters .party-group-trash,.echo-filters .party-group-trash:hover{display:grid;place-items:center;width:26px;height:26px;padding:0;
+  color:#fff;background:#c0392b;border:1px solid #e74c3c;border-radius:7px;cursor:pointer}
+.echo-filters .party-group-trash:hover{background:#e74c3c}
+/* 카드의 파티 이름 아래 — 그룹 이름. 그룹을 안 정한 파티는 흐리게 「미설정」. */
+.party-page .party-list-head{margin-bottom:4px}
+.party-list-group{margin:0 0 9px;padding:3px 9px;font-size:12.5px;font-weight:700;color:var(--c-e8c66a);
+  background:var(--c-443c2b);border-radius:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.party-list-group.none{font-weight:400;color:var(--c-9aa3b3);background:none;padding-left:2px}
+/* 이름은 늘 두 줄 칸 — 첫 줄 캐릭터 이름, 둘째 줄 모드(없으면 빈 줄). 길면 줄을 넘기지 않고 말줄임. */
+.party-slot-name{display:flex;flex-direction:column;width:100%;min-width:0}
+.party-slot-name span,.party-slot-name em{display:block;height:1.3em;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.party-slot-name em{font-style:normal;font-size:11px;font-weight:400;color:var(--c-9aa3b3)}
+/* 자리 맨 위의 속성 아이콘 — 자리 번호 글자 대신 둔다(번호는 툴팁에 남는다). */
+.party-slot-no{display:inline-flex;align-items:center;justify-content:center;min-height:24px}
+.party-page .party-slot .party-slot-no img{width:24px;height:24px;border:none;border-radius:0;object-fit:contain}
+/* 제목 · 단추 · 필터 묶음 — 스크롤해도 위 막대(56px) 바로 아래에 붙는다.
+   판의 안쪽 여백(20px)만큼 밖으로 넓혀 판 폭을 다 덮고, 배경을 깔아 밑을 지나가는 카드가 비치지 않게 한다. */
+.party-list-top{position:sticky;top:56px;z-index:12;margin:-20px -20px 12px;padding:20px 20px 2px;
+  background:var(--c-282f41);border-radius:15px 15px 0 0;box-shadow:0 10px 16px -12px rgba(0,0,0,.6)}
+/* 캐릭터 필터 줄 — 제목과 그룹 단추 사이. 고른 캐릭터 얼굴이 단추 옆에 늘어선다. */
+.party-char-filter{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.party-char-filter .party-load{margin-left:0}
+.party-char-filter img{width:26px;height:26px;border-radius:50%;object-fit:cover;border:1px solid var(--c-4a5266)}
+.party-char-filter em{font-style:normal;font-size:12px;color:var(--c-9aa3b3)}
 .party-page-top .panel-head{flex-wrap:wrap;row-gap:8px}
 /* 속성 거르기가 붙어 좁아져도 검색 칸이 글자 몇 자 폭으로 눌리지 않게 — 모자라면 다음 줄로 내려간다. */
-.party-page-top .panel-search,.matrix-body .panel-search{flex:1 1 160px;min-width:160px}
+.party-pick-modal .panel-search,.matrix-body .panel-search{flex:1 1 160px;min-width:160px}
 .party-page-top>.panel{margin-top:0}
 /* 파티 관리 탭은 편성이 본업이라 계산 탭보다 한 줄쯤 더 보여 준다. */
 /* 안쪽 스크롤을 두지 않는다 — 캐릭터를 훑다가 판 안에서 또 스크롤하게 되는 것이 성가시다.
@@ -842,7 +898,6 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .preset-faces em{font-style:normal;font-size:10px;line-height:1.2;color:var(--c-9aa3b3);text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 
 
-@media(max-width:900px){.party-page-top{grid-template-columns:1fr}}
 /* 파티 구성 — 자리 셋이 패널의 남은 높이를 다 쓴다.
    섹션을 세로 flex로 두고 격자에 flex:1을 주면, 격자 칸은 기본이 stretch라 카드도 같이 늘어난다. */
 /* 「파티 구성」 제목 오른쪽에 붙는 불러오기 단추와, 눌렀을 때 열리는 서랍.
@@ -1031,6 +1086,31 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .pick-card em{font-style:normal;font-size:10px;color:var(--c-9aa3b3)}
 .pick-card em:has(.pick-card-el){display:inline-flex;align-items:center;gap:3px}
 .pick-card img.pick-card-el{width:12px;height:12px;border:none;border-radius:0;object-fit:contain}
+/* 에코 탭 「에코 추가」 창 — 이름 검색 · 화음 세트 고르개 아래로 에코를 격자로 깐다. */
+.echo-pick-backdrop{z-index:1000}
+.dialog.echo-pick{width:min(760px,100%);max-height:86vh;display:flex;flex-direction:column;gap:10px}
+.echo-pick-head{display:flex;align-items:center;justify-content:space-between}
+.echo-pick-head h3{margin:0}
+.echo-pick-close{padding:2px 8px;font-size:18px;background:none;border:none;color:var(--c-9aa3b3);cursor:pointer}
+.echo-pick-input{width:100%;box-sizing:border-box;padding:9px 12px;font:inherit;font-size:13px;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:9px}
+.echo-pick-input:focus{outline:none;border-color:var(--c-8794aa)}
+/* 화음 세트 고르개 — 옵션마다 아이콘이 붙어 <select> 대신 직접 그린 드롭박스. */
+.echo-pick-set{position:relative}
+.echo-pick-set-button{display:flex;align-items:center;gap:8px;text-align:left;cursor:pointer}
+.echo-pick-set-button span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.echo-pick-set-button i{font-style:normal;color:var(--c-9aa3b3)}
+.echo-pick-set img{width:18px;height:18px;flex:none;object-fit:contain}
+.echo-pick-set-list{position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:2;max-height:min(46vh,340px);overflow-y:auto;padding:4px;
+  background:var(--c-282f41);border:1px solid var(--c-414b61);border-radius:9px;box-shadow:0 12px 30px rgba(0,0,0,.35)}
+.echo-pick-set-list button{display:flex;align-items:center;gap:8px;width:100%;padding:7px 9px;font:inherit;font-size:13px;text-align:left;
+  color:var(--c-c2c9d6);background:none;border:none;border-radius:7px;cursor:pointer}
+.echo-pick-set-list button:hover{background:var(--c-30394a)}
+.echo-pick-set-list button.on{color:var(--c-e8c66a);background:var(--c-30394a)}
+.echo-pick-grid{flex:1;min-height:0;overflow-y:auto;align-content:start;padding:2px 4px 2px 2px}
+.echo-pick-grid .pick-card img{border-radius:8px}
+.echo-pick-fetters{display:flex;flex-wrap:wrap;justify-content:center;gap:3px}
+.echo-pick-grid .pick-card .echo-pick-fetters img{width:16px;height:16px;border:none;border-radius:0;object-fit:contain}
+.echo-pick-empty{grid-column:1/-1;margin:0;padding:14px 2px;text-align:center;color:var(--c-9ea7b7);font-size:13px}
 /* 파티에 들어간 캐릭터는 살짝 죽이고, 지금 보고 있는 캐릭터는 금색으로. */
 .pick-card.in{opacity:.55}
 .pick-card.on{border-color:var(--c-e8c66a);background:var(--c-30394a);opacity:1}
@@ -1847,6 +1927,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
   .matrix-body>.panel>.matrix-pool-split>.matrix-pool-col{max-height:min(64vh,620px)}}
 
 /* 세부 탭 — 가로 한 줄. 좁아지면 두 줄로 접힌다. */
+/* 시즌 고르개 — 세부 탭 위에 한 줄. */
+.matrix-season{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
+.matrix-season b{font-weight:600;color:var(--c-a8b0bf)}
+.matrix-season select{padding:6px 10px;font-size:13px;border-radius:8px}
+.matrix-season em{font-style:normal;font-size:11.5px;color:var(--c-8791a4)}
 .matrix-views{display:flex;gap:8px;flex-wrap:wrap;padding:8px;background:var(--c-282f41);
   border:1px solid var(--c-384155);border-radius:15px}
 .matrix-view{flex:1 1 180px;display:flex;flex-direction:column;gap:3px;padding:10px 14px;
@@ -2042,6 +2127,11 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-slot i{position:absolute;top:4px;left:4px;padding:0 4px;border-radius:999px;font-style:normal;font-size:8.5px;font-weight:700;
   color:var(--c-8fd6a8);background:var(--c-2a3a31);border:1px solid var(--c-3f5c4a)}
 .matrix-slot i.over{color:var(--c-f08a9a);background:var(--c-3a2c30);border-color:var(--c-7a4a52)}
+/* 쓸 수 있는 횟수를 넘겨 담긴 캐릭터 — 칸째로 붉게.
+   경고색이라 테마 변수를 쓰지 않는다 — 테마마다 바뀌면 붉게 보이지 않는 테마가 생긴다. */
+.matrix-slot.over,.matrix-slot.over:hover{background:#c0392b;border-color:#e74c3c}
+.matrix-slot.over b{color:#fff}
+.matrix-slot.over i.over{color:#fff;background:#8e2a20;border-color:#e74c3c}
 /* 빈 자리 — 점선만 남겨 몇 자리가 비었는지 세게 한다. */
 .matrix-slot.empty{min-height:62px;border-style:dashed;border-color:var(--c-384155);background:none;cursor:default}
 
@@ -2270,6 +2360,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .matrix-row-line>.matrix-row-members{flex:0 1 auto}
 .matrix-buff-pick{margin-left:auto;max-width:150px;padding:5px 8px;font-size:12px;border-radius:8px}
 .matrix-cycle-pick{margin-left:0}
+.matrix-buff-toggle{display:inline-flex;align-items:center;gap:4px;flex:none;font-size:12px;white-space:nowrap;cursor:pointer}
 .matrix-row-result{margin:0 0 0 4px;flex:none;font-size:12.5px}
 .matrix-row-result b{font-variant-numeric:tabular-nums}
 .matrix-row-score{margin-left:4px;padding:1px 8px;border-radius:999px;font-style:normal;font-size:11.5px;font-weight:700;font-variant-numeric:tabular-nums;
@@ -2403,3 +2494,18 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .updates-tag.new{color:var(--c-7fd1a8);background:var(--c-1f3a2b)}
 .updates-tag.improve{color:var(--c-8fc0ff);background:var(--c-1f3550)}
 .updates-tag.fix{color:var(--c-f0ad4e);background:var(--c-3d2e1d)}
+
+/* 사이클 구성에서 지금 고른 공격 카드 — 금색 테두리 · 금빛 바탕 · 번짐으로 한눈에 띄게.
+   금색(--c-e8c66a)은 테마마다 그 배경에 맞춘 값이 따로 있어 어느 테마에서도 도드라진다. */
+.rotation .card.selected{outline:2px solid var(--c-e8c66a);outline-offset:1px;
+  background:linear-gradient(rgba(var(--rgb-e8c66a),.2),rgba(var(--rgb-e8c66a),.2)),var(--c-2a3246);
+  box-shadow:0 0 0 4px rgba(var(--rgb-e8c66a),.22),0 6px 14px rgba(0,0,0,.3)}
+/* 버프 창 — 여러 공격을 골랐을 때 그중 일부에만 켜져 있는 버프. 켜짐과 꺼짐 사이로 점선 테두리를 두른다. */
+.buffs label.mixed{border-style:dashed;border-color:var(--c-e8c66a)}
+/* 업데이트 알림 창 — 목록이 길면 창 안에서 굴린다. 꼬리표는 업데이트 내역 탭 것(.updates-tag)을 그대로 쓴다. */
+.dialog.update-notice{width:min(600px,100%);max-height:86vh;display:flex;flex-direction:column}
+.update-notice h3{margin:0}
+.update-notice-date{margin:6px 0 12px;font-size:12px;color:var(--c-9aa3b3)}
+.update-notice-list{flex:1;min-height:0;overflow-y:auto;list-style:none;margin:0;padding:0 4px 0 0;display:flex;flex-direction:column;gap:9px}
+.update-notice-list li{display:flex;align-items:flex-start;gap:9px;font-size:13px;line-height:1.55;color:var(--c-c2c9d6)}
+.update-notice-list .updates-tag{flex:none}

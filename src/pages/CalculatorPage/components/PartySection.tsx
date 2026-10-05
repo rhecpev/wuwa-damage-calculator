@@ -34,13 +34,23 @@ interface CharacterPickerProps {
   onPick: (characterId: string) => void;
   /** 제목 옆에 붙일 한 줄 — 「어느 파티에 들어가는지」를 알려 준다. */
   hint?: string;
+  /**
+   * 고른 캐릭터에 붙일 말. 주면 「N번 캐릭터」 대신 이 말을 적는다
+   * — 자리 번호가 뜻이 없는 곳(파티 목록의 캐릭터 필터)에서 쓴다.
+   */
+  pickedLabel?: string;
 }
 
 /**
  * 파티에 넣고 뺄 캐릭터 목록.
  * 아이콘을 누르면 고른 파티에 들어가고, 다시 누르면 빠진다. 파티 카드로 끌어다 놓아도 된다.
  */
-export function CharacterPickerSection({ memberIds, onPick, hint }: CharacterPickerProps) {
+export function CharacterPickerSection({
+  memberIds,
+  onPick,
+  hint,
+  pickedLabel,
+}: CharacterPickerProps) {
   const [query, setQuery] = useState("");
   // 속성 아이콘으로 거른다. null이면 전체.
   const [elementFilter, setElementFilter] = useState<Element | null>(null);
@@ -84,13 +94,13 @@ export function CharacterPickerSection({ memberIds, onPick, hint }: CharacterPic
               onClick={() => onPick(char.id)}
               title={
                 inParty
-                  ? `${char.element} · ${char.weaponType} — ${slotIndex + 1}번 캐릭터 (다시 누르면 해제)`
+                  ? `${char.element} · ${char.weaponType} — ${pickedLabel ?? `${slotIndex + 1}번 캐릭터`} (다시 누르면 해제)`
                   : `${char.element} · ${char.weaponType} (파티 카드로 끌어다 놓을 수 있습니다)`
               }
             >
               {char.iconUrl && <img src={char.iconUrl} alt="" loading="lazy" />}
               <b>{char.name}</b>
-              {inParty && <em>{slotIndex + 1}번 캐릭터</em>}
+              {inParty && <em>{pickedLabel ?? `${slotIndex + 1}번 캐릭터`}</em>}
             </button>
           );
         })}

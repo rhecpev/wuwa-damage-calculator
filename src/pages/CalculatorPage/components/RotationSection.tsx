@@ -153,6 +153,47 @@ export function RotationSection({ results }: RotationSectionProps) {
   // 버프 창은 루틴 오른쪽 자리(.rotation-dock)에 붙이고, 계산식은 화면 위에 창으로 띄운다.
   const selected = results.find((r) => r.item.id === selectedId) ?? null;
 
+  // ── 다중선택 ──
+  // Ctrl(⌘)+클릭으로 한 장씩 더하고, Shift+클릭으로 기준 카드부터 그 카드까지 한꺼번에 고른다.
+  // selectedId는 **기준 카드**(버프 창이 수치를 보여 주는 카드)로 남고, 여기에는 함께 고른 카드 전부를 담는다.
+  // 기준 카드가 빠졌거나 한 장뿐이면 다중선택이 아닌 것으로 본다.
+  const [multiIds, setMultiIds] = useState<string[]>([]);
+  const picked =
+    selected && multiIds.includes(selected.item.id)
+      ? results.filter((r) => multiIds.includes(r.item.id))
+      : [];
+  const peers = picked.length > 1 ? picked.filter((r) => r.item.id !== selected!.item.id) : [];
+  const isPicked = (id: string) => id === selectedId || peers.some((r) => r.item.id === id);
+
+  const pickCard = (id: string, event: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => {
+    const now = peers.length > 0 ? picked.map((r) => r.item.id) : selectedId ? [selectedId] : [];
+
+    if (event.shiftKey && selectedId) {
+      // 기준 카드부터 누른 카드까지 — 화면에 선 순서 그대로.
+      const from = results.findIndex((r) => r.item.id === selectedId);
+      const to = results.findIndex((r) => r.item.id === id);
+      if (from >= 0 && to >= 0) {
+        setMultiIds(results.slice(Math.min(from, to), Math.max(from, to) + 1).map((r) => r.item.id));
+        return;
+      }
+    }
+    if (event.ctrlKey || event.metaKey) {
+      const next = now.includes(id) ? now.filter((x) => x !== id) : [...now, id];
+      setMultiIds(next);
+      // 기준 카드를 뺐으면 남은 것 가운데 하나를 기준으로 세운다. 처음 고르는 것이면 그 카드가 기준이다.
+      if (!selectedId || !next.includes(selectedId)) setSelectedId(next[0] ?? null);
+      return;
+    }
+    // 그냥 누르면 한 장만 — 고른 카드를 다시 누르면 닫는다(여러 장 고른 중이면 그 한 장으로 좁힌다).
+    setMultiIds([]);
+    setSelectedId(selectedId === id && peers.length === 0 ? null : id);
+  };
+
+  const closeBuffs = () => {
+    setMultiIds([]);
+    setSelectedId(null);
+  };
+
   // 담는 순간의 피해를 그래프 값 그대로 같이 담는다 — 나중에 자료가 바뀌어도 그때 숫자로 다시 그린다.
   const saveCycle = () => {
     saveCyclePreset(
@@ -234,7 +275,7 @@ export function RotationSection({ results }: RotationSectionProps) {
           {results.map((result, index) => {
             // 카드를 누르면 이 카드가 선택되고 옆에 버프 창이 뜬다.
             // 히트별 내역은 「상세보기」의 계산식 창에서 본다.
-            const open = selectedId === result.item.id;
+            const open = isPicked(result.item.id);
             const multi = result.damage.hits.length > 1;
             // 사이클이 바뀌는 자리마다 줄을 끊고 머리를 하나 세운다.
             // 예전에 담은 공격에는 cycle이 없어 1사이클로 본다.
@@ -312,13 +353,17 @@ export function RotationSection({ results }: RotationSectionProps) {
                 tabIndex={0}
                 title={`${result.character.name} · ${result.attack.name}`}
                 data-kind={cardKind(result)}
-                onClick={() => setSelectedId(open ? null : result.item.id)}
+                // Shift+클릭이 글자를 긁어 선택하지 않게 한다.
+                onMouseDown={(event) => {
+                  if (event.shiftKey) event.preventDefault();
+                }}
+                onClick={(event) => pickCard(result.item.id, event)}
                 onKeyDown={(event) => {
                   // 안쪽 입력칸에서 누른 키는 카드를 여닫지 않는다.
                   if (event.target !== event.currentTarget) return;
                   if (event.key !== "Enter" && event.key !== " ") return;
                   event.preventDefault();
-                  setSelectedId(open ? null : result.item.id);
+                  pickCard(result.item.id, event);
                 }}
               >
                 <span className="card-head">
@@ -466,7 +511,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                 </button>
                 <button
                   className="copy"
-                  title="이 공격을 버프 설정까지 그대로 복사해 맨 뒤에 추가"
+                  title="이 공격을 버프 설정까지 그대로 복사해 바로 뒤에 추가"
                   onClick={() => duplicateAttack(result.item.id)}
                 >
                   ⧉
@@ -570,17 +615,21 @@ export function RotationSection({ results }: RotationSectionProps) {
     {/* 사이클 구성과 버프 창 사이 — 고른 공격이 **피해 말고 따로 일으키는 일**(트리거)을
         위에서 아래로 쌓아 보여 준다. 무엇을 붙이고 무엇을 태우는지 카드를 고른 채로 읽는 자리다.
         트리거가 없는 공격이면 칸을 비워 둔다(자료에 없는 것이 아니라 하는 일이 없다는 뜻). */}
-    {selected && <TriggerTower result={selected} />}
+    {selected && peers.length === 0 && <TriggerTower result={selected} />}
 
     {/* 루틴 오른쪽 자리 — 버프 창이 여기에 뜬다.
         아무것도 안 열려 있으면 무엇을 누르면 되는지만 적어 둔다. */}
     <aside className="rotation-dock">
       {selected ? (
-        <BuffDialog selected={selected} onClose={() => setSelectedId(null)} />
+        <BuffDialog selected={selected} peers={peers} onClose={closeBuffs} />
       ) : (
         <div className="rotation-dock-empty">
           <b>선택된 카드가 없습니다</b>
           <span>카드를 누르면 버프 창이 여기에 뜹니다. 돋보기(⌕)는 타수별 계산식을 창으로 띄웁니다.</span>
+          <span>
+            Ctrl+클릭(한 장씩) · Shift+클릭(범위)으로 여러 장을 고르면 공통으로 걸리는 버프를 한꺼번에
+            켜고 끕니다.
+          </span>
         </div>
       )}
     </aside>
@@ -603,6 +652,7 @@ const TRIGGER_KIND: Record<string, string> = {
   status: "상태",
   debuff: "디버프",
   resource: "자원",
+  shield: "실드",
 };
 
 /**
@@ -626,10 +676,14 @@ function TriggerTower({ result }: { result: CalculationResult }) {
               ? "status"
               : t.debuff
                 ? "debuff"
-                : "resource";
+                : t.shield
+                  ? "shield"
+                  : "resource";
           const name = t.anomaly
             ? `${ANOMALIES[t.anomaly].name} 효과`
-            : (t.status ?? t.debuff ?? t.resource ?? "");
+            : t.shield
+              ? "실드 획득"
+              : (t.status ?? t.debuff ?? t.resource ?? "");
           return (
             <div
               key={at}

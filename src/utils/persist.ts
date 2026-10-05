@@ -62,6 +62,15 @@ let dirty = false;
  */
 let hydrated = false;
 
+/**
+ * 들어왔을 때 이미 담겨 있던 것이 있었는지 — 있으면 전에 쓰던 사람이다.
+ * hydrate()가 원본(개발 서버 파일 · 고른 파일 · 브라우저 저장)을 다 부은 직후에 한 번 정한다.
+ * 그 뒤로는 화면이 뜨면서 기본값들이 곧바로 저장되므로, 나중에 세면 처음 온 사람도 「있다」로 나온다.
+ */
+let returning = false;
+/** 전에 쓰던 사람인지(저장된 것이 하나라도 있었는지). 처음 온 사람이면 false다. */
+export const isReturningVisitor = (): boolean => returning;
+
 /** 고른 파일. disk일 때만 들어 있다. */
 let handle: DiskFileHandle | null = null;
 /**
@@ -266,6 +275,7 @@ export async function hydrate(): Promise<void> {
     mode = "none";
   }
 
+  returning = memory.size > 0;
   hydrated = true;
   window.addEventListener("pagehide", flushToFile);
 }

@@ -1,14 +1,14 @@
 import { CHANGELOG, type ChangeKind } from "../../data/changelog";
 
 /** 갈래 꼬리표 이름. */
-const KIND_LABEL: Record<ChangeKind, string> = {
+export const KIND_LABEL: Record<ChangeKind, string> = {
   new: "새 기능",
   improve: "개선",
   fix: "수정",
 };
 
 /** 같은 날 안에서는 새 기능 → 개선 → 수정 차례로 보인다. */
-const KIND_ORDER: ChangeKind[] = ["new", "improve", "fix"];
+export const KIND_ORDER: ChangeKind[] = ["new", "improve", "fix"];
 
 const WEEKDAY = ["일", "월", "화", "수", "목", "금", "토"];
 

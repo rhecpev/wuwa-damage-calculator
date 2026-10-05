@@ -5,6 +5,7 @@ import type { AnomalyKind } from "./anomalies";
  * 지금 매트릭스 시즌의 몬스터 배치.
  * 배치 · 몬스터 id · 아이콘 출처: encore.moe API v2 `/ko/dpmatrix/7`
  *   — S2 단계2 「위험한 경지의 강습」(3.8 버전까지), 특이점 확장(레벨 Id 14).
+ * 다음 단계 S2 단계3(`/ko/dpmatrix/8`, 레벨 Id 16)도 같이 둔다 — 화면에서 시즌을 고른다(MATRIX_SEASONS).
  *
  * **체력과 점수는 인게임 실측표를 그대로 옮긴 것이다** — 「s2.2矩阵 各轮次分数对应表」(3.6 매트릭스
  * boss 혈량 · 분수표, 矩7R1~r4). 예전에는 도감 LifeMax × 레벨 배율로 어림잡았는데 실제의 1/5 수준이라
@@ -82,7 +83,23 @@ export interface MatrixMonster {
            */
           extraStacks?: number;
           perStackPerAmp?: number;
-        };
+        }
+      /**
+       * 이상 효과를 **종류와 상관없이** 하나라도 붙인 뒤부터 bonus(겁살).
+       * anomalyDamage는 조건 없이 그 이상 효과 피해에만 곱하는 배수다(겁살의 전자 효과 ×2).
+       */
+      | { kind: "anyAnomaly"; bonus: number; anomalyDamage?: { anomaly: AnomalyKind; mult: number } }
+      /**
+       * 합일 대응을 한 캐릭터의 피해에만 bonus(크라운리스).
+       * 합일 대응은 공격 트리거로 따라가지 않는다 — 합일 대응이 가능한 캐릭터(UNION_RESPONDERS)는
+       * 사이클에서 합일 대응을 한다고 보고 그 캐릭터의 피해에 늘 곱한다.
+       */
+      | { kind: "union"; bonus: number }
+      /**
+       * 사이클에서 실드를 얻을 때마다 perStack씩, maxStacks까지(봉정계유).
+       * 실드를 주는 공격은 공격 트리거의 shield 줄과 SHIELD_ON_DAMAGE(피해마다 실드를 얻는 캐릭터)로 센다.
+       */
+      | { kind: "shield"; perStack: number; maxStacks: number };
   };
   /** 그 몬스터를 잡을 때만 따로 붙는 점수(API의 KillScore). 미믹만 1000이다. */
   killScore?: number;
@@ -90,18 +107,21 @@ export interface MatrixMonster {
   scoreRate?: number;
 }
 
-export const MATRIX_SEASON = {
-  name: "S2 단계2 · 위험한 경지의 강습",
-  level: "특이점 확장",
-};
+/**
+ * 합일 대응이 가능한 캐릭터(모드로 가른 id). 크라운리스의 「합일 시스템」과 단계3 스테이지 버프
+ * 「기본 피해 강화」가 이 캐릭터들의 피해에 붙는다. 여우의 별자리는 합일 모드에서만 합일 대응을 한다.
+ */
+export const UNION_RESPONDERS = ["hsin-union", "suoming"];
 
 const BOSS_ICON = "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Common/Image/ImgBoss/";
 
 /** 라운드마다 같은 다섯. hp · score는 1 · 2 · 3 · 4라운드 순서다(실측표 그대로). */
-const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaultHp" | "score"> & {
+type LineupRow = Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaultHp" | "score"> & {
   hp: [number, number, number, number];
   score: [number, number, number, number];
-})[] = [
+};
+
+const LINEUP_S22: LineupRow[] = [
   {
     monsterId: 650000047,
     handbookId: 330000060,
@@ -174,26 +194,104 @@ const LINEUP: (Omit<MatrixMonster, "round" | "wave" | "slot" | "level" | "defaul
   },
 ];
 
+/** 아직 재지 못한 체력 · 점수 자리. 0은 「비어 있음」이다 — 화면에서 빈 칸으로 나오고 계산이 거기서 멈춘다. */
+const BLANK: [number, number, number, number] = [0, 0, 0, 0];
+
+/**
+ * S2 단계3 — encore.moe API v2 `/ko/dpmatrix/8`, 특이점 확장(레벨 Id 16).
+ * 몬스터 · 저항 속성 · 전용 시스템은 API 그대로다(RecommendTeamFeature · HandBookBuff).
+ *
+ * **체력 · 점수는 비워 두었다(BLANK).** 단계3 실측표가 아직 없다 — 재는 대로 채운다.
+ * 라운드별 점수 환산 배율(DamegaRate 834 · 960 · 1043 · 미믹 918 · 1055 · 1147)은 단계2와 같다.
+ */
+const LINEUP_S23: LineupRow[] = [
+  {
+    monsterId: 650000050,
+    handbookId: 330000020,
+    name: "지옥불 기사",
+    element: "Fusion",
+    icon: `${BOSS_ICON}T_Boss_06.webp`,
+    hp: BLANK,
+    score: BLANK,
+  },
+  {
+    monsterId: 602850001,
+    handbookId: 320000680,
+    name: "봉정계유",
+    element: "Glacio",
+    // 원문 「주변 적군 목표가 실드를 획득할 시」 — 봉정계유 쪽에서 본 적군, 곧 **우리 캐릭터**가 실드를 얻을 때다.
+    // 사이클의 실드 트리거를 세어 스택을 쌓는다. 지속 6초는 보지 않는다(사이클 한 벌 안에서 유지).
+    feature: {
+      name: "공용 시스템",
+      desc: "캐릭터가 실드를 획득할 시 봉정계유가 받는 최종 피해 +10%(6초 · 0.5초마다 1회 · 최대 4스택)",
+      damageTaken: 1.4,
+      rule: { kind: "shield", perStack: 0.1, maxStacks: 4 },
+    },
+    icon: `${BOSS_ICON}T_Boss_32068.webp`,
+    hp: BLANK,
+    score: BLANK,
+  },
+  {
+    monsterId: 650000041,
+    handbookId: 340000010,
+    name: "크라운리스",
+    element: "Havoc",
+    // API의 RecommendTeamFeature는 이름뿐이고, 수치는 도감 버프(HandBookBuff 「전투의 기술」)에 있다.
+    feature: {
+      name: "합일 시스템",
+      desc: "캐릭터가 합일 대응 시, 그 캐릭터가 30초 동안 크라운리스에게 입히는 피해 최종 +40%",
+      damageTaken: 1.4,
+      rule: { kind: "union", bonus: 0.4 },
+    },
+    icon: `${BOSS_ICON}T_Boss_05.webp`,
+    hp: BLANK,
+    score: BLANK,
+  },
+  {
+    monsterId: 665850005,
+    handbookId: 340000320,
+    name: "하늘의 기관 인형 · 겁살",
+    element: "Aero",
+    feature: {
+      name: "이상 효과 시스템",
+      desc: "이상 효과가 추가될 시 받는 최종 피해 +20%(6초). 받는 전자 효과 피해 최종 +100%(상시)",
+      damageTaken: 1.2,
+      // 전자 효과 ×2는 조건 없이 늘 걸린다 — 이상 효과를 붙였는지(×1.2)와 따로 곱한다.
+      rule: { kind: "anyAnomaly", bonus: 0.2, anomalyDamage: { anomaly: "ElectroFlare", mult: 2 } },
+    },
+    icon: `${BOSS_ICON}T_Boss_34032.webp`,
+    hp: BLANK,
+    score: BLANK,
+  },
+  {
+    monsterId: 401800000,
+    handbookId: 310000480,
+    name: "매트릭스 미믹",
+    element: "Spectro",
+    uniformRes: true,
+    killScore: 1000,
+    icon: `${BOSS_ICON}T_Boss_35220.webp`,
+    hp: BLANK,
+    score: BLANK,
+  },
+];
+
 // 4라운드는 표에 레벨이 비어 있다 — 3라운드와 같은 120으로 둔다(체력만 5%쯤 높다).
 const ROUND_LEVELS = [100, 110, 120, 120];
 
 /** 나오는 순서대로 20마리. */
-export const MATRIX_MONSTERS: MatrixMonster[] = ROUND_LEVELS.flatMap((level, r) =>
-  LINEUP.map(({ hp, score, ...m }, i) => ({
-    ...m,
-    round: r + 1,
-    slot: i + 1,
-    wave: r * LINEUP.length + i + 1,
-    level,
-    defaultHp: hp[r],
-    score: score[r],
-  })),
-);
-
-export const MATRIX_ROUND_COUNT = ROUND_LEVELS.length;
-
-/** 체력 저장 키 — 라운드 · 라운드 안 순서. */
-export const matrixHpKey = (m: Pick<MatrixMonster, "round" | "slot">) => `${m.round}-${m.slot}`;
+const monstersOf = (lineup: LineupRow[]): MatrixMonster[] =>
+  ROUND_LEVELS.flatMap((level, r) =>
+    lineup.map(({ hp, score, ...m }, i) => ({
+      ...m,
+      round: r + 1,
+      slot: i + 1,
+      wave: r * lineup.length + i + 1,
+      level,
+      defaultHp: hp[r],
+      score: score[r],
+    })),
+  );
 
 /**
  * 스테이지 버프(NewTowerBuffs) — 파티마다 하나 고른다. 전부 「최종적으로 N% 증가」라 피해에 따로 곱한다
@@ -215,6 +313,8 @@ export interface MatrixHitInfo {
   /** 공격 속성 — 물리(Physical)도 들어올 수 있다. */
   element: DamageElement;
   anomaly?: string;
+  /** 때린 캐릭터(모드로 가른 id) — 합일 대응 캐릭터에만 붙는 배수가 본다. */
+  characterId: string;
 }
 
 /**
@@ -226,6 +326,8 @@ export interface MatrixStageState {
   anomalyOn: boolean;
   /** 지금까지 붙인 부조화 「이탈」 상태 이름들(32번의 두 문장이 이걸 본다). */
   breaches: Set<string>;
+  /** 실드를 한 번이라도 얻었는지(단계3 35번 「기본 피해 강화」). 공격 트리거의 shield 줄을 본다. */
+  shieldOn: boolean;
 }
 
 export interface MatrixBuff {
@@ -235,9 +337,15 @@ export interface MatrixBuff {
   multiplier: (hit: MatrixHitInfo, state: MatrixStageState) => number;
   /** 조건이 붙는 버프인지 — 화면에서 「아직 안 켜짐」을 알려 주려고 표시해 둔다. */
   conditional?: boolean;
+  /**
+   * 실드 조건이 있는 버프인지. 켜져 있으면 버프 고르개 옆에 「실드 버프 상시 적용」 체크가 뜬다
+   * — 체크하면 사이클에서 처음 실드를 얻은 뒤부터 끝까지 실드 조건이 선 것으로 보고,
+   * 체크하지 않으면 실드 조건(지속 2초)은 넣지 않는다.
+   */
+  shieldToggle?: boolean;
 }
 
-export const MATRIX_BUFFS: MatrixBuff[] = [
+const MATRIX_BUFFS_S22: MatrixBuff[] = [
   {
     id: 33,
     name: "공용 강화",
@@ -271,8 +379,55 @@ export const MATRIX_BUFFS: MatrixBuff[] = [
 ];
 
 /**
+ * S2 단계3 스테이지 버프(`/ko/dpmatrix/8`의 NewTowerBuffs 34~37).
+ *
+ *   37 공용 강화        받는 피해 ×1.2, 일반 공격 피해 ×1.2 더 — 조건 없음
+ *   34 이상 효과 강화    이상 효과를 건 뒤부터 ×1.25, 거기에 전도 피해면 ×1.3 더
+ *   35 기본 피해 강화    실드를 얻은 뒤부터 ×1.25, 에코 어빌리티 ×1.4(조건 없음), 합일 대응 캐릭터 ×1.55.
+ *                       실드는 봉정계유와 같은 공격 트리거(shield)로 따라간다. 지속이 2초뿐이라
+ *                       「실드 버프 상시 적용」을 체크했을 때만 넣는다(처음 얻은 뒤부터 끝까지)
+ *   36 조화도 파괴 강화  아무 「이탈」이나 붙은 뒤부터 ×1.25, 해킹 · 이탈이면 ×1.3 더
+ */
+const MATRIX_BUFFS_S23: MatrixBuff[] = [
+  {
+    id: 37,
+    name: "공용 강화",
+    desc: "적군이 받는 피해가 최종적으로 20% 증가되고, 적군이 받는 일반 공격 피해가 최종적으로 20% 증가된다",
+    multiplier: (h) => 1.2 * (h.category === "Basic" ? 1.2 : 1),
+  },
+  {
+    id: 34,
+    name: "이상 효과 강화",
+    desc: "캐릭터가 이상 효과를 추가할 시, 목표가 받는 최종 피해를 25% 증가시키고, 받는 전도 최종 피해를 추가로 30% 증가시키며, 30초간 지속된다",
+    // 전도 추가분도 같은 조건(이상 효과를 건 뒤) 안에 있다.
+    multiplier: (h, st) => (st.anomalyOn ? 1.25 * (h.element === "Electro" ? 1.3 : 1) : 1),
+    conditional: true,
+  },
+  {
+    id: 35,
+    name: "기본 피해 강화",
+    desc: "캐릭터가 실드 획득 시, 피해가 최종적으로 25% 증가되고, 2초간 지속된다. 에코 어빌리티 피해가 최종적으로 40% 증가된다. 캐릭터가 합일 대응 시, 입히는 피해가 최종적으로 55% 증가되고, 30초간 지속된다",
+    multiplier: (h, st) =>
+      (st.shieldOn ? 1.25 : 1) *
+      (h.category === "Echo" ? 1.4 : 1) *
+      (UNION_RESPONDERS.includes(h.characterId) ? 1.55 : 1),
+    conditional: true,
+    shieldToggle: true,
+  },
+  {
+    id: 36,
+    name: "조화도 파괴 강화",
+    desc: "캐릭터가 조화도 · 이탈 상태를 추가할 시, 파티 전체의 피해가 최종적으로 25% 증가되고 30초간 지속된다. 캐릭터가 해킹 · 이탈 상태를 추가할 시, 입히는 피해가 최종적으로 30% 증가되고 30초간 지속된다",
+    multiplier: (_h, st) =>
+      (st.breaches.size > 0 ? 1.25 : 1) * (st.breaches.has("해킹 · 이탈") ? 1.3 : 1),
+    conditional: true,
+  },
+];
+
+/**
  * 매트릭스 전용 캐릭터 강화(API의 `Roles[].EnhanceSkillDesc`) — 이 시즌에 강화받는 캐릭터.
  * 출처: encore.moe API v2 `/ko/dpmatrix/7`의 Roles. 데니아는 「추가 피로도」라 피해에 걸리지 않아 뺐다.
+ * 단계3(`/ko/dpmatrix/8`)도 나머지 열둘은 글자까지 같고, 데니아 자리만 린네(역시 추가 피로도)로 바뀌었다.
  *
  *   finalDamage  그 캐릭터가 준 피해에 곱하는 「최종 피해 N% 증가」(곱연산)
  *   party        그 캐릭터가 공명 해방을 쓴 **뒤부터** 파티 전원의 피해 보너스에 더하는 몫(합연산)
@@ -289,7 +444,7 @@ export interface MatrixRoleBoost {
   desc: string;
 }
 
-export const MATRIX_ROLE_BOOSTS: Record<string, MatrixRoleBoost> = {
+const MATRIX_ROLE_BOOSTS: Record<string, MatrixRoleBoost> = {
   zhezhi: {
     finalDamage: 0.2,
     party: { category: "Skill", amount: 0.3 },
@@ -319,3 +474,58 @@ export const MATRIX_ROLE_BOOSTS: Record<string, MatrixRoleBoost> = {
   camellya: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
   carlotta: { finalDamage: 0.25, desc: "최종 피해 25% 증가" },
 };
+
+/**
+ * 시즌 한 벌 — 화면 맨 위 시즌 고르개가 이 가운데 하나를 고른다.
+ *
+ * 시즌마다 **저장 자리도 따로다**(storeKey · hpKey). 파티 · 고른 스테이지 버프 · 고친 체력이
+ * 시즌끼리 섞이지 않는다 — 「추가 피로도」가 데니아에서 린네로 넘어가도, 단계2에서 데니아를
+ * 두 파티에 담아 둔 편성은 단계2에 그대로 남는다. 단계2는 시즌을 가르기 전의 키를 그대로 쓴다.
+ */
+export interface MatrixSeason {
+  id: string;
+  name: string;
+  level: string;
+  /** 나오는 순서대로 20마리. */
+  monsters: MatrixMonster[];
+  roundCount: number;
+  buffs: MatrixBuff[];
+  roleBoosts: Record<string, MatrixRoleBoost>;
+  /**
+   * 「추가 피로도」로 한 번 더 나갈 수 있는 캐릭터(API의 `Roles[].EnhanceSkillDesc`,
+   * 「캐릭터가 추가 피로도를 보유한다」). 피해가 아니라 **쓸 수 있는 횟수**만 늘린다.
+   */
+  extraStamina: Record<string, string>;
+  /** 이 시즌의 저장 키 — 파티 · 스테이지 버프처럼 시즌마다 따로 두는 것에 쓴다. */
+  storeKey: (name: string) => string;
+  /** 체력 저장 키 — 라운드 · 라운드 안 순서. */
+  hpKey: (m: Pick<MatrixMonster, "round" | "slot">) => string;
+}
+
+/** 맨 앞이 이번 버전이다 — 시즌을 고른 적이 없으면 이것으로 연다. */
+export const MATRIX_SEASONS: MatrixSeason[] = [
+  {
+    id: "s2-3",
+    name: "S2 단계3 · 위험한 경지의 강습",
+    level: "특이점 확장",
+    monsters: monstersOf(LINEUP_S23),
+    roundCount: ROUND_LEVELS.length,
+    buffs: MATRIX_BUFFS_S23,
+    roleBoosts: MATRIX_ROLE_BOOSTS,
+    extraStamina: { linne: "추가 피로도(S2 3단계 한정)" },
+    storeKey: (name) => `${name}:s23`,
+    hpKey: (m) => `s23:${m.round}-${m.slot}`,
+  },
+  {
+    id: "s2-2",
+    name: "S2 단계2 · 위험한 경지의 강습",
+    level: "특이점 확장",
+    monsters: monstersOf(LINEUP_S22),
+    roundCount: ROUND_LEVELS.length,
+    buffs: MATRIX_BUFFS_S22,
+    roleBoosts: MATRIX_ROLE_BOOSTS,
+    extraStamina: { denia: "추가 피로도(S2 2단계 한정)" },
+    storeKey: (name) => name,
+    hpKey: (m) => `${m.round}-${m.slot}`,
+  },
+];

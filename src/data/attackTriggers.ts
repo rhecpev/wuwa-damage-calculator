@@ -120,11 +120,13 @@ export const STATUS_GROUP: Record<TriggerStatus, string> = {
 };
 
 /**
- * 넷 중 **하나만** 채운다.
+ * 다섯 중 **하나만** 채운다.
  *   anomaly   6종 이상 효과 — 스택이 곧 피해라 계산 쪽과 이어진다
  *   status    적에게 붙는 그 밖의 상태(부조화 「이탈」·「간섭」, 고유 상태)
  *   debuff    적의 값을 깎는 것(방어력 감소 · 속성 저항 감소 · 받는 피해 증가)
  *   resource  자신이 쌓고 태우는 자원(「기(炁)」·「복음」·「사진」 등)
+ *   shield    그 공격으로 캐릭터(자신 또는 파티)가 실드를 얻는다 — 늘 action: "add"
+ *             매트릭스 봉정계유(「실드 획득 시 받는 최종 피해 +10%, 최대 4스택」)가 이 줄을 센다.
  */
 export interface AttackTrigger {
   action: TriggerAction;
@@ -140,6 +142,8 @@ export interface AttackTrigger {
   debuff?: DebuffKind;
   /** 자신이 쌓고 태우는 자원 이름. */
   resource?: string;
+  /** 그 공격으로 실드를 얻는다. 몇 개 · 얼마인지는 보지 않고 「얻었다」는 사실만 센다. */
+  shield?: true;
   /** 몇 스택 · 몇 pt인지. 원문에 수치가 없으면 비운다. */
   amount?: number;
   /**
@@ -2333,6 +2337,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       condition: "지속적으로 태운다 · 손을 떼면 남은 것이 통째로 사라진다",
       source: "지속적으로 「기」를 소모하고 「기의 축적」을 진행하여 근처의 목표를 공격하고 기류 피해를 가한다",
     },
+    {
+      action: "add",
+      shield: true,
+      condition: "주천 단계에 따라 1~4스택 — 들어갈 때 한 번으로 센다",
+      source: "소주천 미만: 1스택의 실드를 획득하고 「기의 축적 상태」를 중단할 시",
+    },
   ],
 
   // ── 능양 ──────────────────────────────────────────────────
@@ -3003,6 +3013,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       resource: "갈채",
       condition: "모두 태운다 — 파티가 실드를 얻는다",
       source: "「화염 귀멸의 서곡」 발동 시, 모든 「갈채」를 소모하여 용융 피해를 입히고",
+    },
+    {
+      action: "add",
+      shield: true,
+      condition: "파티 전원이 실드를 얻는다",
+      source: "「화염 귀멸의 서곡」 발동 시, 모든 「갈채」를 소모하여 용융 피해를 입히고, 해당 피해는 「일반 공격 피해」로 적용되며, 근처 파티 내 모든 캐릭터가 실드를 획득하게 된다",
     },
   ],
 
@@ -3844,6 +3860,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       condition: "남은 것이 모두 사라진다",
       source: "해당 스킬 발동 시, 「전기톱 모드」가 종료되고 「톱니바퀴의 잔향」이 모두 제거된다(톱니바퀴 · 종결)",
     },
+    {
+      action: "add",
+      shield: true,
+      condition: "파티 전원이 실드를 얻는다",
+      source: "「톱니바퀴 · 종결」로 목표를 공격하여 인멸 피해를 입히고, 근처 파티 내 모든 캐릭터가 실드를 획득하며, 30초간 지속된다",
+    },
   ],
   "1004203_1": [
     {
@@ -4396,6 +4418,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       condition: "명중해야 든다 — 대신 실드를 얻는다",
       source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(1단)",
     },
+    {
+      action: "add",
+      shield: true,
+      condition: "명중해야 든다",
+      source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(1단)",
+    },
   ],
   "1000907_2": [
     {
@@ -4405,6 +4433,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       condition: "명중해야 든다 — 대신 실드를 얻는다",
       source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(2단)",
     },
+    {
+      action: "add",
+      shield: true,
+      condition: "명중해야 든다",
+      source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(2단)",
+    },
   ],
   "1000907_3": [
     {
@@ -4412,6 +4446,12 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
       resource: "내유외강",
       amount: 1,
       condition: "명중해야 든다 — 대신 실드를 얻는다",
+      source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(3단)",
+    },
+    {
+      action: "add",
+      shield: true,
+      condition: "명중해야 든다",
       source: "「방어의 틈새」로 목표 명중 시 1pt의 「내유외강」을 소모하고, 동시에 실드를 획득한다(3단)",
     },
   ],
@@ -7980,6 +8020,34 @@ export const ATTACK_TRIGGERS: Record<string, AttackTrigger[]> = {
     },
   ],
 
+
+  // ── 실드 획득(매트릭스 봉정계유) — 따로 적을 트리거가 없던 공격들 ──
+  // 감심 「기의 축적 상태」를 중단하면 주천 단계에 맞는 실드를 한 번 더 얻는다(충권 · 밀기).
+  "1001907_1": [
+    {
+      action: "add",
+      shield: true,
+      condition: "「기의 축적 상태」를 중단할 때",
+      source: "「기의 축적 상태」가 중단할 시, 「주천」의 단계에 따라 상응한 실드를 다시 한 번 얻는다(충권)",
+    },
+  ],
+  "1001907_6": [
+    {
+      action: "add",
+      shield: true,
+      condition: "「기의 축적 상태」를 중단할 때",
+      source: "「기의 축적 상태」가 중단할 시, 「주천」의 단계에 따라 상응한 실드를 다시 한 번 얻는다(밀기)",
+    },
+  ],
+  // 샤콘 고유 「막간의 반주」 — 공명 해방 발동 시 자신이 HP 최대치 100%의 실드를 얻는다.
+  "1003403_1": [
+    {
+      action: "add",
+      shield: true,
+      condition: "공명 해방 발동 시 — 샤콘 자신만",
+      source: "샤콘이 공명 해방 「트리오의 카덴차」 발동 시, 자신의 HP 최대치 100%에 해당하는 실드를 획득하고",
+    },
+  ],
 };
 
 /** 이 공격이 일으키는 트리거. 없으면 빈 배열. */
@@ -8030,13 +8098,41 @@ export const triggerKind = (t: AttackTrigger): "anomaly" | "status" | "resource"
  * 모드는 가른 id에서 읽는다(modeOfCharacterId). 가르지 않은 id로 물으면 모드를 알 수 없어
  * 전부 준다 — 그런 캐릭터는 모드 개념이 없으니 모드가 적힌 줄도 없다.
  */
+/**
+ * **피해를 줄 때마다** 실드를 얻는 캐릭터 — 공격 하나하나에 적는 대신 캐릭터 단위로 둔다.
+ * triggersFor()가 이 캐릭터의 모든 공격에 「실드 획득」 한 줄을 덧붙인다.
+ * 근거는 고유 스킬 문장이라 공격 트리거 검사(check-attack-triggers)의 대상이 아니다.
+ */
+export const SHIELD_ON_DAMAGE: Record<string, AttackTrigger> = {
+  augusta: {
+    action: "add",
+    shield: true,
+    condition: "피해를 입힐 때마다 — 0.5초마다 1회",
+    source: "아우구스타가 피해를 입힐 시 HP 최대치의 2.5%+350에 해당하는 실드를 획득한다(영예의 가호)",
+  },
+  iuno: {
+    action: "add",
+    shield: true,
+    condition: "일반 공격 · 강공격 · 회피 반격 · 공명 스킬 · 공명 해방 · 변주 스킬 발동마다",
+    source: "유노가 일반 공격, 강공격, 회피 반격, 공명 스킬, 공명 해방, 변주 스킬을 발동할 때마다 자신의 공격력의 32%에 해당하는 실드를 1개 획득할 수 있으며(가득 차오른 달)",
+  },
+  jingyan: {
+    action: "add",
+    shield: true,
+    condition: "「대지에 그은 경계」 15초 안에 피해를 입힐 때마다 — 0.5초마다 1회",
+    source: "15초 내에 경연이 파티 내 등장 캐릭터인 상태에서 피해를 입힐 시, HP 최대치의 1.6%+700에 해당하는 실드를 획득한다(벽에 기대어 듣게 된 속세)",
+  },
+};
+
 export function triggersFor(characterId: string, attackId: string): AttackTrigger[] {
   const baseId = baseCharacterId(characterId);
   const mode = modeOfCharacterId(characterId);
+  const onDamage = SHIELD_ON_DAMAGE[baseId];
   const rows = [
     ...(ATTACK_TRIGGERS[attackId] ?? []),
     ...(ATTACK_TRIGGERS[`${characterId}:${attackId}`] ?? []),
     ...(baseId === characterId ? [] : (ATTACK_TRIGGERS[`${baseId}:${attackId}`] ?? [])),
+    ...(onDamage ? [onDamage] : []),
   ];
   if (mode === undefined) return rows;
   return rows.filter((t) => t.resonanceMode === undefined || t.resonanceMode === mode);

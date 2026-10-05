@@ -3,6 +3,7 @@ import { characters } from "../../../data/sampleData";
 import { loadMyEchoes } from "../../../data/echoStore";
 import { echoAbility, echoesById, fetterEffects, fetterGroupByName } from "../../../data/echoes";
 import { EchoDetailDialog } from "./EchoDetailDialog";
+import { Dialog } from "../../../components/Feedback";
 
 interface EchoSelectorProps {
   characterId: string;
@@ -42,6 +43,8 @@ export function EchoSelector({
   const [overSlot, setOverSlot] = useState<number | null>(null);
   // 상세보기 다이얼로그에 띄운 에코의 pk.
   const [detailPk, setDetailPk] = useState<number | null>(null);
+  // 다른 캐릭터가 낀 에코를 가져오려 할 때 띄우는 물음. run이 「예」를 눌렀을 때 할 일이다.
+  const [takeAsk, setTakeAsk] = useState<{ ownerName: string; run: () => void } | null>(null);
   const found = characters.find((c) => c.id === characterId);
   const myEchoes = loadMyEchoes() as any[];
 
@@ -88,12 +91,14 @@ export function EchoSelector({
       .values(),
   ) as { name: string; icon: string }[];
 
+  // 누구든 끼고 있는 에코들. 장착 여부는 이 캐릭터가 아니라 **아무 캐릭터나** 끼고 있는지로 본다.
+  const wornPks = new Set(characterEchoLinks.map((link) => link.echoId));
+
   const filtered = myEchoes.filter((e) => {
     if (!e.name.toLowerCase().includes(searchQuery.toLowerCase())) return false;
     if (fetterFilter && e.options?.selectedFetter !== fetterFilter) return false;
-    // 장착 여부는 "이 캐릭터가 끼고 있는지"로 본다.
-    if (equipFilter === "on") return equippedIds.includes(e.pk);
-    if (equipFilter === "off") return !equippedIds.includes(e.pk);
+    if (equipFilter === "on") return wornPks.has(e.pk);
+    if (equipFilter === "off") return !wornPks.has(e.pk);
     return true;
   });
 
@@ -103,6 +108,29 @@ export function EchoSelector({
     const owner = characters.find((c) => c.id === link.characterId);
     if (owner) ownerOf.set(link.echoId, owner);
   }
+
+  /** 다른 캐릭터가 끼고 있는 에코인지. */
+  const isTaken = (pk: number) => {
+    const owner = ownerOf.get(pk);
+    return owner !== undefined && owner.id !== characterId;
+  };
+
+  // 「전체」·「장착」에서는 이 캐릭터가 낀 에코를 맨 위로 당기고, 다른 캐릭터가 낀 에코를 아래로 민다
+  // — 이 캐릭터 것 · 아무도 안 낀 것 · 남이 낀 것 순서다. 「미장착」은 한 갈래뿐이라 그대로 둔다.
+  // 그 안에서의 순서는 그대로다(sort는 같은 값끼리 순서를 지킨다).
+  const rankOf = (pk: number) => (equippedIds.includes(pk) ? 0 : isTaken(pk) ? 2 : 1);
+  const listed =
+    equipFilter === "off" ? filtered : [...filtered].sort((a, b) => rankOf(a.pk) - rankOf(b.pk));
+
+  /**
+   * 다른 캐릭터가 끼고 있는 에코면 가져올지 먼저 묻고, 아니면 바로 한다.
+   * 누르든 슬롯으로 끌든 같은 물음을 거친다.
+   */
+  const askBeforeTaking = (pk: number, run: () => void) => {
+    const owner = ownerOf.get(pk);
+    if (owner && owner.id !== characterId) setTakeAsk({ ownerName: owner.name, run });
+    else run();
+  };
 
   /** 그 에코가 고른 화음의 아이콘. 카드 왼쪽 아래에 붙인다. */
   const fetterIcon = (e: any) =>
@@ -135,7 +163,7 @@ export function EchoSelector({
       return; // 다 찼는데 빈 칸에 놓으려는 경우
     }
 
-    onSetEchoes(characterId, ids);
+    askBeforeTaking(drag.pk, () => onSetEchoes(characterId, ids));
   }
 
   /** 슬롯에서 끌어낸 것을 목록 위에 떨구면 해제. */
@@ -248,11 +276,11 @@ export function EchoSelector({
               endDrag();
             }}
           >
-            {filtered.map((e: any) => {
+            {listed.map((e: any) => {
               const on = equippedIds.includes(e.pk);
               const icon = fetterIcon(e);
               const owner = ownerOf.get(e.pk);
-              const taken = owner !== undefined && owner.id !== characterId;
+              const taken = isTaken(e.pk);
 
               return (
                 <button
@@ -265,8 +293,8 @@ export function EchoSelector({
                   ]
                     .filter(Boolean)
                     .join(" ")}
-                  onClick={() => onToggleEcho(characterId, String(e.pk))}
-                  title={taken ? `${owner!.name}에게서 옮겨 옵니다` : e.name}
+                  onClick={() => askBeforeTaking(e.pk, () => onToggleEcho(characterId, String(e.pk)))}
+                  title={taken ? `${owner!.name} 사용 중 — 누르면 가져올지 묻습니다` : e.name}
                   draggable={canDrag}
                   onDragStart={() => setDrag({ pk: e.pk, from: null })}
                   onDragEnd={endDrag}
@@ -445,6 +473,33 @@ export function EchoSelector({
           })}
         </div>
       </div>
+
+      {takeAsk && (
+        <Dialog
+          title="에코 가져오기"
+          // 이름 끝 글자에 받침이 있으면 「이」, 없으면 「가」(치사가 · 기염이).
+          lines={[
+            `${takeAsk.ownerName}${
+              /[가-힣]$/.test(takeAsk.ownerName) &&
+              (takeAsk.ownerName.charCodeAt(takeAsk.ownerName.length - 1) - 0xac00) % 28 !== 0
+                ? "이"
+                : "가"
+            } 사용중입니다. 가져오시겠습니까?`,
+          ]}
+          buttons={[
+            {
+              label: "가져오기",
+              primary: true,
+              onClick: () => {
+                takeAsk.run();
+                setTakeAsk(null);
+              },
+            },
+            { label: "취소", onClick: () => setTakeAsk(null) },
+          ]}
+          onDismiss={() => setTakeAsk(null)}
+        />
+      )}
 
       {detailEcho && (
         <EchoDetailDialog

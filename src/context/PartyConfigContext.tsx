@@ -105,6 +105,8 @@ export interface PartyPreset {
   id: string;
   name: string;
   config: PartyConfig;
+  /** 파티 관리 탭에서 묶는 그룹 이름. 없거나 비어 있으면 「미설정」 그룹이다. */
+  group?: string;
 }
 
 /** 파티 슬롯 순서 — 1번, 2번, 3번 캐릭터 */
@@ -161,7 +163,7 @@ interface PartyConfigContextType {
   setConfig: (config: PartyConfig) => void;
   addAttack: (attackId: string, characterId: string) => void;
   removeAttack: (id: string) => void;
-  /** 같은 공격을 버프 체크·스택까지 그대로 복사해 루틴 맨 뒤에 붙인다. */
+  /** 같은 공격을 버프 체크·스택까지 그대로 복사해 그 공격 바로 뒤에 끼운다. */
   duplicateAttack: (id: string) => void;
   /**
    * 이 공격 **바로 뒤**에 다른 공격을 담는다. 사이클과 버프 체크·스택을 그대로 이어받는다
@@ -226,6 +228,13 @@ interface PartyConfigContextType {
   /** 담아둔 편성을 계산 탭 자리에 앉힌다. 로테이션·몬스터 설정은 건드리지 않는다. */
   applyPartyPreset: (id: string) => void;
   renamePartyPreset: (id: string, name: string) => void;
+  /** 그 파티의 그룹을 바꾼다. 빈 이름이면 「미설정」으로 돌아간다. */
+  setPartyPresetGroup: (id: string, group: string) => void;
+  /** 「그룹 추가」로 만들어 둔 그룹 이름들. 파티가 없는 빈 그룹도 여기 남는다. */
+  partyGroups: string[];
+  addPartyGroup: (name: string) => void;
+  /** 그룹을 지운다. **그 그룹에 든 파티도 전부 같이 지운다.** */
+  removePartyGroup: (name: string) => void;
   removePartyPreset: (id: string) => void;
 
   /** 담아둔 사이클(공격 루틴 한 벌). 사이클 관리 탭이 본다. */
@@ -634,24 +643,30 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  /** 복사 — 켜둔 버프와 스택을 그대로 들고 맨 뒤에 하나 더 붙인다. */
+  /**
+   * 복사 — 켜둔 버프와 스택을 그대로 들고 **그 공격 바로 뒤에** 하나 더 끼운다.
+   *
+   * 루틴 맨 뒤에 붙이면 안 된다. 화면은 배열 순서대로 그리며 사이클 번호가 바뀌는 자리마다
+   * 머리를 세우므로, 1사이클 공격을 맨 뒤(2사이클 뒤)에 붙이면 「1사이클」 머리가 하나 더 생겨
+   * 사이클이 새로 생긴 것처럼 보인다.
+   */
   const duplicateAttack = (id: string) => {
     setConfig((current) => {
-      const source = current.rotation.find((item) => item.id === id);
-      if (!source) return current;
+      const at = current.rotation.findIndex((item) => item.id === id);
+      if (at < 0) return current;
+      const source = current.rotation[at];
+      const copy: RotationAttack = {
+        ...source,
+        id: crypto.randomUUID(),
+        // 배열·객체는 복사본을 넘겨야 한쪽을 고칠 때 다른 쪽이 따라 바뀌지 않는다.
+        enabledBuffIds: [...source.enabledBuffIds],
+        ...(source.disabledBuffIds ? { disabledBuffIds: [...source.disabledBuffIds] } : {}),
+        ...(source.buffStacks ? { buffStacks: { ...source.buffStacks } } : {}),
+      };
 
       return {
         ...current,
-        rotation: [
-          ...current.rotation,
-          {
-            ...source,
-            id: crypto.randomUUID(),
-            // 배열·객체는 복사본을 넘겨야 한쪽을 고칠 때 다른 쪽이 따라 바뀌지 않는다.
-            enabledBuffIds: [...source.enabledBuffIds],
-            ...(source.buffStacks ? { buffStacks: { ...source.buffStacks } } : {}),
-          },
-        ],
+        rotation: [...current.rotation.slice(0, at + 1), copy, ...current.rotation.slice(at + 1)],
       };
     });
   };
@@ -963,6 +978,27 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setPartyPresets((current) =>
       current.map((p) => (p.id === id ? { ...p, name: label } : p)),
     );
+  };
+
+  const setPartyPresetGroup = (id: string, group: string) => {
+    const label = group.trim();
+    setPartyPresets((current) =>
+      current.map((p) => (p.id === id ? { ...p, group: label || undefined } : p)),
+    );
+  };
+
+  // 「그룹 추가」로 만든 그룹 이름들. 새로고침해도 남는다.
+  const [partyGroups, setPartyGroups] = usePersistedState<string[]>("partyGroups", []);
+
+  const addPartyGroup = (name: string) => {
+    const label = name.trim();
+    if (!label) return;
+    setPartyGroups((current) => (current.includes(label) ? current : [...current, label]));
+  };
+
+  const removePartyGroup = (name: string) => {
+    setPartyGroups((current) => current.filter((g) => g !== name));
+    setPartyPresets((current) => current.filter((p) => p.group !== name));
   };
 
   const removePartyPreset = (id: string) => {
@@ -1358,6 +1394,10 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     movePartyPreset,
     applyPartyPreset,
     renamePartyPreset,
+    setPartyPresetGroup,
+    partyGroups,
+    addPartyGroup,
+    removePartyGroup,
     removePartyPreset,
     cyclePresets,
     saveCyclePreset,

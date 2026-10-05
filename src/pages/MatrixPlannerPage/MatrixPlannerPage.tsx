@@ -11,16 +11,9 @@ import { useAppState } from "../../context/AppStateContext";
 import { usePersistedState } from "../../utils/usePersistedState";
 import type { CyclePreset } from "../../data/cyclePresets";
 import type { Character, Element, PartyConfig } from "../../types/game";
-import {
-  MATRIX_BUFFS,
-  MATRIX_MONSTERS,
-  MATRIX_ROLE_BOOSTS,
-  MATRIX_ROUND_COUNT,
-  MATRIX_SEASON,
-  matrixHpKey,
-} from "../../data/matrixSeason";
+import { MATRIX_SEASONS, UNION_RESPONDERS } from "../../data/matrixSeason";
 import { triggersFor } from "../../data/attackTriggers";
-import type { MatrixBuff, MatrixMonster, MatrixRoleBoost } from "../../data/matrixSeason";
+import type { MatrixBuff, MatrixMonster, MatrixRoleBoost, MatrixSeason } from "../../data/matrixSeason";
 import { isMainDps, tagsOf } from "../../data/characterTags";
 import { baseCharacterId } from "../../data/modeVariants";
 import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../../data/rentalStore";
@@ -38,11 +31,14 @@ import type { AdviceRow } from "../../data/partyAdvice";
  *   파티 순서 구성하기  담아 둔 파티를 도는 순서대로 끌어 옮긴다
  *
  * 파티는 **담은 순서대로** 쭉 선다(속성으로 나누지 않는다) — 그 순서가 곧 도는 순서다.
- * 한 캐릭터는 정해진 횟수만큼만 담을 수 있다(USE_LIMIT · EXTRA_STAMINA). 다 쓰면 목록에서
+ * 한 캐릭터는 정해진 횟수만큼만 담을 수 있다(USE_LIMIT · 시즌의 extraStamina). 다 쓰면 목록에서
  * 눌리지 않고 맨 아래로 내려가며, 어느 파티에 있는지는 카드에 그대로 적어 둔다.
  *
  * 계산 탭 · 파티 관리 탭의 편성과는 **따로 논다.** 저장소도 따로고(matrixParties),
  * 여기서 자리를 옮겨도 계산 중인 파티는 그대로다.
+ *
+ * 맨 위에서 **시즌**을 고른다(MATRIX_SEASONS). 몬스터 · 스테이지 버프 · 「추가 피로도」가 시즌마다
+ * 다르고, 파티 · 고른 버프 · 고친 체력도 시즌마다 따로 담는다.
  */
 
 /** 한 파티에 앉는 캐릭터 수. 명조는 셋이다. */
@@ -65,15 +61,6 @@ const USE_LIMIT: Record<string, number> = {
 };
 
 /**
- * 「추가 피로도」로 한 번 더 나갈 수 있는 캐릭터 — 이번 시즌 강화다
- * (dpmatrix API의 `Roles[].EnhanceSkillDesc`, 데니아 「캐릭터가 추가 피로도를 보유한다」).
- * 피해가 오르는 강화(MATRIX_ROLE_BOOSTS)와 달리 **쓸 수 있는 횟수**만 늘려 주므로 여기서 본다.
- */
-const EXTRA_STAMINA: Record<string, string> = {
-  denia: "추가 피로도(S2 2단계 한정)",
-};
-
-/**
  * **게임에서 한 명**인 캐릭터를 하나로 묶는 열쇠. 횟수를 세는 단위가 이것이다.
  *
  *   모드로 갈린 캐릭터  데니아 · 불꽃 / 데니아 · 조화 밀집 → 한 명(baseCharacterId)
@@ -86,10 +73,11 @@ const personId = (characterId: string): string =>
 /**
  * 이 캐릭터를 몇 번까지 담을 수 있는지. 갈래가 여럿이어도 한 명으로 묶어 센다(personId) —
  * 데니아 · 불꽃과 데니아 · 조화 밀집이 각각 한 번씩이 아니다.
+ * 그 시즌에 「추가 피로도」가 붙은 캐릭터는 한 번이 더 붙는다(season.extraStamina).
  */
-const useLimit = (characterId: string): number => {
+const useLimit = (season: MatrixSeason, characterId: string): number => {
   const base = personId(characterId);
-  return (USE_LIMIT[base] ?? 1) + (EXTRA_STAMINA[base] ? 1 : 0);
+  return (USE_LIMIT[base] ?? 1) + (season.extraStamina[base] ? 1 : 0);
 };
 
 /** 툴팁 줄바꿈. title 속성은 줄바꿈 문자를 그대로 쓴다. */
@@ -111,6 +99,7 @@ const TIER_LABEL: Record<AdviceRow["tier"], string> = {
 function PoolCard({
   char,
   at,
+  limit,
   blocked,
   onPlace,
   basis,
@@ -118,12 +107,13 @@ function PoolCard({
 }: {
   char: Character;
   at: string[];
+  /** 이 시즌에 이 캐릭터를 담을 수 있는 횟수. */
+  limit: number;
   blocked: string | null;
   onPlace: () => void;
   basis?: boolean;
   onBasis?: () => void;
 }) {
-  const limit = useLimit(char.id);
   // 겹쳐 쓸 수 있는 횟수가 남아 있으면 아직 「다 쓴 것」이 아니다 — 흐리게 하지 않는다.
   // (수수 · 파수인처럼 두 번 쓸 수 있는 캐릭터가 한 번 담겼다고 꺼져 보이면 안 된다)
   const spent = at.length >= limit;
@@ -209,17 +199,18 @@ const TARGET_SHORT: Record<string, string> = {
 function AdviceCard({
   char,
   at,
+  limit,
   blocked,
   onPlace,
   advice,
 }: {
   char: Character;
   at: string[];
+  limit: number;
   blocked: string | null;
   onPlace: () => void;
   advice?: AdviceRow;
 }) {
-  const limit = useLimit(char.id);
   // 위 PoolCard와 같은 규칙 — 횟수가 남았으면 흐리게 하지 않는다.
   const spent = at.length >= limit;
 
@@ -311,14 +302,41 @@ const VIEWS = [
 type ViewId = (typeof VIEWS)[number]["id"];
 
 export function MatrixPlannerPage() {
+  // 시즌은 늘 하나가 골라져 있다 — 고른 적이 없으면 이번 버전(목록 맨 앞)이다.
+  const [seasonId, setSeasonId] = usePersistedState<string>("matrix.season", MATRIX_SEASONS[0].id);
+  const season = MATRIX_SEASONS.find((s) => s.id === seasonId) ?? MATRIX_SEASONS[0];
+  const [view, setView] = useState<ViewId>("planner");
+
+  // 시즌마다 저장 자리가 달라 통째로 다시 세운다(key). 세부 탭은 시즌을 바꿔도 그대로 둔다.
+  return (
+    <MatrixPlanner
+      key={season.id}
+      season={season}
+      onSeason={setSeasonId}
+      view={view}
+      setView={setView}
+    />
+  );
+}
+
+function MatrixPlanner({
+  season,
+  onSeason,
+  view,
+  setView,
+}: {
+  season: MatrixSeason;
+  onSeason: (id: string) => void;
+  view: ViewId;
+  setView: (view: ViewId) => void;
+}) {
   const ownedVersion = useSyncExternalStore(subscribeOwnedStore, ownedStoreVersion);
   // 대여로 둔 캐릭터는 파티 줄에 그렇게 적는다 — 내 세팅이 아니라 대여 빌드로 점수가 난다.
   const rentalVersion = useSyncExternalStore(subscribeRentalStore, rentalStoreVersion);
   void rentalVersion;
   const { cyclePresets, applyCyclePreset, characterChains, characterModes } = usePartyConfig();
   const { setTab } = useAppState();
-  const [stored, setParties] = usePersistedState<PlannerParty[]>("matrixParties", []);
-  const [view, setView] = useState<ViewId>("planner");
+  const [stored, setParties] = usePersistedState<PlannerParty[]>(season.storeKey("matrixParties"), []);
   const [activeId, setActiveId] = useState<number | null>(null);
   const [query, setQuery] = useState("");
   // 보유 목록을 속성으로 거른다. null이면 전체.
@@ -375,7 +393,7 @@ export function MatrixPlannerPage() {
 
   /** 쓸 수 있는 횟수를 다 썼는지. 더 담을 수 없고 목록에서도 맨 아래로 내려간다. */
   const isSpent = (characterId: string): boolean =>
-    usedAt(characterId).length >= useLimit(characterId);
+    usedAt(characterId).length >= useLimit(season, characterId);
 
   /**
    * 한 명이 담긴 갈래들(모드 · 방랑자 속성). 목록에서 나머지 갈래를 감출 때 본다.
@@ -478,7 +496,7 @@ export function MatrixPlannerPage() {
    * 이 캐릭터를 지금 더 앉힐 수 있는지. 못 앉히는 까닭까지 같이 돌려준다.
    *
    * 쓸 수 있는 횟수를 **넘겨 담을 수 없다.** 한 번씩이 규칙이고, 치유 · 보조 몇몇만 두 번이며
-   * (USE_LIMIT), 「추가 피로도」가 붙은 캐릭터는 거기에 한 번이 더 붙는다(EXTRA_STAMINA).
+   * (USE_LIMIT), 「추가 피로도」가 붙은 캐릭터는 거기에 한 번이 더 붙는다(season.extraStamina).
    * 모드로 갈린 캐릭터는 원래 한 명이라 모드를 바꿔 담는 것으로 횟수를 늘릴 수 없다.
    */
   const blockedReason = (characterId: string): string | null => {
@@ -490,9 +508,9 @@ export function MatrixPlannerPage() {
       return "채우는 파티가 꽉 찼습니다 — 다른 파티를 고르세요";
 
     const at = usedAt(characterId);
-    const limit = useLimit(characterId);
+    const limit = useLimit(season, characterId);
     if (at.length >= limit) {
-      const extra = EXTRA_STAMINA[base];
+      const extra = season.extraStamina[base];
       return [
         limit > 1
           ? `쓸 수 있는 ${limit}회를 다 썼습니다 — ${at.join(" · ")}`
@@ -705,24 +723,34 @@ export function MatrixPlannerPage() {
   // 파티 순서 구성하기에서 파티마다 드롭다운으로 고른 사이클. 안 골랐으면 첫 사이클.
   const [pickedCycle, setPickedCycle] = useState<Record<number, string>>({});
   // 파티마다 고른 매트릭스 스테이지 버프 id. 넷 중 하나는 반드시 고른다 — 고른 적이 없으면 첫 버프다.
-  const [pickedBuff, setPickedBuff] = usePersistedState<Record<number, number>>("matrix.buffs", {});
+  const [pickedBuff, setPickedBuff] = usePersistedState<Record<number, number>>(
+    season.storeKey("matrix.buffs"),
+    {},
+  );
+  // 파티마다 「실드 버프 상시 적용」 체크 — 실드 조건이 있는 스테이지 버프(shieldToggle)에서만 쓴다.
+  const [shieldAlways, setShieldAlways] = usePersistedState<Record<number, boolean>>(
+    season.storeKey("matrix.shield-always"),
+    {},
+  );
 
   /** 파티 순서대로, 파티마다 고른 사이클. 몬스터 체력 깎기가 이 순서로 돈다. */
   const matrixRuns = useMemo(
     () =>
       parties.map((party, index) => {
         const found = cyclesFor(party.memberIds);
+        const buff = season.buffs.find((b) => b.id === pickedBuff[party.id]) ?? season.buffs[0];
         return {
           index,
           cycle: found.find((p) => p.id === pickedCycle[party.id]) ?? found[0] ?? null,
-          buff: MATRIX_BUFFS.find((b) => b.id === pickedBuff[party.id]) ?? MATRIX_BUFFS[0],
+          buff,
+          shieldAlways: !!buff.shieldToggle && !!shieldAlways[party.id],
         };
       }),
     // cyclesFor는 cyclePresets로만 결과가 달라진다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [parties, pickedCycle, pickedBuff, cyclePresets],
+    [parties, pickedCycle, pickedBuff, shieldAlways, cyclePresets],
   );
-  const matrix = useMatrixSim(matrixRuns);
+  const matrix = useMatrixSim(season, matrixRuns);
 
   /**
    * 파티가 얻은 점수. 몬스터마다 「그 파티가 깎은 체력 ÷ 몬스터 체력 × 그 몬스터 점수」를 더한다 —
@@ -730,7 +758,7 @@ export function MatrixPlannerPage() {
    * 파티 점수를 모두 더하면 몬스터 판의 총점과 같다.
    */
   const partyScore = (index: number) =>
-    MATRIX_MONSTERS.reduce((sum, m, monsterIndex) => {
+    season.monsters.reduce((sum, m, monsterIndex) => {
       const hp = matrix.hpOf(m);
       return hp > 0 ? sum + (m.score * (matrix.sim.dealt[monsterIndex][index] ?? 0)) / hp : sum;
     }, 0);
@@ -762,6 +790,19 @@ export function MatrixPlannerPage() {
 
   return (
     <div className="matrix-planner">
+      {/* 시즌 — 몬스터 · 스테이지 버프 · 추가 피로도가 갈린다. 빈 값 없이 늘 하나를 고른다. */}
+      <label className="matrix-season">
+        <b>시즌</b>
+        <select value={season.id} required onChange={(event) => onSeason(event.target.value)}>
+          {MATRIX_SEASONS.map((s) => (
+            <option key={s.id} value={s.id}>
+              {s.name}
+            </option>
+          ))}
+        </select>
+        <em>파티 · 스테이지 버프 · 고친 체력은 시즌마다 따로 담습니다</em>
+      </label>
+
       {/* 세부 탭 — 담는 화면과 순서 정하는 화면을 갈라 둔다. */}
       <nav className="matrix-views">
         {VIEWS.map((item) => (
@@ -821,6 +862,7 @@ export function MatrixPlannerPage() {
                           key={char.id}
                           char={char}
                           at={usedAt(char.id)}
+                          limit={useLimit(season, char.id)}
                           blocked={blockedReason(char.id)}
                           onPlace={() => place(char.id)}
                           {...(isMainDps(char.id) && {
@@ -868,6 +910,7 @@ export function MatrixPlannerPage() {
                               key={char.id}
                               char={char}
                               at={usedAt(char.id)}
+                              limit={useLimit(season, char.id)}
                               blocked={blockedReason(char.id)}
                               onPlace={() => place(char.id)}
                             />
@@ -884,6 +927,7 @@ export function MatrixPlannerPage() {
                               key={char.id}
                               char={char}
                               at={usedAt(char.id)}
+                              limit={useLimit(season, char.id)}
                               blocked={null}
                               onPlace={() => place(char.id)}
                               advice={advice}
@@ -992,14 +1036,20 @@ export function MatrixPlannerPage() {
                         return <div key={slot} className="matrix-slot empty" aria-hidden="true" />;
 
                       const used = usedAt(char.id).length;
-                      const over = used > useLimit(char.id);
+                      // 파티 불러오기는 횟수를 따지지 않고 그대로 앉힌다 — 넘긴 자리는 칸을 붉게 칠해 알린다.
+                      const limit = useLimit(season, char.id);
+                      const over = used > limit;
 
                       return (
                         <button
                           key={slot}
-                          className="matrix-slot"
+                          className={over ? "matrix-slot over" : "matrix-slot"}
                           title={`${char.name} — 누르면 파티에서 빠집니다${
-                            used > 1 ? ` (${used}개 파티에 있음)` : ""
+                            over
+                              ? ` (쓸 수 있는 ${limit}회를 넘겼습니다 — ${used}개 파티에 있음)`
+                              : used > 1
+                                ? ` (${used}개 파티에 있음)`
+                                : ""
                           }`}
                           onClick={(event) => {
                             event.stopPropagation();
@@ -1087,10 +1137,10 @@ export function MatrixPlannerPage() {
                                 대여
                               </i>
                             )}
-                            {MATRIX_ROLE_BOOSTS[id] && (
+                            {season.roleBoosts[id] && (
                               <i
                                 className="matrix-chip-boost"
-                                title={`매트릭스 강화 — ${MATRIX_ROLE_BOOSTS[id].desc}`}
+                                title={`매트릭스 강화 — ${season.roleBoosts[id].desc}`}
                               >
                                 강화
                               </i>
@@ -1111,12 +1161,28 @@ export function MatrixPlannerPage() {
                         setPickedBuff((cur) => ({ ...cur, [party.id]: id }));
                       }}
                     >
-                      {MATRIX_BUFFS.map((b) => (
+                      {season.buffs.map((b) => (
                         <option key={b.id} value={b.id}>
                           {b.name}
                         </option>
                       ))}
                     </select>
+                  )}
+                  {party.memberIds.length > 0 && matrixRuns[index].buff.shieldToggle && (
+                    <label
+                      className="matrix-buff-toggle"
+                      title="사이클에서 처음 실드를 얻은 뒤부터 끝까지 실드 조건(×1.25)을 켭니다. 끄면 실드 조건은 넣지 않습니다(지속 2초)"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={!!shieldAlways[party.id]}
+                        onChange={(event) => {
+                          const on = event.target.checked;
+                          setShieldAlways((cur) => ({ ...cur, [party.id]: on }));
+                        }}
+                      />
+                      실드 버프 상시 적용
+                    </label>
                   )}
                   {cyclePicker(party)}
                   {/* 이 파티가 깎은 체력 — 색은 오른쪽 체력바의 이 파티 몫과 같다. */}
@@ -1152,7 +1218,7 @@ export function MatrixPlannerPage() {
           </p>
         </section>
         {/* 파티 순서대로 고른 사이클을 한 번씩 써서 매트릭스 몬스터 체력을 타수별로 깎아 본다. */}
-        <MatrixRounds runs={matrixRuns} matrix={matrix} />
+        <MatrixRounds season={season} runs={matrixRuns} matrix={matrix} />
         </div>
       )}
     </div>
@@ -1193,10 +1259,13 @@ interface MatrixRun {
   cycle: CyclePreset | null;
   /** 이 파티에 고른 매트릭스 스테이지 버프. 넷 중 하나는 늘 고른다. */
   buff: MatrixBuff;
+  /** 「실드 버프 상시 적용」 — 켜면 처음 실드를 얻은 뒤부터 끝까지 실드 조건이 선 것으로 본다(shieldToggle 버프만). */
+  shieldAlways: boolean;
 }
 
 /** 매트릭스 체력 깎기 계산 — 파티 순서 줄(파티별 결과)과 몬스터 칸이 같이 쓰도록 위로 올린다. */
-function useMatrixSim(runs: MatrixRun[]) {
+function useMatrixSim(season: MatrixSeason, runs: MatrixRun[]) {
+  const monsters = season.monsters;
   // 키에 v2 — 예전 기본값은 도감 어림값이라 실제의 1/5였다. 그때 손으로 고쳐 둔 값이 남아 있으면
   // 실측표로 바꾼 기본값을 덮어써 버리므로, 자리를 새로 잡아 실측값에서 다시 시작한다.
   const [hpByKey, setHpByKey] = usePersistedState<Record<string, number>>("matrix.hp-v2", {});
@@ -1210,29 +1279,37 @@ function useMatrixSim(runs: MatrixRun[]) {
     characterNodes,
   } = usePartyConfig();
 
-  const hpOf = (m: MatrixMonster) => hpByKey[matrixHpKey(m)] ?? m.defaultHp;
-  const edited = Object.keys(hpByKey).length > 0;
+  const hpOf = (m: MatrixMonster) => hpByKey[season.hpKey(m)] ?? m.defaultHp;
+  // 시즌마다 키가 달라(season.hpKey) 지금 시즌 몬스터의 키만 센다.
+  const edited = monsters.some((m) => season.hpKey(m) in hpByKey);
+
+  /** 이 시즌 몬스터의 고친 체력만 지운다 — 다른 시즌에서 고쳐 둔 값은 남긴다. */
+  const resetHp = () =>
+    setHpByKey((cur) => {
+      const mine = new Set(monsters.map(season.hpKey));
+      return Object.fromEntries(Object.entries(cur).filter(([key]) => !mine.has(key)));
+    });
 
   const sim = useMemo(() => {
     const matrix = resPresetOf("matrix");
-    const hp = MATRIX_MONSTERS.map(hpOf);
+    const hp = monsters.map(hpOf);
     /** dealt[몬스터][파티] — 그 파티가 그 몬스터에서 깎은 체력(넘친 피해 제외). */
-    const dealt = MATRIX_MONSTERS.map(() => runs.map(() => 0));
-    const killedBy: (number | null)[] = MATRIX_MONSTERS.map(() => null);
+    const dealt = monsters.map(() => runs.map(() => 0));
+    const killedBy: (number | null)[] = monsters.map(() => null);
     /** 몬스터마다 사이클이 실제로 켠 전용 시스템 배수(1이면 조건을 못 채운 것). */
-    const featureUp = MATRIX_MONSTERS.map(() => 1);
+    const featureUp = monsters.map(() => 1);
     /** 몬스터마다 스테이지 버프가 실제로 낸 최대 배수(조건을 못 채웠으면 조건 없는 몫만 남는다). */
-    const stageUp = MATRIX_MONSTERS.map(() => 1);
+    const stageUp = monsters.map(() => 1);
     const report = runs.map(() => ({ damage: 0, hits: 0, totalHits: 0, stoppedAt: -1 }));
 
     // 파티 · 몬스터마다 타수별 피해 목록. 실제로 맞는 몬스터만 계산한다(계산이 무겁다).
     const cache = new Map<string, number[]>();
     const hitsFor = (run: MatrixRun, monsterIndex: number): number[] => {
-      const key = `${run.index}:${run.buff.id}:${monsterIndex}`;
+      const key = `${run.index}:${run.buff.id}:${run.shieldAlways ? 1 : 0}:${monsterIndex}`;
       const hit = cache.get(key);
       if (hit) return hit;
       const cycle = run.cycle!;
-      const m = MATRIX_MONSTERS[monsterIndex];
+      const m = monsters[monsterIndex];
       const partyIds = PARTY_SLOTS.map(
         (slot) => cycle.members.find((x) => x.slot === slot)?.characterId ?? "",
       );
@@ -1283,13 +1360,20 @@ function useMatrixSim(runs: MatrixRun[]) {
       let stacks = 0;
       let consumed = false;
       let statusOn = false;
+      let anomalyOn = false;
       /**
        * 스테이지 버프의 조건부 줄이 보는 상태. 몬스터 전용 시스템과 **같은 트리거 자료**를 읽는다
-       * — 30번은 이상 효과를 붙였는지, 32번은 어떤 「이탈」을 붙였는지로 갈린다.
+       * — 30번은 이상 효과를 붙였는지, 32번은 어떤 「이탈」을 붙였는지, 단계3 35번은 실드를 얻었는지로 갈린다.
        */
-      const stage = { anomalyOn: false, breaches: new Set<string>() };
-      const featureScale = (syncAmplify: number) => {
+      const stage = { anomalyOn: false, breaches: new Set<string>(), shieldOn: false };
+      const featureScale = (syncAmplify: number, characterId: string, anomaly?: string) => {
         if (!rule) return 1;
+        if (rule.kind === "union") return UNION_RESPONDERS.includes(characterId) ? 1 + rule.bonus : 1;
+        if (rule.kind === "shield") return 1 + rule.perStack * Math.min(stacks, rule.maxStacks);
+        if (rule.kind === "anyAnomaly") {
+          const own = rule.anomalyDamage && anomaly === rule.anomalyDamage.anomaly ? rule.anomalyDamage.mult : 1;
+          return (anomalyOn ? 1 + rule.bonus : 1) * own;
+        }
         if (rule.kind === "anomaly") {
           return (1 + rule.perStack * Math.min(stacks, rule.maxStacks)) * (consumed ? 1 + rule.onConsume : 1);
         }
@@ -1311,11 +1395,18 @@ function useMatrixSim(runs: MatrixRun[]) {
           if (t.action === "add") {
             if (t.anomaly) stage.anomalyOn = true;
             if (t.status?.endsWith("이탈")) stage.breaches.add(t.status);
+            // 실드 버프는 지속이 2초뿐이라 기본으로는 켜지 않는다. 「실드 버프 상시 적용」을 체크하면
+            // 처음 실드를 얻은 뒤부터 사이클 끝까지 켜진 것으로 본다.
+            if (t.shield && run.shieldAlways) stage.shieldOn = true;
           }
 
           // ── 이 몬스터의 전용 시스템 쪽.
-          if (!rule) continue;
-          if (rule.kind === "anomaly") {
+          if (!rule || rule.kind === "union") continue;
+          if (rule.kind === "shield") {
+            if (t.shield) stacks += 1;
+          } else if (rule.kind === "anyAnomaly") {
+            if (t.action === "add" && t.anomaly) anomalyOn = true;
+          } else if (rule.kind === "anomaly") {
             if (t.anomaly !== rule.anomaly) continue;
             // 개수를 안 적어 둔 줄(「최대 스택까지」)은 상한까지 채운 것으로 본다.
             const n = t.amount ?? rule.maxStacks;
@@ -1328,14 +1419,14 @@ function useMatrixSim(runs: MatrixRun[]) {
       };
 
       /**
-       * 매트릭스 전용 캐릭터 강화(MATRIX_ROLE_BOOSTS).
+       * 매트릭스 전용 캐릭터 강화(season.roleBoosts).
        *   최종 피해 — 강화받은 캐릭터가 낸 피해에 곱한다.
        *   파티 피해 보너스 — 강화받은 캐릭터가 공명 해방을 쓴 **뒤의** 공격부터, 그 공격의
        *   피해 보너스 합(1+Σ)에 더해 다시 나눈다. 해방 그 타는 아직 덕을 보지 않는다.
        */
       const partyBoosts: NonNullable<MatrixRoleBoost["party"]>[] = [];
       const roleScale = (r: (typeof results)[number]) => {
-        const own = 1 + (MATRIX_ROLE_BOOSTS[r.item.characterId]?.finalDamage ?? 0);
+        const own = 1 + (season.roleBoosts[r.item.characterId]?.finalDamage ?? 0);
         if (r.damage.kind !== "normal" || partyBoosts.length === 0) return own;
         const { dmgBonus, category, element } = r.damage.breakdown;
         const extra = partyBoosts
@@ -1344,7 +1435,7 @@ function useMatrixSim(runs: MatrixRun[]) {
         return own * (dmgBonus > 0 ? (dmgBonus + extra) / dmgBonus : 1);
       };
       const followRole = (r: (typeof results)[number]) => {
-        const party = MATRIX_ROLE_BOOSTS[r.item.characterId]?.party;
+        const party = season.roleBoosts[r.item.characterId]?.party;
         const liberation =
           r.skillCategory === "Liberation" || r.attack.type === "Liberation" || r.attack.type === "Ultimate";
         if (party && liberation && !partyBoosts.includes(party)) partyBoosts.push(party);
@@ -1358,10 +1449,11 @@ function useMatrixSim(runs: MatrixRun[]) {
               category: r.attack.damageBonusType ?? r.attack.type,
               element: r.attack.element,
               anomaly: r.attack.anomaly,
+              characterId: r.item.characterId,
             },
             stage,
           ) * roleScale(r);
-        const feature = featureScale(r.stats.syncAmplify);
+        const feature = featureScale(r.stats.syncAmplify, r.item.characterId, r.attack.anomaly);
         featureUp[monsterIndex] = Math.max(featureUp[monsterIndex], feature);
         stageUp[monsterIndex] = Math.max(stageUp[monsterIndex], scale);
         follow(r.item.characterId, r.attack.id);
@@ -1377,12 +1469,16 @@ function useMatrixSim(runs: MatrixRun[]) {
       return list;
     };
 
+    // 체력이 비어 있는 몬스터(아직 재지 못한 시즌)에서는 멈춘다 — 0을 「이미 죽었다」로 읽으면
+    // 한 타에 한 마리씩 줄줄이 넘어가 버린다.
+    const open = (index: number) => index < monsters.length && hp[index] > 0;
+
     let cur = 0;
     for (const run of runs) {
-      if (!run.cycle || cur >= MATRIX_MONSTERS.length) continue;
+      if (!run.cycle || !open(cur)) continue;
       const total = hitsFor(run, cur).length;
       report[run.index].totalHits = total;
-      for (let k = 0; k < total && cur < MATRIX_MONSTERS.length; k++) {
+      for (let k = 0; k < total && open(cur); k++) {
         const damage = hitsFor(run, cur)[k] ?? 0;
         const used = Math.min(damage, hp[cur]);
         hp[cur] -= used;
@@ -1401,6 +1497,7 @@ function useMatrixSim(runs: MatrixRun[]) {
     // hpByKey가 바뀌면 hpOf도 달라진다.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
+    season,
     runs,
     hpByKey,
     config,
@@ -1412,18 +1509,26 @@ function useMatrixSim(runs: MatrixRun[]) {
     characterNodes,
   ]);
 
-  return { sim, hpOf, setHpByKey, edited };
+  return { sim, hpOf, setHpByKey, resetHp, edited };
 }
 
 /** 파티가 멈춘 자리 이름. */
-const matrixPlaceOf = (index: number) => {
-  if (index >= MATRIX_MONSTERS.length) return "전부 처치";
-  const m = MATRIX_MONSTERS[index];
+const matrixPlaceOf = (season: MatrixSeason, index: number) => {
+  if (index >= season.monsters.length) return "전부 처치";
+  const m = season.monsters[index];
   return `${m.round}라운드 ${m.slot}번 ${m.name}`;
 };
 
-function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<typeof useMatrixSim> }) {
-  const { sim, hpOf, setHpByKey, edited } = matrix;
+function MatrixRounds({
+  season,
+  runs,
+  matrix,
+}: {
+  season: MatrixSeason;
+  runs: MatrixRun[];
+  matrix: ReturnType<typeof useMatrixSim>;
+}) {
+  const { sim, hpOf, setHpByKey, resetHp, edited } = matrix;
 
   /**
    * 깎은 체력만큼 점수를 준다 — 게임도 피해량을 점수로 환산하지, 처치 여부로 끊지 않는다.
@@ -1433,7 +1538,7 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
    * 체력을 화면에서 고쳐 두었으면 고친 값을 기준으로 삼는다 — 그래야 처치했을 때
    * 표에 적힌 점수(m.score)가 그대로 나온다.
    */
-  const scoreOf = (m: (typeof MATRIX_MONSTERS)[number], index: number) => {
+  const scoreOf = (m: MatrixMonster, index: number) => {
     const hp = hpOf(m);
     if (hp <= 0) return 0;
     if (sim.killedBy[index] !== null) return m.score; // 처치했으면 반올림 없이 표 값 그대로
@@ -1441,8 +1546,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
     return (m.score * dealt) / hp;
   };
 
-  const earned = MATRIX_MONSTERS.reduce((sum, m, index) => sum + scoreOf(m, index), 0);
-  const fullScore = MATRIX_MONSTERS.reduce((sum, m) => sum + m.score, 0);
+  const earned = season.monsters.reduce((sum, m, index) => sum + scoreOf(m, index), 0);
+  const fullScore = season.monsters.reduce((sum, m) => sum + m.score, 0);
 
   return (
     <section className="panel matrix-round">
@@ -1450,13 +1555,13 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
         <h2>매트릭스 몬스터</h2>
         <div className="matrix-actions">
           <small className="matrix-round-meta">
-            {MATRIX_SEASON.name} · {MATRIX_SEASON.level}
+            {season.name} · {season.level}
           </small>
           <small className="matrix-score-total" title="깎은 체력만큼 점수가 붙습니다(처치는 표 점수 그대로)">
             점수 <b>{Math.floor(earned).toLocaleString()}</b> / {fullScore.toLocaleString()}
           </small>
           {edited && (
-            <button onClick={() => setHpByKey({})} title="체력을 실측표 기본값으로 되돌립니다">
+            <button onClick={resetHp} title="체력을 실측표 기본값으로 되돌립니다">
               기본값으로
             </button>
           )}
@@ -1464,9 +1569,9 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
       </div>
 
 
-      {Array.from({ length: MATRIX_ROUND_COUNT }, (_, r) => {
+      {Array.from({ length: season.roundCount }, (_, r) => {
         const round = r + 1;
-        const list = MATRIX_MONSTERS.map((m, index) => ({ m, index })).filter((x) => x.m.round === round);
+        const list = season.monsters.map((m, index) => ({ m, index })).filter((x) => x.m.round === round);
         return (
           <div key={round} className="matrix-round-block">
             <div className="matrix-round-title">
@@ -1533,18 +1638,22 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                           </span>
                         )}
                         {/* 잡으면 받는 점수 — 어느 몬스터를 먼저 눕힐지 고르는 기준이다. */}
-                        <span className="matrix-monster-score">{m.score.toLocaleString()}점</span>
+                        {m.score > 0 && (
+                          <span className="matrix-monster-score">{m.score.toLocaleString()}점</span>
+                        )}
                         <label className="matrix-hp-input">
                           HP
                           <input
                             type="number"
                             min={1}
                             step={1000}
-                            value={hp}
+                            // 체력을 아직 모르는 몬스터는 빈 칸으로 둔다.
+                            value={hp > 0 ? hp : ""}
+                            placeholder="미입력"
                             onChange={(event) => {
                               const value = Math.round(Number(event.target.value));
                               if (!Number.isFinite(value) || value <= 0) return;
-                              setHpByKey((cur) => ({ ...cur, [matrixHpKey(m)]: value }));
+                              setHpByKey((cur) => ({ ...cur, [season.hpKey(m)]: value }));
                             }}
                           />
                         </label>
@@ -1552,6 +1661,8 @@ function MatrixRounds({ runs, matrix }: { runs: MatrixRun[]; matrix: ReturnType<
                       <small className="matrix-monster-state">
                         {killer !== null ? (
                           <span style={{ color: partyColor(killer) }}>{killer + 1}파티가 처치</span>
+                        ) : hp <= 0 ? (
+                          <span className="muted">체력 미입력</span>
                         ) : sim.hp[index] < hp ? (
                           <>
                             남은 체력 {Math.round(sim.hp[index]).toLocaleString()}

@@ -50,7 +50,13 @@ const ALL_TAB = "__all";
 const SHARED_TAB = "__shared";
 
 interface BuffDialogProps {
+  /** 기준 카드 — 수치(버프량 · 스택 상한)는 이 공격 것으로 보여 준다. */
   selected: CalculationResult;
+  /**
+   * 함께 고른 다른 공격들(다중선택). 있으면 **전부에 공통으로 걸리는 버프만** 띄우고,
+   * 체크 · 스택을 고른 공격 모두에 한꺼번에 적용한다.
+   */
+  peers?: CalculationResult[];
   onClose: () => void;
 }
 
@@ -58,8 +64,10 @@ interface BuffDialogProps {
  * 공격 루틴에서 카드를 누르면 옆에 뜨는 버프 창.
  * 화면을 덮지 않도록 오른쪽에 붙는 패널로 그린다 — 루틴을 보면서 버프를 켜고 끌 수 있다.
  */
-export function BuffDialog({ selected, onClose }: BuffDialogProps) {
+export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
   const { toggleBuff, setBuffStacks, allBuffs, config, autoBuffIdsFor } = usePartyConfig();
+  const targets = [selected, ...peers];
+  const multi = peers.length > 0;
   // 앞 카드의 트리거로 저절로 켜진 것(수수의 반주 등). 손으로 끄면 이 카드에서만 빠진다.
   const autoOn = autoBuffIdsFor(selected.item.id);
   // 고른 탭 — 카드를 바꿔도 남겨 둔다. 한 캐릭터의 버프를 여러 카드에 걸쳐 보는 일이 잦아서다.
@@ -68,14 +76,31 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
   // 이 공격에 걸릴 수 있는 것만 남긴다. 분류·속성·개인 범위가 맞지 않는 버프는
   // 켜도 계산에 안 들어가므로 목록에 띄우지 않는다.
   // 상시 버프는 조건 없이 걸려 있어 손댈 일이 적다 — 조건부를 위로 두고 상시는 아래로 민다.
+  // 여러 장을 골랐으면 고른 공격 **모두**에 걸리는 것만 남긴다.
   const usable = allBuffs
-    .filter((buff: ManualBuff) => appliesTo(buff, selected.attack, selected.character.id))
+    .filter((buff: ManualBuff) => targets.every((t) => appliesTo(buff, t.attack, t.character.id)))
     .sort((a, b) => Number(a.uptime === "passive") - Number(b.uptime === "passive"));
 
-  const isOn = (buff: ManualBuff) =>
+  /** 그 공격에서 이 버프가 켜져 있는지. */
+  const isOnFor = (target: CalculationResult, buff: ManualBuff) =>
     buff.uptime === "passive"
-      ? !(selected.item.disabledBuffIds?.includes(buff.id) ?? false)
-      : selected.item.enabledBuffIds.includes(buff.id) || autoOn.has(buff.id);
+      ? !(target.item.disabledBuffIds?.includes(buff.id) ?? false)
+      : target.item.enabledBuffIds.includes(buff.id) ||
+        autoBuffIdsFor(target.item.id).has(buff.id);
+
+  /** 고른 공격 **전부**에서 켜져 있는지. 한 장만 골랐으면 그 공격의 상태다. */
+  const isOn = (buff: ManualBuff) => targets.every((t) => isOnFor(t, buff));
+  /** 일부에만 켜져 있는지 — 체크박스를 「일부」로 그린다. */
+  const isMixed = (buff: ManualBuff) => !isOn(buff) && targets.some((t) => isOnFor(t, buff));
+
+  /**
+   * 체크를 누르면 고른 공격 모두를 같은 상태로 맞춘다.
+   * 전부 켜져 있었으면 전부 끄고, 일부만 켜져 있거나 다 꺼져 있었으면 전부 켠다.
+   */
+  const toggleAll = (buff: ManualBuff) => {
+    const turnOn = !isOn(buff);
+    for (const t of targets) if (isOnFor(t, buff) !== turnOn) toggleBuff(t.item.id, buff.id);
+  };
 
   // 캐릭터별 탭 — 파티 자리 순서대로, 주인 없는 버프는 「공용」으로 맨 뒤에 모은다.
   const partyOrder = PARTY_SLOTS.map((slot) => config[slot].characterId);
@@ -113,16 +138,33 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
     <aside className="buff-dialog">
       <div className="buff-dialog-head">
         <div>
-          <small>이 공격에 적용할 버프</small>
-          <b>{selected.attack.name}</b>
-          <em>
-            {selected.character.name} · 켜둔 것 {usable.filter(isOn).length}개
-            {autoOn.size > 0 && ` (앞 카드에서 자동 ${usable.filter((b) => autoOn.has(b.id)).length}개)`}
-          </em>
+          {multi ? (
+            <>
+              <small>고른 공격 {targets.length}개에 함께 적용할 버프</small>
+              <b>
+                {selected.attack.name} 외 {peers.length}개
+              </b>
+              <em>
+                공통으로 걸리는 버프 {usable.length}개 · 전부 켜둔 것 {usable.filter(isOn).length}개
+                — 수치는 「{selected.attack.name}」 기준
+              </em>
+            </>
+          ) : (
+            <>
+              <small>이 공격에 적용할 버프</small>
+              <b>{selected.attack.name}</b>
+              <em>
+                {selected.character.name} · 켜둔 것 {usable.filter(isOn).length}개
+                {autoOn.size > 0 &&
+                  ` (앞 카드에서 자동 ${usable.filter((b) => autoOn.has(b.id)).length}개)`}
+              </em>
+            </>
+          )}
         </div>
         {/* 계산이 어긋나 보일 때 통째로 퍼서 보여주는 자리 — 버프 한 줄씩 수치까지 담긴다. */}
         <span className="buff-dialog-tools">
-          <CopyJson result={selected} allBuffs={usable} label="계산 JSON" />
+          {/* 계산 내역은 공격 하나의 것이라 여러 장을 골랐을 때는 내지 않는다. */}
+          {!multi && <CopyJson result={selected} allBuffs={usable} label="계산 JSON" />}
           <button onClick={onClose}>×</button>
         </span>
       </div>
@@ -153,7 +195,9 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
         <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>
           {allBuffs.length === 0
             ? "버프 목록이 비어 있습니다. 위 「버프 직접 입력」에서 추가하거나 장착 무기 버프를 담아보세요."
-            : "이 공격에 걸릴 수 있는 버프가 없습니다."}
+            : multi
+              ? "고른 공격 모두에 공통으로 걸리는 버프가 없습니다."
+              : "이 공격에 걸릴 수 있는 버프가 없습니다."}
         </p>
       ) : (
         <div className="buffs">
@@ -164,6 +208,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
             const off = selected.item.disabledBuffIds?.includes(buff.id) ?? false;
             const auto = autoOn.has(buff.id);
             const checked = isOn(buff);
+            const mixed = isMixed(buff);
             // 스택형이면 이 공격에서 정한 스택을, 없으면 버프의 기본값을 쓴다.
             // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과의 방어력 감소 등)는 상한이 고정이 아니다
             // — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면 같이 올라간다.
@@ -198,7 +243,9 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
             return (
               <label
                 key={buff.id}
-                className={[checked ? "on" : "", recommended ? "rec" : ""].filter(Boolean).join(" ")}
+                className={[checked ? "on" : "", mixed ? "mixed" : "", recommended ? "rec" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
                 title={
                   recommended
                     ? `자동 발동 후보 — 「${recommended.condition}」이라 ` +
@@ -209,14 +256,20 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                 <input
                   type="checkbox"
                   checked={checked}
+                  // 고른 공격 가운데 일부에만 켜져 있으면 「일부」(−)로 그린다. 누르면 전부 켠다.
+                  ref={(element) => {
+                    if (element) element.indeterminate = mixed;
+                  }}
                   title={
-                    always
+                    mixed
+                      ? "고른 공격 가운데 일부에만 켜져 있습니다 — 누르면 전부 켭니다"
+                      : always
                       ? "상시 버프 — 끄면 이 공격에서만 빠집니다"
                       : auto
                         ? "앞 카드에서 저절로 켜진 버프 — 끄면 이 공격에서만 빠집니다"
                         : undefined
                   }
-                  onChange={() => toggleBuff(selected.item.id, buff.id)}
+                  onChange={() => toggleAll(buff)}
                 />
                 {/* 무기 버프는 무기 그림, 그 외는 들고 있는 캐릭터 아이콘. */}
                 {buff.iconUrl ? (
@@ -289,9 +342,11 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                         스택
                         <select
                           value={stacks}
-                          onChange={(event) =>
-                            setBuffStacks(selected.item.id, buff.id, Number(event.target.value))
-                          }
+                          onChange={(event) => {
+                            // 고른 공격 모두에 같은 스택을 넣는다(상한은 공격마다 따로 잘린다).
+                            for (const t of targets)
+                              setBuffStacks(t.item.id, buff.id, Number(event.target.value));
+                          }}
                         >
                           {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
                             <option key={n} value={n}>
@@ -305,6 +360,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
                   </b>
                   <small>
                     {describe(buff)}
+                    {mixed && " · 고른 공격 일부에만 켜짐"}
                     {always && (off ? " · 상시(이 공격에서 끔)" : " · 상시")}
                     {auto && " · 앞 카드에서 자동"}
                     {!always && !auto && off && buff.triggeredBy && " · 자동(이 공격에서 끔)"}
@@ -321,6 +377,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
 
       {/* 오른쪽 —이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
           버프를 켜고 끄면서 어느 타가 얼마나 움직이는지 그 자리에서 보려는 것이다. */}
+      {!multi && (
       <div className="buff-dialog-hits">
         <small>히트별</small>
         <table>
@@ -351,6 +408,7 @@ export function BuffDialog({ selected, onClose }: BuffDialogProps) {
           </tbody>
         </table>
       </div>
+      )}
     </div>
     </aside>
   );

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import type { Echo } from "../../../types/game";
 import echoData from "../../../data/echo.json";
 import { isExcludedEcho } from "../../../data/echoExcludes";
@@ -44,154 +44,115 @@ export function EchoSearchDialog({
 }: EchoSearchDialogProps) {
   // 제외 목록이 고정이라 한 번만 만들면 된다.
   const echoes = useMemo(() => buildEchoes(), []);
+  // 화음 세트로 거른다. ""이면 전체. 창을 닫았다 열어도 남는다 — 같은 세트를 이어서 담기 좋게.
+  const [fetter, setFetter] = useState("");
+  // 세트 고르개가 펼쳐져 있는지. 옵션에 아이콘을 넣으려고 <select> 대신 직접 그린다.
+  const [fetterOpen, setFetterOpen] = useState(false);
+
+  /** 고를 수 있는 화음 세트(이름 · 아이콘) — 에코 목록에 나오는 순서대로. */
+  const fetters = useMemo(() => {
+    const map = new Map<string, string | undefined>();
+    for (const echo of echoes)
+      for (const fg of echo.fetterGroups ?? []) if (!map.has(fg.name)) map.set(fg.name, fg.icon);
+    return Array.from(map, ([name, icon]) => ({ name, icon }));
+  }, [echoes]);
 
   if (!isOpen) return null;
 
+  const picked = fetters.find((f) => f.name === fetter);
+  const pickFetter = (name: string) => {
+    setFetter(name);
+    setFetterOpen(false);
+  };
+
+  const needle = searchQuery.trim().toLowerCase();
+  const shown = echoes.filter(
+    (echo) =>
+      echo.name.toLowerCase().includes(needle) &&
+      (!fetter || (echo.fetterGroups ?? []).some((fg) => fg.name === fetter)),
+  );
+
   return (
-    <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(22,26,36,0.62)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 1000,
-      }}
-      onClick={onClose}
-    >
+    <div className="dialog-backdrop echo-pick-backdrop" onClick={onClose} role="presentation">
       <div
-        style={{
-          background: "var(--c-434343)",
-          padding: "20px",
-          borderRadius: "8px",
-          width: "90%",
-          maxWidth: "500px",
-          maxHeight: "80vh",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 4px 6px rgba(0,0,0,0.3)",
+        className="dialog echo-pick"
+        onClick={(e) => {
+          e.stopPropagation();
+          // 창 안의 다른 곳을 누르면 세트 고르개를 접는다.
+          setFetterOpen(false);
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
-          <h3 style={{ margin: 0, color: "var(--c-ffffff)" }}>에코 검색</h3>
-          <button
-            onClick={onClose}
-            style={{ background: "none", border: "none", fontSize: "20px", cursor: "pointer", color: "var(--c-cccccc)" }}
-          >
+        <div className="echo-pick-head">
+          <h3>에코 검색</h3>
+          <button className="echo-pick-close" onClick={onClose} aria-label="닫기">
             ✕
           </button>
         </div>
 
         <input
           type="text"
+          className="echo-pick-input"
           placeholder="에코 이름으로 검색..."
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           autoFocus
-          style={{
-            width: "100%",
-            padding: "10px",
-            marginBottom: "0",
-            border: "1px solid var(--c-585858)",
-            borderTopLeftRadius: "4px",
-            borderTopRightRadius: "4px",
-            boxSizing: "border-box",
-            fontSize: "14px",
-            background: "var(--c-505050)",
-            color: "var(--c-ffffff)",
-          }}
         />
-
-        <div
-          style={{
-            border: "1px solid var(--c-585858)",
-            borderTop: "none",
-            borderBottomLeftRadius: "4px",
-            borderBottomRightRadius: "4px",
-            maxHeight: "300px",
-            overflowY: "auto",
-            background: "var(--c-4a4a4a)",
-          }}
-        >
-          {echoes
-            .filter((echo) => echo.name.toLowerCase().includes(searchQuery.toLowerCase()))
-            .map((echo) => (
-              <div
-                key={echo.id}
-                onClick={() => {
-                  const rawEcho = (echoData as any).Echo.find((e: any) => String(e.Id) === echo.id);
-                  if (rawEcho) {
-                    onSelectEcho({
-                      ...echo,
-                      iconUrl: rawEcho.Icon,
-                      fetterGroups: rawEcho.FetterGroups?.map((fg: any) => ({name: fg.Name, icon: fg.Icon})) || [],
-                    } as any);
-                    onClose();
-                  }
-                }}
-                style={{
-                  padding: "12px",
-                  borderBottom: "1px solid var(--c-585858)",
-                  cursor: "pointer",
-                  transition: "background 0.2s",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "var(--c-505050)")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "var(--c-4a4a4a)")}
-              >
-                {echo.iconUrl && (
-                  <img
-                    src={echo.iconUrl}
-                    alt={echo.name}
-                    style={{ width: "32px", height: "32px", flexShrink: 0 }}
-                  />
-                )}
-                <div style={{ flex: 1 }}>
-                  <strong style={{ color: "var(--c-ffffff)" }}>{echo.name}</strong>
-                  {/* 같은 이름이 여러 벌인 에코가 있다 — 어느 것인지 도감 id로 가른다.
-                      목록에서 뺀 것과 남은 것이 이름만 같은 경우가 많아 id가 없으면 헷갈린다. */}
-                  <span style={{ color: "var(--c-9aa3b3)", fontSize: "11px", marginLeft: "6px" }}>
-                    #{echo.id}
-                  </span>
-                  {echo.fetterGroups && echo.fetterGroups.length > 0 && (
-                    <div style={{ display: "flex", gap: "8px", marginTop: "6px", flexWrap: "wrap" }}>
-                      {echo.fetterGroups.map((fg, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            display: "flex",
-                            alignItems: "center",
-                            gap: "4px",
-                            background: "var(--c-585858)",
-                            padding: "4px 8px",
-                            borderRadius: "3px",
-                            fontSize: "12px",
-                          }}
-                        >
-                          {fg.icon && (
-                            <img src={fg.icon} alt="" style={{ width: "16px", height: "16px" }} />
-                          )}
-                          <span style={{ color: "var(--c-cccccc)" }}>{fg.name}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
-          {echoes.filter((echo) => echo.name.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
-            <div style={{ padding: "12px", color: "var(--c-727272)", textAlign: "center" }}>
-              검색 결과가 없습니다
+        {/* 화음 세트로 거르기 — 그 세트에 드는 에코만 남긴다. */}
+        <div className="echo-pick-set" onClick={(e) => e.stopPropagation()}>
+          <button
+            className="echo-pick-input echo-pick-set-button"
+            aria-haspopup="listbox"
+            aria-expanded={fetterOpen}
+            onClick={() => setFetterOpen((open) => !open)}
+          >
+            {picked?.icon && <img src={picked.icon} alt="" />}
+            <span>{picked?.name ?? "화음 세트 전체"}</span>
+            <i>▾</i>
+          </button>
+          {fetterOpen && (
+            <div className="echo-pick-set-list" role="listbox">
+              <button role="option" aria-selected={!fetter} className={fetter ? undefined : "on"} onClick={() => pickFetter("")}>
+                <span>화음 세트 전체</span>
+              </button>
+              {fetters.map((f) => (
+                <button
+                  key={f.name}
+                  role="option"
+                  aria-selected={f.name === fetter}
+                  className={f.name === fetter ? "on" : undefined}
+                  onClick={() => pickFetter(f.name)}
+                >
+                  {f.icon && <img src={f.icon} alt="" loading="lazy" />}
+                  <span>{f.name}</span>
+                </button>
+              ))}
             </div>
           )}
+        </div>
+
+        <div className="pick-grid echo-pick-grid">
+          {shown.map((echo) => (
+            <button
+              key={echo.id}
+              className="pick-card"
+              title={[echo.name, ...(echo.fetterGroups ?? []).map((fg) => fg.name)].join("\n")}
+              onClick={() => {
+                onSelectEcho(echo);
+                onClose();
+              }}
+            >
+              {echo.iconUrl && <img src={echo.iconUrl} alt="" loading="lazy" />}
+              <b>{echo.name}</b>
+              {echo.fetterGroups && echo.fetterGroups.length > 0 && (
+                <span className="echo-pick-fetters">
+                  {echo.fetterGroups.map((fg, idx) =>
+                    fg.icon ? <img key={idx} src={fg.icon} alt={fg.name} loading="lazy" /> : null,
+                  )}
+                </span>
+              )}
+            </button>
+          ))}
+          {shown.length === 0 && <p className="echo-pick-empty">검색 결과가 없습니다</p>}
         </div>
       </div>
     </div>
