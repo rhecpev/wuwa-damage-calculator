@@ -1,9 +1,17 @@
 import { useMemo, useState } from "react";
 import { characters } from "../../../data/sampleData";
-import { loadMyEchoes } from "../../../data/echoStore";
+import {
+  loadEchoPresets,
+  loadMyEchoes,
+  sameEchoes,
+  saveEchoPresets,
+} from "../../../data/echoStore";
+import { EchoPresetDialog } from "../../../components/EchoPresetDialog";
+import type { EchoPreset } from "../../../data/echoStore";
 import { echoAbility, echoesById, fetterEffects, fetterGroupByName } from "../../../data/echoes";
 import { EchoDetailDialog } from "./EchoDetailDialog";
-import { Dialog } from "../../../components/Feedback";
+import { DeleteDialog, Dialog } from "../../../components/Feedback";
+import type { DeleteAsk } from "../../../components/Feedback";
 
 interface EchoSelectorProps {
   characterId: string;
@@ -45,6 +53,17 @@ export function EchoSelector({
   const [detailPk, setDetailPk] = useState<number | null>(null);
   // 다른 캐릭터가 낀 에코를 가져오려 할 때 띄우는 물음. run이 「예」를 눌렀을 때 할 일이다.
   const [takeAsk, setTakeAsk] = useState<{ ownerName: string; run: () => void } | null>(null);
+  // 에코 프리셋 — 지금 낀 한 벌을 이름 붙여 담아 두고, 나중에 통째로 다시 끼운다.
+  const [presets, setPresets] = useState(loadEchoPresets);
+  const commitPresets = (next: EchoPreset[]) => {
+    setPresets(next);
+    saveEchoPresets(next);
+  };
+  // 「프리셋 저장」 창에 적는 중인 이름. 창이 닫혀 있으면 null.
+  const [presetName, setPresetName] = useState<string | null>(null);
+  const [presetOpen, setPresetOpen] = useState(false);
+  // 지울지 묻는 중인 프리셋.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
   const found = characters.find((c) => c.id === characterId);
   const myEchoes = loadMyEchoes() as any[];
 
@@ -174,6 +193,38 @@ export function EchoSelector({
       equippedIds.filter((id) => id !== drag.pk),
     );
   }
+
+  // ── 프리셋 ──
+  const defaultPresetName = `${found.name} 프리셋`;
+
+  /** 지금 낀 한 벌을 그 이름으로 담는다. 같은 이름이 있으면 그 프리셋을 갈아 쓴다. */
+  const savePreset = () => {
+    const name = (presetName ?? "").trim() || defaultPresetName;
+    const same = presets.find((p) => p.name === name);
+    commitPresets(
+      same
+        ? presets.map((p) => (p === same ? { ...p, echoIds: equippedIds } : p))
+        : [...presets, { id: crypto.randomUUID(), name, echoIds: equippedIds }],
+    );
+    setPresetName(null);
+  };
+
+  /** 프리셋에 담긴 에코들 — 그 뒤에 지운 에코는 빠진다. */
+  const presetEchoes = (preset: EchoPreset) =>
+    preset.echoIds.map((pk) => myEchoes.find((e) => e.pk === pk)).filter(Boolean) as any[];
+
+  /** 프리셋 한 벌을 이 캐릭터에 끼운다. 다른 캐릭터가 낀 에코가 섞여 있으면 가져올지 먼저 묻는다. */
+  const applyPreset = (preset: EchoPreset) => {
+    if (!onSetEchoes) return;
+    const ids = presetEchoes(preset).map((e) => e.pk as number);
+    const run = () => {
+      onSetEchoes(characterId, ids);
+      setPresetOpen(false);
+    };
+    const owners = [...new Set(ids.filter(isTaken).map((pk) => ownerOf.get(pk)!.name))];
+    if (owners.length > 0) setTakeAsk({ ownerName: owners.join(" · "), run });
+    else run();
+  };
 
   /** 줄 · 슬롯이 버튼이라 안에 버튼을 못 넣는다 — span에 버튼 역할을 준다. */
   const detailButton = (pk: number) => (
@@ -483,8 +534,86 @@ export function EchoSelector({
               </button>
             );
           })}
+
+          {/* 프리셋 — 지금 낀 한 벌을 담아 두거나, 담아 둔 한 벌을 통째로 끼운다. */}
+          {onSetEchoes && (
+            <div className="echo-preset-buttons">
+              <button
+                disabled={equipped.length === 0}
+                title={
+                  equipped.length === 0
+                    ? "장착한 에코가 없습니다"
+                    : "지금 장착한 에코 한 벌을 프리셋으로 담아 둡니다"
+                }
+                onClick={() => setPresetName("")}
+              >
+                프리셋 저장
+              </button>
+              <button
+                title="담아 둔 프리셋을 이 캐릭터에 끼웁니다"
+                onClick={() => setPresetOpen(true)}
+              >
+                프리셋 불러오기{presets.length > 0 ? ` (${presets.length})` : ""}
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {presetName !== null && (
+        <div className="dialog-backdrop" onClick={() => setPresetName(null)} role="presentation">
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
+            <h3>에코 프리셋 저장</h3>
+            <label className="party-form-field">
+              <b>
+                프리셋 이름<em>지금 장착한 에코 {equipped.length}개를 담습니다</em>
+              </b>
+              <input
+                type="text"
+                autoFocus
+                placeholder={defaultPresetName}
+                value={presetName}
+                onChange={(event) => setPresetName(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") savePreset();
+                  if (event.key === "Escape") setPresetName(null);
+                }}
+              />
+            </label>
+            {presets.some((p) => p.name === (presetName.trim() || defaultPresetName)) && (
+              <p className="echo-note">같은 이름의 프리셋이 있습니다 — 저장하면 그 프리셋을 덮어씁니다.</p>
+            )}
+            <div className="dialog-buttons">
+              <button className="primary" onClick={savePreset}>
+                저장
+              </button>
+              <button onClick={() => setPresetName(null)}>취소</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {presetOpen && (
+        <EchoPresetDialog
+          characterName={found.name}
+          presets={presets}
+          activeId={presets.find((p) => sameEchoes(p.echoIds, equippedIds))?.id}
+          onApply={applyPreset}
+          onDelete={(preset) =>
+            setDeleteAsk({
+              title: "프리셋 삭제",
+              lines: [
+                `「${preset.name}」 프리셋을 지웁니다.`,
+                "에코 자체와 지금 장착 상태는 그대로 남습니다.",
+              ],
+              run: () => commitPresets(presets.filter((p) => p.id !== preset.id)),
+            })
+          }
+          onClose={() => setPresetOpen(false)}
+        />
+      )}
+
+      {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
 
       {takeAsk && (
         <Dialog

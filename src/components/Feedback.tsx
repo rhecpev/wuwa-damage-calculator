@@ -36,6 +36,35 @@ export interface DialogButton {
   primary?: boolean;
 }
 
+/** 지우기 전에 물을 것 — 무엇을 지우는지와, 「삭제」를 눌렀을 때 할 일. */
+export interface DeleteAsk {
+  title: string;
+  lines: string[];
+  run: () => void;
+}
+
+/** 지울지 묻는 창. 「삭제」를 누르면 지우고, 「취소」나 바깥을 누르면 그대로 닫는다. */
+export function DeleteDialog({ ask, onClose }: { ask: DeleteAsk; onClose: () => void }) {
+  return (
+    <Dialog
+      title={ask.title}
+      lines={[...ask.lines, "되돌릴 수 없습니다."]}
+      buttons={[
+        {
+          label: "삭제",
+          primary: true,
+          onClick: () => {
+            ask.run();
+            onClose();
+          },
+        },
+        { label: "취소", onClick: onClose },
+      ]}
+      onDismiss={onClose}
+    />
+  );
+}
+
 /** 화면 한가운데 뜨는 알림·물음 창. 바깥을 눌러도 닫힌다(맨 끝 단추가 눌린 것으로 본다). */
 export function Dialog({
   title,

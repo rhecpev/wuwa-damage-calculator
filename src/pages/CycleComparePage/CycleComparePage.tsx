@@ -23,10 +23,13 @@ import {
 import {
   echoStoreVersion,
   loadEchoLinks,
+  loadEchoPresets,
   loadMyEchoes,
   mainEchoOf,
+  sameEchoes,
   subscribeEchoStore,
 } from "../../data/echoStore";
+import { EchoPresetDialog } from "../../components/EchoPresetDialog";
 import type { EchoLink, MyEcho } from "../../data/echoStore";
 import { loadMyWeapons, ownedStoreVersion, subscribeOwnedStore } from "../../data/ownedStore";
 import { fetterGroupByName } from "../../data/echoes";
@@ -375,6 +378,71 @@ function useCycleRunner(enemyOverride: Enemy | null = null) {
 
 // ── 사이클 VS 사이클 ─────────────────────────────────────────────
 
+/**
+ * 견줄 사이클 고르는 칸. 누르면 목록이 아래로 펼쳐지고, 글자를 적으면 이름에 그 글자가 든 사이클만 남는다.
+ * 「지금 계산 중인 루틴」(id "")은 검색어와 상관없이 늘 맨 위에 있다.
+ */
+function CyclePick({
+  value,
+  presets,
+  onChange,
+  plain = false,
+}: {
+  value: string;
+  presets: CyclePreset[];
+  onChange: (id: string) => void;
+  /** 이름만 적는다 — 저장 당시 값을 쓰지 않는 자리(기준 고르기)에서는 「값 없음」 꼬리표가 뜻이 없다. */
+  plain?: boolean;
+}) {
+  // 적는 중인 검색어. null이면 목록이 닫혀 있고, 칸에는 고른 사이클 이름이 보인다.
+  const [query, setQuery] = useState<string | null>(null);
+  const needle = (query ?? "").trim().toLowerCase();
+  const matched = presets.filter((p) => p.name.toLowerCase().includes(needle));
+  const labelOf = (p: CyclePreset | undefined) =>
+    p ? `${p.name}${plain || p.snapshot ? "" : " (저장 당시 값 없음)"}` : "지금 계산 중인 루틴";
+  const rows = [{ id: "", label: labelOf(undefined) }, ...matched.map((p) => ({ id: p.id, label: labelOf(p) }))];
+
+  return (
+    <div className="group-combo">
+      <input
+        type="text"
+        placeholder="사이클 검색..."
+        value={query ?? labelOf(presets.find((p) => p.id === value))}
+        onFocus={() => setQuery("")}
+        onBlur={() => setQuery(null)}
+        onChange={(event) => setQuery(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") event.currentTarget.blur();
+          // Enter는 맨 위에 걸린 사이클을 고른다.
+          if (event.key === "Enter" && query !== null) {
+            onChange(matched[0]?.id ?? "");
+            event.currentTarget.blur();
+          }
+        }}
+      />
+      {query !== null && (
+        // 누르는 동안 칸이 초점을 잃으면 목록이 먼저 닫혀 버린다 — mousedown을 막아 둔다.
+        <ul className="group-combo-list" onMouseDown={(event) => event.preventDefault()}>
+          {rows.map((row) => (
+            <li key={row.id}>
+              <button
+                className={row.id === value ? "on" : ""}
+                onClick={() => {
+                  onChange(row.id);
+                  (document.activeElement as HTMLElement | null)?.blur();
+                }}
+              >
+                {row.label}
+              </button>
+            </li>
+          ))}
+          {matched.length === 0 && needle && <li className="none">맞는 사이클이 없습니다.</li>}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 function CycleVsCycle({ enemy }: { enemy: Enemy | null }) {
   const {
     cyclePresets,
@@ -432,18 +500,6 @@ function CycleVsCycle({ enemy }: { enemy: Enemy | null }) {
     enemy,
   ]);
 
-  const options = (
-    <>
-      <option value="">지금 계산 중인 루틴</option>
-      {cyclePresets.map((p) => (
-        <option key={p.id} value={p.id}>
-          {p.name}
-          {p.snapshot ? "" : " (저장 당시 값 없음)"}
-        </option>
-      ))}
-    </>
-  );
-
   return (
     <>
       <section className="panel">
@@ -470,12 +526,10 @@ function CycleVsCycle({ enemy }: { enemy: Enemy | null }) {
       <div className="compare-vs">
         {/* 사이클 고르는 칸은 그 그래프 바로 위에 붙인다 — 어느 쪽을 바꾸는지 눈으로 바로 잇도록. */}
         <div className="compare-side">
-          <label className="compare-pick compare-pick-a">
+          <div className="compare-pick compare-pick-a">
             <em>A</em>
-            <select value={aId} onChange={(event) => setAId(event.target.value)}>
-              {options}
-            </select>
-          </label>
+            <CyclePick value={aId} presets={cyclePresets} onChange={setAId} />
+          </div>
           <DamageBreakdownSection
             stacked
             snapshot={view.a.snapshot}
@@ -504,12 +558,10 @@ function CycleVsCycle({ enemy }: { enemy: Enemy | null }) {
         </div>
 
         <div className="compare-side">
-          <label className="compare-pick compare-pick-b">
+          <div className="compare-pick compare-pick-b">
             <em>B</em>
-            <select value={bId} onChange={(event) => setBId(event.target.value)}>
-              {options}
-            </select>
-          </label>
+            <CyclePick value={bId} presets={cyclePresets} onChange={setBId} />
+          </div>
           <DamageBreakdownSection
             stacked
             snapshot={view.b.snapshot}
@@ -826,6 +878,24 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
       if (from !== undefined) put(from, prev);
       return { ...s, gear: { ...s.gear, [id]: { ...s.gear[id], echoes } } };
     });
+  /** 다섯 자리를 통째로 그 한 벌로 바꾼다(프리셋 불러오기). 원래 낀 것과 같은 자리는 바꾼 기록을 남기지 않는다. */
+  const setEchoSet = (id: string, pks: number[]) =>
+    setState((s) => {
+      const worn = wornOf(id);
+      const echoes: Record<number, number> = {};
+      for (const slot of SLOTS) {
+        if (pks[slot] !== worn[slot]) echoes[slot] = pks[slot] ?? EMPTY_SLOT;
+      }
+      return { ...s, gear: { ...s.gear, [id]: { ...s.gear[id], echoes } } };
+    });
+  /** 에코 프리셋 창을 연 캐릭터. */
+  const [presetFor, setPresetFor] = useState<string | null>(null);
+  const echoPresets = loadEchoPresets();
+  /** 바꾼 뒤의 다섯 자리가 어느 프리셋과 같은지 — 자리 순서까지 같아야 한다. */
+  const presetAfter = (id: string) => {
+    const pks = SLOTS.map((slot) => echoPkAfter(id, slot)).filter((pk) => pk !== undefined);
+    return pks.length > 0 ? echoPresets.find((p) => sameEchoes(p.echoIds, pks)) : undefined;
+  };
   const resetChar = (id: string) =>
     setState((s) => {
       const gear = { ...s.gear };
@@ -1070,20 +1140,15 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
             <h2>에코 · 무기 · 돌파 비교</h2>
           </div>
           <div className="compare-picks">
-            <label>
+            <div className="compare-base">
               <em>기준</em>
-              <select
+              <CyclePick
+                plain
                 value={state.baseId}
-                onChange={(event) => setState({ ...EMPTY_GEAR, baseId: event.target.value })}
-              >
-                <option value="">지금 계산 중인 루틴</option>
-                {cyclePresets.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                presets={cyclePresets}
+                onChange={(id) => setState({ ...EMPTY_GEAR, baseId: id })}
+              />
+            </div>
             {view?.changed && (
               <button
                 className="pen"
@@ -1185,6 +1250,13 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
 
                 {/* 에코 — 다섯 줄. 아이콘 · 이름 · 주옵션 · 화음 세트. 누르면 보유 에코로 교체. */}
                 <div>
+                  {/* 다섯 자리를 프리셋 한 벌로 한꺼번에 바꾼다. 이름은 바꾼 뒤의 구성이 어느 프리셋인지다. */}
+                  <div className="gear-preset">
+                    <em className={presetAfter(id) ? "on" : ""}>
+                      {presetAfter(id)?.name ?? "프리셋 없음"}
+                    </em>
+                    <button onClick={() => setPresetFor(id)}>프리셋 불러오기</button>
+                  </div>
                   <ul className="gear-echo-rows">
                     {SLOTS.map((slot) => {
                       const echo = echoByPk(echoPkAfter(id, slot));
@@ -1504,6 +1576,21 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* ── 에코 프리셋 창 — 고른 한 벌로 바꿔 끼웠다고 치고 계산한다 ── */}
+      {presetFor && (
+        <EchoPresetDialog
+          characterName={characters.find((c) => c.id === presetFor)?.name ?? presetFor}
+          hint="고른 한 벌로 바꿔 끼웠다고 치고 계산합니다. 실제 장착은 그대로입니다."
+          presets={echoPresets}
+          activeId={presetAfter(presetFor)?.id}
+          onApply={(picked) => {
+            setEchoSet(presetFor, picked.echoIds);
+            setPresetFor(null);
+          }}
+          onClose={() => setPresetFor(null)}
+        />
       )}
 
       {/* ── 에코 교체 창 ── */}

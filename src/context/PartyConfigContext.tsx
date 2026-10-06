@@ -27,7 +27,14 @@ import {
   setPreAscensionSource,
 } from "../data/characterStats";
 import { inherentSkillsOf, nodesOf } from "../data/characterNodes";
-import { echoStoreVersion, subscribeEchoStore } from "../data/echoStore";
+import {
+  echoSetSnapshotOf,
+  echoStoreVersion,
+  linksWithEchoSets,
+  loadEchoLinks,
+  saveEchoLinks,
+  subscribeEchoStore,
+} from "../data/echoStore";
 import { rentalBuildOf, rentalSkillLevelsOf, rentalWeaponOf } from "../data/rentalBuilds";
 import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../data/rentalStore";
 import type { EchoLink } from "../data/echoStore";
@@ -1018,6 +1025,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       const character = characters.find((c) => c.id === member.characterId);
       if (!character) return null;
       const weapon = characterWeapons[character.id];
+      const echoSet = echoSetSnapshotOf(character.id);
       return {
         slot,
         characterId: character.id,
@@ -1027,6 +1035,8 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
         resonanceChain: characterChains[character.id] ?? 0,
         resonanceMode: characterModes[character.id] ?? character.resonanceModes?.[0],
         echoIds: [...(member.echoIds ?? [])],
+        // 지금 낀 에코 한 벌과 프리셋 이름 — 앉힐 때 이 한 벌로 다시 끼운다.
+        ...(echoSet ? { echoSet } : {}),
       };
     });
     // 빈 자리(캐릭터가 안 앉은 슬롯)는 담지 않는다.
@@ -1067,12 +1077,18 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     if (!preset) return;
     const drop = new Set(dropBuffIds);
 
+    // 담을 때 끼고 있던 에코 한 벌로 다시 끼운다. 그 에코가 남아 있지 않은 캐릭터는 지금 에코 그대로 둔다.
+    const links = loadEchoLinks();
+    const restored = linksWithEchoSets(preset.members, links);
+    if (restored !== links) saveEchoLinks(restored);
+
     // 손 버프를 먼저 앉힌다 — 루틴이 그 id를 가리키므로 순서가 뒤집히면 잠깐 빈 채로 그려진다.
     setManualBuffs(preset.manualBuffs.map((b) => ({ ...b })));
 
     setConfig((current) => ({
       ...current,
-      // 자리에 누가 앉는지는 사이클이 정한다. 무기·체인은 캐릭터 관리 쪽 값이라 건드리지 않는다.
+      // 자리에 누가 앉는지는 사이클이 정한다. 무기·체인은 캐릭터 관리 쪽 값이라 건드리지 않는다
+      // (에코만 위에서 담을 때의 한 벌로 되돌린다).
       ...Object.fromEntries(
         PARTY_SLOTS.map((slot) => {
           const member = preset.members.find((m) => m.slot === slot);

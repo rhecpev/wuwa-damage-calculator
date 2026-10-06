@@ -8,7 +8,18 @@ import {
   usePartyConfig,
 } from "../../../context/PartyConfigContext";
 import { useAppState } from "../../../context/AppStateContext";
-import { echoStoreVersion, equippedFetterSets, subscribeEchoStore } from "../../../data/echoStore";
+import {
+  applyEchoPreset,
+  echoPresetOf,
+  echoPresetOwners,
+  echoStoreVersion,
+  equippedFetterSets,
+  loadEchoPresets,
+  subscribeEchoStore,
+} from "../../../data/echoStore";
+import { isRentalCharacter } from "../../../data/rentalStore";
+import { EchoPresetDialog } from "../../../components/EchoPresetDialog";
+import { Dialog } from "../../../components/Feedback";
 import { PartyPresetSection } from "./PartyPresetSection";
 
 interface PartySectionProps {
@@ -128,6 +139,13 @@ export function PartyRosterSection({ config }: PartySectionProps) {
   // 에코 저장소는 React 상태가 아니라 localStorage 한 벌이다. 에코를 갈아끼우면
   // 화음 세트도 달라지므로, 저장될 때마다 올라가는 번호를 보고 다시 그린다.
   useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
+
+  // 에코 프리셋을 고르는 중인 캐릭터의 id. null이면 창이 닫힌 것.
+  const [presetFor, setPresetFor] = useState<string | null>(null);
+  const presetCharacter = characters.find((c) => c.id === presetFor);
+  const echoPresets = loadEchoPresets();
+  // 다른 캐릭터가 낀 에코를 가져오려 할 때 띄우는 물음. run이 「가져오기」를 눌렀을 때 할 일이다.
+  const [takeAsk, setTakeAsk] = useState<{ owners: string; run: () => void } | null>(null);
 
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [overSlot, setOverSlot] = useState<number | null>(null);
@@ -272,7 +290,37 @@ export function PartyRosterSection({ config }: PartySectionProps) {
                       </span>
                     );
                   })()}
+                  {/* 지금 낀 에코 프리셋의 이름 — 화음 세트 아이콘 바로 아래에 적는다.
+                      낀 에코가 어느 프리셋과도 같지 않으면 「프리셋 없음」이다. */}
+                  {(() => {
+                    const preset = echoPresetOf(character.id, echoPresets);
+                    return (
+                      <em
+                        className={preset ? "party-preset-name" : "party-preset-name none"}
+                        title={preset ? `에코 프리셋 — ${preset.name}` : "지금 낀 에코와 같은 프리셋이 없습니다"}
+                      >
+                        {preset?.name ?? "프리셋 없음"}
+                      </em>
+                    );
+                  })()}
                   <strong>{character.name}</strong>
+                  {/* 캐릭터마다 하나씩 — 누르면 프리셋 창이 뜨고, 고른 한 벌로 갈아 끼운다. */}
+                  <button
+                    className="party-echo-preset"
+                    title={
+                      isRentalCharacter(character.id)
+                        ? "대여 캐릭터는 계산에 대여 빌드의 에코를 씁니다 — 프리셋을 바꿔도 계산은 그대로입니다"
+                        : "담아 둔 에코 프리셋으로 갈아 끼웁니다"
+                    }
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setPresetFor(character.id);
+                    }}
+                  >
+                    프리셋
+                    <br />
+                    불러오기
+                  </button>
                 </>
               ) : (
                 <span className="party-empty">미선택</span>
@@ -281,6 +329,46 @@ export function PartyRosterSection({ config }: PartySectionProps) {
           );
         })}
       </div>
+
+      {presetCharacter && (
+        <EchoPresetDialog
+          characterName={presetCharacter.name}
+          presets={echoPresets}
+          activeId={echoPresetOf(presetCharacter.id, echoPresets)?.id}
+          onApply={(preset) => {
+            const run = () => {
+              applyEchoPreset(presetCharacter.id, preset);
+              setPresetFor(null);
+            };
+            // 다른 캐릭터가 낀 에코가 섞여 있으면 가져올지 먼저 묻는다.
+            const owners = echoPresetOwners(presetCharacter.id, preset).map(
+              (id) => characters.find((c) => c.id === id)?.name ?? id,
+            );
+            if (owners.length > 0) setTakeAsk({ owners: owners.join(" · "), run });
+            else run();
+          }}
+          onClose={() => setPresetFor(null)}
+        />
+      )}
+
+      {takeAsk && (
+        <Dialog
+          title="에코 가져오기"
+          lines={[`${takeAsk.owners} 사용 중인 에코가 들어 있습니다. 가져오시겠습니까?`]}
+          buttons={[
+            {
+              label: "가져오기",
+              primary: true,
+              onClick: () => {
+                takeAsk.run();
+                setTakeAsk(null);
+              },
+            },
+            { label: "취소", onClick: () => setTakeAsk(null) },
+          ]}
+          onDismiss={() => setTakeAsk(null)}
+        />
+      )}
 
       {pickSlot !== null && (
         <SlotPickerDialog

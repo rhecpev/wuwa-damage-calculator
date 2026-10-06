@@ -1,6 +1,8 @@
 import { useMemo, useState, useSyncExternalStore } from "react";
 import { PartyPresetSection } from "../CalculatorPage/components/PartyPresetSection";
 import { ElementFilter } from "../../components/ElementFilter";
+import { DeleteDialog } from "../../components/Feedback";
+import type { DeleteAsk } from "../../components/Feedback";
 import type { DragEvent } from "react";
 import { characters } from "../../data/sampleData";
 import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../data/elements";
@@ -597,6 +599,8 @@ function MatrixPlanner({
   };
 
   const clearAll = () => setParties(parties.map((p) => ({ ...p, memberIds: [] })));
+  // 「전체 비우기」를 눌러 비울지 묻는 중이면 그 물음.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
 
   // 파티 관리 탭에 담아 둔 파티를 고르는 창. 계산 탭의 「파티 불러오기」와 같은 목록이다.
   const [presetOpen, setPresetOpen] = useState(false);
@@ -956,9 +960,21 @@ function MatrixPlanner({
                   파티 불러오기
                 </button>
                 <button onClick={addParty}>+ 파티</button>
-                <button onClick={clearAll}>전체 비우기</button>
+                <button
+                  onClick={() =>
+                    setDeleteAsk({
+                      title: "전체 비우기",
+                      lines: [`파티 ${parties.length}개에 앉힌 캐릭터를 모두 비웁니다.`],
+                      run: clearAll,
+                    })
+                  }
+                >
+                  전체 비우기
+                </button>
               </div>
             </div>
+
+            {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
 
             {presetOpen && (
               // 계산 탭의 파티 불러오기와 같은 창 — 바깥이나 Esc로 닫는다.

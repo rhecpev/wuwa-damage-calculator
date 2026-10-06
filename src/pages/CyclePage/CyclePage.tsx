@@ -12,6 +12,14 @@ import {
 } from "../../data/cyclePresets";
 import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreakdownSection";
 import { num } from "../../utils/format";
+import {
+  canRestoreEchoSet,
+  linksWithEchoSets,
+  sameEchoes,
+  wornEchoPks,
+} from "../../data/echoStore";
+import { DeleteDialog } from "../../components/Feedback";
+import type { DeleteAsk } from "../../components/Feedback";
 import { ELEMENT_COLORS, ELEMENT_NAMES } from "../../data/elements";
 import { resPresetOf } from "../../context/PartyConfigContext";
 
@@ -57,11 +65,13 @@ export function CyclePage() {
     renameCyclePreset,
     removeCyclePreset,
     currentCycleMembers,
-    buffIdsFor,
+    buffsWith,
   } = usePartyConfig();
   const { setTab } = useAppState();
 
   const [query, setQuery] = useState("");
+  // 지울지 묻는 중인 사이클.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
   const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
   /** 추출물을 띄운 사이클. 글자를 그대로 보여 주고 복사하게 한다. */
   const [exporting, setExporting] = useState<CyclePreset | null>(null);
@@ -112,7 +122,13 @@ export function CyclePage() {
     const manual = new Set(preset.manualBuffs.map((b) => b.id));
     // **앉힌 뒤**의 버프로 따진다. 지금 파티로 따지면 다른 팀의 사이클은 그 팀 버프가
     // 통째로 없는 것으로 잡혀, 켜 둔 체크가 전부 빠진 채로 들어온다.
-    const after = buffIdsFor(preset.members.map((m) => m.characterId));
+    // 에코도 마찬가지다 — 앉히면서 담을 때의 한 벌로 다시 끼우므로, 그 뒤의 장착으로 화음·어빌리티 버프를 본다.
+    const after = new Set(
+      buffsWith(
+        preset.members.map((m) => m.characterId),
+        { echoLinks: linksWithEchoSets(preset.members) },
+      ).map((b) => b.id),
+    );
     const seen = new Set<string>();
     for (const item of preset.rotation) {
       for (const id of item.enabledBuffIds) {
@@ -138,7 +154,22 @@ export function CyclePage() {
           else if (me.weaponRefine !== them.weaponRefine)
             changes.push(`정련 ${them.weaponRefine} → ${me.weaponRefine}`);
           if (me.resonanceMode !== them.resonanceMode) changes.push("공명 모드가 다름");
-          if (me.echoIds.join(",") !== them.echoIds.join(",")) changes.push("에코 구성이 다름");
+        }
+        // 에코는 지금 파티에 없는 캐릭터도 따진다 — 앉히면서 담을 때의 한 벌로 다시 끼우기 때문이다.
+        const saved = them.echoSet;
+        if (
+          saved &&
+          !sameEchoes(
+            saved.echoes.map((e) => e.pk),
+            wornEchoPks(them.characterId),
+          )
+        ) {
+          const label = saved.presetName ? `「${saved.presetName}」 프리셋` : "담을 때의 에코";
+          changes.push(
+            canRestoreEchoSet(saved)
+              ? `에코가 다름 — ${label}으로 갈아 끼웁니다`
+              : `에코가 다름 — ${label}의 에코가 남아 있지 않아 지금 에코를 그대로 씁니다`,
+          );
         }
         return { member: them, changes };
       })
@@ -159,7 +190,15 @@ export function CyclePage() {
   const memberFace = (member: CycleMember) => {
     const character = characters.find((c) => c.id === member.characterId);
     return (
-      <i key={member.slot} title={`${member.characterName} · ${member.resonanceChain}돌`}>
+      <i
+        key={member.slot}
+        title={
+          `${member.characterName} · ${member.resonanceChain}돌` +
+          (member.echoSet
+            ? ` · 에코 ${member.echoSet.presetName ? `「${member.echoSet.presetName}」` : `${member.echoSet.echoes.length}개`}`
+            : "")
+        }
+      >
         {character?.iconUrl ? (
           <img src={character.iconUrl} alt="" loading="lazy" />
         ) : (
@@ -323,7 +362,16 @@ export function CyclePage() {
                     <button className="preset-quiet" onClick={() => setExporting(preset)}>
                       내용 보기
                     </button>
-                    <button className="danger" onClick={() => removeCyclePreset(preset.id)}>
+                    <button
+                      className="danger"
+                      onClick={() =>
+                        setDeleteAsk({
+                          title: "사이클 삭제",
+                          lines: [`「${preset.name}」 사이클을 목록에서 지웁니다.`],
+                          run: () => removeCyclePreset(preset.id),
+                        })
+                      }
+                    >
                       삭제
                     </button>
                   </div>
@@ -333,6 +381,8 @@ export function CyclePage() {
           </ul>
         )}
       </section>
+
+      {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
 
       {/* ── 저장 당시 그래프 — 담을 때 박아 둔 값으로 그린다. 지금 자료로 다시 계산하지 않는다. ── */}
       {graphing?.snapshot && (

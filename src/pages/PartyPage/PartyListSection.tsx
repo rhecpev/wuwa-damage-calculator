@@ -3,10 +3,11 @@ import { characters } from "../../data/sampleData";
 import { ELEMENT_NAMES, elementIcon } from "../../data/elements";
 import { MODE_LABEL, modeOfCharacterId } from "../../data/modeVariants";
 import { PARTY_SLOTS, usePartyConfig } from "../../context/PartyConfigContext";
-import type { PartyPreset } from "../../context/PartyConfigContext";
+import { groupsOf } from "../../components/GroupCombo";
 import type { PartyConfig } from "../../types/game";
 import { CHAR_MIME, CharacterPickerSection } from "../CalculatorPage/components/PartySection";
-import { Dialog } from "../../components/Feedback";
+import { DeleteDialog, Dialog } from "../../components/Feedback";
+import type { DeleteAsk } from "../../components/Feedback";
 
 /**
  * 끌어다 놓기로 주고받는 값. 무엇이 오는지 MIME 타입으로 가른다.
@@ -41,13 +42,6 @@ const dragHas = (event: React.DragEvent, mime: string) =>
 export const membersOf = (cfg: PartyConfig) =>
   PARTY_SLOTS.map((slot) => cfg[slot].characterId).filter(Boolean);
 
-/**
- * 그룹 이름들 — 「그룹 추가」로 만든 것이 먼저, 그 순서대로. 「미설정」(그룹 없음)은 넣지 않는다.
- * 파티에만 적혀 있고 목록에 없는 이름(그룹 추가가 생기기 전에 적어 둔 것)도 뒤에 붙여 잃지 않는다.
- */
-export const groupsOf = (groups: string[], presets: PartyPreset[]) =>
-  Array.from(new Set([...groups, ...presets.map((p) => p.group ?? "").filter(Boolean)]));
-
 interface PartyListSectionProps {
   /** 지금 캐릭터를 고르고 있는 파티. 카드에 금색 테두리를 두른다. */
   activeId: string | null;
@@ -55,6 +49,8 @@ interface PartyListSectionProps {
   onActivate: (id: string) => void;
   /** 「파티 추가」를 눌렀을 때 — 새 파티 창을 연다. 그룹을 골라 보고 있었으면 그 그룹을 넘긴다. */
   onAdd: (group: string) => void;
+  /** 「복사」를 눌렀을 때 — 그 파티의 캐릭터 · 그룹을 채운 새 파티 창을 연다. */
+  onCopy: (id: string) => void;
 }
 
 /**
@@ -63,7 +59,7 @@ interface PartyListSectionProps {
  * 카드 안에서는 캐릭터를 끌어 자리 순서를, 카드 손잡이를 끌면 목록에서 보이는 순서를 바꾼다.
  * 캐릭터는 카드를 눌러 뜨는 창에서 고른다. 다른 파티 카드에서 끌어다 놓아도 된다.
  */
-export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSectionProps) {
+export function PartyListSection({ activeId, onActivate, onAdd, onCopy }: PartyListSectionProps) {
   const {
     partyPresets,
     setPartyPresetMembers,
@@ -81,15 +77,24 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
   const groups = groupsOf(partyGroups, partyPresets);
   // 그룹으로 거른다. null이면 전체, ""이면 그룹을 안 정한 파티(미설정).
   const [picked, setPicked] = useState<string | null>(null);
-  // 지운 그룹을 가리키고 있으면 전체로 본다.
-  const filter = picked && !groups.includes(picked) ? null : picked;
+  // 그룹 이름 검색어. 적으면 그 글자가 든 그룹만 단추로 남고, 파티도 그 그룹들 것만 보인다.
+  const [groupQuery, setGroupQuery] = useState("");
+  const groupNeedle = groupQuery.trim().toLowerCase();
+  const shownGroups = groups.filter((g) => g.toLowerCase().includes(groupNeedle));
+  // 지운 그룹이나 검색에서 빠진 그룹을 가리키고 있으면 전체로 본다. 검색 중에는 「미설정」도 빠진다.
+  const filter =
+    picked !== null && (picked ? !shownGroups.includes(picked) : groupNeedle !== "")
+      ? null
+      : picked;
   // 캐릭터로 거른다. 고른 캐릭터가 **들어 있는** 파티가 남는다 — 하나만 골라도 그 캐릭터가 든 파티가 다 나오고,
   // 여럿을 고르면 그 캐릭터들이 모두 든 파티로 좁혀진다. 비어 있으면 거르지 않는다.
   const [charFilter, setCharFilter] = useState<string[]>([]);
   const [charFilterOpen, setCharFilterOpen] = useState(false);
   const shown = partyPresets.filter(
     (p) =>
-      (filter === null || (p.group ?? "") === filter) &&
+      (filter === null
+        ? !groupNeedle || shownGroups.includes(p.group ?? "")
+        : (p.group ?? "") === filter) &&
       (charFilter.length === 0 || charFilter.every((id) => membersOf(p.config).includes(id))),
   );
   // 체크해 둔 파티들 — 「다중 그룹 변경」으로 한꺼번에 그룹을 옮긴다. 지워진 파티는 세지 않는다.
@@ -99,6 +104,8 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
   const [moveTo, setMoveTo] = useState<string | null>(null);
   // 지울지 묻는 중인 그룹.
   const [removing, setRemoving] = useState<string | null>(null);
+  // 지울지 묻는 중인 파티.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
 
   // 이름을 고치는 중인 파티. 한 번에 하나만 연다.
   const [editing, setEditing] = useState<{ id: string; value: string } | null>(null);
@@ -245,10 +252,21 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
         {/* 그룹으로 거르기 — 고른 그룹 오른쪽에 그 그룹을 지우는 휴지통이 붙는다. */}
         {groups.length > 0 && (
           <div className="echo-filters party-groups">
+            <input
+              type="text"
+              className="party-group-search"
+              placeholder="그룹 검색..."
+              title="적은 글자가 든 그룹과 그 파티만 봅니다"
+              value={groupQuery}
+              onChange={(event) => setGroupQuery(event.target.value)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setGroupQuery("");
+              }}
+            />
             <button className={filter === null ? "on" : ""} onClick={() => setPicked(null)}>
               전체
             </button>
-            {groups.map((group) => (
+            {shownGroups.map((group) => (
               <span key={group} className="party-group-chip">
                 <button className={filter === group ? "on" : ""} onClick={() => setPicked(group)}>
                   {group}
@@ -277,9 +295,11 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
                 )}
               </span>
             ))}
-            <button className={filter === "" ? "on" : ""} onClick={() => setPicked("")}>
-              미설정
-            </button>
+            {!groupNeedle && (
+              <button className={filter === "" ? "on" : ""} onClick={() => setPicked("")}>
+                미설정
+              </button>
+            )}
           </div>
         )}
       </div>
@@ -354,6 +374,8 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
           </div>
         </div>
       )}
+
+      {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
 
       {removing !== null && (
         <Dialog
@@ -481,11 +503,25 @@ export function PartyListSection({ activeId, onActivate, onAdd }: PartyListSecti
                     {members.length} / {PARTY_MAX}
                   </em>
                   <button
+                    className="party-list-remove party-list-copy"
+                    title="이 파티와 같은 캐릭터 · 그룹으로 새 파티를 만듭니다"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onCopy(preset.id);
+                    }}
+                  >
+                    복사
+                  </button>
+                  <button
                     className="party-list-remove"
                     title="이 파티를 목록에서 지웁니다"
                     onClick={(event) => {
                       event.stopPropagation();
-                      removePartyPreset(preset.id);
+                      setDeleteAsk({
+                        title: "파티 삭제",
+                        lines: [`「${preset.name}」 파티를 목록에서 지웁니다.`],
+                        run: () => removePartyPreset(preset.id),
+                      });
                     }}
                   >
                     삭제

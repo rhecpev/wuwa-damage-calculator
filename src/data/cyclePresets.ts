@@ -1,11 +1,12 @@
 import type { Enemy, ManualBuff, ResonanceMode, RotationAttack } from "../types/game";
+import type { EchoSetSnapshot } from "./echoStore";
 
 /**
  * 사이클 — 다 짜 놓은 공격 루틴 한 벌.
  *
  * 파티 프리셋(PartyPreset)이 「누가 앉았는가」를 담는다면, 이쪽은 **「어떻게 돌리는가」**를 담는다.
  * 담기는 것은 넷이다.
- *   members      누가 어떤 무기·체인·모드·에코로 섰는지 (환경)
+ *   members      누가 어떤 무기·체인·모드·에코(낀 한 벌과 프리셋 이름)로 섰는지 (환경)
  *   manualBuffs  손으로 넣은 버프 (그대로 옮겨야 켜둔 체크가 살아난다)
  *   rotation     공격 순서와 사이클, 그리고 공격마다 켜둔 버프
  *   enemy        어느 콘텐츠를 기준으로 짠 것인지
@@ -31,6 +32,11 @@ export interface CycleMember {
   resonanceMode?: ResonanceMode;
   /** 낀 에코 도감 id. 화음 세트와 메인 어빌리티가 여기서 나온다. */
   echoIds: string[];
+  /**
+   * 담을 때 끼고 있던 에코 한 벌과 그 프리셋 이름. 앉힐 때 이 한 벌로 다시 끼운다.
+   * 이 필드가 생기기 전에 담은 사이클과, 에코를 안 꼈거나 대여로 둔 캐릭터에는 없다.
+   */
+  echoSet?: EchoSetSnapshot;
 }
 
 /**

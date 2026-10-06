@@ -69,8 +69,137 @@ export const saveMyEchoes = (echoes: MyEcho[]): void => {
   const links = loadPersisted(LINK_KEY, (characterEchoLinksData.links ?? []) as EchoLink[]);
   const kept = pruneLinks(links, echoes);
   if (kept.length !== links.length) savePersisted(LINK_KEY, kept);
+  // 프리셋도 같다 — 지운 에코의 pk는 나중에 새 에코가 다시 쓸 수 있어, 남겨 두면 엉뚱한 에코를 가리킨다.
+  const pks = new Set(echoes.map((e) => e.pk));
+  const presets = loadEchoPresets();
+  const trimmed = presets
+    .map((preset) => ({ ...preset, echoIds: preset.echoIds.filter((pk) => pks.has(pk)) }))
+    .filter((preset) => preset.echoIds.length > 0);
+  if (JSON.stringify(trimmed) !== JSON.stringify(presets)) savePersisted(PRESET_KEY, trimmed);
   bump();
 };
+
+/**
+ * 에코 프리셋 — 다섯 자리에 낀 에코 한 벌에 이름을 붙여 둔 것.
+ * 캐릭터에 묶이지 않는다 — 어느 캐릭터에서든 불러와 그대로 끼울 수 있다.
+ */
+export interface EchoPreset {
+  id: string;
+  name: string;
+  /** 보유 에코의 pk들. 순서가 곧 슬롯 순서라 첫 번째가 메인 에코다. */
+  echoIds: number[];
+}
+
+const PRESET_KEY = "echoPresets";
+
+export const loadEchoPresets = (): EchoPreset[] => loadPersisted(PRESET_KEY, [] as EchoPreset[]);
+
+export const saveEchoPresets = (presets: EchoPreset[]): void => {
+  savePersisted(PRESET_KEY, presets);
+};
+
+/** 두 벌이 같은 에코를 같은 자리 순서로 담고 있는지. 자리가 다르면 메인 에코가 달라 다른 벌로 본다. */
+export const sameEchoes = (a: number[], b: number[]): boolean =>
+  a.length === b.length && a.every((pk, index) => pk === b[index]);
+
+/** 이 캐릭터가 지금 끼고 있는 프리셋 — 낀 에코가 프리셋과 자리까지 똑같을 때만 그 프리셋으로 본다. */
+export function echoPresetOf(
+  characterId: string,
+  presets: EchoPreset[] = loadEchoPresets(),
+  links: EchoLink[] = loadEchoLinks(),
+): EchoPreset | undefined {
+  const worn = links.filter((link) => link.characterId === characterId).map((link) => link.echoId);
+  if (worn.length === 0) return undefined;
+  return presets.find((preset) => sameEchoes(preset.echoIds, worn));
+}
+
+/** 프리셋의 에코 가운데 **다른 캐릭터**가 끼고 있는 것의 주인들(캐릭터 id, 겹치지 않게). */
+export function echoPresetOwners(characterId: string, preset: EchoPreset): string[] {
+  const owners = loadEchoLinks()
+    .filter((link) => link.characterId !== characterId && preset.echoIds.includes(link.echoId))
+    .map((link) => link.characterId);
+  return [...new Set(owners)];
+}
+
+/**
+ * 사이클을 담는 순간 캐릭터 한 명이 끼고 있던 에코 한 벌.
+ * pk만 적으면 그 뒤에 에코를 고치거나 지우고 새로 만든 것을 못 가려내므로, 에코 내용도 같이 박아 둔다.
+ */
+export interface EchoSetSnapshot {
+  /** 그때 끼고 있던 에코 프리셋의 이름. 프리셋과 같지 않은 구성이었으면 없다. */
+  presetName?: string;
+  /** 슬롯 순서대로. 첫 번째가 메인 에코다. */
+  echoes: Pick<MyEcho, "pk" | "id" | "name" | "options">[];
+}
+
+/** 이 캐릭터가 지금 끼고 있는 에코의 pk들(슬롯 순서). 대여 빌드가 아니라 **내 장착**을 본다. */
+export const wornEchoPks = (characterId: string, links: EchoLink[] = loadEchoLinks()): number[] =>
+  links.filter((link) => link.characterId === characterId).map((link) => link.echoId);
+
+/** 지금 낀 한 벌을 사이클에 담을 모양으로. 낀 에코가 없거나 대여로 둔 캐릭터면 undefined. */
+export function echoSetSnapshotOf(characterId: string): EchoSetSnapshot | undefined {
+  if (isRentalCharacter(characterId)) return undefined;
+  const links = loadEchoLinks();
+  const owned = loadMyEchoes();
+  const echoes = wornEchoPks(characterId, links)
+    .map((pk) => owned.find((e) => e.pk === pk))
+    .filter((e): e is MyEcho => e !== undefined)
+    .map(({ pk, id, name, options }) => ({ pk, id, name, options }));
+  if (echoes.length === 0) return undefined;
+  const presetName = echoPresetOf(characterId, loadEchoPresets(), links)?.name;
+  return { ...(presetName ? { presetName } : {}), echoes };
+}
+
+/**
+ * 담아 둔 한 벌을 지금도 그대로 끼울 수 있는지 — 에코가 전부 남아 있고 내용도 그때와 같아야 한다.
+ * 남에게 받은 사이클은 pk가 내 것과 우연히 겹칠 수 있어, 내용까지 견줘야 엉뚱한 에코를 끼우지 않는다.
+ */
+export function canRestoreEchoSet(set: EchoSetSnapshot, owned: MyEcho[] = loadMyEchoes()): boolean {
+  return set.echoes.every((saved) => {
+    const mine = owned.find((e) => e.pk === saved.pk);
+    return (
+      mine !== undefined &&
+      mine.id === saved.id &&
+      JSON.stringify(mine.options) === JSON.stringify(saved.options)
+    );
+  });
+}
+
+/**
+ * 담아 둔 한 벌들을 끼웠다고 칠 때의 장착 연결. 끼울 수 없는 벌(canRestoreEchoSet)은 건너뛴다.
+ * 저장하지는 않는다 — 미리 따져 보는 데도 쓰기 때문이다.
+ */
+export function linksWithEchoSets(
+  sets: { characterId: string; echoSet?: EchoSetSnapshot }[],
+  links: EchoLink[] = loadEchoLinks(),
+): EchoLink[] {
+  const owned = loadMyEchoes();
+  let next = links;
+  for (const { characterId, echoSet } of sets) {
+    if (!echoSet || !canRestoreEchoSet(echoSet, owned)) continue;
+    const pks = echoSet.echoes.map((e) => e.pk).slice(0, 5);
+    if (sameEchoes(pks, wornEchoPks(characterId, next))) continue;
+    next = [
+      ...next.filter((link) => link.characterId !== characterId && !pks.includes(link.echoId)),
+      ...pks.map((echoId) => ({ characterId, echoId })),
+    ];
+  }
+  return next;
+}
+
+/**
+ * 프리셋 한 벌을 그 캐릭터에 끼운다. 지금 낀 에코는 빠지고,
+ * 다른 캐릭터가 끼고 있던 에코는 거기서 떨어져 나온다(중복 장착 금지).
+ */
+export function applyEchoPreset(characterId: string, preset: EchoPreset): void {
+  const next = preset.echoIds.slice(0, 5);
+  saveEchoLinks([
+    ...loadEchoLinks().filter(
+      (link) => link.characterId !== characterId && !next.includes(link.echoId),
+    ),
+    ...next.map((echoId) => ({ characterId, echoId })),
+  ]);
+}
 
 /** 없는 에코(지웠거나 pk가 바뀐 것)를 가리키는 연결을 뺀다. */
 function pruneLinks(links: EchoLink[], echoes: MyEcho[]): EchoLink[] {

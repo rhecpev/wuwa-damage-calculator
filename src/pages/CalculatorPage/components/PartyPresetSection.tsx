@@ -3,6 +3,7 @@ import { characters } from "../../../data/sampleData";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import type { PartyConfig } from "../../../types/game";
 import type { PartyPreset } from "../../../context/PartyConfigContext";
+import { GroupCombo, groupsOf } from "../../../components/GroupCombo";
 
 interface PartyPresetSectionProps {
   /** 하나를 불러온 뒤 부를 것. 다이얼로그로 띄운 쪽이 스스로 닫으려고 쓴다. */
@@ -19,8 +20,13 @@ interface PartyPresetSectionProps {
  * 만들고 지우고 순서를 바꾸는 것은 파티 관리 탭이 한다 — 여기서는 고르기만 한다.
  */
 export function PartyPresetSection({ onLoaded, onPick }: PartyPresetSectionProps) {
-  const { partyPresets, applyPartyPreset } = usePartyConfig();
+  const { partyPresets, partyGroups, applyPartyPreset } = usePartyConfig();
   const [query, setQuery] = useState("");
+  const groups = groupsOf(partyGroups, partyPresets);
+  // 그룹으로 거른다. null이면 전체, ""이면 그룹을 안 정한 파티(미설정).
+  const [picked, setPicked] = useState<string | null>(null);
+  // 지운 그룹을 가리키고 있으면 전체로 본다.
+  const group = picked && !groups.includes(picked) ? null : picked;
 
   /** 그 구성에 앉은 캐릭터들. 목록에 아이콘과 이름을 같이 보여준다. */
   const members = (cfg: PartyConfig) =>
@@ -32,14 +38,21 @@ export function PartyPresetSection({ onLoaded, onPick }: PartyPresetSectionProps
   const needle = query.trim().toLowerCase();
   const shown = partyPresets.filter(
     (preset) =>
-      preset.name.toLowerCase().includes(needle) ||
-      members(preset.config).some((c) => c.name.toLowerCase().includes(needle)),
+      (group === null || (preset.group ?? "") === group) &&
+      (preset.name.toLowerCase().includes(needle) ||
+        members(preset.config).some((c) => c.name.toLowerCase().includes(needle))),
   );
 
   return (
     <section className="panel">
       <div className="panel-head">
         <h2>파티 목록</h2>
+        {groups.length > 0 && (
+          <div className="group-labeled">
+            <b>그룹</b>
+            <GroupCombo value={group} groups={groups} onChange={setPicked} allowAll />
+          </div>
+        )}
         <input
           type="text"
           className="panel-search"

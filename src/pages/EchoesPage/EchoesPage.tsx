@@ -1,7 +1,14 @@
 import { useMemo, useState } from "react";
 import type { Echo } from "../../types/game";
 import { characters } from "../../data/sampleData";
-import { loadMyEchoes, nextPk, saveMyEchoes } from "../../data/echoStore";
+import {
+  loadEchoLinks,
+  loadEchoPresets,
+  loadMyEchoes,
+  nextPk,
+  saveMyEchoes,
+} from "../../data/echoStore";
+import { usePartyConfig } from "../../context/PartyConfigContext";
 import { useAppState } from "../../context/AppStateContext";
 import { EchoSearchDialog } from "./components/EchoSearchDialog";
 import { EchoDetailModal } from "./components/EchoDetailModal";
@@ -9,7 +16,7 @@ import echoOptionData from "../../data/echoOption.json";
 import echoData from "../../data/echo.json";
 import { isExcludedEcho } from "../../data/echoExcludes";
 import { normKey, readEchoCard, type ReadEcho } from "../../utils/ocr";
-import { ProgressBar, type Progress } from "../../components/Feedback";
+import { DeleteDialog, ProgressBar, type DeleteAsk, type Progress } from "../../components/Feedback";
 
 /**
  * 옵션 표를 **이름으로 찾아 쓰기 위한** 얇은 형.
@@ -63,6 +70,12 @@ export function EchoesPage() {
     saveMyEchoes(next);
   };
   const [isSaving, setIsSaving] = useState(false);
+  // 담아 둔 사이클 — 에코를 지울 때 어느 사이클이 그 에코를 쓰는지 알리는 데 쓴다.
+  const { cyclePresets } = usePartyConfig();
+  // 장착 연결 — 카드에 누가 끼고 있는지 얼굴을 붙이는 데 쓴다. 에코를 지우면 연결도 걷히므로 그때 다시 읽는다.
+  const echoLinks = useMemo(() => loadEchoLinks(), [myEchoes]);
+  // 지울지 묻는 중인 에코.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
   const [batchEchos, setBatchEchos] = useState<any[]>([]);
   const [showBatchDialog, setShowBatchDialog] = useState(false);
   const [batchProcessing, setBatchProcessing] = useState(false);
@@ -278,6 +291,35 @@ export function EchoesPage() {
     }
   };
 
+  /**
+   * 이 에코를 지우면 같이 어긋나는 것들 — 지우기 전에 확인 창에 적는다.
+   * 사이클은 담을 때의 에코를 다시 끼우는데, 그 에코가 없으면 그 캐릭터는 되돌리지 못한다.
+   */
+  const usageWarnings = (echo: { pk: number; id: string }): string[] => {
+    const lines: string[] = [];
+    const cycles = cyclePresets.filter((preset) =>
+      preset.members.some((m) =>
+        m.echoSet?.echoes.some((e) => e.pk === echo.pk && e.id === echo.id),
+      ),
+    );
+    if (cycles.length > 0) {
+      lines.push(
+        `사이클 ${cycles.length}개가 이 에코를 쓰고 있습니다 — ${cycles
+          .map((c) => `「${c.name}」`)
+          .join(" · ")}. 지우면 그 사이클을 불러올 때 이 에코를 낀 캐릭터의 에코를 되돌리지 못합니다.`,
+      );
+    }
+    const presets = loadEchoPresets().filter((p) => p.echoIds.includes(echo.pk));
+    if (presets.length > 0) {
+      lines.push(
+        `에코 프리셋 ${presets.length}개에서도 빠집니다 — ${presets
+          .map((p) => `「${p.name}」`)
+          .join(" · ")}.`,
+      );
+    }
+    return lines;
+  };
+
   const handleDeleteEcho = async (pk: number) => {
     try {
       commitEchoes(myEchoes.filter((echo) => echo.pk !== pk));
@@ -311,6 +353,7 @@ export function EchoesPage() {
 
   return (
     <>
+    {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
     {/* 등록 단추는 목록 판 밖 — 목록이 길어도 늘 위에 있다. 색은 테마 변수를 탄다(.page-toolbar). */}
     <div className="page-toolbar">
       <button className="primary" onClick={() => setShowEchoSearch(true)}>
@@ -1279,6 +1322,8 @@ export function EchoesPage() {
                 const fetter = echo.fetterGroups?.find(
                   (g: any) => g.name === echo.options?.selectedFetter,
                 );
+                const ownerId = echoLinks.find((link) => link.echoId === echo.pk)?.characterId;
+                const owner = characters.find((c) => c.id === ownerId);
                 return (
                   <div key={echo.pk} className="echo-row">
                     <span className="echo-row-left">
@@ -1321,12 +1366,47 @@ export function EchoesPage() {
                       </span>
 
                       <span className="echo-row-tools">
+                        {/* pk를 떼고 넘기면 창이 「에코 저장」으로 뜬다 — 옵션은 그대로 채워진 채 새 에코로 담긴다. */}
+                        <button
+                          title="이 에코와 같은 옵션으로 새 에코를 만듭니다"
+                          onClick={() => {
+                            const { pk: _pk, ...copy } = echo as any;
+                            setSelectedEcho(copy);
+                          }}
+                        >
+                          복사
+                        </button>
                         <button onClick={() => setSelectedEcho(echo as any)}>수정</button>
-                        <button className="danger" onClick={() => handleDeleteEcho(echo.pk)}>
+                        <button
+                          className="danger"
+                          onClick={() =>
+                            setDeleteAsk({
+                              title: "에코 삭제",
+                              lines: [
+                                `「${echo.name}」 에코를 목록에서 지웁니다.`,
+                                ...usageWarnings(echo),
+                              ],
+                              run: () => handleDeleteEcho(echo.pk),
+                            })
+                          }
+                        >
                           삭제
                         </button>
                       </span>
                     </span>
+
+                    {/* 누가 끼고 있는지 — 캐릭터 탭의 에코 카드와 같은 자리에 얼굴을 붙인다. */}
+                    {owner && (
+                      <span className="echo-row-state">
+                        <i className="echo-row-owner" title={`${owner.name} 장착 중`}>
+                          {owner.iconUrl ? (
+                            <img src={owner.iconUrl} alt="" loading="lazy" />
+                          ) : (
+                            owner.name[0]
+                          )}
+                        </i>
+                      </span>
+                    )}
                   </div>
                 );
               })}

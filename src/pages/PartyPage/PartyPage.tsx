@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { characters } from "../../data/sampleData";
 import { PARTY_SLOTS, usePartyConfig } from "../../context/PartyConfigContext";
 import { CharacterPickerSection } from "../CalculatorPage/components/PartySection";
-import { PartyListSection, groupsOf, membersOf } from "./PartyListSection";
+import { GroupCombo, groupsOf } from "../../components/GroupCombo";
+import { PartyListSection, membersOf } from "./PartyListSection";
 
 /** 파티 창에서 고치는 중인 값. 「저장」을 눌러야 파티에 들어간다. */
 interface PartyDraft {
@@ -32,12 +34,13 @@ export function PartyPage() {
   } = usePartyConfig();
   const [draft, setDraft] = useState<PartyDraft | null>(null);
 
-  const openFor = (id: string) => {
+  /** copy면 새 파티로 연다 — 캐릭터 · 그룹만 그 파티에서 가져오고 이름은 비워 둔다. */
+  const openFor = (id: string, copy = false) => {
     const preset = partyPresets.find((p) => p.id === id);
     if (!preset) return;
     setDraft({
-      partyId: id,
-      name: preset.name,
+      partyId: copy ? null : id,
+      name: copy ? "" : preset.name,
       members: membersOf(preset.config),
       group: preset.group ?? "",
     });
@@ -69,7 +72,8 @@ export function PartyPage() {
     <div className="party-page">
       <PartyListSection
         activeId={draft?.partyId ?? null}
-        onActivate={openFor}
+        onActivate={(id) => openFor(id)}
+        onCopy={(id) => openFor(id, true)}
         onAdd={(group) => setDraft({ partyId: null, name: "", members: [], group })}
       />
 
@@ -83,42 +87,80 @@ export function PartyPage() {
               </button>
             </div>
 
-            <label className="party-form-field">
-              <b>1. 파티명</b>
-              <input
-                type="text"
-                autoFocus
-                placeholder={`파티 ${partyPresets.length + 1}`}
-                value={draft.name}
-                onChange={(event) => setDraft({ ...draft, name: event.target.value })}
-              />
-            </label>
+            {/* 위 줄 — 왼쪽에 자리 셋, 오른쪽에 파티명과 그룹을 위아래로. 창이 세로로 길어지지 않게. */}
+            <div className="party-form-top">
+              <div className="party-form-field">
+                <b>
+                  1. 캐릭터
+                  <em>
+                    {draft.members.length} / {PARTY_SLOTS.length}
+                  </em>
+                </b>
+                {/* 계산 탭의 「파티 구성」과 같은 모양 — 지금 고른 캐릭터를 자리 순서대로 보여 준다. */}
+                <div className="party">
+                  {PARTY_SLOTS.map((slot, index) => {
+                    const character = characters.find((c) => c.id === draft.members[index]);
 
-            <div className="party-form-field">
-              <b>
-                2. 캐릭터
-                <em>
-                  {draft.members.length} / {PARTY_SLOTS.length}
-                </em>
-              </b>
-              <CharacterPickerSection memberIds={draft.members} onPick={pick} />
+                    return (
+                      <article key={slot} className={character ? "filled" : ""}>
+                        <small>{index + 1}번 캐릭터</small>
+                        {character ? (
+                          <>
+                            <button
+                              className="party-clear"
+                              title={`${character.name} — 이 자리를 비웁니다`}
+                              onClick={() => pick(character.id)}
+                            >
+                              ×
+                            </button>
+                            <div className="party-face">
+                              {character.iconUrl && (
+                                <img
+                                  src={character.iconUrl}
+                                  alt=""
+                                  loading="lazy"
+                                  draggable={false}
+                                />
+                              )}
+                            </div>
+                            <strong>{character.name}</strong>
+                          </>
+                        ) : (
+                          <span className="party-empty">미선택</span>
+                        )}
+                      </article>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="party-form-side">
+                <label className="party-form-field">
+                  <b>2. 파티명</b>
+                  <input
+                    type="text"
+                    autoFocus
+                    placeholder={`파티 ${partyPresets.length + 1}`}
+                    value={draft.name}
+                    onChange={(event) => setDraft({ ...draft, name: event.target.value })}
+                  />
+                </label>
+
+                <div className="party-form-field">
+                  <b>3. 그룹</b>
+                  {/* 「그룹 추가」로 만들어 둔 그룹에서만 고른다. 안 고르면 「미설정」으로 묶인다. */}
+                  <GroupCombo
+                    value={draft.group}
+                    groups={groups}
+                    onChange={(group) => setDraft({ ...draft, group: group ?? "" })}
+                  />
+                </div>
+              </div>
             </div>
 
-            <label className="party-form-field">
-              <b>3. 그룹</b>
-              {/* 「그룹 추가」로 만들어 둔 그룹에서만 고른다. 안 고르면 「미설정」으로 묶인다. */}
-              <select
-                value={draft.group}
-                onChange={(event) => setDraft({ ...draft, group: event.target.value })}
-              >
-                <option value="">미설정</option>
-                {groups.map((name) => (
-                  <option key={name} value={name}>
-                    {name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="party-form-field party-form-grow">
+              <CharacterPickerSection memberIds={draft.members} onPick={pick} />
+            </div>
 
             <div className="dialog-buttons">
               <button

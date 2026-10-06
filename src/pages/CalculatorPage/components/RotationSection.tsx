@@ -14,6 +14,8 @@ import { DamageFormulaModal } from "./DamageFormulaModal";
 import { buildDamageSnapshot } from "./DamageBreakdownSection";
 import { BuffDialog } from "./BuffDialog";
 import { num } from "../../../utils/format";
+import { DeleteDialog } from "../../../components/Feedback";
+import type { DeleteAsk } from "../../../components/Feedback";
 import { DAMAGE_TYPE_LABEL } from "../../../utils/buffLabels";
 import { isExtraAttack } from "./AttackPaletteSection";
 import { ANOMALIES } from "../../../data/anomalies";
@@ -140,6 +142,8 @@ export function RotationSection({ results }: RotationSectionProps) {
   // 카드를 눌러 히트별로 펼치는 것과 계산식을 여는 것은 다른 동작이다.
   const [formulaId, setFormulaId] = useState<string | null>(null);
   // 사이클 저장 — 이름을 물어보는 작은 줄. 담고 나면 다시 접는다.
+  // 「일괄 삭제」·「사이클 삭제」를 눌러 지울지 묻는 중이면 그 물음.
+  const [deleteAsk, setDeleteAsk] = useState<DeleteAsk | null>(null);
   const [saveOpen, setSaveOpen] = useState(false);
   const [saveName, setSaveName] = useState("");
   const [saved, setSaved] = useState(false);
@@ -238,7 +242,13 @@ export function RotationSection({ results }: RotationSectionProps) {
               <button
                 className="viz-toggle"
                 title="담아둔 공격을 전부 비운다"
-                onClick={() => clearRotation()}
+                onClick={() =>
+                  setDeleteAsk({
+                    title: "일괄 삭제",
+                    lines: [`담아둔 공격 ${results.length}대를 전부 지웁니다.`],
+                    run: () => clearRotation(),
+                  })
+                }
               >
                 일괄 삭제 ({results.length})
               </button>
@@ -301,7 +311,16 @@ export function RotationSection({ results }: RotationSectionProps) {
                 <button
                   className="cycle-copy cycle-remove"
                   title={`${cycle}사이클의 공격 ${cycleCount}대를 통째로 지웁니다 — 뒤 사이클 번호는 하나씩 당겨집니다`}
-                  onClick={() => removeCycle(cycle)}
+                  onClick={() =>
+                    setDeleteAsk({
+                      title: "사이클 삭제",
+                      lines: [
+                        `${cycle}사이클의 공격 ${cycleCount}대를 통째로 지웁니다.`,
+                        "뒤 사이클 번호는 하나씩 당겨집니다.",
+                      ],
+                      run: () => removeCycle(cycle),
+                    })
+                  }
                 >
                   × 사이클 삭제
                 </button>
@@ -559,6 +578,8 @@ export function RotationSection({ results }: RotationSectionProps) {
           )}
         </div>
       </div>
+
+      {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
 
       {/* 공격 바꾸기 — 카드의 펜(✎)을 누르면 뜬다.
           담아 둔 카드가 「이 타수가 아니었네」일 때 지우고 다시 담지 않고 갈아 끼운다.
