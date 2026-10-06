@@ -113,12 +113,34 @@ export function echoPresetOf(
   return presets.find((preset) => sameEchoes(preset.echoIds, worn));
 }
 
-/** 프리셋의 에코 가운데 **다른 캐릭터**가 끼고 있는 것의 주인들(캐릭터 id, 겹치지 않게). */
-export function echoPresetOwners(characterId: string, preset: EchoPreset): string[] {
-  const owners = loadEchoLinks()
-    .filter((link) => link.characterId !== characterId && preset.echoIds.includes(link.echoId))
-    .map((link) => link.characterId);
-  return [...new Set(owners)];
+/**
+ * 장착이 before에서 after로 바뀔 때 **에코를 잃는 캐릭터**와 그 개수.
+ * skip에 든 캐릭터는 세지 않는다 — 한 벌을 통째로 갈아 끼우는 당사자는 「잃는」 것이 아니다.
+ */
+export function echoLosers(
+  before: EchoLink[],
+  after: EchoLink[],
+  skip: string[] = [],
+): { characterId: string; count: number }[] {
+  const kept = new Set(after.map((link) => `${link.characterId}|${link.echoId}`));
+  const lost = new Map<string, number>();
+  for (const link of before) {
+    if (skip.includes(link.characterId) || kept.has(`${link.characterId}|${link.echoId}`)) continue;
+    lost.set(link.characterId, (lost.get(link.characterId) ?? 0) + 1);
+  }
+  return [...lost].map(([characterId, count]) => ({ characterId, count }));
+}
+
+/** 프리셋을 이 캐릭터에 끼우면 에코를 잃는 **다른 캐릭터**들과 그 개수. */
+export function echoPresetOwners(
+  characterId: string,
+  preset: EchoPreset,
+): { characterId: string; count: number }[] {
+  const before = loadEchoLinks();
+  const taken = before.filter(
+    (link) => link.characterId !== characterId && preset.echoIds.includes(link.echoId),
+  );
+  return echoLosers(taken, []);
 }
 
 /**

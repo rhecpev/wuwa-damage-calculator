@@ -145,7 +145,7 @@ export function PartyRosterSection({ config }: PartySectionProps) {
   const presetCharacter = characters.find((c) => c.id === presetFor);
   const echoPresets = loadEchoPresets();
   // 다른 캐릭터가 낀 에코를 가져오려 할 때 띄우는 물음. run이 「가져오기」를 눌렀을 때 할 일이다.
-  const [takeAsk, setTakeAsk] = useState<{ owners: string; run: () => void } | null>(null);
+  const [takeAsk, setTakeAsk] = useState<{ owners: string[]; run: () => void } | null>(null);
 
   const [dragFrom, setDragFrom] = useState<number | null>(null);
   const [overSlot, setOverSlot] = useState<number | null>(null);
@@ -340,11 +340,12 @@ export function PartyRosterSection({ config }: PartySectionProps) {
               applyEchoPreset(presetCharacter.id, preset);
               setPresetFor(null);
             };
-            // 다른 캐릭터가 낀 에코가 섞여 있으면 가져올지 먼저 묻는다.
+            // 다른 캐릭터가 낀 에코가 섞여 있으면 누구에게서 몇 개가 빠지는지 알리고 먼저 묻는다.
             const owners = echoPresetOwners(presetCharacter.id, preset).map(
-              (id) => characters.find((c) => c.id === id)?.name ?? id,
+              ({ characterId, count }) =>
+                `${characters.find((c) => c.id === characterId)?.name ?? characterId}에게서 에코 ${count}개가 빠집니다.`,
             );
-            if (owners.length > 0) setTakeAsk({ owners: owners.join(" · "), run });
+            if (owners.length > 0) setTakeAsk({ owners, run });
             else run();
           }}
           onClose={() => setPresetFor(null)}
@@ -354,7 +355,11 @@ export function PartyRosterSection({ config }: PartySectionProps) {
       {takeAsk && (
         <Dialog
           title="에코 가져오기"
-          lines={[`${takeAsk.owners} 사용 중인 에코가 들어 있습니다. 가져오시겠습니까?`]}
+          lines={[
+            "이 프리셋에는 다른 캐릭터가 끼고 있는 에코가 들어 있습니다.",
+            ...takeAsk.owners,
+            "가져오시겠습니까?",
+          ]}
           buttons={[
             {
               label: "가져오기",

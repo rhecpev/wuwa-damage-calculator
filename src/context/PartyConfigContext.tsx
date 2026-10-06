@@ -257,7 +257,9 @@ interface PartyConfigContextType {
    * 담긴 사이클을 계산 탭에 앉힌다.
    * dropBuffIds에 담긴 버프 체크는 빼고 앉힌다 — 지금 환경에 없는 버프를 걸러낼 때 쓴다.
    */
-  applyCyclePreset: (id: string, dropBuffIds?: string[]) => void;
+  applyCyclePreset: (id: string, dropBuffIds?: string[], restoreEchoes?: boolean) => void;
+  /** 고친 에코를 담아 둔 사이클에 반영하거나(options), 사이클에서 뺀다(null). */
+  syncCycleEcho: (echo: { pk: number; id: string }, options: unknown | null) => void;
   renameCyclePreset: (id: string, name: string) => void;
   removeCyclePreset: (id: string) => void;
   /** 지금 환경을 사이클과 같은 모양으로. 담긴 것과 견주려고 화면이 쓴다. */
@@ -1072,15 +1074,18 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setCyclePresets((current) => [preset, ...current]);
   };
 
-  const applyCyclePreset = (id: string, dropBuffIds: string[] = []) => {
+  const applyCyclePreset = (id: string, dropBuffIds: string[] = [], restoreEchoes = true) => {
     const preset = cyclePresets.find((p) => p.id === id);
     if (!preset) return;
     const drop = new Set(dropBuffIds);
 
     // 담을 때 끼고 있던 에코 한 벌로 다시 끼운다. 그 에코가 남아 있지 않은 캐릭터는 지금 에코 그대로 둔다.
-    const links = loadEchoLinks();
-    const restored = linksWithEchoSets(preset.members, links);
-    if (restored !== links) saveEchoLinks(restored);
+    // restoreEchoes를 끄면 장착은 손대지 않고 지금 낀 에코로 계산한다(매트릭스에서 여는 사이클).
+    if (restoreEchoes) {
+      const links = loadEchoLinks();
+      const restored = linksWithEchoSets(preset.members, links);
+      if (restored !== links) saveEchoLinks(restored);
+    }
 
     // 손 버프를 먼저 앉힌다 — 루틴이 그 id를 가리키므로 순서가 뒤집히면 잠깐 빈 채로 그려진다.
     setManualBuffs(preset.manualBuffs.map((b) => ({ ...b })));
@@ -1114,6 +1119,35 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     const label = name.trim();
     if (!label) return;
     setCyclePresets((current) => current.map((p) => (p.id === id ? { ...p, name: label } : p)));
+  };
+
+  /**
+   * 보유 에코를 고쳤을 때, 그 에코를 담아 둔 사이클들을 맞춘다.
+   * options를 주면 사이클에 박아 둔 에코 내용을 그 값으로 갈고(다음에 불러올 때 고친 에코로 끼워진다),
+   * null이면 그 에코를 사이클의 한 벌에서 뺀다. 한 벌이 비면 에코 기록 자체를 지운다.
+   */
+  const syncCycleEcho = (echo: { pk: number; id: string }, options: unknown | null) => {
+    const match = (e: { pk: number; id: string }) => e.pk === echo.pk && e.id === echo.id;
+    setCyclePresets((current) =>
+      current.map((preset) => {
+        if (!preset.members.some((m) => m.echoSet?.echoes.some(match))) return preset;
+        return {
+          ...preset,
+          members: preset.members.map((member) => {
+            if (!member.echoSet?.echoes.some(match)) return member;
+            const echoes =
+              options === null
+                ? member.echoSet.echoes.filter((e) => !match(e))
+                : member.echoSet.echoes.map((e) => (match(e) ? { ...e, options } : e));
+            if (echoes.length === 0) {
+              const { echoSet: _gone, ...rest } = member;
+              return rest;
+            }
+            return { ...member, echoSet: { ...member.echoSet, echoes } };
+          }),
+        };
+      }),
+    );
   };
 
   const removeCyclePreset = (id: string) => {
@@ -1419,6 +1453,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     saveCyclePreset,
     addCyclePreset,
     applyCyclePreset,
+    syncCycleEcho,
     renameCyclePreset,
     removeCyclePreset,
     currentCycleMembers,

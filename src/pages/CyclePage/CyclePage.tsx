@@ -14,7 +14,9 @@ import { DamageBreakdownSection } from "../CalculatorPage/components/DamageBreak
 import { num } from "../../utils/format";
 import {
   canRestoreEchoSet,
+  echoLosers,
   linksWithEchoSets,
+  loadEchoLinks,
   sameEchoes,
   wornEchoPks,
 } from "../../data/echoStore";
@@ -174,6 +176,18 @@ export function CyclePage() {
         return { member: them, changes };
       })
       .filter((row) => row.changes.length > 0);
+  };
+
+  /**
+   * 이 사이클을 앉히면 **에코를 잃는 다른 캐릭터**들. 담을 때의 한 벌로 다시 끼우면서
+   * 그 에코를 지금 끼고 있던 캐릭터에서 빠진다. 한 벌을 통째로 되돌려 받는 당사자는 세지 않는다.
+   */
+  const losersOf = (preset: CyclePreset) => {
+    const before = loadEchoLinks();
+    const restored = preset.members
+      .filter((m) => m.echoSet && canRestoreEchoSet(m.echoSet))
+      .map((m) => m.characterId);
+    return echoLosers(before, linksWithEchoSets(preset.members, before), restored);
   };
 
   /** 앉히기. 어긋난 것이 있으면 먼저 물어보고, 없으면 바로 넣는다. */
@@ -531,6 +545,22 @@ export function CyclePage() {
                     <li key={row.member.characterId}>
                       <b>{row.member.characterName}</b>
                       <span>{row.changes.join(" · ")}</span>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+
+            {losersOf(confirming.preset).length > 0 && (
+              <>
+                <small className="formula-section">에코가 빠지는 캐릭터</small>
+                <ul className="cycle-diff">
+                  {losersOf(confirming.preset).map(({ characterId, count }) => (
+                    <li key={characterId}>
+                      <b>{characters.find((c) => c.id === characterId)?.name ?? characterId}</b>
+                      <span>
+                        끼고 있던 에코 {count}개가 빠집니다 — 이 사이클의 캐릭터에게 옮겨 갑니다
+                      </span>
                     </li>
                   ))}
                 </ul>

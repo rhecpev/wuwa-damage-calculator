@@ -6,8 +6,10 @@ import {
   loadEchoPresets,
   loadMyEchoes,
   nextPk,
+  saveEchoPresets,
   saveMyEchoes,
 } from "../../data/echoStore";
+import type { MyEcho } from "../../data/echoStore";
 import { usePartyConfig } from "../../context/PartyConfigContext";
 import { useAppState } from "../../context/AppStateContext";
 import { EchoSearchDialog } from "./components/EchoSearchDialog";
@@ -16,7 +18,13 @@ import echoOptionData from "../../data/echoOption.json";
 import echoData from "../../data/echo.json";
 import { isExcludedEcho } from "../../data/echoExcludes";
 import { normKey, readEchoCard, type ReadEcho } from "../../utils/ocr";
-import { DeleteDialog, ProgressBar, type DeleteAsk, type Progress } from "../../components/Feedback";
+import {
+  DeleteDialog,
+  Dialog,
+  ProgressBar,
+  type DeleteAsk,
+  type Progress,
+} from "../../components/Feedback";
 
 /**
  * 옵션 표를 **이름으로 찾아 쓰기 위한** 얇은 형.
@@ -71,7 +79,7 @@ export function EchoesPage() {
   };
   const [isSaving, setIsSaving] = useState(false);
   // 담아 둔 사이클 — 에코를 지울 때 어느 사이클이 그 에코를 쓰는지 알리는 데 쓴다.
-  const { cyclePresets } = usePartyConfig();
+  const { cyclePresets, syncCycleEcho } = usePartyConfig();
   // 장착 연결 — 카드에 누가 끼고 있는지 얼굴을 붙이는 데 쓴다. 에코를 지우면 연결도 걷히므로 그때 다시 읽는다.
   const echoLinks = useMemo(() => loadEchoLinks(), [myEchoes]);
   // 지울지 묻는 중인 에코.
@@ -98,10 +106,52 @@ export function EchoesPage() {
     characters[idx].echoIds = updated;
   }
 
+  /** 이 에코를 쓰고 있는 사이클과 에코 프리셋. */
+  const usageOf = (echo: { pk: number; id: string }) => ({
+    cycles: cyclePresets.filter((preset) =>
+      preset.members.some((m) =>
+        m.echoSet?.echoes.some((e) => e.pk === echo.pk && e.id === echo.id),
+      ),
+    ),
+    presets: loadEchoPresets().filter((p) => p.echoIds.includes(echo.pk)),
+  });
+
+  /** 수정 창에서 고친 값을 저장하다가, 쓰는 사이클 · 프리셋을 어떻게 할지 묻는 중인 에코. */
+  const [editAsk, setEditAsk] = useState<{ echo: MyEcho; options: any } | null>(null);
+
+  /**
+   * 물음에 답한 대로 저장한다. keep이면 고친 내용을 사이클에도 반영하고(프리셋은 에코를 가리키기만 해서
+   * 저절로 따라온다), 아니면 그 사이클 · 프리셋에서 이 에코를 뺀다.
+   */
+  const finishEdit = (keep: boolean) => {
+    if (!editAsk) return;
+    const { echo, options } = editAsk;
+    commitEchoes(myEchoes.map((e) => (e.pk === echo.pk ? { ...e, options } : e)));
+    syncCycleEcho(echo, keep ? options : null);
+    if (!keep) {
+      saveEchoPresets(
+        loadEchoPresets()
+          .map((p) => ({ ...p, echoIds: p.echoIds.filter((pk) => pk !== echo.pk) }))
+          .filter((p) => p.echoIds.length > 0),
+      );
+    }
+    setEditAsk(null);
+  };
+
   const handleUpdateEcho = async (echoOptions: any) => {
     if (!selectedEcho || isSaving) return;
-    setIsSaving(true);
     const selectedPk = (selectedEcho as any).pk;
+    // 쓰는 사이클 · 프리셋이 있으면 저장하기 전에 먼저 묻는다. 수정 창은 이 물음 창보다 위에 뜨므로 잠깐 닫는다.
+    const target = myEchoes.find((e) => e.pk === selectedPk);
+    if (target && JSON.stringify(target.options) !== JSON.stringify(echoOptions)) {
+      const used = usageOf(target);
+      if (used.cycles.length + used.presets.length > 0) {
+        setEditAsk({ echo: target, options: echoOptions });
+        setSelectedEcho(null);
+        return;
+      }
+    }
+    setIsSaving(true);
     try {
       commitEchoes(
         myEchoes.map((echo) =>
@@ -297,11 +347,7 @@ export function EchoesPage() {
    */
   const usageWarnings = (echo: { pk: number; id: string }): string[] => {
     const lines: string[] = [];
-    const cycles = cyclePresets.filter((preset) =>
-      preset.members.some((m) =>
-        m.echoSet?.echoes.some((e) => e.pk === echo.pk && e.id === echo.id),
-      ),
-    );
+    const { cycles, presets } = usageOf(echo);
     if (cycles.length > 0) {
       lines.push(
         `사이클 ${cycles.length}개가 이 에코를 쓰고 있습니다 — ${cycles
@@ -309,7 +355,6 @@ export function EchoesPage() {
           .join(" · ")}. 지우면 그 사이클을 불러올 때 이 에코를 낀 캐릭터의 에코를 되돌리지 못합니다.`,
       );
     }
-    const presets = loadEchoPresets().filter((p) => p.echoIds.includes(echo.pk));
     if (presets.length > 0) {
       lines.push(
         `에코 프리셋 ${presets.length}개에서도 빠집니다 — ${presets
@@ -354,6 +399,37 @@ export function EchoesPage() {
   return (
     <>
     {deleteAsk && <DeleteDialog ask={deleteAsk} onClose={() => setDeleteAsk(null)} />}
+    {editAsk &&
+      (() => {
+        const used = usageOf(editAsk.echo);
+        // 그만두면 고치던 값을 그대로 채운 채 수정 창으로 돌아간다.
+        const back = () => {
+          setSelectedEcho({ ...editAsk.echo, options: editAsk.options } as any);
+          setEditAsk(null);
+        };
+        return (
+          <Dialog
+            title="쓰고 있는 사이클 · 프리셋이 있습니다"
+            lines={[
+              `「${editAsk.echo.name}」 에코를 고치려고 합니다. 이 에코를 쓰는 곳:`,
+              ...(used.cycles.length > 0
+                ? [`사이클 ${used.cycles.length}개 — ${used.cycles.map((c) => `「${c.name}」`).join(" · ")}`]
+                : []),
+              ...(used.presets.length > 0
+                ? [`에코 프리셋 ${used.presets.length}개 — ${used.presets.map((p) => `「${p.name}」`).join(" · ")}`]
+                : []),
+              "반영: 그 사이클 · 프리셋도 고친 에코를 씁니다. (사이클의 「저장 당시」 피해 숫자는 그대로입니다.)",
+              "빼기: 에코는 고치고, 그 사이클 · 프리셋에서는 이 에코를 뺍니다.",
+            ]}
+            buttons={[
+              { label: "반영", primary: true, onClick: () => finishEdit(true) },
+              { label: "빼기", onClick: () => finishEdit(false) },
+              { label: "취소", onClick: back },
+            ]}
+            onDismiss={back}
+          />
+        );
+      })()}
     {/* 등록 단추는 목록 판 밖 — 목록이 길어도 늘 위에 있다. 색은 테마 변수를 탄다(.page-toolbar). */}
     <div className="page-toolbar">
       <button className="primary" onClick={() => setShowEchoSearch(true)}>

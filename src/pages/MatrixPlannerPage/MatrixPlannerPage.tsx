@@ -490,7 +490,8 @@ function MatrixPlanner({
 
   /** 그 사이클을 계산 탭에 앉히고 그리로 넘어간다. 「연결」을 누르면 곧장 돌려볼 수 있게. */
   const openCycle = (preset: CyclePreset) => {
-    applyCyclePreset(preset.id);
+    // 장착 중인 에코는 건드리지 않는다 — 사이클에 담긴 에코로 되돌리지 않고 지금 낀 에코로 계산한다.
+    applyCyclePreset(preset.id, [], false);
     setTab("calculator");
   };
 
