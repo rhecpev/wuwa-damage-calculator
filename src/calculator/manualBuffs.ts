@@ -259,6 +259,7 @@ export function appliesTo(buff: ManualBuff, attack: Attack, characterId?: string
  *   CritRate          표시값(퍼센트포인트). 1.3 → 130
  *
  * 「N%를 초과한 만큼」이라고 적힌 효과는 scaleOffset에 그 N을 적는다 — buffAmount에서 뺀다.
+ * 「0.1%당 1pt」처럼 1이 아닌 단위로 적힌 효과는 scaleStep에 그 단위를 적는다 — value는 단위 하나당 수치.
  */
 const SCALE_SOURCES: Record<BuffScaleStat, (s: Stats) => number> = {
   ATK: (s) => Math.floor(s.atk) / 100,
@@ -346,7 +347,9 @@ export function buffAmount(
   // 문턱에 못 미치면 0 — 음수가 되어 버프가 마이너스로 걸리는 일이 없게 한다.
   const source = SCALE_SOURCES[buff.scaleFrom](from);
   const over = buff.scaleOffset === undefined ? source : Math.max(0, source - buff.scaleOffset);
-  const raw = over * buff.value * stacks;
+  // 「0.1%당 1pt」처럼 단위가 적힌 효과는 그 단위로 끊어 센다(scaleStep). 1e-9는 0.3/0.1=2.999… 보정.
+  const units = buff.scaleStep ? Math.floor(over / buff.scaleStep + 1e-9) : over;
+  const raw = units * buff.value * stacks;
   // 「최대 25%까지」 같은 상한. 적어두지 않았으면 상한 없음.
   return buff.maxValue === undefined ? raw : Math.min(raw, buff.maxValue);
 }

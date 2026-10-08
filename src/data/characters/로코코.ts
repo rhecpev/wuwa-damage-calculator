@@ -359,12 +359,13 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     target: "atkFlat",
     damageType: "All",
     scaleFrom: "CritRate",
-    value: 10,
+    value: 1, // 초과 0.1%당 1pt
     scaleOffset: 50,
+    scaleStep: 0.1,
     maxValue: 200,
     uptime: "active",
     scope: "party",
-    condition: "해방 발동 후 30초간 파티 전원 — 초과 0.1%당 1pt(=1%당 10pt), 최대 200pt",
+    condition: "해방 발동 후 30초간 — 크리티컬 50% 초과 0.1%당, 파티 내 캐릭터의 공격력 1pt 증가(최대 200pt)",
   },
   // ── 고유 스킬 ──
   {

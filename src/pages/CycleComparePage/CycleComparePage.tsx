@@ -807,6 +807,8 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   /** 설정 창과, 그 안에서 고른 루틴 카드. */
   const [dialog, setDialog] = useState<GearDialog | null>(null);
   const [focusItem, setFocusItem] = useState<string | null>(null);
+  /** 설정 창에서 함께 고른 카드 — 계산 탭과 같이 Ctrl(⌘)+클릭 · Shift+클릭으로 고른다. focusItem이 기준 카드다. */
+  const [multiItems, setMultiItems] = useState<string[]>([]);
   const [dragOver, setDragOver] = useState<string | null>(null);
 
   const preset = cyclePresets.find((p) => p.id === state.baseId) ?? null;
@@ -987,20 +989,32 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   ]);
 
   // ── 바꾼 뒤 루틴 편집 — 버프 켜기 · 스택 · 공격 끼워 넣기 ──
-  const toggleIn = (itemId: string, buff: ManualBuff) =>
-    updateRotation((rot) =>
-      rot.map((it) => {
-        if (it.id !== itemId) return it;
-        if (buff.uptime === "passive") {
+  // 여러 장을 고른 채로 바꾸면 기준 카드(itemId)가 바뀌는 쪽으로 함께 고른 카드(peerIds)도 맞춘다
+  // — 제각각 뒤집지 않는다. 그 버프가 걸릴 수 없는 카드는 건너뛴다.
+  const toggleIn = (itemId: string, buff: ManualBuff, peerIds: string[] = []) =>
+    updateRotation((rot) => {
+      const base = rot.find((it) => it.id === itemId);
+      if (!base) return rot;
+      const passive = buff.uptime === "passive";
+      // 기준 카드가 지금 이 버프를 받고 있는가 — 누르면 그 반대가 된다.
+      const wasOn = passive
+        ? !(base.disabledBuffIds ?? []).includes(buff.id)
+        : base.enabledBuffIds.includes(buff.id);
+      return rot.map((it) => {
+        if (it.id !== itemId) {
+          if (!peerIds.includes(it.id)) return it;
+          const r = view?.resultsById.get(it.id);
+          if (!r || !appliesTo(buff, r.attack, r.character.id)) return it;
+        }
+        if (passive) {
           const off = new Set(it.disabledBuffIds ?? []);
-          if (off.has(buff.id)) off.delete(buff.id);
-          else off.add(buff.id);
+          if (wasOn) off.add(buff.id);
+          else off.delete(buff.id);
           return { ...it, disabledBuffIds: [...off] };
         }
-        const on = it.enabledBuffIds.includes(buff.id);
-        let enabled = on
-          ? it.enabledBuffIds.filter((x) => x !== buff.id)
-          : [...it.enabledBuffIds, buff.id];
+        const on = wasOn;
+        let enabled = it.enabledBuffIds.filter((x) => x !== buff.id);
+        if (!on) enabled = [...enabled, buff.id];
         // 같은 묶음(「HP 60% 이상/미만」 따위)은 하나만 켜진다.
         if (!on && buff.exclusiveGroup) {
           const same = new Set(
@@ -1011,12 +1025,14 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
           enabled = enabled.filter((x) => !same.has(x));
         }
         return { ...it, enabledBuffIds: enabled };
-      }),
-    );
-  const setStacksIn = (itemId: string, buffId: string, stacks: number) =>
+      });
+    });
+  const setStacksIn = (itemId: string, buffId: string, stacks: number, peerIds: string[] = []) =>
     updateRotation((rot) =>
       rot.map((it) =>
-        it.id === itemId ? { ...it, buffStacks: { ...it.buffStacks, [buffId]: stacks } } : it,
+        it.id === itemId || peerIds.includes(it.id)
+          ? { ...it, buffStacks: { ...it.buffStacks, [buffId]: stacks } }
+          : it,
       ),
     );
 
@@ -1049,6 +1065,7 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   const closeDialog = () => {
     setDialog(null);
     setFocusItem(null);
+    setMultiItems([]);
     setDragOver(null);
   };
   const markBuffDone = (buffId: string) =>
@@ -1116,6 +1133,44 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
   const focusRotationItem = focusItem ? afterRotation.find((it) => it.id === focusItem) : undefined;
   const focusResult = focusItem ? view?.resultsById.get(focusItem) : undefined;
   const cycles = [...new Set(afterRotation.map((it) => it.cycle ?? 1))];
+
+  /** 설정 창에서 누를 수 있는 카드인가 — 버프 창에서는 그 버프가 걸릴 수 있는 공격만. */
+  const canPick = (itemId: string) => {
+    const r = view?.resultsById.get(itemId);
+    if (!r) return false;
+    return dialog?.kind !== "buff" || (!!dialogBuff && appliesTo(dialogBuff, r.attack, r.character.id));
+  };
+  // 기준 카드가 빠졌으면 다중선택이 아닌 것으로 본다(계산 탭과 같은 규칙).
+  const peerIds =
+    focusItem && multiItems.includes(focusItem)
+      ? multiItems.filter((id) => id !== focusItem && afterRotation.some((it) => it.id === id))
+      : [];
+  const pickItem = (id: string, event: { ctrlKey: boolean; metaKey: boolean; shiftKey: boolean }) => {
+    if (!canPick(id)) return;
+    const now = peerIds.length > 0 ? [focusItem!, ...peerIds] : focusItem ? [focusItem] : [];
+    if (event.shiftKey && focusItem) {
+      // 기준 카드부터 누른 카드까지 — 루틴 순서 그대로, 누를 수 있는 카드만.
+      const from = afterRotation.findIndex((it) => it.id === focusItem);
+      const to = afterRotation.findIndex((it) => it.id === id);
+      if (from >= 0 && to >= 0) {
+        setMultiItems(
+          afterRotation
+            .slice(Math.min(from, to), Math.max(from, to) + 1)
+            .map((it) => it.id)
+            .filter(canPick),
+        );
+        return;
+      }
+    }
+    if (event.ctrlKey || event.metaKey) {
+      const next = now.includes(id) ? now.filter((x) => x !== id) : [...now, id];
+      setMultiItems(next);
+      if (!focusItem || !next.includes(focusItem)) setFocusItem(next[0] ?? null);
+      return;
+    }
+    setMultiItems([]);
+    setFocusItem(id);
+  };
 
   /** 끌어다 놓기 받는 쪽 — 공격 끼워 넣기 창에서만 쓴다. */
   const dropProps = (key: string, target: string | null) => ({
@@ -1431,7 +1486,7 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                 </h3>
                 <span>
                   {dialog.kind === "buff"
-                    ? "밝은 카드가 이 버프가 걸릴 수 있는 공격입니다. 카드를 눌러 오른쪽에서 켜고 스택을 정하세요."
+                    ? "밝은 카드가 이 버프가 걸릴 수 있는 공격입니다. 카드를 눌러 오른쪽에서 켜고 스택을 정하세요. Ctrl+클릭 · Shift+클릭으로 여러 장을 한꺼번에 고릅니다."
                     : "오른쪽 카드를 왼쪽 루틴의 원하는 카드 위에 끌어다 놓으면 그 앞에 끼워집니다. 끼운 카드를 눌러 버프를 정하세요."}
                 </span>
               </div>
@@ -1465,13 +1520,15 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                             title={r ? `${r.character.name} · ${r.attack.name}` : "지금 환경에 없는 공격 — 계산에서 빠집니다"}
                             className={[
                               applicable ? "" : "dim",
-                              focusItem === it.id ? "selected" : "",
+                              focusItem === it.id || peerIds.includes(it.id) ? "selected" : "",
                               inserted ? "fresh" : "",
                               dragOver === it.id ? "over" : "",
                             ]
                               .filter(Boolean)
                               .join(" ")}
-                            onClick={() => applicable && setFocusItem(it.id)}
+                            onClick={(event) => pickItem(it.id, event)}
+                            // Shift+클릭이 카드 글자를 긁지 않게 한다.
+                            onMouseDown={(event) => event.shiftKey && event.preventDefault()}
                             {...(dialog.kind === "attack"
                               ? {
                                   ...dropProps(it.id, it.id),
@@ -1528,14 +1585,17 @@ function GearCompare({ enemy }: { enemy: Enemy | null }) {
                   <>
                     <small className="formula-section">
                       {attackLabel(focusResult.attack.name)} · {focusResult.character.name}
+                      {peerIds.length > 0 && ` 외 ${peerIds.length}장 — 함께 바뀝니다`}
                     </small>
                     <ScenarioBuffs
                       item={focusRotationItem}
                       result={focusResult}
                       buffs={view.afterBuffs}
                       focusId={dialog.kind === "buff" ? dialog.buffId : undefined}
-                      onToggle={(buff) => toggleIn(focusRotationItem.id, buff)}
-                      onStacks={(buffId, stacks) => setStacksIn(focusRotationItem.id, buffId, stacks)}
+                      onToggle={(buff) => toggleIn(focusRotationItem.id, buff, peerIds)}
+                      onStacks={(buffId, stacks) =>
+                        setStacksIn(focusRotationItem.id, buffId, stacks, peerIds)
+                      }
                     />
                   </>
                 ) : (

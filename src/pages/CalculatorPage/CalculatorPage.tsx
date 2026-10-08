@@ -4,6 +4,7 @@ import { useCalculationResults } from "./hooks/useCalculationResults";
 import { PartyRosterSection } from "./components/PartySection";
 import { AttackPaletteSection } from "./components/AttackPaletteSection";
 import { RotationSection } from "./components/RotationSection";
+import { RailResizers, useRailSizes } from "./components/RailResizers";
 import { EnemySection } from "./components/EnemySection";
 import { BuffSection } from "./components/BuffSection";
 import { DamageBreakdownSection } from "./components/DamageBreakdownSection";
@@ -44,6 +45,7 @@ export function CalculatorPage() {
   // 예전에 저장된 이름(없어진 탭)이 남아 있으면 첫 탭으로 돌린다 — 아무것도 안 보이지 않게.
   const [tab, setTab] = usePersistedState<SubTab>("calc.tab", TABS[0].id);
   const active = TABS.some((item) => item.id === tab) ? tab : TABS[0].id;
+  const rail = useRailSizes();
 
   return (
     <>
@@ -57,8 +59,10 @@ export function CalculatorPage() {
 
       {/* 사이클 구성을 가로로 눕힌다 — 카드를 넓게 늘어놓고 보는 자리다.
           오른쪽 절반은 버프 창·계산식 창이 뜨는 자리(RotationSection 안의 .rotation-dock)다. */}
-      <section className="rotation-rail">
+      <section className="rotation-rail" style={rail.style}>
         <RotationSection results={results} />
+        {/* 칸 사이 경계를 끌어 사이클 판 · 버프 창 · 트리거 칸의 크기를 바꾼다. */}
+        <RailResizers setSizes={rail.setSizes} />
       </section>
 
       {/* 나머지는 세부 탭으로 접어 둔다 — 한 화면에 다 펼치면 루틴이 위로 밀려서다. */}

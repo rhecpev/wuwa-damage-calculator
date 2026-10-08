@@ -10,6 +10,7 @@ import type { CalculationResult } from "../hooks/useCalculationResults";
 import { useAppState } from "../../../context/AppStateContext";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import { triggersFor } from "../../../data/attackTriggers";
+import { characters } from "../../../data/sampleData";
 import { DamageFormulaModal } from "./DamageFormulaModal";
 import { buildDamageSnapshot } from "./DamageBreakdownSection";
 import { BuffDialog } from "./BuffDialog";
@@ -152,6 +153,13 @@ export function RotationSection({ results }: RotationSectionProps) {
   const [overId, setOverId] = useState<string | null>(null);
   // 공격을 갈아 끼우는 창을 연 항목.
   const [swapId, setSwapId] = useState<string | null>(null);
+  // 이름을 눌러 밝게 볼 캐릭터. 파티에서 빠졌으면 고르지 않은 것으로 본다.
+  const [focusCharId, setFocusCharId] = useState<string | null>(null);
+  const partyNames = PARTY_SLOTS.flatMap((slot, index) => {
+    const character = characters.find((c) => c.id === config[slot].characterId);
+    return character ? [{ ...character, no: index + 1 }] : [];
+  });
+  const focusChar = partyNames.some((c) => c.id === focusCharId) ? focusCharId : null;
   const formulaResult = results.find((r) => r.item.id === formulaId);
   const swapResult = results.find((r) => r.item.id === swapId);
   // 버프 창은 루틴 오른쪽 자리(.rotation-dock)에 붙이고, 계산식은 화면 위에 창으로 띄운다.
@@ -280,6 +288,30 @@ export function RotationSection({ results }: RotationSectionProps) {
       )}
       {saved && <p className="cycle-saved">사이클 관리 탭에 담았습니다.</p>}
 
+      {/* 파티 자리 순서대로 캐릭터 이름 — 누르면 그 캐릭터의 카드만 밝게 두고 나머지는 어둡게 한다. */}
+      {partyNames.length > 0 && (
+        <div className="rotation-who">
+          {partyNames.map(({ id, name, iconUrl, no }) => (
+            <button
+              key={id}
+              className={focusChar === id ? "on" : ""}
+              aria-pressed={focusChar === id}
+              title={
+                focusChar === id
+                  ? "다시 누르면 전부 밝게 돌아갑니다"
+                  : `${name}의 공격 카드만 밝게 봅니다`
+              }
+              onClick={() => setFocusCharId(focusChar === id ? null : id)}
+            >
+              {iconUrl && <img src={iconUrl} alt="" loading="lazy" />}
+              <em>{no}번</em>
+              {name}
+              <span>{results.filter((r) => r.character.id === id).length}대</span>
+            </button>
+          ))}
+        </div>
+      )}
+
       <div className="rotation-wrap">
         <div className="rotation">
           {results.map((result, index) => {
@@ -331,6 +363,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                 "item",
                 dragId === result.item.id ? "dragging" : "",
                 overId === result.item.id ? "over" : "",
+                focusChar && result.character.id !== focusChar ? "dim" : "",
               ]
                 .filter(Boolean)
                 .join(" ")}

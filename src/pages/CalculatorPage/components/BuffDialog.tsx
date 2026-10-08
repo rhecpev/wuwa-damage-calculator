@@ -232,6 +232,8 @@ export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
             // scaleFrom 버프는 그때의 스탯에서 수치가 나온다 — 계산에 쓴 최종 스탯을 그대로 넘긴다.
             // 파티 버프는 준 사람의 스탯을 보므로 파티 전원의 스탯창도 함께 넘긴다.
             const amount = buffAmount(buff, stacks, selected.stats, selected.ownerPanels);
+            // 퍼센트가 아니라 수치 그대로 더해지는 자리
+            const isPoint = buff.target === "syncAmplify" || buff.target === "atkFlat";
             const owner = buff.ownerId
               ? characters.find((c) => c.id === buff.ownerId)
               : undefined;
@@ -297,18 +299,18 @@ export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
                         ? `${buff.raisesStatusKinds?.[0] ?? "상태"} 상한 +${buff.raisesStatusStacks}`
                         : buff.raisesAnomalyStacks && !buff.value
                         ? `이상 스택 상한 +${buff.raisesAnomalyStacks}`
-                        : buff.target === "syncAmplify"
-                          ? `${+amount.toFixed(1)}pt` // 조화도 파괴 증폭은 퍼센트가 아닌 수치
+                        : isPoint
+                          ? `${+amount.toFixed(1)}pt` // 조화도 파괴 증폭 · 깡공격력은 퍼센트가 아닌 수치
                           : `${(amount * 100).toFixed(1)}%`}
                       {buff.scaleFrom
-                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom} × ${
-                            buff.target === "syncAmplify"
-                              ? `${buff.value}pt`
-                              : `${(buff.value * 100).toFixed(1)}%`
+                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom}${
+                            buff.scaleOffset !== undefined ? ` ${buff.scaleOffset} 초과` : ""
+                          }${buff.scaleStep ? ` ${buff.scaleStep}당` : " ×"} ${
+                            isPoint ? `${buff.value}pt` : `${(buff.value * 100).toFixed(1)}%`
                           })`
                         : stacks > 1 &&
                           buff.value > 0 &&
-                          ` (${(buff.value * 100).toFixed(1)}% × ${stacks})`}
+                          ` (${isPoint ? `${buff.value}pt` : `${(buff.value * 100).toFixed(1)}%`} × ${stacks})`}
                     </em>
                     {buff.switchesDamageBonusType && (
                       <em className="buff-cap" title="켜면 이 공격의 피해 판정이 바뀝니다">

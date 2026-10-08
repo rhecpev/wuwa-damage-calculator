@@ -37,7 +37,7 @@
   padding:3px 10px;border-radius:999px;background:var(--c-3f382b);border:1px solid var(--c-66543a);white-space:nowrap}
 .cycle-head span{font-size:11px;color:var(--c-8b95a8);white-space:nowrap}
 /* 머리 오른쪽으로 가는 선 — 사이클 경계를 한 줄로 그어 준다. */
-.cycle-head::after{content:"";flex:1;height:1px;background:var(--c-384155)}
+.cycle-head::after{content:"";flex:1;height:2px;border-radius:1px;background:var(--c-8794aa)}
 /* 첫 사이클 머리는 위 여백을 두지 않는다 — 패널 제목과 붙어 보이게. */
 .rotation>.cycle-head:first-child{margin-top:0}
 /* 카드 위 도구줄에 사이클 이동 화살표를 더한다. */
@@ -46,6 +46,18 @@
 .item-tools .cyc:disabled{opacity:.3;cursor:not-allowed}
 /* 제목줄의 단추 둘을 나란히. */
 .rotation-tools{display:flex;gap:8px}
+/* 사이클 구성 제목 줄 아래의 파티 이름 줄 — 누른 캐릭터의 카드만 밝게 남긴다. */
+.rotation-who{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 10px}
+.rotation-who button{display:inline-flex;align-items:center;gap:6px;padding:4px 12px 4px 5px;font-size:12px;
+  border-radius:999px;cursor:pointer;background:var(--c-2a3246);border:1px solid var(--c-3c455c);color:var(--c-c2c9d6)}
+.rotation-who button:hover{border-color:var(--c-8794aa)}
+.rotation-who button.on{border-color:var(--c-e8c66a);background:var(--c-e8c66a);color:var(--c-242a39);font-weight:700}
+.rotation-who button.on em,.rotation-who button.on span{color:var(--c-242a39);opacity:.75}
+.rotation-who img{width:22px;height:22px;border-radius:50%;object-fit:cover}
+.rotation-who em{font-style:normal;font-weight:700;color:var(--c-8791a4)}
+.rotation-who span{font-size:11px;color:var(--c-8791a4)}
+.rotation .item.dim{opacity:.28}
+.rotation .item.dim:hover{opacity:.6}
 
 .rotation{display:flex;flex-wrap:wrap;gap:12px 0;align-items:stretch;min-height:150px}.item{display:flex;align-items:center}.card{width:150px;min-height:0;padding:8px 9px;text-align:left;display:flex;flex-direction:column;gap:6px;cursor:pointer;font:inherit;color:var(--c-e9edf5);background:var(--c-2a3246);border:1px solid var(--c-3c455c);border-radius:10px}.card span{color:var(--c-a8b0bf);font-size:12px}.card b{font-size:23px}.card small{letter-spacing:0;color:var(--c-949dae)}.card.selected{border-color:var(--c-8d9ab0);transform:translateY(-3px)}/* 카드 하나를 감싸는 상자. 삭제·복사 버튼이 이 상자를 기준으로 붙는다. */
 /* 카드 하나를 감싸는 상자. 단추들은 카드 위에 떠 있지 않고 카드 아래에 한 줄로 붙는다
@@ -1298,6 +1310,20 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .viz-bar-fill-anomaly{background:var(--c-c98500)}
 .viz-bar-anomaly{margin-left:auto;display:flex;align-items:center;gap:5px;font-size:11px;color:var(--c-9aa3b3);font-variant-numeric:tabular-nums}
 .viz-bar-anomaly i{width:8px;height:8px;border-radius:2px;background:var(--c-c98500)}
+/* 도넛 · 막대 아래의 공격별 피해 순위. 막대는 1등을 가득 찬 길이로 본다. */
+.viz-rank{margin-top:20px;padding-top:16px;border-top:1px solid var(--c-384155)}
+.viz-rank-head{display:block;margin-bottom:12px;font-size:12px;color:var(--c-c2c9d6)}
+.viz-rank ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.viz-rank li{display:grid;grid-template-columns:26px minmax(0,1.2fr) minmax(0,2fr) auto auto;align-items:center;gap:10px}
+.viz-rank i{font-style:normal;font-size:12px;font-weight:700;text-align:center;line-height:22px;border-radius:6px;
+  color:var(--c-9aa3b3);background:var(--c-30394a);font-variant-numeric:tabular-nums}
+.viz-rank i.top{color:var(--c-242a39);background:var(--c-e8c66a)}
+.viz-rank-name{display:flex;align-items:center;gap:7px;min-width:0;font-size:12px;color:var(--c-c2c9d6);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.viz-rank-name img{flex:none;width:22px;height:22px;border-radius:50%;object-fit:cover;border:1px solid var(--c-4a5266)}
+.viz-rank-name small{color:var(--c-8791a4)}
+.viz-rank b{font-size:13px;color:var(--c-e9edf5);font-variant-numeric:tabular-nums;text-align:right}
+.viz-rank em{font-style:normal;font-size:11px;color:var(--c-9aa3b3);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
 .viz-bars b{font-size:13px;color:var(--c-e9edf5);font-variant-numeric:tabular-nums}
 .viz-bars em{font-style:normal;font-size:11px;color:var(--c-9aa3b3);font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
 
@@ -1360,6 +1386,16 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
   background:var(--c-262d3f);border:1px dashed var(--c-3c455c);border-radius:14px}
 .rotation-dock-empty b{font-size:13px;color:var(--c-c2c9d6)}
 .rotation-dock-empty span{font-size:12px;line-height:1.6;color:var(--c-8791a4)}
+/* 칸 사이 경계 손잡이 — 끌어서 버프 창 · 트리거 칸 너비와 줄 높이를 바꾼다(RailResizers).
+   자리는 칸과 같은 변수로 잡아서, 칸이 움직이면 손잡이도 따라간다. */
+.rail-resizer{position:absolute;z-index:3;border-radius:4px;touch-action:none;transition:background .12s}
+.rail-resizer:hover,.rail-resizer.dragging{background:var(--c-8794aa)}
+.rail-resizer-dock,.rail-resizer-trig{top:8px;bottom:10px;width:8px;cursor:col-resize}
+.rail-resizer-dock{right:calc(var(--trig-w) + var(--dock-w) + 18px)}
+.rail-resizer-trig{right:calc(var(--trig-w) + 10px)}
+.rail-resizer-height{left:8px;right:8px;bottom:1px;height:8px;cursor:row-resize}
+/* 끄는 동안 글자가 긁히거나 커서가 깜빡이지 않게 한다. */
+body.rail-resizing{user-select:none}
 .app.has-rail{margin-right:0}
 /* 좁은 화면에서는 붙여 두지 않는다 — 판이 길어지면 화면을 통째로 덮어 버린다. */
 @media(max-width:1040px){
@@ -1370,6 +1406,7 @@ tr.hit-extra .hit-extra-label{display:block;font-style:normal;font-size:10px;col
 .trigger-tower{position:static;width:100%;margin-top:10px;flex-direction:row;flex-wrap:wrap;overflow:visible}
 .trigger-tower-empty{flex:1 0 100%}
 .rotation-dock .buff-dialog{max-height:70vh}
+.rail-resizer{display:none}
 }
 /* 패널 제목 줄 — 제목 왼쪽, 검색칸 오른쪽. */
 .panel-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}

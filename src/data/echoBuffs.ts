@@ -40,6 +40,8 @@ export interface EchoBuffTemplate extends BuffAutoTrigger {
   scaleFrom?: BuffScaleStat;
   /** 「N%를 초과한 만큼」이라고 적힌 효과의 그 N. */
   scaleOffset?: number;
+  /** 「0.1%당」처럼 1이 아닌 단위로 끊어 셀 때 그 단위. value는 단위 하나당 수치가 된다. */
+  scaleStep?: number;
   /** 비례분의 상한(소수 비율). 「최대 25%까지」가 0.25다. */
   maxValue?: number;
   /** 기본 스택. 생략하면 1. */

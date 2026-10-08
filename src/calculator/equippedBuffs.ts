@@ -161,6 +161,7 @@ export function deriveCharacterBuffs(
         // 수치가 스탯에서 나오는 버프(연무 3체인 등)는 그 스탯 종류와 상한을 그대로 넘긴다.
         ...(template.scaleFrom ? { scaleFrom: template.scaleFrom } : {}),
         ...(template.scaleOffset !== undefined ? { scaleOffset: template.scaleOffset } : {}),
+        ...(template.scaleStep !== undefined ? { scaleStep: template.scaleStep } : {}),
         // 이상 효과 스택을 그대로 쓰는 버프 · 그 상한을 올려주는 버프
         ...(template.anomalyStacks ? { anomalyStacks: template.anomalyStacks } : {}),
         ...(template.raisesAnomalyStacks !== undefined
@@ -301,6 +302,7 @@ export function deriveEchoBuffs(
           value: template.value,
           ...(template.scaleFrom ? { scaleFrom: template.scaleFrom } : {}),
           ...(template.scaleOffset !== undefined ? { scaleOffset: template.scaleOffset } : {}),
+        ...(template.scaleStep !== undefined ? { scaleStep: template.scaleStep } : {}),
           ...(template.maxValue !== undefined ? { maxValue: template.maxValue } : {}),
           // 에코 세트 효과는 스탯창에 찍히지 않고 전투 중에 붙는다(실측 확인).
           statGroup: template.statGroup ?? "buff",
@@ -356,6 +358,7 @@ export function deriveEchoBuffs(
         value: template.value,
         ...(template.scaleFrom ? { scaleFrom: template.scaleFrom } : {}),
         ...(template.scaleOffset !== undefined ? { scaleOffset: template.scaleOffset } : {}),
+        ...(template.scaleStep !== undefined ? { scaleStep: template.scaleStep } : {}),
         ...(template.maxValue !== undefined ? { maxValue: template.maxValue } : {}),
         statGroup: template.statGroup ?? "buff",
         stacks: template.stacks ?? 1,

@@ -199,6 +199,24 @@ export function DamageBreakdownSection({
 
   const barMax = members.reduce((max, m) => Math.max(max, m.value), 0) || 1;
 
+  // 공격별 순위 — 같은 캐릭터의 같은 공격은 몇 번을 담았든 합친다. 큰 것부터.
+  // 예전에 담은 사이클에는 attacks가 없을 수 있다.
+  const byAttack = new Map<string, { key: string; characterId: string; name: string; value: number; count: number }>();
+  for (const a of data.attacks ?? []) {
+    const key = `${a.characterId}|${a.attackId}`;
+    const row = byAttack.get(key) ?? { key, characterId: a.characterId, name: a.name, value: 0, count: 0 };
+    row.value += a.expected;
+    row.count += 1;
+    byAttack.set(key, row);
+  }
+  const ranking = [...byAttack.values()]
+    .sort((x, y) => y.value - x.value)
+    .map((a) => {
+      const owner = characters.find((c) => c.id === a.characterId);
+      return { ...a, name: a.name.replace(/\s*피해$/, ""), owner: owner?.name ?? "", icon: owner?.iconUrl };
+    });
+  const rankMax = ranking[0]?.value || 1;
+
   return (
     <section className={stacked ? "panel viz viz-stacked" : "panel viz"}>
       <div className="row">
@@ -335,6 +353,30 @@ export function DamageBreakdownSection({
           </ul>
         </figure>
       </div>
+
+      {/* ── 아래: 공격별 피해 순위 — 같은 공격을 여러 번 담았으면 합쳐서 한 줄로 센다. ── */}
+      {ranking.length > 0 && (
+        <div className="viz-rank">
+          <small className="viz-rank-head">공격별 피해 순위</small>
+          <ol>
+            {ranking.map((a, index) => (
+              <li key={a.key} title={`${a.owner} · ${a.name} · ${num(a.value)}`}>
+                <i className={index < 3 ? "top" : ""}>{index + 1}</i>
+                <span className="viz-rank-name">
+                  {a.icon && <img src={a.icon} alt="" loading="lazy" />}
+                  {a.name}
+                  {a.count > 1 && <small>×{a.count}</small>}
+                </span>
+                <span className="viz-bar-track">
+                  <span className="viz-bar-fill" style={{ width: `${(a.value / rankMax) * 100}%` }} />
+                </span>
+                <b>{num(a.value)}</b>
+                <em>{total > 0 ? pct(a.value / total, 1) : "—"}</em>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
     </section>
   );
 }
