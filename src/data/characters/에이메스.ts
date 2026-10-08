@@ -586,7 +586,11 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     label: "적막을 깎아 빚어낸 형태 · 조화 파동 궤적 1스택당 배율 상승",
     target: "motionValue",
-    damageType: "Skill",
+    // 원문: 「제거된 조화 파동 궤적 1스택마다 … 합주가 **추가로 입히는 조화 파동 피해**의 피해 배율을 4% 상승」
+    // — 합주 본체(등장 · 강림)가 아니라 추가 피해에만 붙는다. 예전에는 damageType "Skill"로 적혀 있어
+    // 추가 피해에는 안 걸리고 엉뚱한 공명 스킬 공격에 걸렸다(2026-10-09 고침).
+    damageType: "All",
+    attackIds: ["1004607_3"],
     modifier: "amplify",
     value: 0.04,
     // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
@@ -595,7 +599,7 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     resonanceMode: "Discord",
-    condition: "제거된 「조화 파동 궤적」 스택만큼, 공명 스킬 「빛나는 날개의 합주」에만",
+    condition: "제거된 「조화 파동 궤적」 스택만큼, 「빛나는 날개의 합주」가 추가로 입히는 조화 파동 피해에만",
   },
   {
     label: "적막을 깎아 빚어낸 형태 · 불꽃 궤적 1스택당 배율 상승",
@@ -866,13 +870,30 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     scope: "self",
     condition: "조화 파동 모드. 위 확률과 같이 켠다",
   },
+  // 2체인 가운데 — 「합주가 추가로 입히는 조화 파동 피해로 목표 명중 시, 목표가 받는 그 추가 피해의
+  // 피해 배율을 20% 상승시키고, 1초간 지속되며, 최대 5스택까지 중첩」.
+  // 버프 순번이 id 열쇠라 맨 뒤에 붙인다.
+  {
+    label: "2체인 · 합주 추가 조화 파동 피해 배율 상승 (스택당 20%)",
+    target: "motionValue",
+    damageType: "All",
+    attackIds: ["1004607_3"],
+    modifier: "amplify",
+    value: 0.2, // 스택당 배율 20% 상승
+    stacks: 5,
+    maxStacks: 5,
+    resonanceChain: 2,
+    resonanceMode: "Discord",
+    uptime: "active",
+    scope: "self",
+    condition: "조화 파동 모드. 추가 조화 파동 피해가 맞을 때마다 1스택(1초 지속) — 첫 타는 0스택이다",
+  },
 ];
 
 // 미반영 — 피해 계산과 무관하거나 엔진이 다루지 못해 뺀 것들
 //   1체인 뒷부분  즉시 대응 · 찬란한 빛 진입 조건, 「동기화율」 · 궤적 봉인 규칙
-//   2체인 가운데  「조화 파동 피해」 쪽 배율 상승(5스택)
-//                — 「조화 파동 피해」는 이상 효과가 아닌 별도 지속 피해라 붙일 자리가 없다
-//                (불꽃 효과 쪽 강화는 위 버프로 반영했다)
+//   회로 「추가로 입히는 조화 파동 피해는 목표의 부조화 수치 영향을 받지 않는다」
+//                — 무엇이 빠진다는 뜻인지 확인하지 못했다. 지금은 다른 조화 파동 피해와 같은 식으로 낸다.
 //   5체인 「별바다 끝에 닿은 영원의 여정」 실드 · 부활 · 회복
 //   6체인 뒷부분  궤적 스택 두 배(채우는 속도라 피해식에 자리가 없다. 상한 60스택은 반영했다)
 //                — 조화 파동 쪽 크리티컬 고정은 2026-09-16에 고정 칸(critRateFix · critDamageFix)으로 담았다
