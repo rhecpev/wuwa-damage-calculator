@@ -26,7 +26,7 @@ export type ResonanceMode="Discord"|"Flame"|"Cluster"|"Frost"|"Echo"|"Union"|"Fl
 //   이중 모드 캐릭터는 다섯이다 — 루실라(서리·에코), 에이메스(조화 파동·불꽃),
 //   데니아(불꽃·조화 밀집), 린네(조화 파동·조화 밀집), 여우의 별자리(합일·전자).
 //   모드 개념이 없는 캐릭터는 생략(undefined).
-export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;noCrit?:boolean;trigger?:AttackTrigger[];}
+export interface Attack{id:string;name:string;type:AttackType;damageBonusType?:AttackType;element:DamageElement;scalingStat:ScalingStat;hits:number[][];increaseShare?:number[];skillLevel:number;fixedDamage?:number;resonanceMode?:ResonanceMode;resonanceChain?:number;extra?:boolean;extraHits?:ExtraHit[];hitLabels?:(string|null)[];hitFixed?:boolean[];anomaly?:AnomalyKind;discord?:boolean;noCrit?:boolean;tune?:"damage"|"response";trigger?:AttackTrigger[];}
 // discord: 조화도 파괴(부조화) 항목이면 true. 켜져 있으면 피해를 calculator/discord.ts가 낸다
 //   — 공격력을 타지 않고 10027.14 고정값에서 출발하는 별도 피해식이다(data/discord.ts 참고).
 // anomaly: 이 항목이 공격이 아니라 「이상 효과 피해」일 때 어느 효과인지.

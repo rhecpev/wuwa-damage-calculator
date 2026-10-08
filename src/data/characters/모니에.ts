@@ -365,6 +365,8 @@ const circuitSkillAttacks: Attack[] = [
     element: "Fusion",
     scalingStat: "ATK",
     skillLevel: 10,
+    // 조화 파동 대응 — 스킬 레벨은 공명 회로를 따르되, 공격 목록에서는 「조화도 파괴 대응」 구역에 선다.
+    tune: "response",
     // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
     noCrit: true,
     hits: [

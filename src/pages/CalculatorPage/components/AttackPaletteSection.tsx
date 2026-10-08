@@ -15,6 +15,7 @@ import {
   subscribeAttackNicknames,
 } from "../../../data/attackNicknames";
 import type { Attack, Character, SkillCategory } from "../../../types/game";
+import { TUNE_RESPONSE_SECTION } from "../../../utils/buffLabels";
 
 interface AttackPaletteSectionProps {
   onAddAttack: (attackId: string, characterId: string) => void;
@@ -28,7 +29,9 @@ const SECTIONS: { category: SkillCategory; label: string }[] = [
   { category: "Liberation", label: "공명 해방" },
   { category: "Variation", label: "변주 스킬" },
   { category: "Intro", label: "반주 스킬" },
-  { category: "Sync", label: "조화도 파괴" },
+  // 조화 파동 대응(attack.tune === "response")만 여기 선다 — 어느 스킬에 들어 있든 이 구역으로 뺀다.
+  // 조화도 파괴 피해 자체는 맨 아래 "discord" 줄이다.
+  { category: "Sync", label: TUNE_RESPONSE_SECTION },
   // 고유 스킬에서 떨어지는 공격(히유키 「속삭이는 눈」의 추가 냉해 피해 등).
   // 공격이 없는 고유 스킬이 대부분이라 그런 캐릭터에게는 이 구역이 아예 뜨지 않는다.
   { category: "Passive", label: "고유 스킬" },
@@ -210,7 +213,8 @@ export function paletteOf(character: Character, chain: number, byNickname: boole
     for (const attack of skill.attacks) {
       // 체인이 모자라 아직 생기지 않는 공격(방랑자 인멸 5체인 추가타 등)은 띄우지 않는다.
       if ((attack.resonanceChain ?? 0) > chain) continue;
-      const category = skill.category ?? fallbackCategory(attack);
+      const category: SkillCategory =
+        attack.tune === "response" ? "Sync" : (skill.category ?? fallbackCategory(attack));
       const bucket = grouped.get(category);
       if (bucket) {
         bucket.attacks.push(attack);

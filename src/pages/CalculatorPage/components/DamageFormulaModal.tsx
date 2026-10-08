@@ -11,6 +11,7 @@ import {
 } from "../../../calculator/damage";
 import { dec, num, pct } from "../../../utils/format";
 import { STAT_NAMES } from "../../../utils/statNames";
+import { TUNE_DAMAGE_LABEL } from "../../../utils/buffLabels";
 import { CopyJson } from "./CopyJson";
 
 interface DamageFormulaModalProps {
@@ -144,7 +145,146 @@ export function DamageFormulaModal({ result, onClose }: DamageFormulaModalProps)
   if (result.damage.kind === "anomaly") {
     return <AnomalyFormulaModal result={result} damage={result.damage} onClose={onClose} />;
   }
+  // 조화도 파괴도 식이 따로다 — 일반 창으로 그리면 없는 칸(피해증가 · 부스트 · 크리티컬)을 읽다 죽는다.
+  if (result.damage.kind === "discord") {
+    return <DiscordFormulaModal result={result} damage={result.damage} onClose={onClose} />;
+  }
   return <NormalFormulaModal result={result} onClose={onClose} />;
+}
+
+function DiscordFormulaModal({
+  result,
+  damage,
+  onClose,
+}: {
+  result: CalculationResult;
+  damage: Extract<CalculationResult["damage"], { kind: "discord" }>;
+  onClose: () => void;
+}) {
+  const { attack, character } = result;
+  const d = damage.breakdown;
+  useEscapeToClose(onClose);
+
+  const r = d.baseRes - d.resPenTotal;
+  const resBranch =
+    r < 0 ? "R < 0 → 1 − R/2" : r < 0.8 ? "0 ≤ R < 0.8 → 1 − R" : "R ≥ 0.8 → 1 / (1 + 5R)";
+
+  return (
+    <ContributionContext.Provider value={result.stats.contributions}>
+      <div className="formula-backdrop" onClick={onClose}>
+        <div className="formula-modal" onClick={(event) => event.stopPropagation()}>
+          <div className="formula-head">
+            <div>
+              <h3>{attack.name}</h3>
+              <span>
+                {character.name} · Lv.{d.charLevel} · {ELEMENT_NAMES[d.element]} · {d.occurrences}회
+              </span>
+            </div>
+            <div className="formula-actions">
+              <CopyJson result={result} />
+              <button className="formula-close" onClick={onClose}>
+                ×
+              </button>
+            </div>
+          </div>
+
+          <p className="formula-top">
+            조화도 파괴 피해 = ⌈ 기초값 × 최종 배율 × 발생횟수 × 방어저항 × 속성저항 × 최종피해 ×
+            조화도 파괴 증폭 ⌉
+            <br />
+            <span style={{ color: "var(--c-9aa3b3)" }}>
+              공격력 · 크리티컬 · 피해 보너스 · 부스트는 조화도 파괴 피해에 들어가지 않습니다.
+            </span>
+          </p>
+
+          <small className="formula-section">1 · 기초값</small>
+          <table className="formula-table">
+            <tbody>
+              <Row label="조화도 파괴 기초값" expr="90레벨 기준 고정값" value={dec(d.discordBase)} />
+              <Row label="기본 배율" expr="조화도 파괴 배율" value={pct(d.baseRate)} />
+              <Row
+                label="배율 상승"
+                expr="Σ motionValueAmplify (곱연산)"
+                value={pct(d.motionValueAmplify)}
+                keys={["motionValueAmplify"]}
+              />
+              <Row
+                label="배율 증가"
+                expr="Σ motionValueIncrease (합연산)"
+                value={pct(d.motionValueIncrease)}
+                keys={["motionValueIncrease"]}
+              />
+              <Row
+                label="최종 배율"
+                expr="(기본 배율 + 증가) × (1 + 상승)"
+                value={pct(d.motionValue)}
+              />
+              <Row
+                label="기초 피해"
+                expr={`${dec(d.discordBase)} × ${pct(d.motionValue)}`}
+                value={dec(d.base)}
+              />
+              <Row label="발생 횟수" expr="같은 조화도 파괴가 몇 번 터졌는지" value={`${d.occurrences}회`} />
+            </tbody>
+          </table>
+
+          <small className="formula-section">2 · 배율</small>
+          <table className="formula-table">
+            <tbody>
+              <Row
+                label="속성저항"
+                expr={`R = ${pct(d.baseRes)} − ${pct(d.resPenTotal)} = ${pct(r)} · ${resBranch}`}
+                value={mult(d.resMult)}
+                keys={["resPen", "resReduction"]}
+              />
+              <Row
+                label="방어저항"
+                expr={`(800+8×${d.charLevel}) / (800+8×${d.charLevel} + (792+8×${d.enemyLevel})×(1−${pct(
+                  d.defIgnore,
+                )})×(1−${pct(d.defReduction)}))`}
+                value={mult(d.defMult)}
+                keys={["defIgnore", "defReduction"]}
+              />
+              <Row
+                label="적 피해 감소"
+                expr={`1 − ${pct(d.enemyDamageReduction)}`}
+                value={mult(d.drMult)}
+              />
+              <Row
+                label="최종피해"
+                expr={`1 + ${pct(d.totalDamageBonus)}`}
+                value={mult(d.totalDmg)}
+                keys={["totalDamageBonus"]}
+              />
+              <Row
+                label="조화도 파괴 증폭"
+                expr={`1 + ${dec(d.syncAmplify)}pt / 100`}
+                value={mult(d.amplify)}
+                keys={["syncAmplify"]}
+              />
+              <Row label="배율 합계" expr="위 값을 전부 곱한 것" value={mult(d.multiplierChain)} />
+            </tbody>
+          </table>
+
+          <small className="formula-section">3 · 결과</small>
+          <table className="formula-table">
+            <tbody>
+              <Row
+                label="조화도 파괴 피해"
+                expr={`⌈ ${dec(d.base)} × ${d.occurrences} × ${mult(d.multiplierChain)} ⌉`}
+                value={num(damage.expectedDamage)}
+              />
+            </tbody>
+          </table>
+
+          <p className="formula-note">
+            조화도 파괴 피해에는 크리티컬이 없습니다. 이상 효과와 달리 <b>방어력 무시가 들어가고</b>,
+            조화도 파괴 증폭은 이 피해에만 걸립니다.
+          </p>
+        </div>
+      </div>
+    </ContributionContext.Provider>
+  );
 }
 
 function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
@@ -177,7 +317,8 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
       d.scalingStat === "ATK" ? "atk" : d.scalingStat === "HP" ? "hp" : "def"
     ];
   const elementName = ELEMENT_NAMES[d.element];
-  const categoryName = CATEGORY_NAMES[d.category] ?? d.category;
+  // 「조화 파동 피해」는 Ultimate 칸을 빌려 담은 것이라 그대로 적으면 「궁극기」가 된다.
+  const categoryName = attack.tune ? TUNE_DAMAGE_LABEL : (CATEGORY_NAMES[d.category] ?? d.category);
 
   // 속성저항은 R = 기본저항 - (저항 무시 + 저항 감소) 를 세 구간으로 나눠 계산한다.
   // 무시와 감소는 먼저 합연산으로 더한다. 어느 구간인지 같이 보여준다.

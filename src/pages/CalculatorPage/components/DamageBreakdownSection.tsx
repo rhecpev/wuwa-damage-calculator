@@ -5,6 +5,7 @@ import { characters } from "../../../data/sampleData";
 import { ANOMALIES } from "../../../data/anomalies";
 import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
 import { num, pct } from "../../../utils/format";
+import { TUNE_DAMAGE_LABEL } from "../../../utils/buffLabels";
 import type { DamageSnapshot } from "../../../data/cyclePresets";
 
 interface DamageBreakdownSectionProps {
@@ -99,7 +100,9 @@ function slicesOf(rows: CalculationResult[]): Slice[] {
       ? `${ANOMALIES[kind].name} 효과`
       : r.attack.discord
         ? "조화도 파괴"
-        : (CATEGORY_NAMES[r.attack.damageBonusType ?? r.attack.type] ?? "기타");
+        : r.attack.tune
+          ? `${TUNE_DAMAGE_LABEL} 피해` // Ultimate 칸을 빌린 것이라 그대로 두면 「궁극기」로 묶인다
+          : (CATEGORY_NAMES[r.attack.damageBonusType ?? r.attack.type] ?? "기타");
     bucket.set(key, (bucket.get(key) ?? 0) + r.damage.expectedDamage);
   }
 

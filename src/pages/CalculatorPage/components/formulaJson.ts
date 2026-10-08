@@ -111,6 +111,8 @@ export function formulaJson(result: CalculationResult, allBuffs?: ManualBuff[]):
         스킬레벨: attack.skillLevel,
         이상효과: attack.anomaly ?? null,
         조화도파괴: attack.discord ?? false,
+        // 「조화 파동 피해」는 분류 · 피해판정에 Ultimate가 찍힌다(칸을 빌린 것) — 진짜 판정은 여기 적는다.
+        조화파동: attack.tune ?? null,
       },
       로테이션: {
         켜둔버프: item.enabledBuffIds,

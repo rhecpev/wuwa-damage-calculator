@@ -17,7 +17,11 @@ import { BuffDialog } from "./BuffDialog";
 import { num } from "../../../utils/format";
 import { DeleteDialog } from "../../../components/Feedback";
 import type { DeleteAsk } from "../../../components/Feedback";
-import { DAMAGE_TYPE_LABEL } from "../../../utils/buffLabels";
+import {
+  DAMAGE_TYPE_LABEL,
+  TUNE_DAMAGE_LABEL,
+  TUNE_RESPONSE_SECTION,
+} from "../../../utils/buffLabels";
 import { isExtraAttack } from "./AttackPaletteSection";
 import { ANOMALIES } from "../../../data/anomalies";
 import { anomalyStackCap } from "../../../calculator/manualBuffs";
@@ -68,6 +72,8 @@ export function cardKind(result: CalculationResult): string {
 function damageTypeOf(result: CalculationResult): { key: string; label: string } {
   if (result.damage.kind === "anomaly") return { key: "anomaly", label: "이상 효과 피해" };
   if (result.damage.kind === "discord") return { key: "discord", label: "조화도 파괴 피해" };
+  // 「조화 파동 피해」는 Ultimate 칸을 빌려 담은 것이라 그대로 적으면 「궁극기 피해」가 된다.
+  if (result.attack.tune) return { key: "tune", label: `${TUNE_DAMAGE_LABEL} 피해` };
   // 「해당 피해는 ○○ 피해로 적용된다」처럼 판정이 따로 적힌 공격은 그 판정을 적는다.
   const type = result.attack.damageBonusType ?? result.attack.type;
   return { key: type, label: `${DAMAGE_TYPE_LABEL[type] ?? type} 피해` };
@@ -85,13 +91,14 @@ function attackGroups(character: CalculationResult["character"], chain: number) 
     { category: "Liberation", label: "공명 해방" },
     { category: "Variation", label: "변주 스킬" },
     { category: "Intro", label: "반주 스킬" },
-    { category: "Sync", label: "조화도 파괴" },
+    { category: "Sync", label: TUNE_RESPONSE_SECTION },
     { category: "Passive", label: "고유 스킬" },
   ];
   const bucket = new Map<string, CalculationResult["attack"][]>();
   for (const skill of character.skills) {
-    const key = skill.category ?? "Basic";
     for (const attack of skill.attacks) {
+      // 조화 파동 대응은 어느 스킬에 들어 있든 따로 세운다(공격 추가 팔레트와 같은 규칙).
+      const key = attack.tune === "response" ? "Sync" : (skill.category ?? "Basic");
       // 체인이 모자라 생기지 않는 공격은 바꿀 후보에서도 뺀다(공격 추가 팔레트와 같은 규칙).
       if ((attack.resonanceChain ?? 0) > chain) continue;
       const rows = bucket.get(key);

@@ -14,6 +14,7 @@ import {
   subscribeAttackNicknames,
 } from "../../data/attackNicknames";
 import type { Attack, SkillCategory } from "../../types/game";
+import { TUNE_RESPONSE_SECTION } from "../../utils/buffLabels";
 
 /**
  * 별명 — 공격을 평소 부르는 이름으로 적어 두는 화면.
@@ -56,7 +57,7 @@ const SECTIONS: { category: SkillCategory; label: string }[] = [
   { category: "Liberation", label: "공명 해방" },
   { category: "Variation", label: "변주 스킬" },
   { category: "Intro", label: "반주 스킬" },
-  { category: "Sync", label: "조화도 파괴" },
+  { category: "Sync", label: TUNE_RESPONSE_SECTION },
   { category: "Passive", label: "고유 스킬" },
 ];
 
@@ -91,7 +92,8 @@ function sectionsOf(character: (typeof characters)[number] | null) {
   >();
   for (const skill of character?.skills ?? []) {
     for (const attack of skill.attacks) {
-      const category = skill.category ?? fallbackCategory(attack);
+      const category: SkillCategory =
+        attack.tune === "response" ? "Sync" : (skill.category ?? fallbackCategory(attack));
       const bucket = grouped.get(category);
       if (bucket) {
         bucket.rows.push({ attack, skill: skill.name });

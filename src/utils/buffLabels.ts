@@ -66,6 +66,15 @@ export const DAMAGE_TYPE_LABEL: Record<string, string> = {
   HavocBane: "암흑 효과",
 };
 
+/**
+ * 「조화 파동 피해」로 떨어지는 공격(attack.tune)의 판정 이름.
+ * AttackType에 칸이 없어 Ultimate를 빌려 담았는데, 그대로 적으면 「궁극기」로 찍힌다 — 화면에는 이 이름을 쓴다.
+ */
+export const TUNE_DAMAGE_LABEL = "조화 파동";
+
+/** 공격 목록에서 「조화 파동 대응」 공격을 따로 세우는 구역 이름. */
+export const TUNE_RESPONSE_SECTION = "조화도 파괴 대응";
+
 export const ELEMENT_LABEL: Record<string, string> = {
   Aero: "기류",
   Glacio: "응결",
