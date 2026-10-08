@@ -294,8 +294,14 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
 
   useEscapeToClose(onClose);
 
-  const statLabel =
-    d.scalingStat === "ATK" ? "공격력" : d.scalingStat === "HP" ? "HP" : "방어력";
+  // 조화 파동 피해는 스탯이 아니라 고정된 부조화 계수에 계수를 곱한다.
+  const statLabel = d.tune
+    ? "부조화 계수"
+    : d.scalingStat === "ATK"
+      ? "공격력"
+      : d.scalingStat === "HP"
+        ? "HP"
+        : "방어력";
   // 이 공격의 피해증가·부스트가 어느 칸을 보는지. 줄을 눌렀을 때 그 칸의 출처만 걸러낸다.
   const bonusKeys = [
     "allDamageBonus" as const,
@@ -347,10 +353,13 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
         </div>
 
         <p className="formula-top">
-          피해 = ⌈ Σ(계수<sub>히트</sub>) × ⌊{statLabel}⌋ × 배율 합계 ⌉ + 고정 피해
+          피해 = ⌈ Σ(계수<sub>히트</sub>) × {d.tune ? statLabel : `⌊${statLabel}⌋`} × 배율 합계 ⌉ +
+          고정 피해
           <br />
           <span style={{ color: "var(--c-9aa3b3)" }}>
-            ⌊{statLabel}⌋ = ⌊ ⌊기초 × (1 + 스탯창 %)⌋ + 기초 × 버프 % + 깡수치 ⌋
+            {d.tune
+              ? "조화 파동 피해 — 공격력 · 피해 보너스 · 부스트는 들어가지 않고, 조화도 파괴 증폭이 붙습니다."
+              : `⌊${statLabel}⌋ = ⌊ ⌊기초 × (1 + 스탯창 %)⌋ + 기초 × 버프 % + 깡수치 ⌋`}
           </span>
         </p>
 
@@ -378,6 +387,17 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
         </table>
 
         <small className="formula-section">2 · 계수에 곱하는 스탯</small>
+        {d.tune ? (
+          <table className="formula-table">
+            <tbody>
+              <Row
+                label="부조화 계수"
+                expr="조화도 파괴와 같은 고정 기초값 — 공명자 스탯과 무관하다"
+                value={dec(d.attr)}
+              />
+            </tbody>
+          </table>
+        ) : (
         <table className="formula-table">
           <tbody>
             <Row
@@ -433,6 +453,7 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
             />
           </tbody>
         </table>
+        )}
 
         <small className="formula-section">3 · 배율</small>
         <table className="formula-table">
@@ -486,9 +507,17 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
               value={mult(d.totalDmg)}
               keys={["totalDamageBonus"]}
             />
+            {d.tune && (
+              <Row
+                label="조화도 파괴 증폭"
+                expr={`1 + ${dec(d.syncAmplify)}pt / 100`}
+                value={mult(d.amplify)}
+                keys={["syncAmplify"]}
+              />
+            )}
             <tr className="formula-sum">
               <td className="formula-label">배율 합계</td>
-              <td className="formula-expr">위 여덟 배율을 전부 곱한 값</td>
+              <td className="formula-expr">위 배율을 전부 곱한 값</td>
               <td className="formula-value">{mult(d.multiplierChain)}</td>
             </tr>
           </tbody>

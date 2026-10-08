@@ -1,5 +1,6 @@
 import type { Attack, AttackType, Buff, Character, DamageElement, Enemy } from "../types/game";
 import type { Stats } from "../types/stats";
+import { DISCORD_BASE } from "../data/discord";
 
 /**
  * 최종 데미지 = 스킬 계수(배율 증가·상승 반영) × 기초 공격력(=Stats.atk, 이미 %/깡공 반영된 최종값)
@@ -141,14 +142,24 @@ export function calculateDamage(
   b: Buff[],
   e: Enemy,
 ) {
+  // 「조화 파동 피해」(a.tune)는 스킬표의 계수가 공격력이 아니라 **부조화 계수**에 걸린다
+  // — 게임 스킬표에 「596.43% 부조화 계수」로 적혀 있다. 조화도 파괴와 같은 고정 기초값을 쓰고,
+  // 같은 갈래의 규칙을 따른다(data/discord.ts): 피해 보너스 · 부스트는 빠지고 조화도 파괴 증폭이 붙는다.
+  // 속성저항은 그 공격의 속성으로, 크리티컬은 에이메스 6체인이 못 박을 때만 붙는다(noCrit).
+  //   실측 — 모니에 「입자 분사」 Lv.10(298.22%) 13145 = ⌈10027.14 × 2.9822 × 방어 0.48843 × 0.9⌉
+  //          (0.9 = 용융 저항 40% → 0.6 × 증폭 50pt → 1.5 로 읽었다. 공격력식으로는 1492가 나온다.)
+  const tune = a.tune !== undefined;
   // 계수에 곱하는 스탯은 소수점을 버린 정수(게임 스탯창에 찍히는 값)를 쓴다.
-  const attr = Math.floor(
-    a.scalingStat === "ATK" ? s.atk : a.scalingStat === "HP" ? s.hp : s.def,
-  );
+  const attr = tune
+    ? DISCORD_BASE
+    : Math.floor(a.scalingStat === "ATK" ? s.atk : a.scalingStat === "HP" ? s.hp : s.def);
 
-  const dmgBonus =
-    1 + s.allDamageBonus + categoryDamageBonus(a, s) + s[ELEMENT_BONUS_KEY[a.element]];
-  const boost = 1 + s.allBoost + categoryBoost(a, s) + elementBoost(a, s);
+  const dmgBonus = tune
+    ? 1
+    : 1 + s.allDamageBonus + categoryDamageBonus(a, s) + s[ELEMENT_BONUS_KEY[a.element]];
+  const boost = tune ? 1 : 1 + s.allBoost + categoryBoost(a, s) + elementBoost(a, s);
+  // 조화도 파괴 증폭 — 스탯창 표시값이 pt라 100으로 나눈다. 조화 파동 피해가 아니면 걸리지 않는다.
+  const amplify = tune ? 1 + s.syncAmplify / 100 : 1;
   const critMultiplier = 1 + s.critDamage; // critDamage는 기본 100% 제외한 보너스분
   const rate = Math.min(Math.max(s.critRate, 0), 1);
   // 몬스터 속성과 같은 속성으로 때리면 저항이 더 높게 잡힌다.
@@ -162,7 +173,7 @@ export function calculateDamage(
   const drMult = 1 - e.damageReduction;
 
   const multiplierChain =
-    dmgBonus * boost * resMult * defMult * drMult * dmgTaken * totalDmg;
+    dmgBonus * boost * resMult * defMult * drMult * dmgTaken * totalDmg * amplify;
 
   // 스킬 배율에 걸리는 "증가"와 "상승"은 붙는 방식이 다르다.
   //   상승: 계수 × (1 + 상승률)   — 곱연산
@@ -284,6 +295,10 @@ export function calculateDamage(
       dmgTaken,
       totalDamageBonus: s.totalDamageBonus,
       totalDmg,
+      // 조화 파동 피해 — 부조화 계수 기준이고 증폭이 붙는다(아니면 tune=false, amplify=1)
+      tune,
+      syncAmplify: s.syncAmplify,
+      amplify,
       // 위 배율을 전부 곱한 것
       multiplierChain,
       /** 올림 전 히트 합계. normalDamage = ⌈rawTotal + 고정피해⌉ */
