@@ -11,7 +11,7 @@ import {
 } from "../../../calculator/damage";
 import { dec, num, pct } from "../../../utils/format";
 import { STAT_NAMES } from "../../../utils/statNames";
-import { TUNE_DAMAGE_LABEL } from "../../../utils/buffLabels";
+import { tuneLabelOf } from "../../../utils/buffLabels";
 import { CopyJson } from "./CopyJson";
 
 interface DamageFormulaModalProps {
@@ -324,7 +324,7 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
     ];
   const elementName = ELEMENT_NAMES[d.element];
   // 「조화 파동 피해」는 Ultimate 칸을 빌려 담은 것이라 그대로 적으면 「궁극기」가 된다.
-  const categoryName = attack.tune ? TUNE_DAMAGE_LABEL : (CATEGORY_NAMES[d.category] ?? d.category);
+  const categoryName = attack.tune ? tuneLabelOf(attack) : (CATEGORY_NAMES[d.category] ?? d.category);
 
   // 속성저항은 R = 기본저항 - (저항 무시 + 저항 감소) 를 세 구간으로 나눠 계산한다.
   // 무시와 감소는 먼저 합연산으로 더한다. 어느 구간인지 같이 보여준다.
@@ -358,7 +358,7 @@ function NormalFormulaModal({ result, onClose }: DamageFormulaModalProps) {
           <br />
           <span style={{ color: "var(--c-9aa3b3)" }}>
             {d.tune
-              ? "조화 파동 피해 — 공격력 · 피해 보너스 · 부스트는 들어가지 않고, 조화도 파괴 증폭이 붙습니다."
+              ? `${categoryName} 피해 — 공격력 · 피해 보너스 · 부스트는 들어가지 않고, 조화도 파괴 증폭이 붙습니다.`
               : `⌊${statLabel}⌋ = ⌊ ⌊기초 × (1 + 스탯창 %)⌋ + 기초 × 버프 % + 깡수치 ⌋`}
           </span>
         </p>

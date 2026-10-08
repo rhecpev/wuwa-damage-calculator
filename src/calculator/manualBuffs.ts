@@ -424,6 +424,45 @@ export function buffContributions(
   return out;
 }
 
+/** 파티 버프의 비례분이 읽는 칸들(SCALE_SOURCES의 panel 쪽). */
+const OWNER_SCALE_KEYS: (keyof Stats)[] = ["energyRegen", "syncAmplify", "discordEfficiency", "critRate"];
+
+/**
+ * 준 사람의 스탯창(ownerPanels)에, **이 공격에 켜 둔 발동 버프 가운데 그 사람에게도 닿는 것**을 얹는다.
+ *
+ * 파티 버프의 비례분은 준 사람의 그때 스탯을 본다 — 스탯창 값만 보면 그 사람이 받고 있는
+ * 발동 버프가 빠진다. 린네가 「조화도 파괴 증폭 +40」을 켠 채로 주는 「서약」 추가 공격력은
+ * 증폭 10이 아니라 50을 봐야 하고(3% → 15%), 모니에의 「별의 고리」도 부조화 효율 +50%를 본다
+ * (20% → 25%). 에이메스 합주 등장 실측(41441 / 40153)이 이쪽에서만 맞는다.
+ *
+ * 상시 버프는 스탯창에 이미 들어 있어 건너뛴다. 특정 공격 · 분류에만 붙는 것과
+ * 그 자체가 스탯에 비례하는 것(순환)도 뺀다.
+ */
+export function ownerStatsWithBuffs(
+  ownerPanels: Record<string, Stats>,
+  buffs: ManualBuff[],
+): Record<string, Stats> {
+  const out: Record<string, Stats> = {};
+  for (const [ownerId, panel] of Object.entries(ownerPanels)) {
+    const stats = { ...panel };
+    for (const buff of buffs) {
+      if (!buff.enabled || buff.uptime === "passive" || buff.scaleFrom) continue;
+      if (buff.damageType !== "All" || buff.attackId || buff.attackIds?.length) continue;
+      const reaches =
+        buff.scope === "party"
+          ? !(buff.excludeOwner && buff.ownerId === ownerId)
+          : buff.ownerId === ownerId;
+      if (!reaches) continue;
+      if (buff.onlyFor && !buff.onlyFor.includes(baseCharacterId(ownerId))) continue;
+      const patch = statPatch(buff, buffAmount(buff, buff.stacks));
+      if (!patch) continue;
+      for (const key of OWNER_SCALE_KEYS) if (patch[key]) stats[key] += patch[key]!;
+    }
+    out[ownerId] = stats;
+  }
+  return out;
+}
+
 /**
  * 버프가 몇 번 자리에 얼마를 얹는지 — Stats 한 칸짜리 조각으로 돌려준다.
  * JSON 내보내기에서 「이 버프가 어느 칸에 들어갔는지」를 적는 데도 쓴다.
@@ -610,6 +649,35 @@ export function applyDamageTypeSwitch(attack: Attack, buffs: ManualBuff[]): Atta
     return { ...attack, damageBonusType: buff.switchesDamageBonusType };
   }
   return attack;
+}
+
+/**
+ * 켜면 **그 공격의 타수가 늘어나는** 버프(addsExtraHits)를 얹는다.
+ *
+ * 에이메스 「별조각의 공진」이 그렇다 — 합주가 추가로 입히는 조화 파동 피해가 5회에서 10회가 된다.
+ * 늘어나는 타는 원래 타와 똑같은 것이라 첫 히트의 계수를 그대로 베껴 뒤에 붙인다
+ * (체인으로 붙는 추가타 Attack.extraHits와 달리 배율 「증가」 몫도 똑같이 나눠 받는다).
+ * 히트별 표에서 구분되도록 hitLabels에 버프 이름을 적는다.
+ *
+ * 판정 전환과 같이, 어느 공격에 걸지는 attackId · attackIds로 정한다.
+ */
+export function applyExtraHitBuffs(attack: Attack, buffs: ManualBuff[]): Attack {
+  let out = attack;
+  for (const buff of buffs) {
+    const count = Math.floor(buff.addsExtraHits ?? 0);
+    if (count <= 0 || out.hits.length === 0) continue;
+    const ids = buff.attackIds?.length ? buff.attackIds : buff.attackId ? [buff.attackId] : [];
+    if (!ids.includes(attack.id)) continue;
+    const added = Array.from({ length: count }, () => [...out.hits[0]]);
+    out = {
+      ...out,
+      hits: [...out.hits, ...added],
+      hitLabels: [...(out.hitLabels ?? out.hits.map(() => null)), ...added.map(() => buff.label ?? "추가 타")],
+      ...(out.increaseShare ? { increaseShare: [...out.increaseShare, ...added.map(() => out.increaseShare![0])] } : {}),
+      ...(out.hitFixed ? { hitFixed: [...out.hitFixed, ...added.map(() => false)] } : {}),
+    };
+  }
+  return out;
 }
 
 /**

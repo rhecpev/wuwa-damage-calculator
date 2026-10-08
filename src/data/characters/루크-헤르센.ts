@@ -539,7 +539,11 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     label: "이곳에 지는 모든 것들 · 얼음 속의 의미 배율 상승",
     target: "motionValue",
-    damageType: "Liberation",
+    // 원문: 「최후의 해석」 — 공명 해방 「얼음 속의 의미」의 피해 배율을 25% 상승, 3스택 중첩.
+    // 「얼음 속의 의미」는 판정이 일반 공격이라 damageType "Liberation"으로는 걸리지 않았다 — 공격을 직접 지목한다
+    // (2026-10-09 고침. 아래 햇무리 참살 줄과 같은 사정이다).
+    damageType: "All",
+    attackIds: ["1004703_1"],
     modifier: "amplify",
     value: 0.25,
     maxStacks: 3,
@@ -601,7 +605,18 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     label: "1체인 · 공중 공격 피해 보너스",
     target: "damageBonus",
-    damageType: "Aerial",
+    // 원문: 「공중 공격 피해 보너스가 150% 증가된다」. 루크의 공중 공격은 전부 판정이 일반 공격이라
+    // damageType "Aerial"로는 어느 공격에도 걸리지 않았다 — 공중 공격들을 직접 지목한다(2026-10-09 고침).
+    damageType: "All",
+    attackIds: [
+      "1004701_6", // 공중 공격 1단
+      "1004701_7", // 2단 · 낫 · 해부
+      "1004701_8", // 3단 · 낫 · 해부
+      "1004701_9", // 2단 · 낫 · 재단
+      "1004701_10", // 3단 · 낫 · 재단
+      "1004701_11", // 4단
+      "1004707_1", // 공중 공격 · 대지를 가르는 판결
+    ],
     value: 1.5, // 150% 증가
     uptime: "passive", // 조건이 없어 늘 걸린다
     scope: "self",

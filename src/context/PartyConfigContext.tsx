@@ -38,7 +38,8 @@ import {
 import { rentalBuildOf, rentalSkillLevelsOf, rentalWeaponOf } from "../data/rentalBuilds";
 import { isRentalCharacter, rentalStoreVersion, subscribeRentalStore } from "../data/rentalStore";
 import type { EchoLink } from "../data/echoStore";
-import { anomalyFromAttackId } from "../data/anomalies";
+import { ANOMALIES, anomalyFromAttackId } from "../data/anomalies";
+import type { AnomalyDef } from "../data/anomalies";
 import { anomalyStateBuffs } from "../data/anomalyBuffs";
 import { anomalyStackCap, statusStackCap } from "../calculator/manualBuffs";
 import { isDiscordAttackId } from "../data/discord";
@@ -117,6 +118,21 @@ export interface PartyPreset {
 }
 
 /** 파티 슬롯 순서 — 1번, 2번, 3번 캐릭터 */
+/**
+ * 루틴 항목이 이상 효과 피해면 그 효과. 공격 팔레트의 이상 효과 항목이거나,
+ * 이상 효과로 계산하는 캐릭터 공격(에이메스 · 불꽃의 합주 폭발)이다 — 둘 다 스택 · 발생 횟수를 정한다.
+ */
+function anomalyDefOfItem(item: { attackId: string; characterId: string }): AnomalyDef | undefined {
+  const direct = anomalyFromAttackId(item.attackId);
+  if (direct) return direct;
+  const character = characters.find((c) => c.id === item.characterId);
+  for (const skill of character?.skills ?? []) {
+    const attack = skill.attacks.find((a) => a.id === item.attackId);
+    if (attack) return attack.anomaly ? ANOMALIES[attack.anomaly] : undefined;
+  }
+  return undefined;
+}
+
 export const PARTY_SLOTS: PartySlot[] = ["mainDps", "subDps", "support"];
 
 /** 몬스터 레벨 입력 범위 */
@@ -808,7 +824,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
       ...current,
       rotation: current.rotation.map((item) => {
         if (item.id !== rotationId) return item;
-        const def = anomalyFromAttackId(item.attackId);
+        const def = anomalyDefOfItem(item);
         if (!def) return item;
         // 상한은 최대 스택의 두 배까지만 — 그 위는 실수로 눌린 값에 가깝다.
         const value = Math.min(Math.max(Math.round(stacks) || 0, 0), def.maxStacks * 2);
@@ -860,7 +876,7 @@ export function PartyConfigProvider({ children }: { children: ReactNode }) {
     setConfig((current) => ({
       ...current,
       rotation: current.rotation.map((item) => {
-        if (item.id !== rotationId || !anomalyFromAttackId(item.attackId)) return item;
+        if (item.id !== rotationId || !anomalyDefOfItem(item)) return item;
         return { ...item, anomalyOccurrences: Math.min(Math.max(Math.round(occurrences) || 1, 1), 99) };
       }),
     }));

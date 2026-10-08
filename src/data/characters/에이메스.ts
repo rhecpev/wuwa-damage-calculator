@@ -479,7 +479,9 @@ const circuitSkillAttacks: Attack[] = [
   },
   {
     id: "1004607_3",
-    name: "빛나는 날개의 합주 추가 피해(매 회)",
+    // 스킬표는 「추가 피해(매 회)」 한 번 값이다. 원문이 「추가로 5회의 조화 파동 피해」라 카드 한 장에 5타를 담는다
+    // — 「별조각의 공진」이면 10회가 되는데, 그 5타는 아래 버프(addsExtraHits)가 붙인다.
+    name: "빛나는 날개의 합주 추가 피해",
     type: "Ultimate",
     element: "Fusion",
     scalingStat: "ATK",
@@ -491,6 +493,10 @@ const circuitSkillAttacks: Attack[] = [
     // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).
     noCrit: true,
     hits: [
+      [0.55, 0.5951, 0.6402, 0.7034, 0.7485, 0.8004, 0.8725, 0.9447, 1.0168, 1.0935],
+      [0.55, 0.5951, 0.6402, 0.7034, 0.7485, 0.8004, 0.8725, 0.9447, 1.0168, 1.0935],
+      [0.55, 0.5951, 0.6402, 0.7034, 0.7485, 0.8004, 0.8725, 0.9447, 1.0168, 1.0935],
+      [0.55, 0.5951, 0.6402, 0.7034, 0.7485, 0.8004, 0.8725, 0.9447, 1.0168, 1.0935],
       [0.55, 0.5951, 0.6402, 0.7034, 0.7485, 0.8004, 0.8725, 0.9447, 1.0168, 1.0935],
     ],
   },
@@ -510,6 +516,22 @@ const circuitSkillAttacks: Attack[] = [
     hits: [
       [3, 3.246, 3.492, 3.8364, 4.0824, 4.3653, 4.7589, 5.1525, 5.5461, 5.9643],
     ],
+  },
+  // 합주의 추가 피해는 **모드마다 다른 것**이다 — 조화 파동이면 위 5회의 조화 파동 피해(1004607_3),
+  // 불꽃이면 이것이다. 원문: 「공명 모드 · 불꽃」에 있을 시, 합주 기간 동안 목표의 「불꽃의 궤적」을 제거하고
+  // 「불꽃 효과」 스택 최대치에 따라 「불꽃 효과」를 폭발시킨다(스택은 제거하지 않는다).
+  // 계수가 없는 이상 효과 피해라 hits는 비우고 anomaly로 넘긴다 — 피해는 calculator/anomaly.ts가 낸다.
+  // 궤적 스택당 10% · 별조각의 공진 200% 배율 상승은 버프(anomalyAmplify)로 켠다.
+  {
+    id: "1004607_5",
+    name: "빛나는 날개의 합주 추가 피해 (불꽃 효과 폭발)",
+    type: "Echo", // 피해 보너스 칸을 쓰지 않으므로 분류는 의미가 없다(anomalyAttack과 같다)
+    element: "Fusion",
+    scalingStat: "ATK",
+    skillLevel: 10,
+    resonanceMode: "Flame",
+    anomaly: "FusionBurst",
+    hits: [],
   },
 ];
 
@@ -603,9 +625,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   {
     label: "적막을 깎아 빚어낸 형태 · 불꽃 궤적 1스택당 배율 상승",
-    target: "motionValue",
+    // 이상 효과 피해는 일반 공격식이 아니라 배율 칸이 따로다(anomaly.ts의 base × (1 + anomalyAmplify)).
+    // 예전에는 motionValue로 적혀 있어 불꽃 효과 카드에 아예 걸리지 않았다(2026-10-09 고침).
+    target: "anomalyAmplify",
     damageType: "FusionBurst",
-    modifier: "amplify",
     value: 0.1,
     // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
     // 예전에는 한 번에 붙는 양(10스택)을 상한으로 잘못 적어 두었다(2026-09-16 고침).
@@ -620,9 +643,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     //   「「불꽃 효과」」가 「「불꽃 효과」」의 메인 목표에게 입히는 피해 배율을 추가로 200% 상승시킨다.
     // 2체인이 있으면 이 200%가 400%로 커지므로 둘을 배타로 묶는다.
     label: "적막을 깎아 빚어낸 형태 · 합주 폭발 불꽃 효과 배율 상승",
-    target: "motionValue",
+    // 이상 효과 피해는 일반 공격식이 아니라 배율 칸이 따로다(anomaly.ts의 base × (1 + anomalyAmplify)).
+    // 예전에는 motionValue로 적혀 있어 불꽃 효과 카드에 아예 걸리지 않았다(2026-10-09 고침).
+    target: "anomalyAmplify",
     damageType: "FusionBurst",
-    modifier: "amplify",
     value: 2, // 배율 200% 상승
     uptime: "active",
     scope: "self",
@@ -633,9 +657,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   {
     // 2체인 — 「별조각의 공진」이 위 배율 상승 효과를 400%로 키운다.
     label: "2체인 · 합주 폭발 불꽃 효과 배율 상승 (별조각의 공진)",
-    target: "motionValue",
+    // 이상 효과 피해는 일반 공격식이 아니라 배율 칸이 따로다(anomaly.ts의 base × (1 + anomalyAmplify)).
+    // 예전에는 motionValue로 적혀 있어 불꽃 효과 카드에 아예 걸리지 않았다(2026-10-09 고침).
+    target: "anomalyAmplify",
     damageType: "FusionBurst",
-    modifier: "amplify",
     value: 4, // 200% -> 400%
     uptime: "active",
     scope: "self",
@@ -648,9 +673,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     // 2체인 — 「불꽃의 궤적」의 스택당 배율 상승이 10% → 15%로 커진다.
     // 위 「불꽃 궤적 1스택당 배율 상승」(10%)에 5%를 한 줄 더 얹어 같이 켠다.
     label: "2체인 · 불꽃 궤적 1스택당 배율 상승 강화",
-    target: "motionValue",
+    // 이상 효과 피해는 일반 공격식이 아니라 배율 칸이 따로다(anomaly.ts의 base × (1 + anomalyAmplify)).
+    // 예전에는 motionValue로 적혀 있어 불꽃 효과 카드에 아예 걸리지 않았다(2026-10-09 고침).
+    target: "anomalyAmplify",
     damageType: "FusionBurst",
-    modifier: "amplify",
     value: 0.05, // 10% -> 15%
     // 「궤적」은 **최대 30스택**까지 쌓이고, 6체인이면 60스택이 된다.
     // 예전에는 한 번에 붙는 양(10스택)을 상한으로 잘못 적어 두었다(2026-09-16 고침).
@@ -854,9 +880,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     value: 0.8,
     resonanceChain: 6,
     resonanceMode: "Discord",
-    uptime: "active",
+    // 원문에 발동 조건이 없다 — 조화 파동 모드의 6체인이면 늘 그렇다. 에이메스 자신의 조화 파동 피해에만.
+    uptime: "passive",
     scope: "self",
-    condition: "조화 파동 모드. 아래 크리티컬 피해와 같이 켠다",
   },
   {
     label: "6체인 · 조화 파동 피해 크리티컬 피해 (275% 고정)",
@@ -866,9 +892,9 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     value: 1.75, // 275% 중 100%를 넘는 부분
     resonanceChain: 6,
     resonanceMode: "Discord",
-    uptime: "active",
+    // 원문에 발동 조건이 없다 — 조화 파동 모드의 6체인이면 늘 그렇다. 에이메스 자신의 조화 파동 피해에만.
+    uptime: "passive",
     scope: "self",
-    condition: "조화 파동 모드. 위 확률과 같이 켠다",
   },
   // 2체인 가운데 — 「합주가 추가로 입히는 조화 파동 피해로 목표 명중 시, 목표가 받는 그 추가 피해의
   // 피해 배율을 20% 상승시키고, 1초간 지속되며, 최대 5스택까지 중첩」.
@@ -887,6 +913,21 @@ const passiveBuffs: CharacterBuffTemplate[] = [
     uptime: "active",
     scope: "self",
     condition: "조화 파동 모드. 추가 조화 파동 피해가 맞을 때마다 1스택(1초 지속) — 첫 타는 0스택이다",
+  },
+  // 회로 원문: 「별조각의 공진」 상태에서는 … 「공명 모드 · 조화 파동」에 있을 시, 합주가 추가로 입히는
+  //   「조화 파동 피해」 횟수가 10회로 증가된다. — 기본 5타에 5타를 더 붙인다(addsExtraHits).
+  // 수치는 0이다 — 하는 일이 타수를 늘리는 것뿐이라 피해에 더하는 값이 없다.
+  {
+    label: "별조각의 공진 · 합주 추가 조화 파동 피해 10회",
+    target: "damageBonus",
+    damageType: "All",
+    attackIds: ["1004607_3"],
+    value: 0,
+    addsExtraHits: 5,
+    resonanceMode: "Discord",
+    uptime: "active",
+    scope: "self",
+    condition: "공명 해방 「샛별을 향한 비행」으로 얻는 「별조각의 공진」 상태(30초) + 조화 파동 모드",
   },
 ];
 

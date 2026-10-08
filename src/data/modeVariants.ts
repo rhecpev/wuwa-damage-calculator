@@ -81,6 +81,15 @@ export function modeVariants(base: Character): Character[] {
     id: `${base.id}-${MODE_SLUG[mode]}`,
     name: `${base.name} · ${MODE_LABEL[mode]}`,
     resonanceModes: [mode],
+    // 다른 모드에서만 나가는 공격도 뺀다 — 에이메스 · 불꽃에는 합주의 「조화 파동 추가 피해」 · 초신성이 없다
+    // (불꽃 모드의 합주는 「불꽃 효과」를 터뜨린다). 예전에는 버프만 걸러서, 불꽃 모드에서 조화 파동 공격이
+    // 버프 하나 없이 그대로 담겼다.
+    skills: base.skills.map((skill) => ({
+      ...skill,
+      attacks: skill.attacks.filter(
+        (a) => a.resonanceMode === undefined || a.resonanceMode === mode,
+      ),
+    })),
     passiveBuffs: (base.passiveBuffs ?? []).filter(
       (b) => b.resonanceMode === undefined || b.resonanceMode === mode,
     ),

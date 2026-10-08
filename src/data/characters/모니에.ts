@@ -506,7 +506,10 @@ const passiveBuffs: CharacterBuffTemplate[] = [
   },
   {
     label: "질량-에너지 등가 · 간섭 목표 피해 (공명 효율 100% 초과분)",
-    target: "boost",
+    // 원문: 「초과한 공명 효율 1% 당 **피해를 0.25% 증가**」 — 부스트가 아니라 피해 보너스다.
+    // 예전에는 boost로 적혀 있었다. 에이메스 합주 등장 실측(41441 / 40153)이 피해 보너스 쪽에서만 맞는다
+    // (2026-10-09 고침).
+    target: "damageBonus",
     damageType: "All",
     value: 0.0025, // 초과 1%당 0.25%
     scaleFrom: "EnergyRegen",

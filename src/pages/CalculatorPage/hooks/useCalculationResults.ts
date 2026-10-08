@@ -23,9 +23,11 @@ import { calculateDiscordDamage } from "../../../calculator/discord";
 import { DISCORD_ATTACK_ID, discordAttack, isDiscordAttackId } from "../../../data/discord";
 import {
   anomalyStackCap,
+  ownerStatsWithBuffs,
   statusStackCap,
   critOverrides,
   applyDamageTypeSwitch,
+  applyExtraHitBuffs,
   buffContributions,
   manualBuffDelta,
 } from "../../../calculator/manualBuffs";
@@ -265,7 +267,8 @@ export function computeResults(
 
     // 「이번 피해는 공명 해방 피해로 적용된다」 같은 조건부 분류 전환을 먼저 얹는다.
     // 아래 버프 판정(appliesTo)이 damageBonusType을 보므로 순서가 여기여야 한다.
-    const attack = applyDamageTypeSwitch(leveledAttack, itemBuffs);
+    // 타수를 늘리는 버프(에이메스 「별조각의 공진」)도 여기서 같이 얹는다.
+    const attack = applyExtraHitBuffs(applyDamageTypeSwitch(leveledAttack, itemBuffs), itemBuffs);
 
     // 증분을 calculateFinalStats 안으로 넘겨서 공격력% 같은 값이
     // 기초 스탯 곱연산에 제대로 들어가게 한다.
@@ -282,8 +285,12 @@ export function computeResults(
     const baseBuffs = [...activeBuffs, treeBuff];
     const chain = characterChains[character.id] ?? 0;
 
+    // 파티 버프의 비례분이 볼 준 사람 스탯 — 스탯창 값에, 이 공격에 켜 둔 발동 버프 중 그 사람에게도
+    // 닿는 것을 얹는다(린네가 켠 증폭 +40이 린네의 「서약」 추가 공격력에도 먹는다).
+    const itemOwnerPanels = ownerStatsWithBuffs(ownerPanels, itemBuffs);
+
     // 수치가 처음부터 정해져 있는 버프.
-    const base = manualBuffDelta(attack, itemBuffs, character.id, undefined, "base", ownerPanels);
+    const base = manualBuffDelta(attack, itemBuffs, character.id, undefined, "base", itemOwnerPanels);
 
     // 공명 효율 · 조화도 파괴 증폭 · 부조화 효율에 비례하는 버프는 그 세 수치가
     // 확정돼야 값이 나온다. 셋 다 공격력에 기대지 않으므로 한 번 계산해서 꺼내 오면 된다
@@ -303,7 +310,7 @@ export function computeResults(
       character.id,
       panelSource,
       "panel",
-      ownerPanels,
+      itemOwnerPanels,
     );
 
     const stats = calculateFinalStats(
@@ -315,14 +322,14 @@ export function computeResults(
       addStats(base, panel),
       // 같은 버프를 한 줄씩 남긴 것. 계산에는 위 증분을 쓰고, 이건 상세보기 내역용이다.
       [
-        ...buffContributions(attack, itemBuffs, character.id, undefined, "base", ownerPanels),
+        ...buffContributions(attack, itemBuffs, character.id, undefined, "base", itemOwnerPanels),
         ...buffContributions(
           attack,
           itemBuffs,
           character.id,
           panelSource,
           "panel",
-          ownerPanels,
+          itemOwnerPanels,
         ),
       ],
     );
@@ -336,13 +343,13 @@ export function computeResults(
       character.id,
       stats,
       "scaled",
-      ownerPanels,
+      itemOwnerPanels,
     );
     for (const key of Object.keys(scaled) as (keyof typeof scaled)[]) {
       if (scaled[key]) stats[key] += scaled[key];
     }
     stats.contributions.push(
-      ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", ownerPanels),
+      ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", itemOwnerPanels),
     );
 
     // 크리티컬이 아예 없는 공격(조화 파동 피해)은 장비 크리티컬을 타지 않는다 — 여기서 0으로 내린다.
@@ -359,7 +366,8 @@ export function computeResults(
     return {
       item,
       character,
-      ownerPanels,
+      // 버프 창 · 계산 JSON도 계산에 쓴 것과 같은 값을 보여야 한다.
+      ownerPanels: itemOwnerPanels,
       attack,
       skillCategory: (found.skill as { category?: SkillCategory }).category,
       activeBuffs,

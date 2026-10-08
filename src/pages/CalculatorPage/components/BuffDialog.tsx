@@ -320,6 +320,11 @@ export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
                         판정으로 전환
                       </em>
                     )}
+                    {buff.addsExtraHits ? (
+                      <em className="buff-cap" title="켜면 이 공격의 타수가 늘어납니다">
+                        +{buff.addsExtraHits}타
+                      </em>
+                    ) : null}
                     {cap && cap.bonus > 0 && (
                       <em className="buff-cap" title={cap.from.join(" · ")}>
                         {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}

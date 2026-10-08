@@ -565,8 +565,8 @@ const syncSkillAttacks: Attack[] = [
     element: "Spectro",
     scalingStat: "ATK",
     skillLevel: 10,
-    // 「조화 파동 · 간섭」 목표에게만 나가는 대응기다 — 조화 밀집 모드의 린네는 파동 · 이탈을
-    // 붙이지 못하므로 간섭도 서지 않는다. 그래서 조화 파동 모드 전용으로 못 박는다.
+    // 「조화 파동 · 간섭」 목표에게만 나가는 대응기다 — 조화 파동 모드일 때만 대응한다.
+    // 조화 밀집 모드에서는 나오지 않는다(modeVariants가 다른 모드 공격을 걸러 낸다).
     resonanceMode: "Discord",
     tune: "response",
     // 「조화 파동 피해」라 크리티컬이 붙지 않는다(에이메스 6체인이 켜지면 그 공격만 80% · 275%).

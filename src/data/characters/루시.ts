@@ -458,6 +458,10 @@ const liberationSkillAttacks: Attack[] = [
     id: "1004903_4",
     name: "스푸핑 프로그램 · 이동 제한 피해",
     type: "Ultimate",
+    // 원문: 「표기된 모든 목표에게 해킹 피해를 입히고」 — 대응기는 아니지만 해킹 피해라 같은 식으로 낸다.
+    tune: "damage",
+    tuneName: "해킹",
+    noCrit: true,
     element: "Spectro",
     scalingStat: "ATK",
     skillLevel: 10,
@@ -532,6 +536,10 @@ const circuitSkillAttacks: Attack[] = [
     id: "1004907_1",
     name: "해킹 대응 · 데이터 크래시 피해",
     type: "Ultimate",
+    // 「해킹 피해」는 「조화 파동 피해」와 이름만 다른 같은 갈래다 — 부조화 계수 기준이고 크리티컬이 없다.
+    tune: "response",
+    tuneName: "해킹",
+    noCrit: true,
     element: "Spectro",
     scalingStat: "ATK",
     skillLevel: 10,

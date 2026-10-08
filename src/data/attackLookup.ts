@@ -30,7 +30,8 @@ export function attackTypeOf(
   if (character) {
     for (const skill of character.skills) {
       const attack = skill.attacks.find((a) => a.id === attackId);
-      if (attack) return attack.type;
+      // 이상 효과로 계산하는 캐릭터 공격(에이메스 · 불꽃의 합주 폭발)도 분류가 없다.
+      if (attack) return attack.anomaly ? undefined : attack.type;
     }
   }
 

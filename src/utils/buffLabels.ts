@@ -72,6 +72,9 @@ export const DAMAGE_TYPE_LABEL: Record<string, string> = {
  */
 export const TUNE_DAMAGE_LABEL = "조화 파동";
 
+/** 그 공격의 판정 이름. 「해킹 피해」처럼 이름만 다른 같은 갈래는 공격에 적힌 이름(tuneName)을 쓴다. */
+export const tuneLabelOf = (attack: { tuneName?: string }) => attack.tuneName ?? TUNE_DAMAGE_LABEL;
+
 /** 공격 목록에서 「조화 파동 대응」 공격을 따로 세우는 구역 이름. */
 export const TUNE_RESPONSE_SECTION = "조화도 파괴 대응";
 

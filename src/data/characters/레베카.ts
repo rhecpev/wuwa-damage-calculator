@@ -490,6 +490,10 @@ const circuitSkillAttacks: Attack[] = [
     id: "1004807_3",
     name: "해킹 대응 · 멜트다운 피해",
     type: "Ultimate",
+    // 「해킹 피해」는 「조화 파동 피해」와 이름만 다른 같은 갈래다 — 부조화 계수 기준이고 크리티컬이 없다.
+    tune: "response",
+    tuneName: "해킹",
+    noCrit: true,
     element: "Electro",
     scalingStat: "ATK",
     skillLevel: 10,

@@ -19,7 +19,7 @@ import { DeleteDialog } from "../../../components/Feedback";
 import type { DeleteAsk } from "../../../components/Feedback";
 import {
   DAMAGE_TYPE_LABEL,
-  TUNE_DAMAGE_LABEL,
+  tuneLabelOf,
   TUNE_RESPONSE_SECTION,
 } from "../../../utils/buffLabels";
 import { isExtraAttack } from "./AttackPaletteSection";
@@ -73,7 +73,7 @@ function damageTypeOf(result: CalculationResult): { key: string; label: string }
   if (result.damage.kind === "anomaly") return { key: "anomaly", label: "이상 효과 피해" };
   if (result.damage.kind === "discord") return { key: "discord", label: "조화도 파괴 피해" };
   // 「조화 파동 피해」는 Ultimate 칸을 빌려 담은 것이라 그대로 적으면 「궁극기 피해」가 된다.
-  if (result.attack.tune) return { key: "tune", label: `${TUNE_DAMAGE_LABEL} 피해` };
+  if (result.attack.tune) return { key: "tune", label: `${tuneLabelOf(result.attack)} 피해` };
   // 「해당 피해는 ○○ 피해로 적용된다」처럼 판정이 따로 적힌 공격은 그 판정을 적는다.
   const type = result.attack.damageBonusType ?? result.attack.type;
   return { key: type, label: `${DAMAGE_TYPE_LABEL[type] ?? type} 피해` };

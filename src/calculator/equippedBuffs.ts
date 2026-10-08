@@ -172,6 +172,8 @@ export function deriveCharacterBuffs(
         ...(template.switchesDamageBonusType
           ? { switchesDamageBonusType: template.switchesDamageBonusType }
           : {}),
+        // 켜면 그 공격의 타수가 늘어나는 버프(에이메스 「별조각의 공진」)
+        ...(template.addsExtraHits ? { addsExtraHits: template.addsExtraHits } : {}),
         ...(template.maxValue !== undefined ? { maxValue: template.maxValue } : {}),
         // 카드의 발수만큼 발마다 스택이 오르는 버프(모르테피 「자유로운 리듬」)
         ...(template.rampsWithRepeat ? { rampsWithRepeat: true } : {}),
