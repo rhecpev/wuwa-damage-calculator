@@ -28,6 +28,13 @@ export type ChangeDay = {
 
 export const CHANGELOG: ChangeDay[] = [
   {
+    date: "2026-10-11",
+    title: "매트릭스 S2 단계3 체력 · 점수",
+    items: [
+      { kind: "new", text: "매트릭스 S2 단계3 몬스터 체력 · 점수 — 1라운드 실측(일반 몬스터 4,680점 · 미믹 6,666점)에 맞추고, 체력과 2 ~ 4라운드는 단계2 표를 따른다. 시뮬레이터가 단계3에서도 끝까지 돈다" },
+    ],
+  },
+  {
     date: "2026-10-09",
     title: "조화도 파괴 대응 구역 · 조화 파동 피해 표시",
     items: [
