@@ -1,0 +1,588 @@
+/* 대미지 계산 2 — wuwalab.com 로테이션 화면을 본뜬 꼴.
+   전부 .c2 안에서만 먹는다. 원본 계산 탭과 다른 탭은 건드리지 않는다.
+
+   본뜬 것: 어둡고 채도가 낮은 면, 1px 테두리와 거의 각진 모서리, 금색 강조,
+   모노 글꼴의 작은 대문자 라벨, 한 대가 한 줄인 촘촘한 표, 오른쪽 요약 판. */
+
+/* ── 색 ──────────────────────────────────────────────────────
+   앱의 색 변수(--c-*)를 그대로 받아 쓴다 — 다크 · 라이트 · 세피아 · 미드나잇 어느 테마든 그 테마 색을 따른다.
+   사이트에서 본뜬 것은 색이 아니라 꼴(표 · 각진 모서리 · 라벨)뿐이다. */
+.c2,.c2-pop,.c2-nav{
+  --c2-bg:var(--c-242a39);--c2-surface:var(--c-282f41);--c2-surface-2:var(--c-2a3246);
+  --c2-border:var(--c-384155);--c2-border-2:var(--c-4a5266);
+  --c2-accent:var(--c-e8c66a);--c2-text:var(--c-e9edf5);--c2-muted:var(--c-9aa3b3);--c2-dim:var(--c-6d7689);
+  /* 숫자 · 라벨용. 한글은 모노 글꼴에 없어 뭉개지므로 바로 뒤에 본문 글꼴을 세운다. */
+  --c2-mono:"IBM Plex Mono","Cascadia Mono",Consolas,"Malgun Gothic","Apple SD Gothic Neo",system-ui,sans-serif;
+  --c2-r:2px;
+}
+
+/* ── 바탕 ────────────────────────────────────────────────────
+   본문(.app)의 여백까지 이 탭의 바탕색으로 덮는다. */
+.c2{margin:-20px -24px 0;padding:20px 24px 28px;background:var(--c2-bg);color:var(--c2-text)}
+/* 바탕이 화면 아래까지 닿게 — 높이를 어림수(100vh - 150px)로 박으면 위 막대 · 꼬리말 · 여백 합과 어긋나
+   내용이 짧아도 30px쯤 넘쳐 세로 스크롤이 생겼다. 본문을 화면 높이의 세로 줄로 두고 남는 높이를 .c2가 먹는다. */
+.app:has(>.c2){display:flex;flex-direction:column;min-height:100vh}
+.app>.c2{flex:1 0 auto}
+@media(max-width:900px){.c2{margin:-12px -14px 0;padding:14px 14px 24px}}
+
+/* 제목 줄 — 금색 마름모와 자간을 벌린 이름. */
+.c2-title{display:flex;align-items:baseline;gap:12px;margin:0 0 14px;padding-bottom:12px;border-bottom:1px solid var(--c2-border)}
+.c2-title h1{margin:0;font-size:15px;font-weight:700;letter-spacing:.14em}
+.c2-title h1::before{content:"◆";margin-right:10px;color:var(--c2-accent);font-size:11px;vertical-align:1px}
+.c2-title em{font:400 11px var(--c2-mono);font-style:normal;letter-spacing:.16em;text-transform:uppercase;color:var(--c2-dim)}
+
+/* ── 안쪽 컴포넌트 공통 ──────────────────────────────────────
+   둥근 판을 각지게 펴고, 판 제목을 작은 라벨로 줄인다. */
+.c2 .panel{padding:14px 16px;border-radius:var(--c2-r);box-shadow:none}
+.c2 .calc-party-bar>.panel{padding:12px 14px}
+.c2 .panel h2,
+.c2 .calc-party-bar .party-head h2,
+.c2 .calc-party-bar>.panel>h2{margin:0 0 12px;font-size:12px;font-weight:700;letter-spacing:.14em;color:var(--c2-text)}
+.c2 .panel h2::before{content:"";display:inline-block;width:5px;height:5px;margin-right:9px;background:var(--c2-accent);transform:rotate(45deg);vertical-align:2px}
+/* 남은 둥근 모서리를 전부 편다 — 알약 단추 · 동그란 얼굴 · 딱지까지. 원본 규칙마다 따로 이기려 들지 않고 한 줄로 누른다.
+   .c2-pop은 화면 위에 뜨는 창(계산식)이다. body에 그려져 .c2 밖에 놓이므로 같은 규칙을 따로 건다. */
+:is(.c2,.c2-pop) :is(*,*::before,*::after){border-radius:var(--c2-r)!important}
+.c2 .viz-toggle{padding:5px 11px;font-size:11px;letter-spacing:.04em}
+/* 파티 자리 — 위에 줄을 얹는다(사이트의 캐릭터 칸). */
+.c2 .party article{border-top:2px solid var(--c2-border-2)}
+.c2 .party article:hover{border-top-color:var(--c2-accent)}
+
+/* ── 사이클 표 + 오른쪽 자리 ─────────────────────────────── */
+.c2-grid{position:relative;display:grid;grid-template-columns:minmax(0,1fr) var(--side-w,clamp(420px,36vw,720px));gap:14px;align-items:start;margin-top:14px}
+.c2-rot{min-width:0;background:var(--c2-surface);border:1px solid var(--c2-border);border-radius:var(--c2-r)}
+.c2-rot-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;padding:10px 12px;border-bottom:1px solid var(--c2-border)}
+.c2-rot-bar h2{margin:0;font-size:12px;font-weight:700;letter-spacing:.14em}
+.c2-rot-bar h2::before{content:"";display:inline-block;width:5px;height:5px;margin-right:9px;background:var(--c2-accent);transform:rotate(45deg);vertical-align:2px}
+.c2-rot-bar .rotation-tools{margin-left:auto;gap:6px}
+.c2-rot .cycle-save{margin:10px 12px 0}
+.c2-rot .cycle-saved{margin:8px 12px 0}
+
+/* 캐릭터 고르개 — 누른 캐릭터의 줄만 밝게 남긴다. 아래 줄이 그 캐릭터 색이다. */
+.c2-who{display:flex;flex-wrap:wrap;gap:6px}
+.c2-who button{display:inline-flex;align-items:center;gap:6px;padding:3px 9px 3px 4px;font-size:12px;cursor:pointer;
+  color:var(--c2-muted);background:none;border:1px solid var(--c2-border);border-bottom:2px solid var(--who)}
+.c2-who button:hover{color:var(--c2-text);border-color:var(--c2-border-2);border-bottom-color:var(--who)}
+.c2-who button.on{color:var(--who);background:color-mix(in srgb,var(--who) 14%,transparent);border-color:var(--who);font-weight:700}
+.c2-who img{width:20px;height:20px;border-radius:2px;object-fit:cover}
+.c2-who span{font:400 11px var(--c2-mono);color:var(--c2-dim)}
+
+/* 표 — 줄 높이를 낮게, 숫자는 모노 글꼴로 오른쪽에 맞춘다.
+   길어지면 표만 스스로 스크롤하고 머리 줄은 위에 붙는다(아래 「공격 추가」가 화면 밖으로 밀리지 않게). */
+.c2-table{height:var(--table-h,max(320px,calc(100vh - 330px)));overflow:auto;font-size:12px}
+.c2-tr{display:grid;grid-template-columns:36px 128px minmax(190px,1fr) 124px 100px 112px;align-items:center;min-width:690px}
+.c2-tr>span{min-width:0;padding:0 8px}
+.c2-tr .r{text-align:right}
+.c2-th{position:sticky;top:0;z-index:2;min-height:28px;background:var(--c2-surface);border-bottom:1px solid var(--c2-border-2);
+  font:500 11px var(--c2-mono);letter-spacing:.1em;color:var(--c2-dim)}
+.c2-row{min-height:30px;border-bottom:1px solid var(--c2-border);cursor:pointer;outline:none}
+.c2-row:hover{background:var(--c2-surface-2)}
+.c2-row:focus-visible{box-shadow:inset 0 0 0 1px var(--c2-border-2)}
+.c2-row.selected{background:color-mix(in srgb,var(--c2-accent) 11%,transparent);box-shadow:inset 2px 0 0 var(--c2-accent)}
+.c2-row.dim{opacity:.32}
+.c2-row.dragging{opacity:.4}
+.c2-row.over{box-shadow:inset 0 2px 0 var(--c2-accent)}
+/* 공명 해방 줄은 그 캐릭터 색으로 통째로 물들인다 — 표를 훑을 때 사이클의 마디가 된다. */
+.c2-row.kind-liberation{background:color-mix(in srgb,var(--who) 13%,transparent)}
+.c2-row.kind-liberation .c2-skill b{color:var(--who);font-weight:700}
+.c2-row.kind-liberation.selected{background:color-mix(in srgb,var(--c2-accent) 20%,transparent)}
+
+.c2-num{font:400 11px var(--c2-mono);color:var(--c2-dim);text-align:right}
+/* 캐릭터 칸 — 왼쪽 줄과 옅은 바탕이 그 캐릭터 색이다. */
+.c2-tr>.c2-char{align-self:stretch;display:flex;align-items:center;gap:7px;font-weight:700;color:var(--who);white-space:nowrap;overflow:hidden;
+  background:color-mix(in srgb,var(--who) 9%,transparent);border-left:2px solid var(--who)}
+.c2-char img{width:20px;height:20px;flex:none;border-radius:2px;object-fit:cover}
+.c2-tr>.c2-skill{display:flex;flex-wrap:wrap;align-items:center;gap:3px 8px;padding-top:3px;padding-bottom:3px}
+.c2-skill b{font-weight:500;color:var(--c2-text);word-break:keep-all}
+.c2-extra{font:400 11px var(--c2-mono);font-style:normal;padding:0 5px;color:var(--c-efe6ff);background:var(--c-7a63a2);border-radius:2px;white-space:nowrap}
+.c2-skill .card-stack input{width:44px;padding:1px 4px;font-family:var(--c2-mono);font-size:11px}
+.c2-skill .card-stack em{font-size:11px}
+
+/* 피해 타입 딱지 — 사이트의 CANCEL 딱지처럼 각지고 테두리가 있다. 색은 갈래를 따른다. */
+.c2-type{display:inline-block;max-width:100%;padding:1px 6px;font:500 11px var(--c2-mono);font-style:normal;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;
+  --k:var(--c-a9c6e4);color:var(--k);background:color-mix(in srgb,var(--k) 12%,transparent);border:1px solid color-mix(in srgb,var(--k) 45%,transparent);border-radius:2px}
+.c2-type[data-kind="heavy"]{--k:var(--c-e0b482)}
+.c2-type[data-kind="skill"]{--k:var(--c-94d5b1)}
+.c2-type[data-kind="circuit"]{--k:var(--c-9ed0f0)}
+.c2-type[data-kind="liberation"]{--k:var(--c-eccf7c)}
+.c2-type[data-kind="intro"]{--k:var(--c-8fd6da)}
+.c2-type[data-kind="outro"]{--k:var(--c-e6a0c1)}
+.c2-type[data-kind="echo"]{--k:var(--c-c2cad8)}
+.c2-type[data-kind="anomaly"]{--k:var(--c-b3bcf0)}
+.c2-type[data-kind="discord"],.c2-type[data-type="tune"]{--k:var(--c-e69a9a)}
+
+.c2-dmg{font-family:var(--c2-mono);font-size:13px;font-weight:700;color:var(--c2-text);font-variant-numeric:tabular-nums}
+
+/* 줄 끝 단추 — 평소에는 흐리고, 줄에 올리거나 고르면 또렷해진다. */
+.c2-tr>.item-tools{padding:0 6px 0 4px}
+.c2-row .item-tools{gap:3px;opacity:.28;transition:opacity .12s}
+.c2-row:hover .item-tools,.c2-row.selected .item-tools,.c2-row:focus-within .item-tools{opacity:1}
+.c2-row .item-tools button{flex:none;width:21px;height:21px;border-radius:2px;background:none}
+
+/* 사이클 머리 — 표를 가로지르는 한 줄. 오른쪽에 그 사이클의 소계. */
+.c2-cycle{display:flex;align-items:center;gap:10px;min-width:690px;min-height:28px;padding:0 8px 0 10px;
+  background:var(--c2-bg);border-bottom:1px solid var(--c2-border-2)}
+.c2-cycle b{font:700 11px var(--c2-mono);letter-spacing:.1em;color:var(--c2-accent)}
+.c2-cycle span{font:400 11px var(--c2-mono);color:var(--c2-dim)}
+.c2-cycle .c2-cycle-sum{margin-left:auto;font-size:12px;font-weight:700;color:var(--c2-text)}
+.c2-cycle .cycle-copy{order:0;border-radius:2px;background:none}
+.c2-empty{padding:22px 14px;text-align:center;font-size:12px;color:var(--c2-dim)}
+
+/* ── 피해 분석 판에 합쳐 넣은 것 — 숫자 줄 · 공격별 막대 · 분류 표 ── */
+.c2-sum-stats{display:flex;flex-wrap:wrap;gap:8px 28px;margin:0 0 18px;padding:12px 14px;background:var(--c2-surface-2);border:1px solid var(--c2-border)}
+.c2-sum-stats em,.c2-sum-chart em,.c2-rot-total em{display:block;font:500 11px var(--c2-mono);font-style:normal;letter-spacing:.1em;color:var(--c2-dim)}
+.c2-sum-stats b{display:block;margin-top:3px;font:700 15px var(--c2-mono);color:var(--c2-text);font-variant-numeric:tabular-nums}
+.c2-sum-stats b.accent{font-size:19px;color:var(--c2-accent)}
+.c2-sum-stats small{font-size:11px;font-weight:400;color:var(--c2-muted)}
+.c2-sum-chart{margin-top:20px;padding-top:16px;border-top:1px solid var(--c2-border)}
+.c2-sum-chart svg{display:block;width:100%;height:96px;margin-top:8px;border-bottom:1px solid var(--c2-border-2)}
+.c2-bkd{width:100%;margin-top:18px;border-collapse:collapse;border-top:1px solid var(--c2-border);font:400 11px var(--c2-mono);font-variant-numeric:tabular-nums}
+.c2-bkd :is(th,td){padding:5px 8px;text-align:right;white-space:nowrap}
+.c2-bkd :is(th,td):first-child{padding-left:0;text-align:left;color:var(--c2-muted)}
+.c2-bkd td:last-child{padding-right:0;font-weight:700;color:var(--c2-text)}
+.c2-bkd th{padding-top:10px;font-size:11px;font-weight:700;letter-spacing:.04em;color:var(--who,var(--c2-dim));border-bottom:1px solid var(--who,var(--c2-border))}
+.c2-bkd th:last-child{padding-right:0}
+.c2-bkd td{color:var(--c2-muted)}
+.c2-bkd tbody tr:hover td{background:var(--c2-surface-2)}
+.c2-bkd tfoot td{border-top:1px solid var(--c2-border-2);font-weight:700;color:var(--who,var(--c2-text))}
+.c2-bkd tfoot td:last-child{color:var(--c2-accent)}
+/* 표 머리의 총 기대 피해 */
+.c2-rot-total{display:flex;align-items:baseline;gap:8px}
+.c2-rot-total b{font:700 15px var(--c2-mono);color:var(--c2-accent);font-variant-numeric:tabular-nums}
+
+/* ── 세부 탭 — 밑줄 탭 ───────────────────────────────────── */
+.c2 .calc-tabs{gap:24px;margin:20px 0 0;padding:0 2px;border-bottom:1px solid var(--c2-border)}
+.c2 .calc-tabs button{margin-bottom:-1px;padding:9px 0;font-size:12px;font-weight:700;letter-spacing:.12em;
+  color:var(--c2-dim);background:none;border:0;border-bottom:2px solid transparent;border-radius:0;box-shadow:none}
+.c2 .calc-tabs button:hover{color:var(--c2-text);background:none}
+.c2 .calc-tabs button.on{color:var(--c2-accent);background:none;border-bottom-color:var(--c2-accent)}
+.c2 .calc-tabs+.panel{margin-top:12px;border-top:1px solid var(--c-384155);border-radius:var(--c2-r)}
+
+/* 좁은 화면 — 오른쪽 자리를 표 아래로 내린다. */
+@media(max-width:1100px){
+  .c2-table{height:var(--table-h,60vh)}
+}
+
+/* 순위 줄의 막대 — 원본 규칙(.viz-bar-track{grid-column:1})이 막대를 첫 칸으로 끌어내려 줄이 둘로 갈린다. 제 칸에 앉힌다. */
+.c2 .viz-rank .viz-bar-track{grid-column:auto}
+
+/* ── 맨 위 줄 — 파티 구성 · 콘텐츠 선택 · 몬스터 설정을 한 줄 높이로 눕힌다 ──
+   원본은 카드를 세로로 쌓아 240px쯤 차지한다. 여기서는 칸마다 옆으로 늘어놓아 띠 두 줄로 줄인다
+   (폭이 넉넉하면 한 줄에 다 선다). 마크업은 그대로 두고 배치만 바꾼다. */
+.c2 .calc-party-bar{display:flex;flex-wrap:wrap;gap:6px}
+.c2 .calc-party-bar>.panel{flex:1 1 auto;display:flex;flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 14px;min-width:0;padding:5px 10px}
+.c2 .calc-party-bar>.panel>h2,
+.c2 .calc-party-bar .party-head h2,
+.c2 .calc-party-bar .party-half-head h2{min-height:0;margin:0;white-space:nowrap}
+
+/* 파티 구성 */
+.c2 .calc-party-bar .party-head{display:flex;align-items:center;gap:10px;min-height:0;margin:0}
+.c2 .calc-party-bar .party-load{padding:3px 9px;font-size:11px;white-space:nowrap}
+.c2 .calc-party-bar .party{flex:none;display:flex;gap:6px;min-height:0;counter-reset:slot}
+.c2 .calc-party-bar .party article{counter-increment:slot;flex-direction:row;align-items:center;gap:7px;min-height:30px;padding:1px 26px 1px 7px;border-top-width:1px;text-align:left;cursor:pointer}
+/* 「1번 캐릭터」 글자 대신 번호만 앞에 적는다. */
+.c2 .calc-party-bar .party article>small{display:none}
+.c2 .calc-party-bar .party article::before{content:counter(slot);font:700 11px var(--c2-mono);color:var(--c2-dim)}
+.c2 .calc-party-bar .party article img{width:24px;height:24px}
+.c2 .calc-party-bar .party article .party-sets img{width:13px;height:13px}
+.c2 .calc-party-bar .party-face{order:1}
+.c2 .calc-party-bar .party strong{order:2;font-size:12px;white-space:nowrap}
+.c2 .calc-party-bar .party-sets{order:3;margin:0;gap:3px}
+.c2 .calc-party-bar .party-sets i{width:18px;height:18px}
+.c2 .calc-party-bar .party-preset-name{order:4;max-width:110px;font-size:11px}
+.c2 .calc-party-bar .party-echo-preset{order:5;margin:0;padding:2px 6px;font-size:11px;white-space:nowrap}
+.c2 .calc-party-bar .party-empty{order:2;margin:0;font-size:11px;white-space:nowrap}
+.c2 .calc-party-bar .party-clear{top:50%;right:4px;transform:translateY(-50%);width:18px;height:18px}
+
+.c2 .calc-party-bar .enemy-elements{display:flex;flex-wrap:wrap;gap:4px;height:auto}
+.c2 .calc-party-bar .party-half .enemy-element,
+.c2 .calc-party-bar .enemy-field .enemy-element{flex-direction:row;flex-wrap:nowrap;align-content:normal;gap:5px;min-height:28px;padding:3px 9px;font-size:12px;white-space:nowrap}
+.c2 .calc-party-bar .enemy-res{flex-basis:auto}
+
+/* 몬스터 설정 */
+.c2 .calc-party-bar .enemy-grid{flex:1 1 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px 16px}
+.c2 .calc-party-bar .enemy-field{flex-direction:row;flex-wrap:wrap;align-items:center;gap:6px 8px}
+.c2 .calc-party-bar .enemy-field>small{font-size:11px;color:var(--c2-dim);white-space:nowrap}
+.c2 .calc-party-bar .enemy-icon{width:16px;height:16px}
+/* 속성 저항 안내는 접는다 — 같은 숫자가 콘텐츠 선택 칸에 이미 적혀 있다. 방어력 안내는 줄 끝에 남긴다. */
+.c2 .calc-party-bar .enemy-field:first-child .enemy-hint{display:none}
+.c2 .calc-party-bar .enemy-hint{font-size:11px;white-space:nowrap}
+.c2 .calc-party-bar .enemy-level{gap:8px}
+.c2 .calc-party-bar .enemy-level input[type=range]{flex:none;width:110px}
+.c2 .calc-party-bar .enemy-level-number{width:56px;padding:3px 6px;font-size:13px}
+.c2 .calc-party-bar .enemy-level-keys{flex-wrap:nowrap;gap:4px 10px}
+.c2 .calc-party-bar .enemy-level-group{gap:4px}
+.c2 .calc-party-bar .enemy-level-keys button{padding:3px 8px!important;font-size:11px!important}
+
+/* 한 줄에 다 세우려고 더 줄인 것 — 판 제목 둘과 레벨 막대를 접고(숫자 칸으로 충분하다), 칸 사이를 좁힌다.
+   콘텐츠 선택은 몬스터 판의 레벨 옆으로 옮겨 왔다(EnemySection). */
+/* 넘치면 칸이 아래로 접힌다(프리셋 이름 · 화음 세트가 붙어 길어진 경우, 좁은 화면). */
+.c2 .calc-party-bar>.panel{gap:6px 10px;padding:4px 8px}
+.c2 .calc-party-bar>.party-panel{flex:0 1 auto}
+.c2 .calc-party-bar>.panel>h2,.c2 .calc-party-bar .party-head h2{display:none}
+.c2 .calc-party-bar .party-preset-name.none{display:none}
+.c2 .calc-party-bar .enemy-level input[type=range]{display:none}
+.c2 .calc-party-bar .enemy-grid{gap:6px 12px}
+.c2 .calc-party-bar .enemy-field{flex-wrap:nowrap}
+.c2 .calc-party-bar .enemy-field .enemy-element{gap:4px;padding:3px 7px}
+.c2 .calc-party-bar .enemy-content .enemy-res{font-size:11px}
+
+/* 버프 직접 입력 — 입력칸 · 고르개 글자를 줄인다(원본은 브라우저 기본 크기에 가까워 표 옆에서 혼자 크다). */
+.c2 .buff-form :is(input,select){padding:6px 8px;font-size:12px}
+.c2 .buff-form label{gap:4px;font-size:11px}
+.c2 .buff-add{padding:6px 14px;font-size:12px}
+.c2 .buff-table :is(input,select){font-size:12px}
+.c2 .buff-stack{padding:3px 6px}
+
+/* 양식 칸을 똑같은 폭으로 나누면 긴 고르개(적용 방식 · 지속 · 범위)의 글자가 잘린다.
+   칸마다 제 내용만큼 폭을 잡게 하고, 글자를 적는 칸만 폭을 정해 준다. */
+.c2 .buff-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 10px}
+.c2 .buff-form label{flex:0 0 auto}
+.c2 .buff-form select{width:auto;max-width:100%}
+.c2 .buff-form input{width:84px}
+.c2 .buff-form input[type=text]{width:180px}
+.c2 .buff-add{flex:0 0 auto}
+
+/* ── 윗줄을 두 줄 높이로 — 왼쪽에 파티, 오른쪽 위에 속성 · 아래에 콘텐츠(와 레벨) ──
+   한 줄에 다 눕히면 폭이 빠듯해 프리셋 이름이 붙는 순간 접혔다. 두 줄 높이를 쓰되 자리를 정해 둔다.
+   위의 한 줄짜리 규칙들을 여기서 덮는다. */
+.c2 .calc-party-bar{flex-wrap:nowrap;align-items:stretch}
+.c2 .calc-party-bar>.party-panel{flex:0 0 auto;flex-wrap:nowrap}
+.c2 .calc-party-bar>.panel:not(.party-panel){flex:1 1 0;min-width:0}
+
+/* 파티 자리 — 얼굴이 두 줄을 다 쓰고, 오른쪽 위에 이름 · 아래에 화음 세트와 에코 프리셋. */
+/* 자리 높이가 고정이라, 옆 판이 더 높아지면 가운데에 세운다(늘이면 위로 붙는다). */
+.c2 .calc-party-bar .party{align-self:center}
+.c2 .calc-party-bar .party article{display:grid;grid-template-columns:auto auto auto minmax(0,1fr) auto;grid-template-rows:auto auto;
+  grid-template-areas:"num face name name name" "num face sets preset load";align-items:center;gap:2px 7px;min-height:52px;padding:4px 26px 4px 7px}
+.c2 .calc-party-bar .party article::before{grid-area:num}
+.c2 .calc-party-bar .party-face{grid-area:face}
+.c2 .calc-party-bar .party article img{width:40px;height:40px}
+.c2 .calc-party-bar .party article .party-sets img{width:13px;height:13px}
+.c2 .calc-party-bar .party strong{grid-area:name;font-size:13px}
+.c2 .calc-party-bar .party-sets{grid-area:sets}
+.c2 .calc-party-bar .party-preset-name,
+.c2 .calc-party-bar .party-preset-name.none{grid-area:preset;display:block;max-width:120px}
+.c2 .calc-party-bar .party-echo-preset{grid-area:load}
+.c2 .calc-party-bar .party-empty{grid-area:1 / 2 / 3 / 6;padding-right:20px}
+
+/* 오른쪽 — 속성 · 콘텐츠 · 레벨이 한 줄에 서고, 판 높이는 왼쪽 파티 판과 같다(세로 가운데).
+   폭이 모자라면 칸 단위로 다음 줄로 넘어간다. */
+.c2 .calc-party-bar .enemy-grid{align-content:center;gap:5px 14px}
+
+/* 좁은 화면 — 파티를 위로 올리고 몬스터 설정을 그 아래에 둔다. */
+@media(max-width:1100px){
+  .c2 .calc-party-bar{flex-wrap:wrap}
+  .c2 .calc-party-bar>.party-panel{flex:1 1 100%;flex-wrap:wrap}
+  .c2 .calc-party-bar>.panel:not(.party-panel){flex:1 1 100%}
+}
+
+/* 파티 자리 크기를 못 박는다 — 캐릭터를 앉히거나 프리셋을 불러올 때마다 칸 폭이 이름 길이를 따라 출렁이지 않게.
+   빈 자리도 같은 크기다. 넘치는 이름 · 프리셋 이름은 말줄임으로 자르고 전체는 툴팁에 남는다. */
+.c2 .calc-party-bar .party article{box-sizing:border-box;width:216px;height:54px;min-height:0;overflow:hidden}
+.c2 .calc-party-bar .party strong{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.c2 .calc-party-bar .party-preset-name,
+.c2 .calc-party-bar .party-preset-name.none{max-width:none;min-width:0}
+@media(max-width:1100px){.c2 .calc-party-bar .party{flex:1 1 auto}.c2 .calc-party-bar .party article{flex:1 1 0;width:auto;min-width:0}}
+
+/* 버프 창 머리 — 공격 이름 아래에 트리거 딱지(부여는 초록, 소모는 붉은색). 많으면 여러 줄로 접힌다. */
+.c2-head-line{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0}
+.c2-trigs{display:inline-flex;flex-wrap:wrap;gap:4px}
+.c2-trig{display:inline-flex;align-items:center;gap:5px;padding:1px 6px;font-size:11px;font-style:normal;white-space:nowrap;color:var(--c-c2c9d6);background:var(--c-262d3f);border:1px solid var(--c-3c455c)}
+.c2-trig em{font-style:normal;font-size:11px;font-weight:700;letter-spacing:.06em}
+.c2-trig small{font:400 11px var(--c2-mono);color:var(--c2-dim)}
+.c2-trig.add{border-color:var(--c-3d5f47)}
+.c2-trig.add em{color:var(--c-7fc08a)}
+.c2-trig.use{border-color:var(--c-7a4a52)}
+.c2-trig.use em{color:var(--c-f08a9a)}
+
+/* 크기 손잡이 — 표 아래 경계(높이)와 표 · 버프 창 사이 경계(너비). 끌어서 바꾸고 두 번 누르면 원래대로(GridResizers).
+   세로 손잡이는 두 칸 사이 틈(14px)에 놓인다. 버프 창 너비와 같은 변수로 자리를 잡아 칸이 움직이면 따라간다. */
+.c2-resizer{touch-action:none;transition:background .12s}
+.c2-resizer:hover,.c2-resizer.dragging{background:var(--c2-border-2)}
+/* 높이 손잡이는 줄 전체 폭으로 깔고 가운데에 쥐는 자리를 그려 둔다 — 얇은 선만 있으면 어디를 잡는지 안 보인다. */
+.c2-resizer-height{grid-column:1 / -1;position:relative;height:12px;margin-top:-8px;cursor:row-resize}
+.c2-resizer-height::after{content:"";position:absolute;left:50%;top:4px;width:64px;height:4px;margin-left:-32px;background:var(--c2-border-2)}
+.c2-resizer-height:hover::after,.c2-resizer-height.dragging::after{background:var(--c2-accent)}
+
+/* ── 체크박스 — 브라우저 기본 모양(파란 둥근 칸)을 버리고 이 탭의 꼴로 그린다 ──
+   빈 칸은 테두리만, 켜면 강조색으로 채우고 어두운 체크를 얹는다. 버프 창과 버프 직접 입력 표에 쓰인다.
+   체크는 그림(data URI)이라 변수를 못 받아 색을 못 박았다 — 강조색이 어느 테마에서든 금색 계열이라 어두운 선이 읽힌다. */
+:is(.c2,.c2-pop) input[type=checkbox]{appearance:none;-webkit-appearance:none;flex:none;width:15px;height:15px;margin:0;padding:0;vertical-align:middle;cursor:pointer;
+  background:var(--c2-surface-2) center / 11px 11px no-repeat;border:1px solid var(--c2-border-2);transition:background-color .1s,border-color .1s}
+:is(.c2,.c2-pop) input[type=checkbox]:hover{border-color:var(--c2-accent)}
+:is(.c2,.c2-pop) input[type=checkbox]:focus-visible{outline:1px solid var(--c2-accent);outline-offset:2px}
+:is(.c2,.c2-pop) input[type=checkbox]:checked{background-color:var(--c2-accent);border-color:var(--c2-accent);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.2 6.3 4.9 9l4.9-5.8' fill='none' stroke='%2315171c' stroke-width='1.9' stroke-linecap='square'/%3E%3C/svg%3E")}
+/* 섞인 상태(여러 줄을 골랐는데 일부만 켜짐) — 체크 대신 가로 줄. */
+:is(.c2,.c2-pop) input[type=checkbox]:indeterminate{background-color:var(--c2-surface-2);border-color:var(--c2-accent);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 6h7' fill='none' stroke='%23c9b178' stroke-width='2'/%3E%3C/svg%3E")}
+:is(.c2,.c2-pop) input[type=checkbox]:disabled{opacity:.45;cursor:default}
+:is(.c2,.c2-pop) input[type=checkbox]:disabled:hover{border-color:var(--c2-border-2)}
+
+/* ── 버프 카드의 스택 구역 — 스택이 있는 버프만 카드 오른쪽 끝에 세로 줄로 갈라 둔다 ──
+   위에 「스택」, 가운데에 − [숫자] +, 아래에 상한. 카드 높이를 다 써서 어느 카드든 같은 자리에 선다. */
+.c2 .buffs label>span:not(.c2-stack){flex:1;min-width:0}
+.c2 .buffs .c2-stack{flex:none;align-self:stretch;align-items:center;justify-content:center;gap:3px;margin:-11px -11px -11px 0;padding:6px 9px;
+  background:var(--c2-surface);border-left:1px solid var(--c2-border);cursor:default}
+.c2 .buffs .c2-stack>em{font:700 11px var(--c2-mono);font-style:normal;letter-spacing:.14em;color:var(--c2-dim)}
+.c2 .buffs .c2-stack>small{font:400 11px var(--c2-mono);color:var(--c2-dim)}
+.c2 .buffs .c2-stack-row{flex-direction:row;align-items:stretch;gap:0}
+.c2 .buffs .c2-stack-row button{width:20px;padding:0;font-size:13px;line-height:1;cursor:pointer;color:var(--c2-muted);background:var(--c2-surface-2);border:1px solid var(--c2-border-2)}
+.c2 .buffs .c2-stack-row button:hover:not(:disabled){color:var(--c2-accent);border-color:var(--c2-accent)}
+.c2 .buffs .c2-stack-row button:disabled{opacity:.35;cursor:default}
+.c2 .buffs .c2-stack-row select{min-width:40px;margin:0 -1px;padding:2px 2px;font:700 12px var(--c2-mono);text-align:center;text-align-last:center;
+  color:var(--c2-text);background:var(--c2-surface-2);border:1px solid var(--c2-border-2)}
+.c2 .buffs label.on .c2-stack-row select{color:var(--c2-accent)}
+
+/* ── 버프 창 — 고른 줄 바로 아래에 열린다 ──────────────────────
+   예전에는 표 오른쪽에 따로 붙어 있었다. 지금은 표 안에서 그 줄 밑으로 펼쳐지고, 왼쪽 줄이 그 캐릭터 색이다.
+   원본 버프 창은 화면에 떠 있는 것(position:fixed)이라 흐름으로 풀어 준다. 폭이 넓으니 버프 카드를 여러 칸으로 늘어놓는다.
+   표가 좌우로 스크롤돼도 창은 보이는 폭에 맞춰 붙어 있는다(sticky). */
+.c2-inline{position:sticky;left:0;width:100%;max-width:100%;padding:8px 10px 10px 12px;background:var(--c2-bg);
+  border-bottom:1px solid var(--c2-border-2);border-left:2px solid var(--who,var(--c2-accent))}
+.c2-inline .buff-dialog{position:static;transform:none;width:100%;max-height:min(56vh,520px);min-height:0;box-shadow:none}
+.c2-inline .buffs{grid-template-columns:repeat(auto-fill,minmax(300px,1fr));align-items:start}
+.c2-hint{margin:0;padding:7px 12px;font-size:11px;line-height:1.5;color:var(--c2-dim);border-top:1px solid var(--c2-border)}
+
+/* ── 표 오른쪽 자리 — 공격 추가 ───────────────────────────────
+   사이클 구성 판과 높이를 똑같이 맞춘다 — 줄 높이는 왼쪽 표가 정하고(높이 0으로 두어 줄을 밀어 올리지 않는다),
+   이 자리는 그 높이를 다 채운 뒤 넘치는 만큼만 안에서 스크롤한다. 폭이 좁으니 단추 · 여백을 줄여 담는다.
+   캐릭터 셋이 세로 칸 셋으로 서는 것은 원본 그대로다(칸마다 그 캐릭터의 공격). */
+.c2-side{align-self:stretch;min-width:0;height:0;min-height:100%;overflow-y:auto}
+.c2-side>.panel{min-height:100%;margin-top:0;padding:10px 12px}
+.c2-side .panel-head{margin-bottom:10px}
+.c2-side .palette-grid{min-width:0;gap:8px}
+.c2-side .palette-column-head{gap:8px;padding:5px 8px}
+.c2-side .palette-column-head img,.c2-side .palette-column-blank{width:28px;height:28px}
+.c2-side .palette-group{gap:6px;padding:8px}
+.c2-side .palette-group-head img,.c2-side .palette-group-icon-blank{width:22px;height:22px}
+.c2-side .palette{gap:4px}
+.c2-side .palette button{padding:4px 8px;font-size:12px}
+.c2-side .palette-sub{margin-top:4px;padding-left:7px}
+.c2-resizer-side{position:absolute;z-index:3;top:0;bottom:16px;right:calc(var(--side-w,clamp(420px,36vw,720px)) + 3px);width:8px;cursor:col-resize}
+.c2-resizer-side::after{content:"";position:absolute;top:50%;left:2px;width:4px;height:48px;margin-top:-24px;background:var(--c2-border-2)}
+.c2-resizer-side:hover::after,.c2-resizer-side.dragging::after{background:var(--c2-accent)}
+/* 좁은 화면 — 공격 추가를 표 아래로 내린다. */
+@media(max-width:1100px){
+  .c2-grid{grid-template-columns:minmax(0,1fr)}
+  .c2-side{height:auto;min-height:0;overflow:visible}
+  .c2-resizer-side{display:none}
+}
+
+/* 버프 창 머리의 + 단추와 그것이 띄우는 「버프 추가」 창. 창 안의 양식 판은 테두리를 벗겨 창과 한 장으로 붙인다. */
+.c2 .buff-dialog-head .c2-buff-add{font-size:17px;font-weight:700;color:var(--c2-accent)}
+.c2 .buff-dialog-head .c2-buff-add:hover{border-color:var(--c2-accent)}
+.c2-pop .c2-buff-add-modal{width:min(1180px,100%)}
+.c2-pop .c2-buff-add-modal>.panel{margin-top:14px;padding:0;background:none;border:0}
+.c2-pop .c2-buff-add-modal>.panel>.row{display:none}
+.c2-pop .buff-form{display:flex;flex-wrap:wrap;align-items:flex-end;gap:8px 10px}
+.c2-pop .buff-form label{flex:0 0 auto;gap:4px;font-size:11px}
+.c2-pop .buff-form :is(input,select){padding:6px 8px;font-size:12px}
+.c2-pop .buff-form select{width:auto;max-width:100%}
+.c2-pop .buff-form input{width:84px}
+.c2-pop .buff-form input[type=text]{width:180px}
+.c2-pop .buff-add{flex:0 0 auto;padding:6px 14px;font-size:12px}
+.c2-pop .buff-table :is(input,select){font-size:12px}
+
+/* 오른쪽 판을 한 줄에 세우려고 칸을 세로로 쌓는다 — 판 높이(파티 자리 54px)는 남고 폭이 모자라서다(1536 폭 화면 기준).
+   속성은 아이콘 위 · 이름 아래, 콘텐츠는 이름 위 · 저항 아래. 「속성」「콘텐츠」 라벨은 접는다(칸만 봐도 안다).
+   레벨은 라벨 · 숫자 · 고정 문구를 세로로 쌓는다. */
+.c2 .calc-party-bar .party article{width:196px}
+.c2 .calc-party-bar .enemy-grid{gap:5px 12px}
+.c2 .calc-party-bar .enemy-field:not(:last-child)>small{display:none}
+.c2 .calc-party-bar .enemy-elements{gap:3px}
+.c2 .calc-party-bar .party-half .enemy-element,
+.c2 .calc-party-bar .enemy-field .enemy-element{flex-direction:column;justify-content:center;gap:1px;min-height:46px;padding:3px 7px;font-size:11px;line-height:1.25}
+.c2 .calc-party-bar .enemy-content .enemy-res{font-size:11px}
+.c2 .calc-party-bar .enemy-field:last-child{flex-direction:column;flex-wrap:nowrap;align-items:flex-start;gap:2px}
+.c2 .calc-party-bar .enemy-field:last-child .enemy-hint{font-size:11px}
+.c2 .calc-party-bar .enemy-field:last-child{gap:1px}
+.c2 .calc-party-bar .enemy-field:last-child>small{line-height:1.1}
+.c2 .calc-party-bar .enemy-field:last-child .enemy-level-number{padding:1px 6px;font-size:12px}
+.c2 .calc-party-bar .enemy-field:last-child .enemy-hint{line-height:1.1}
+
+/* ── 사이클 보기 전환 — 카드 / 리스트 ──────────────────────────
+   토글은 머리 줄의 단추 묶음 맨 앞에 선다. 고른 쪽이 강조색으로 채워진다. */
+.c2-view{display:inline-flex;margin-right:6px}
+.c2-view button{padding:5px 11px;font-size:11px;letter-spacing:.04em;cursor:pointer;color:var(--c2-muted);background:var(--c2-surface-2);border:1px solid var(--c2-border-2)}
+.c2-view button+button{margin-left:-1px}
+.c2-view button:hover{color:var(--c2-text)}
+.c2-view button.on{position:relative;color:var(--c-242a39);background:var(--c2-accent);border-color:var(--c2-accent);font-weight:700}
+/* 리스트는 그릇이 줄 배치에 끼어들지 않게 한다. */
+.c2-rows{display:contents}
+/* 카드 — 원본 탭의 카드 판(.rotation: 옆으로 늘어놓고 접는다)을 그대로 쓴다. 표 안이라 안쪽 여백만 준다.
+   사이클 머리 · 버프 창 · 빈 안내는 한 줄을 통째로 차지해 카드 줄을 끊는다. */
+.c2-cards .rotation{min-height:0;padding:10px 12px 12px;align-content:flex-start}
+.c2-cards .rotation>:is(.c2-cycle,.c2-inline,.c2-empty){flex:0 0 100%;min-width:0}
+.c2-cards .rotation>.c2-cycle{margin:0 -12px;flex-basis:calc(100% + 24px);border-top:1px solid var(--c2-border)}
+.c2-cards .rotation>.c2-cycle:first-child{margin-top:-10px;border-top:0}
+.c2-cards .rotation>.c2-inline{position:static;margin:0 -12px;flex-basis:calc(100% + 24px);width:auto;max-width:none;border-top:1px solid var(--c2-border-2)}
+
+/* Ctrl · Shift를 누르고 있는 동안 버프 창을 감춘다(hidden 속성). 아래 규칙들이 display를 정해 둬서 따로 눌러 준다. */
+.c2-inline[hidden]{display:none!important}
+
+/* ══ 상자 걷어내기 ═══════════════════════════════════════════════
+   wuwalab과 나란히 세어 보니 지저분해 보이는 까닭은 색이 아니라 상자였다 — 같은 화면에 글자는 절반인데
+   사방 테두리 상자는 여덟 배, 단추는 열 배가 넘었다. 여기서는 구분을 테두리가 아니라 줄 · 여백 · 글자색으로 한다.
+   위에 쌓인 규칙들을 덮어쓰는 자리라 파일 맨 끝에 둔다. */
+
+/* 회색은 세 단계만 — 본문 · 보조 · 흐림. 원본은 비슷한 회색 다섯이 섞여 있어 위계가 안 보인다.
+   안쪽 컴포넌트가 쓰는 변수를 여기서 세 값으로 모은다(테마마다 값이 달라도 이름으로 따라간다). */
+.c2,.c2-pop,.c2-nav{
+  --c-c2c9d6:var(--c-e9edf5);
+  --c-9aa3b3:var(--c-a8b0bf);--c-949dae:var(--c-a8b0bf);
+  --c-8b95a8:var(--c-8791a4);--c-6d7689:var(--c-8791a4);
+  --c2-muted:var(--c-a8b0bf);--c2-dim:var(--c-8791a4);
+}
+
+/* ① 공격 추가 — 단추 테두리를 없애고 글자 목록으로. 올렸을 때만 바탕이 깔린다.
+   묶음(일반 공격 · 공명 스킬…)도 상자 대신 머리 아래 선 하나로 가른다. */
+.c2-side .palette-group{padding:0 0 6px;background:none;border:0}
+.c2-side .palette-group-head{padding-bottom:4px;border-bottom:1px solid var(--c2-border)}
+.c2-side .palette-group-head img,.c2-side .palette-group-icon-blank{background:none;border:0;padding:0}
+.c2-side .palette-count{padding:0;background:none;border:0;font-family:var(--c2-mono);color:var(--c2-dim)}
+.c2-side .palette-column-head{padding:0 0 6px;background:none;border:0;border-bottom:1px solid var(--c2-border-2)}
+.c2-side .palette{gap:0 2px}
+.c2-side .palette button{padding:3px 6px;color:var(--c2-text);background:none;border:1px solid transparent;text-align:left}
+.c2-side .palette button:hover{color:var(--c2-accent);background:var(--c2-surface-2)}
+.c2-side .palette button.attack-extra{color:var(--c-c6a3e0);background:none;border-color:transparent}
+.c2-side .palette button.attack-extra:hover{background:var(--c2-surface-2);border-color:transparent}
+.c2-side .palette-sub{border-left-color:var(--c2-border)}
+
+/* ② 줄 끝 도구 단추 — 줄에 올렸거나 골랐을 때만 보인다. 테두리도 없앤다. */
+.c2-row .item-tools{opacity:0}
+.c2-row .item-tools button{border-color:transparent}
+.c2-row .item-tools button:hover{background:var(--c2-surface)}
+
+/* ④ 피해 타입 — 테두리 딱지 대신 색 글자만. */
+.c2-type{padding:0;background:none;border:0}
+
+/* ⑤ 윗줄 — 파티 자리 · 속성 · 콘텐츠의 테두리를 빼고, 고른 것만 강조한다. */
+.c2 .calc-party-bar .party article{background:none;border-color:transparent}
+.c2 .calc-party-bar .party article:hover{background:var(--c2-surface-2);border-color:transparent}
+.c2 .calc-party-bar .party article.over{border-color:var(--c2-accent)}
+.c2 .calc-party-bar .party article+article{border-left-color:var(--c2-border)}
+.c2 .calc-party-bar .party-echo-preset{padding:0;background:none;border:0;color:var(--c2-dim);text-decoration:underline;text-underline-offset:2px}
+.c2 .calc-party-bar .party-echo-preset:hover{color:var(--c2-accent)}
+.c2 .calc-party-bar .party-sets i{background:none;border:0}
+.c2 .calc-party-bar .enemy-element:not(.on){background:none;border-color:transparent}
+.c2 .calc-party-bar .enemy-element:not(.on):hover{background:var(--c2-surface-2)}
+
+/* 사이클 표 머리 — 캐릭터 고르개는 밑줄만, 사이클 복제 · 삭제는 글자만. */
+.c2-who button{border-color:transparent;border-bottom-color:var(--who)}
+.c2-who button:hover{border-color:transparent;border-bottom-color:var(--who);background:var(--c2-surface-2)}
+.c2-cycle .cycle-copy{padding:2px 6px;border-color:transparent}
+.c2-cycle .cycle-copy:hover{background:none}
+
+/* 버프 창 — 카드 안 글자 크기를 세 계단에 맞춘다. */
+.c2-inline .buffs b{font-size:13px}
+.c2-inline .buffs small,.c2-inline .buff-cap{font-size:11px}
+.c2-inline .buff-amount{font-size:12px}
+
+/* ══ 「○○ 2」 탭들 — 같은 규칙을 입힌다 ═══════════════════════════
+   대미지 계산 2에서 한 것과 같은 다섯 가지다: 되풀이되는 칸의 테두리를 걷고(올렸을 때만 바탕),
+   줄마다 붙는 단추는 테두리 없이 글자로, 딱지는 색 글자로, 글자 크기는 11 · 12 · 13px 세 계단으로.
+   탭마다 상자가 가장 많이 나오는 것부터 골라 적었다(화면에서 세어 본 순서).
+   고른 것 · 켠 것(.on · .owned · .chip-active)의 테두리는 남긴다 — 그게 유일한 표시인 자리가 있어서다. */
+
+/* 얼굴 · 아이콘 그림의 테두리 — 어느 탭이든 그림마다 상자가 하나씩 더 생긴다. */
+.c2 :is(.char-list-pick,.party-slot,.matrix-slot,.echo-row-icon,.weapon-card-wearers,.cycle-list) img,
+.c2 :is(.advice-face,.nick-face,.char-head-face){border-color:transparent}
+
+/* 거르는 칩 · 속성 단추 — 고른 것만 테두리. */
+.c2 .chips .chip:not(.chip-active),
+.c2 .element-filter>button:not(.on),
+.c2 .echo-filters>button:not(.on){background:none;border-color:transparent}
+.c2 .chips .chip:not(.chip-active):hover,
+.c2 .element-filter>button:not(.on):hover,
+.c2 .echo-filters>button:not(.on):hover{background:var(--c2-surface-2)}
+
+/* ── 캐릭터 · 별명 — 오른쪽 캐릭터 목록과 스탯 표 ── */
+.c2 .char-list-item>button{background:none;border-color:transparent}
+.c2 .char-list-item>button:hover{background:var(--c2-surface-2)}
+.c2 .stat-bonus>div{background:none;border-color:transparent;border-bottom-color:var(--c2-border)}
+.c2 .char-level>b{font-size:13px}
+.c2 .nick-group>.nick-row{background:none;border-color:transparent;border-bottom-color:var(--c2-border)}
+.c2 .nick-row>input{background:none;border-color:transparent;border-bottom-color:var(--c2-border-2)}
+.c2 .nick-row>input:focus{border-color:var(--c2-accent)}
+.c2 .nick-name>em{font-size:11px}
+
+/* ── 무기 — 카드 68장. 가진 것만 테두리로 남긴다. ── */
+.c2 .weapon-card:not(.owned){background:none;border-color:transparent}
+.c2 .weapon-card:hover{background:var(--c2-surface-2)}
+.c2 .weapon-card-refine{background:none;border-color:transparent}
+
+/* ── 에코 — 카드 안의 단추와 딱지 ── */
+/* 복사 · 수정 · 삭제 — 테두리를 다 걷었더니 글자만 남아 단추로 안 보였다. 옅은 칸과 테두리를 남기고 올리면 금색. */
+.c2 .echo-row-tools>button{padding:3px 9px;font-size:11px;color:var(--c2-text);background:var(--c2-surface-2);border-color:var(--c2-border-2)}
+.c2 .echo-row-tools>button:hover{color:var(--c2-accent);border-color:var(--c2-accent)}
+.c2 .echo-row-tools>button.danger{color:var(--c-ffa3a3);background:none;border-color:var(--c-7a4a52)}
+.c2 .echo-row-tools>button.danger:hover{border-color:var(--c-c05a5a)}
+.c2 .echo-row-owner{border-color:transparent}
+.c2 .echo-row :is(span,b){font-size:11px}
+.c2 .echo-row .echo-row-name{font-size:13px}
+
+/* ── 파티 — 자리 칸과 줄마다 붙는 단추 ── */
+.c2 .party-list-slots>.party-slot{background:none;border-color:transparent}
+.c2 .party-list-slots>.party-slot:hover{background:var(--c2-surface-2)}
+.c2 .party-slot>.party-clear,
+.c2 .party-list-head>.party-list-remove{background:none;border-color:transparent}
+.c2 .party-list-head>.party-list-remove:hover{color:var(--c2-accent)}
+.c2 .party-list-card>.party-list-group,.c2 .panel-head>.party-add{font-size:12px}
+.c2 .party-list-head>.party-grip{font-size:13px}
+
+/* ── 사이클 — 저장 당시 수치 딱지와 줄 단추 ── */
+.c2 .cycle-row-facts>.cycle-fact{padding-left:0;background:none;border-color:transparent}
+/* 삭제 · 그래프 · 내용 보기 · 추출 — 에코 단추와 같은 까닭으로 칸과 테두리를 남긴다. 이름 고치기 연필만 글자로 둔다. */
+.c2 .cycle-row-actions>button:not(.primary){color:var(--c2-text);background:var(--c2-surface-2);border-color:var(--c2-border-2)}
+.c2 .cycle-row-actions>button:not(.primary):not(.danger):hover{color:var(--c2-accent);border-color:var(--c2-accent)}
+.c2 .cycle-row-actions>button.danger{color:var(--c-ffa3a3);background:none;border-color:var(--c-7a4a52)}
+.c2 .cycle-row-actions>button.danger:hover{border-color:var(--c-c05a5a)}
+.c2 .cycle-row-title>.cycle-rename{background:none;border-color:transparent}
+.c2 .cycle-fact>u{font-size:11px}
+.c2 .cycle-fact>b,.c2 .cycle-row-title>b{font-size:13px}
+
+/* ── 매트릭스 — 파티 자리 · 버프 딱지 · 줄 단추 ── */
+/* 횟수를 넘겨 쓴 자리(.over — 붉은 바탕)는 경고라 그대로 둔다. */
+.c2 .matrix-slots>.matrix-slot:not(.empty):not(.over){background:none;border-color:transparent}
+.c2 .matrix-slots>button.matrix-slot:not(.over):hover{background:var(--c2-surface-2)}
+.c2 .advice-buffs>.advice-buff{padding-left:0;background:none;border-color:transparent;font-size:11px}
+.c2 .advice-buff>b,.c2 .advice-buff>u{font-size:11px}
+.c2 button.matrix-drop{background:none;border-color:transparent;font-size:11px}
+.c2 button.matrix-drop:hover{color:var(--c2-accent)}
+.c2 .matrix-slot>b,.c2 .matrix-slot>i,.c2 .advice-who>em,.c2 .matrix-party>.matrix-cycles{font-size:11px}
+.c2 .advice-who>b,.c2 span.matrix-main{font-size:12px}
+
+/* ── 업데이트 내역 ── */
+.c2 .updates-tag{font-size:11px}
+.c2 .updates-card span:not(.updates-tag){font-size:13px}
+
+/* ══ 위 막대 — 「○○ 2」 탭에 있을 때(TabNavigation이 .c2-nav를 붙인다) ══════════
+   대미지 계산 2의 세부 탭(.calc-tabs)과 같은 꼴 — 둥근 알약 · 파란 발광 대신 밑줄 탭, 고른 탭은 금색 글자와 금색 밑줄.
+   이름표는 판 제목처럼 금색 마름모와 모노 글꼴 부제를 단다. */
+.sidebar.c2-nav{background:var(--c2-bg);border-bottom:1px solid var(--c2-border)}
+.sidebar.c2-nav .sidebar-brand b{font-size:13px;letter-spacing:.14em;color:var(--c2-text)}
+.sidebar.c2-nav .sidebar-brand b::before{content:"◆";margin-right:9px;color:var(--c2-accent);font-size:10px;vertical-align:1px}
+.sidebar.c2-nav .sidebar-brand em{padding-left:19px;font:400 10px var(--c2-mono);letter-spacing:.16em;color:var(--c2-dim)}
+
+/* 탭이 막대 높이를 다 써야 밑줄이 막대 아래 선에 붙는다. */
+.sidebar.c2-nav .sidebar-nav{align-self:stretch;align-items:stretch;gap:0;margin-bottom:-1px;overflow-y:hidden}
+.sidebar.c2-nav .sidebar-link{padding:0 10px;background:none;border:0;border-bottom:2px solid transparent;border-radius:0;box-shadow:none}
+.sidebar.c2-nav .sidebar-link:hover{background:var(--c2-surface-2)}
+.sidebar.c2-nav .sidebar-icon{color:var(--c2-dim)}
+.sidebar.c2-nav .sidebar-text b{font-size:12px;font-weight:700;letter-spacing:.06em;color:var(--c2-dim)}
+.sidebar.c2-nav .sidebar-link:hover .sidebar-text b{color:var(--c2-text)}
+.sidebar.c2-nav .sidebar-link.on{background:none;border-bottom-color:var(--c2-accent);box-shadow:none}
+.sidebar.c2-nav .sidebar-link.on :is(.sidebar-icon,.sidebar-text b){color:var(--c2-accent)}
+
+/* 테마 · 저장 단추 — 각지게, 올렸을 때만 테두리. */
+.sidebar.c2-nav :is(.theme-gear,.storage-icon,.sidebar-menu-button){border-radius:var(--c2-r)}
+.sidebar.c2-nav :is(.theme-toggle button.theme-gear,.storage-icon):hover{color:var(--c2-accent);border-color:var(--c2-border-2)}
+
+/* 세로 화면의 펼침 메뉴 — 탭이 세로로 서므로 밑줄 대신 왼쪽 줄로 고른 탭을 표시한다. */
+@media(orientation:portrait){
+  .sidebar.c2-nav .sidebar-menu-button{background:var(--c2-surface-2);border-color:var(--c2-border-2)}
+  .sidebar.c2-nav.open .sidebar-menu{background:var(--c2-bg);border-bottom-color:var(--c2-border)}
+  .sidebar.c2-nav.open .sidebar-link{margin:0;padding:8px 10px;border-bottom:0;border-left:2px solid transparent}
+  .sidebar.c2-nav.open .sidebar-link.on{border-left-color:var(--c2-accent);background:color-mix(in srgb,var(--c2-accent) 10%,transparent)}
+}

@@ -1,0 +1,485 @@
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
+import type { CalculationResult } from "../hooks/useCalculationResults";
+import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
+import {
+  anomalyStackCap,
+  statusStackCap,
+  appliesTo,
+  buffAmount,
+  DAMAGE_TYPE_OPTIONS,
+  TARGET_OPTIONS,
+} from "../../../calculator/manualBuffs";
+import type { ManualBuff } from "../../../types/game";
+import { autoBuffRecommendation } from "../../../data/autoBuffCandidates";
+import { characters } from "../../../data/sampleData";
+import { num } from "../../../utils/format";
+import { CopyJson } from "./CopyJson";
+import { TriggerTags } from "./TriggerTags";
+import { BuffSection } from "./BuffSection";
+
+/**
+ * scaleFrom 버프가 어느 스탯에서 수치를 가져오는지 — 목록에 그대로 적는다.
+ * BuffScaleStat 전부를 적어 둔다. 빠진 것이 있으면 「undefined × 0.1%」로 새어 나온다
+ * (「내려앉은 깃털의 노래」 5세트가 공명 효율 비례라 그렇게 보였다).
+ */
+const SCALE_LABEL: Record<string, string> = {
+  ATK: "공격력",
+  HP: "HP",
+  DEF: "방어력",
+  EnergyRegen: "공명 효율",
+  DiscordEfficiency: "부조화 효율",
+  SyncAmplify: "조화도 파괴 증폭",
+  CritRate: "크리티컬",
+};
+
+/** 버프 한 줄을 "적용 대상 · 피해 종류 · 방식"으로 요약한다. */
+function describe(buff: ManualBuff): string {
+  const target = TARGET_OPTIONS.find((o) => o.value === buff.target)?.label ?? buff.target;
+  const damage = DAMAGE_TYPE_OPTIONS.find((o) => o.value === buff.damageType)?.label ?? buff.damageType;
+  const how =
+    buff.target === "motionValue" ? (buff.modifier === "increase" ? "증가" : "상승") : "가산";
+  return `${target} · ${damage} · ${how}`;
+}
+
+/**
+ * 상한을 올려 준 줄의 이름에서 **캐릭터 이름만** 뽑는다.
+ * 라벨이 「데니아 · 조화 밀집 간섭 상한 +1 (파티에 있으면)」 꼴이라 그대로 이으면 줄이 길어진다.
+ */
+const capOwner = (label: string) => label.split(" · ")[0];
+
+/** 탭 id — 캐릭터 id와 겹치지 않게 밑줄을 붙인다. */
+const ALL_TAB = "__all";
+const SHARED_TAB = "__shared";
+
+interface BuffDialogProps {
+  /** 기준 카드 — 수치(버프량 · 스택 상한)는 이 공격 것으로 보여 준다. */
+  selected: CalculationResult;
+  /**
+   * 함께 고른 다른 공격들(다중선택). 있으면 **전부에 공통으로 걸리는 버프만** 띄우고,
+   * 체크 · 스택을 고른 공격 모두에 한꺼번에 적용한다.
+   */
+  peers?: CalculationResult[];
+  onClose: () => void;
+}
+
+/**
+ * 공격 루틴에서 카드를 누르면 옆에 뜨는 버프 창.
+ * 화면을 덮지 않도록 오른쪽에 붙는 패널로 그린다 — 루틴을 보면서 버프를 켜고 끌 수 있다.
+ */
+export function BuffDialog({ selected, peers = [], onClose }: BuffDialogProps) {
+  const { toggleBuff, setBuffStacks, allBuffs, config, autoBuffIdsFor } = usePartyConfig();
+  const targets = [selected, ...peers];
+  const multi = peers.length > 0;
+  // 앞 카드의 트리거로 저절로 켜진 것(수수의 반주 등). 손으로 끄면 이 카드에서만 빠진다.
+  const autoOn = autoBuffIdsFor(selected.item.id);
+  // 고른 탭 — 카드를 바꿔도 남겨 둔다. 한 캐릭터의 버프를 여러 카드에 걸쳐 보는 일이 잦아서다.
+  const [tab, setTab] = useState(ALL_TAB);
+
+  // 이 공격에 걸릴 수 있는 것만 남긴다. 분류·속성·개인 범위가 맞지 않는 버프는
+  // 켜도 계산에 안 들어가므로 목록에 띄우지 않는다.
+  // 상시 버프는 조건 없이 걸려 있어 손댈 일이 적다 — 조건부를 위로 두고 상시는 아래로 민다.
+  // 여러 장을 골랐으면 고른 공격 **모두**에 걸리는 것만 남긴다.
+  const usable = allBuffs
+    .filter((buff: ManualBuff) => targets.every((t) => appliesTo(buff, t.attack, t.character.id)))
+    .sort((a, b) => Number(a.uptime === "passive") - Number(b.uptime === "passive"));
+
+  /** 그 공격에서 이 버프가 켜져 있는지. */
+  const isOnFor = (target: CalculationResult, buff: ManualBuff) =>
+    buff.uptime === "passive"
+      ? !(target.item.disabledBuffIds?.includes(buff.id) ?? false)
+      : target.item.enabledBuffIds.includes(buff.id) ||
+        autoBuffIdsFor(target.item.id).has(buff.id);
+
+  /** 고른 공격 **전부**에서 켜져 있는지. 한 장만 골랐으면 그 공격의 상태다. */
+  const isOn = (buff: ManualBuff) => targets.every((t) => isOnFor(t, buff));
+  /** 일부에만 켜져 있는지 — 체크박스를 「일부」로 그린다. */
+  const isMixed = (buff: ManualBuff) => !isOn(buff) && targets.some((t) => isOnFor(t, buff));
+
+  /**
+   * 체크를 누르면 고른 공격 모두를 같은 상태로 맞춘다.
+   * 전부 켜져 있었으면 전부 끄고, 일부만 켜져 있거나 다 꺼져 있었으면 전부 켠다.
+   */
+  const toggleAll = (buff: ManualBuff) => {
+    const turnOn = !isOn(buff);
+    for (const t of targets) if (isOnFor(t, buff) !== turnOn) toggleBuff(t.item.id, buff.id);
+  };
+
+  // 캐릭터별 탭 — 파티 자리 순서대로, 주인 없는 버프는 「공용」으로 맨 뒤에 모은다.
+  const partyOrder = PARTY_SLOTS.map((slot) => config[slot].characterId);
+  const rank = (id: string) => {
+    if (id === "") return Infinity;
+    const at = partyOrder.indexOf(id);
+    return at === -1 ? partyOrder.length : at;
+  };
+  const ownerIds = [...new Set(usable.map((buff) => buff.ownerId ?? ""))].sort(
+    (a, b) => rank(a) - rank(b),
+  );
+  const tabs = [
+    { id: ALL_TAB, label: "전체", icon: undefined as string | undefined, list: usable },
+    ...ownerIds.map((id) => {
+      const owner = id ? characters.find((c) => c.id === id) : undefined;
+      return {
+        id: id || SHARED_TAB,
+        label: id ? (owner?.name ?? "파티에 없음") : "공용",
+        icon: owner?.iconUrl,
+        list: usable.filter((buff) => (buff.ownerId ?? "") === id),
+      };
+    }),
+  ];
+  const current = tabs.find((t) => t.id === tab) ?? tabs[0];
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+
+  // 「버프 추가」 창을 열었는지.
+  const [addOpen, setAddOpen] = useState(false);
+
+  // 고른 공격 모두에 같은 스택을 넣는다(상한은 공격마다 따로 잘린다).
+  const setStacksAll = (buffId: string, value: number) => {
+    for (const t of targets) setBuffStacks(t.item.id, buffId, value);
+  };
+
+  return (
+    <aside className="buff-dialog">
+      <div className="buff-dialog-head">
+        <div>
+          {multi ? (
+            <>
+              <small>고른 공격 {targets.length}개에 함께 적용할 버프</small>
+              <b>
+                {selected.attack.name} 외 {peers.length}개
+              </b>
+              <em>
+                공통으로 걸리는 버프 {usable.length}개 · 전부 켜둔 것 {usable.filter(isOn).length}개
+                — 수치는 「{selected.attack.name}」 기준
+              </em>
+            </>
+          ) : (
+            // 머리에는 공격 이름과 그 공격의 트리거(부여 · 소모) 딱지만 둔다.
+            <span className="c2-head-line">
+              <b>{selected.attack.name}</b>
+              <TriggerTags result={selected} />
+            </span>
+          )}
+        </div>
+        {/* 계산이 어긋나 보일 때 통째로 퍼서 보여주는 자리 — 버프 한 줄씩 수치까지 담긴다. */}
+        <span className="buff-dialog-tools">
+          {/* 계산 내역은 공격 하나의 것이라 여러 장을 골랐을 때는 내지 않는다. */}
+          {!multi && <CopyJson result={selected} allBuffs={usable} label="계산 JSON" />}
+          {/* 목록에 없는 버프를 손으로 보탠다 — 아래 「버프 직접 입력」 탭과 같은 양식을 창으로 띄운다. */}
+          <button
+            className="c2-buff-add"
+            title="버프 추가 — 목록에 없는 버프를 직접 입력합니다"
+            onClick={() => setAddOpen(true)}
+          >
+            +
+          </button>
+          <button onClick={onClose}>×</button>
+        </span>
+      </div>
+
+      {/* 버프 창은 스크롤되는 표 안에 있어서, 그 안에 그리면 창이 표 높이에 갇힌다. body로 빼서 그린다.
+          .c2-pop은 이 탭의 색 · 모서리 규칙이 따라오게 하는 껍데기다(calc2.css). */}
+      {addOpen &&
+        createPortal(
+          <div className="c2-pop">
+            <div
+              className="formula-backdrop"
+              role="presentation"
+              onClick={() => setAddOpen(false)}
+              onKeyDown={(event) => {
+                if (event.key === "Escape") setAddOpen(false);
+              }}
+            >
+              <div className="formula-modal c2-buff-add-modal" onClick={(event) => event.stopPropagation()}>
+                <div className="formula-head">
+                  <div>
+                    <small>BUFF</small>
+                    <h3>버프 추가</h3>
+                    <span>여기서 넣은 버프는 버프 목록에 바로 보태집니다.</span>
+                  </div>
+                  <button className="formula-close" onClick={() => setAddOpen(false)}>
+                    ×
+                  </button>
+                </div>
+                <BuffSection />
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
+    {/* 캐릭터 탭 — 버프 목록과 히트별 값 위를 가로질러 붙박이로 둔다. 넘치면 줄을 바꾼다. */}
+      {usable.length > 0 && (
+        <div className="buff-tabs" role="tablist">
+          {tabs.map((t) => (
+            <button
+              key={t.id}
+              role="tab"
+              aria-selected={t.id === current.id}
+              className={t.id === current.id ? "on" : ""}
+              onClick={() => setTab(t.id)}
+            >
+              {t.icon && <img src={t.icon} alt="" loading="lazy" />}
+              {t.label}
+              <em>
+                {t.list.filter(isOn).length}/{t.list.length}
+              </em>
+            </button>
+          ))}
+        </div>
+      )}
+    {/* 여러 장을 골랐을 때는 히트별 칸이 없다 — 버프 목록이 폭을 다 쓰게 한다. */}
+    <div className={multi ? "buff-dialog-split solo" : "buff-dialog-split"}>
+    <div className="buff-dialog-body">
+      {usable.length === 0 ? (
+        <p style={{ color: "var(--c-9ea7b7)", margin: 0 }}>
+          {allBuffs.length === 0
+            ? "버프 목록이 비어 있습니다. 위 「버프 직접 입력」에서 추가하거나 장착 무기 버프를 담아보세요."
+            : multi
+              ? "고른 공격 모두에 공통으로 걸리는 버프가 없습니다."
+              : "이 공격에 걸릴 수 있는 버프가 없습니다."}
+        </p>
+      ) : (
+        <div className="buffs">
+          {current.list.map((buff: ManualBuff) => {
+            // 상시 버프는 조건이 없어 기본으로 걸린다. 다만 「이게 얼마나 보태는지」를 보려고
+            // 잠깐 빼 보는 일이 잦아 끌 수 있게 열어 뒀다 — 끈 것은 그 공격에만 남는다.
+            const always = buff.uptime === "passive";
+            const off = selected.item.disabledBuffIds?.includes(buff.id) ?? false;
+            const auto = autoOn.has(buff.id);
+            const checked = isOn(buff);
+            const mixed = isMixed(buff);
+            // 스택형이면 이 공격에서 정한 스택을, 없으면 버프의 기본값을 쓴다.
+            // 이상 효과 스택을 그대로 쓰는 버프(암흑 효과의 방어력 감소 등)는 상한이 고정이 아니다
+            // — 치사의 반주처럼 상한을 올려주는 버프가 켜져 있으면 같이 올라간다.
+            // 상한을 올려주는 버프가 자동으로 켜졌을 수도 있다 — 계산 쪽과 같은 목록을 넘긴다.
+            const onIds = [...selected.item.enabledBuffIds, ...autoOn.keys()];
+            const cap = buff.anomalyStacks
+              ? anomalyStackCap(buff.anomalyStacks, allBuffs, onIds, selected.item.disabledBuffIds)
+              : null;
+            // 적에게 붙는 상태(조화 밀집 · 간섭)의 스택을 따르는 줄 — 상한이 파티 구성으로 정해진다.
+            // 누가 얼마나 올렸는지를 그대로 들고 있어 아래에서 이름까지 적는다.
+            const statusCap = buff.statusStacks
+              ? statusStackCap(buff.statusStacks, allBuffs, onIds, selected.item.disabledBuffIds)
+              : null;
+            const max = statusCap ? statusCap.max : cap ? cap.max : (buff.maxStacks ?? 1);
+            // 손으로 정한 스택이 없으면 트리거로 쌓인 자동 스택을 보여 준다(계산과 같은 규칙).
+            const stacks = Math.min(
+              selected.item.buffStacks?.[buff.id] ?? autoOn.get(buff.id) ?? buff.stacks,
+              max,
+            );
+            // scaleFrom 버프는 그때의 스탯에서 수치가 나온다 — 계산에 쓴 최종 스탯을 그대로 넘긴다.
+            // 파티 버프는 준 사람의 스탯을 보므로 파티 전원의 스탯창도 함께 넘긴다.
+            const amount = buffAmount(buff, stacks, selected.stats, selected.ownerPanels);
+            // 퍼센트가 아니라 수치 그대로 더해지는 자리
+            const isPoint = buff.target === "syncAmplify" || buff.target === "atkFlat";
+            const owner = buff.ownerId
+              ? characters.find((c) => c.id === buff.ownerId)
+              : undefined;
+
+            // 자료에 조건이 「○○ 발동 후 N초」로 적혀 있는데 아직 자동 발동을 안 건 줄 —
+            // 배경색을 달리해 「이건 루틴이 대신 켜 줄 수 있다」를 그 자리에서 보이게 한다
+            // (data/autoBuffCandidates.ts. 목록만 보려면 npm run report:autobuffs).
+            const recommended = buff.triggeredBy?.length ? null : autoBuffRecommendation(buff.id);
+
+            return (
+              <label
+                key={buff.id}
+                className={[checked ? "on" : "", mixed ? "mixed" : "", recommended ? "rec" : ""]
+                  .filter(Boolean)
+                  .join(" ")}
+                title={
+                  recommended
+                    ? `자동 발동 후보 — 「${recommended.condition}」이라 ` +
+                      `${recommended.kinds.map((k) => k.key).join(" · ")}를 루틴에 담으면 대신 켤 수 있습니다`
+                    : undefined
+                }
+              >
+                <input
+                  type="checkbox"
+                  checked={checked}
+                  // 고른 공격 가운데 일부에만 켜져 있으면 「일부」(−)로 그린다. 누르면 전부 켠다.
+                  ref={(element) => {
+                    if (element) element.indeterminate = mixed;
+                  }}
+                  title={
+                    mixed
+                      ? "고른 공격 가운데 일부에만 켜져 있습니다 — 누르면 전부 켭니다"
+                      : always
+                      ? "상시 버프 — 끄면 이 공격에서만 빠집니다"
+                      : auto
+                        ? "앞 카드에서 저절로 켜진 버프 — 끄면 이 공격에서만 빠집니다"
+                        : undefined
+                  }
+                  onChange={() => toggleAll(buff)}
+                />
+                {/* 무기 버프는 무기 그림, 그 외는 들고 있는 캐릭터 아이콘. */}
+                {buff.iconUrl ? (
+                  <i className="buff-owner weapon" title={buff.label}>
+                    <img src={buff.iconUrl} alt="" loading="lazy" />
+                  </i>
+                ) : (
+                  owner && (
+                    <i className="buff-owner" title={`${owner.name}의 버프`}>
+                      {owner.iconUrl ? (
+                        <img src={owner.iconUrl} alt="" loading="lazy" />
+                      ) : (
+                        owner.name[0]
+                      )}
+                    </i>
+                  )
+                )}
+                <span>
+                  <b>
+                    {buff.label || describe(buff)}{" "}
+                    <em className="buff-amount">
+                      {/* 스탯은 안 건드리고 이상 스택 상한만 올리는 버프는 퍼센트가 의미 없다. */}
+                      {buff.raisesStatusStacks && !buff.value
+                        ? `${buff.raisesStatusKinds?.[0] ?? "상태"} 상한 +${buff.raisesStatusStacks}`
+                        : buff.raisesAnomalyStacks && !buff.value
+                        ? `이상 스택 상한 +${buff.raisesAnomalyStacks}`
+                        : isPoint
+                          ? `${+amount.toFixed(1)}pt` // 조화도 파괴 증폭 · 깡공격력은 퍼센트가 아닌 수치
+                          : `${(amount * 100).toFixed(1)}%`}
+                      {buff.scaleFrom
+                        ? ` (${SCALE_LABEL[buff.scaleFrom] ?? buff.scaleFrom}${
+                            buff.scaleOffset !== undefined ? ` ${buff.scaleOffset} 초과` : ""
+                          }${buff.scaleStep ? ` ${buff.scaleStep}당` : " ×"} ${
+                            isPoint ? `${buff.value}pt` : `${(buff.value * 100).toFixed(1)}%`
+                          })`
+                        : stacks > 1 &&
+                          buff.value > 0 &&
+                          ` (${isPoint ? `${buff.value}pt` : `${(buff.value * 100).toFixed(1)}%`} × ${stacks})`}
+                    </em>
+                    {buff.switchesDamageBonusType && (
+                      <em className="buff-cap" title="켜면 이 공격의 피해 판정이 바뀝니다">
+                        {DAMAGE_TYPE_OPTIONS.find(
+                          (o) => o.value === buff.switchesDamageBonusType,
+                        )?.label ?? buff.switchesDamageBonusType}{" "}
+                        판정으로 전환
+                      </em>
+                    )}
+                    {buff.addsExtraHits ? (
+                      <em className="buff-cap" title="켜면 이 공격의 타수가 늘어납니다">
+                        +{buff.addsExtraHits}타
+                      </em>
+                    ) : null}
+                    {cap && cap.bonus > 0 && (
+                      <em className="buff-cap" title={cap.from.join(" · ")}>
+                        {cap.from.join(" · ")} 적용됨 · 상한 {cap.max}
+                      </em>
+                    )}
+                    {/* 상태 스택은 누가 몇 칸씩 올렸는지를 그대로 적는다 —
+                        「조화 밀집 · 간섭」은 대응 캐릭터가 파티에 설 때마다 상한이 하나씩 오른다. */}
+                    {statusCap && (
+                      <em
+                        className="buff-cap"
+                        title={statusCap.from.map((r) => `${r.label} +${r.amount}`).join(" · ")}
+                      >
+                        상한 {statusCap.max} = 기본 {statusCap.base}
+                        {statusCap.from.map((r) => ` + ${capOwner(r.label)} ${r.amount}`).join("")}
+                      </em>
+                    )}
+                  </b>
+                  <small>
+                    {describe(buff)}
+                    {mixed && " · 고른 공격 일부에만 켜짐"}
+                    {always && (off ? " · 상시(이 공격에서 끔)" : " · 상시")}
+                    {auto && " · 앞 카드에서 자동"}
+                    {!always && !auto && off && buff.triggeredBy && " · 자동(이 공격에서 끔)"}
+                    {buff.exclusiveGroup && " · 같은 묶음에서 하나만"}
+                    {!buff.enabled && " · 목록에서 꺼둠"}
+                  </small>
+                </span>
+                {/* 스택 구역 — 스택이 있는 버프만 카드 오른쪽에 칸을 따로 둔다.
+                    이름 줄에 끼워 두면 수치 설명에 묻혀 안 보이고, 줄이 접힐 때마다 자리가 바뀐다. */}
+                {max > 1 && (
+                  <span
+                    className="c2-stack"
+                    // 라벨 안이라 그냥 두면 클릭이 체크박스로 새어 나간다.
+                    onClick={(event) => event.preventDefault()}
+                  >
+                    <em>스택</em>
+                    <span className="c2-stack-row">
+                      <button
+                        type="button"
+                        title="스택 하나 내리기"
+                        disabled={stacks <= 1}
+                        onClick={() => setStacksAll(buff.id, stacks - 1)}
+                      >
+                        −
+                      </button>
+                      <select
+                        value={stacks}
+                        onChange={(event) => setStacksAll(buff.id, Number(event.target.value))}
+                      >
+                        {Array.from({ length: max }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        title="스택 하나 올리기"
+                        disabled={stacks >= max}
+                        onClick={() => setStacksAll(buff.id, stacks + 1)}
+                      >
+                        +
+                      </button>
+                    </span>
+                    <small>최대 {max}</small>
+                  </span>
+                )}
+              </label>
+            );
+          })}
+        </div>
+      )}
+      </div>
+
+      {/* 오른쪽 —이 공격의 히트별 값. 계산식 창의 「4 · 히트별」에서 일반·치명타만 뽑았다.
+          버프를 켜고 끄면서 어느 타가 얼마나 움직이는지 그 자리에서 보려는 것이다. */}
+      {!multi && (
+      <div className="buff-dialog-hits">
+        <small>히트별</small>
+        <table>
+          <thead>
+            <tr>
+              <th>타</th>
+              <th>일반</th>
+              <th>치명타</th>
+            </tr>
+          </thead>
+          <tbody>
+            {selected.damage.hits.map((hit, index) => (
+              <tr
+                key={index}
+                className={"extraLabel" in hit && hit.extraLabel ? "hit-extra" : undefined}
+                title={"extraLabel" in hit && hit.extraLabel ? hit.extraLabel : undefined}
+              >
+                <td>{index + 1}</td>
+                <td>{num(hit.normalDamage)}</td>
+                <td>{num(hit.criticalDamage)}</td>
+              </tr>
+            ))}
+            <tr className="buff-hits-sum">
+              <td>합</td>
+              <td>{num(selected.damage.normalDamage)}</td>
+              <td>{num(selected.damage.criticalDamage)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      )}
+    </div>
+    </aside>
+  );
+}

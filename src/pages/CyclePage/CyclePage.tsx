@@ -195,7 +195,7 @@ export function CyclePage() {
     const orphans = orphansOf(preset);
     if (orphans.length === 0 && diffOf(preset).length === 0) {
       applyCyclePreset(preset.id);
-      setTab("calculator");
+      setTab("calculator2");
       return;
     }
     setConfirming({ preset, orphans });
@@ -600,7 +600,7 @@ export function CyclePage() {
                 onClick={() => {
                   applyCyclePreset(confirming.preset.id, confirming.orphans);
                   setConfirming(null);
-                  setTab("calculator");
+                  setTab("calculator2");
                 }}
               >
                 {confirming.orphans.length > 0 ? "빼고 넣기" : "그대로 넣기"}

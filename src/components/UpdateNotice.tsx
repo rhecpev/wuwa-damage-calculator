@@ -52,7 +52,7 @@ export function UpdateNotice() {
           <button
             onClick={() => {
               close();
-              setTab("updates");
+              setTab("updates2");
             }}
           >
             업데이트 내역 보기

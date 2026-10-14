@@ -1,0 +1,124 @@
+import {
+  ENEMY_LEVEL_MAX,
+  ENEMY_LEVEL_MIN,
+  ENEMY_RES_PRESETS,
+  resPresetOf,
+  usePartyConfig,
+} from "../../../context/PartyConfigContext";
+import type { Element } from "../../../types/game";
+import { ELEMENT_COLORS, ELEMENT_NAMES, elementIcon } from "../../../data/elements";
+
+/** 속성 라디오에 쓸 목록. 게임 내 속성 순서를 따른다. */
+const ELEMENTS: Element[] = ["Glacio", "Fusion", "Electro", "Aero", "Spectro", "Havoc"];
+
+export function EnemySection() {
+  const { config, setEnemyLevel, setEnemyElement, setEnemyResPreset } = usePartyConfig();
+  const { enemy } = config;
+  // 적 레벨이 정해진 콘텐츠(종말 매트릭스)면 레벨 칸을 잠근다.
+  const preset = enemy.resPreset ?? "field";
+  const presetInfo = resPresetOf(preset);
+  const locked = presetInfo.fixedLevel !== undefined;
+
+  return (
+    <section className="panel">
+      <h2>몬스터 설정</h2>
+
+      <div className="enemy-grid">
+        <div className="enemy-field">
+          <small>속성</small>
+          <div className="enemy-elements">
+            {ELEMENTS.map((element) => {
+              const active = enemy.element === element;
+              const color = ELEMENT_COLORS[element];
+              const icon = elementIcon(element);
+
+              return (
+                <label
+                  key={element}
+                  className={active ? "enemy-element on" : "enemy-element"}
+                  style={active ? { borderColor: color, color } : undefined}
+                >
+                  <input
+                    type="radio"
+                    name="enemy-element"
+                    value={element}
+                    checked={active}
+                    onChange={() => setEnemyElement(element)}
+                  />
+                  {icon ? (
+                    <img className="enemy-icon" src={icon} alt="" loading="lazy" />
+                  ) : (
+                    // 도감에 아이콘이 없으면 예전처럼 색 점으로 대신한다.
+                    <span className="enemy-dot" style={{ background: color }} />
+                  )}
+                  {ELEMENT_NAMES[element]}
+                </label>
+              );
+            })}
+          </div>
+          <span className="enemy-hint">
+            선택한 속성과 같은 속성으로 때리면 속성 저항 {Math.round(enemy.sameElementRes * 100)}%,
+            그 외에는 {Math.round(enemy.baseRes * 100)}%가 적용됩니다.
+          </span>
+
+        </div>
+
+        {/* 콘텐츠 선택 — 파티 판에 있던 것을 이 줄로 옮겼다. 레벨은 콘텐츠가 정하기도 해서 그 뒤에 둔다.
+            칸마다 적힌 숫자는 기본 저항 / 동일 속성 저항이다. */}
+        <div className="enemy-field enemy-content">
+          <small title="칸마다 적힌 숫자는 기본 저항 / 동일 속성 저항입니다">콘텐츠</small>
+          <div className="enemy-elements">
+            {ENEMY_RES_PRESETS.map((item) => (
+              <label
+                key={item.id}
+                className={item.id === preset ? "enemy-element on" : "enemy-element"}
+                title={`${item.label} — 기본 저항 ${Math.round(item.baseRes * 100)}% / 동일 속성 저항 ${Math.round(item.sameElementRes * 100)}%`}
+              >
+                <input
+                  type="radio"
+                  name="enemy-res-preset"
+                  value={item.id}
+                  checked={item.id === preset}
+                  onChange={() => setEnemyResPreset(item.id)}
+                />
+                {item.label}
+                <em className="enemy-res">
+                  {Math.round(item.baseRes * 100)} / {Math.round(item.sameElementRes * 100)}%
+                </em>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="enemy-field">
+          <small>레벨</small>
+          <div className="enemy-level">
+            <input
+              type="range"
+              min={ENEMY_LEVEL_MIN}
+              max={ENEMY_LEVEL_MAX}
+              value={enemy.level}
+              disabled={locked}
+              onChange={(event) => setEnemyLevel(Number(event.target.value))}
+            />
+            <input
+              type="number"
+              className="enemy-level-number"
+              min={ENEMY_LEVEL_MIN}
+              max={ENEMY_LEVEL_MAX}
+              value={enemy.level}
+              disabled={locked}
+              onChange={(event) => setEnemyLevel(Number(event.target.value))}
+            />
+          </div>
+          {/* 적 레벨이 정해진 콘텐츠(종말 매트릭스)를 고르면 레벨 칸이 잠긴다 — 왜 잠겼는지 바로 옆에 적는다. */}
+          {locked && (
+            <span className="enemy-hint">
+              {presetInfo.label} 레벨 {presetInfo.fixedLevel} 고정
+            </span>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}

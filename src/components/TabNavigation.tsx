@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { useAppState, type TabType } from "../context/AppStateContext";
-import { THEMES, useTheme } from "../utils/theme";
+import { SHAPES, THEMES, useShape, useTheme } from "../utils/theme";
 import { StorageBar } from "./StorageBar";
 
 /**
@@ -44,7 +45,7 @@ const AKI = "https://api-v2.encore.moe/resource/Data/Game/Aki/UI/UIResources/Com
 
 const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }> = [
   {
-    id: "calculator",
+    id: "calculator2",
     label: "대미지 계산",
     hint: "루틴 · 피해량",
     icon: icon(
@@ -55,26 +56,26 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "characters",
+    id: "characters2",
     label: "캐릭터",
     hint: "무기 · 에코 · 스킬",
     icon: gameIcon(`${ENCORE}SP_FuncIconRole.B66doHXn.svg`),
   },
   {
-    id: "weapons",
+    id: "weapons2",
     label: "무기",
     hint: "보유 무기 등록",
     // 대검 아이콘 — 무기 종류 다섯 중 생김새가 가장 또렷해 「무기」를 대표시킨다.
     icon: gameIcon(`${AKI}SP_IconNorSword.webp`),
   },
   {
-    id: "echoes",
+    id: "echoes2",
     label: "에코",
     hint: "보유 에코 등록",
     icon: gameIcon(`${ENCORE}SP_FuncIconMonster.DjNJIuuu.svg`),
   },
   {
-    id: "party",
+    id: "party2",
     label: "파티",
     hint: "저장한 파티",
     icon: icon(
@@ -86,7 +87,7 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "cycles",
+    id: "cycles2",
     label: "사이클",
     hint: "담아둔 공격 루틴 · 주고받기",
     icon: icon(
@@ -97,13 +98,13 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "matrixPlanner",
+    id: "matrixPlanner2",
     label: "매트릭스",
     hint: "파티 플래너 · 도는 순서",
     icon: gameIcon(`${ENCORE}SP_IconActivityTowerGuide.CveSAbrf.svg`),
   },
   {
-    id: "cycleCompare",
+    id: "cycleCompare2",
     label: "사이클 대미지 비교",
     hint: "조건을 바꾸면 얼마나 오르나",
     icon: icon(
@@ -113,13 +114,13 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "profileImport",
+    id: "profileImport2",
     label: "디스코드 프로필 입력",
     hint: "카드 사진 한 장으로 채우기",
     icon: brandIcon(<path d={DISCORD_MARK} />),
   },
   {
-    id: "nicknames",
+    id: "nicknames2",
     label: "별명",
     hint: "공격 이름을 내 말로",
     icon: icon(
@@ -129,7 +130,7 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
     ),
   },
   {
-    id: "updates",
+    id: "updates2",
     label: "업데이트 내역",
     hint: "무엇이 바뀌었나",
     icon: icon(
@@ -150,12 +151,17 @@ const TABS: Array<{ id: TabType; label: string; hint: string; icon: ReactNode }>
 export function TabNavigation() {
   const { tab, setTab } = useAppState();
   const { theme, setTheme } = useTheme();
+  const { shape, setShape } = useShape();
   // 세로로 긴 화면에서만 쓰는 접이식 메뉴. 가로 화면에서는 늘 펼쳐져 있어 이 값을 보지 않는다.
   const [menuOpen, setMenuOpen] = useState(false);
   const current = TABS.find((item) => item.id === tab);
+  // 테마 고르는 창을 열었는지.
+  const [themeOpen, setThemeOpen] = useState(false);
+  const currentTheme = THEMES.find((item) => item.id === theme) ?? THEMES[0];
 
   return (
-    <aside className={menuOpen ? "sidebar open" : "sidebar"}>
+    // 디자인 「네모나게」면 위 막대도 그 꼴(calc2.css의 .c2-nav)로 바꾼다.
+    <aside className={["sidebar", menuOpen && "open", shape === "square" && "c2-nav"].filter(Boolean).join(" ")}>
       {/* 세로 화면 전용 — ☰을 누르면 탭 목록과 테마 고르개가 아래로 펼쳐진다. */}
       <button
         className="sidebar-menu-button"
@@ -208,22 +214,87 @@ export function TabNavigation() {
         ))}
       </nav>
 
-      {/* 테마 넷을 그 테마의 바탕색 동그라미로 가로로 늘어놓는다. 이름은 title로만 남긴다. */}
-      <div className="theme-toggle" role="radiogroup" aria-label="테마">
-        {THEMES.map((item) => (
-          <button
-            key={item.id}
-            role="radio"
-            aria-checked={item.id === theme}
-            aria-label={item.label}
-            title={item.label}
-            className={item.id === theme ? "on" : undefined}
-            style={{ background: item.swatch }}
-            onClick={() => setTheme(item.id)}
-          />
-        ))}
+      {/* 테마 — 지금 테마의 동그라미만 보여 주고(이름은 툴팁), 톱니바퀴를 누르면 고르는 창이 뜬다.
+          테마가 열하나라 막대에 다 늘어놓으면 탭 자리를 너무 먹는다. */}
+      <div className="theme-toggle">
+        <span className="theme-current" title={`지금 테마 — ${currentTheme.label}`}>
+          <i style={{ background: currentTheme.swatch }} />
+        </span>
+        <button
+          className="theme-gear"
+          aria-label="테마 · 디자인 고르기"
+          title="테마 · 디자인 고르기"
+          onClick={() => setThemeOpen(true)}
+        >
+          {icon(
+            <>
+              <circle cx="12" cy="12" r="3" />
+              <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h.1a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v.1a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z" />
+            </>,
+          )}
+        </button>
       </div>
       </div>
+
+      {/* 테마 고르는 창 — 위 막대는 화면에 붙어 있는 것이라 그 안에 그리면 창이 막대에 갇힌다. body로 빼서 그린다. */}
+      {themeOpen &&
+        createPortal(
+          <div
+            className="formula-backdrop"
+            role="presentation"
+            onClick={() => setThemeOpen(false)}
+            onKeyDown={(event) => {
+              if (event.key === "Escape") setThemeOpen(false);
+            }}
+          >
+            <div className="formula-modal theme-dialog" onClick={(event) => event.stopPropagation()}>
+              <div className="formula-head">
+                <div>
+                  <small>THEME · DESIGN</small>
+                  <h3>테마 · 디자인</h3>
+                  <span>누르면 바로 바뀝니다. 고른 값은 이 브라우저에 기억됩니다.</span>
+                </div>
+                <button className="formula-close" onClick={() => setThemeOpen(false)}>
+                  ×
+                </button>
+              </div>
+              {/* 디자인 — 둥글게는 이전 디자인 그대로, 네모나게는 대미지 계산 2에서 만든 각진 꼴. */}
+              <h4 className="theme-section">디자인</h4>
+              <div className="shape-toggle" role="radiogroup" aria-label="디자인">
+                {SHAPES.map((item) => (
+                  <button
+                    key={item.id}
+                    role="radio"
+                    aria-checked={item.id === shape}
+                    className={item.id === shape ? `on shape-${item.id}` : `shape-${item.id}`}
+                    onClick={() => setShape(item.id)}
+                  >
+                    <i />
+                    <b>{item.label}</b>
+                    <em>{item.hint}</em>
+                  </button>
+                ))}
+              </div>
+              <h4 className="theme-section">테마</h4>
+              <div className="theme-grid" role="radiogroup" aria-label="테마">
+                {THEMES.map((item) => (
+                  <button
+                    key={item.id}
+                    role="radio"
+                    aria-checked={item.id === theme}
+                    className={item.id === theme ? "on" : undefined}
+                    onClick={() => setTheme(item.id)}
+                  >
+                    <i style={{ background: item.swatch }} />
+                    <b>{item.label}</b>
+                    <em>{item.scheme === "dark" ? "어두운 계열" : "밝은 계열"}</em>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
 
       {/* 저장 상태 점과 파일 단추 — 세로 화면에서 메뉴를 접어도 늘 보인다. */}
       <StorageBar />

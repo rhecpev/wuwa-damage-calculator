@@ -1,4 +1,5 @@
 import { Fragment, useState, useSyncExternalStore } from "react";
+import { usePersistedState } from "../../../utils/usePersistedState";
 import {
   attackDisplayName,
   attackNameByNickname,
@@ -119,6 +120,8 @@ export const attackLabel = (name: string) => name.replace(/\s*피해$/, "");
 
 export function RotationSection({ results }: RotationSectionProps) {
   const { selectedId, setSelectedId } = useAppState();
+  // 사이클을 어떤 꼴로 볼지 — 카드 판, 또는 한 대가 한 줄인 리스트. 고른 쪽을 기억한다.
+  const [view, setView] = usePersistedState<"list" | "card">("calc.view", "card");
   // 공격 추가 목록의 「인게임 명칭 / 별명」 토글을 같이 따른다 — 토글이나 별명이 바뀌면 다시 그린다.
   useSyncExternalStore(subscribeAttackNicknames, attackNicknamesVersion);
   /** 카드에 적을 공격 이름. 별명 모드면 별명(없으면 규칙 별명), 아니면 인게임 명칭에서 「피해」를 뗀 것. */
@@ -227,6 +230,184 @@ export function RotationSection({ results }: RotationSectionProps) {
     setSaveOpen(false);
   };
 
+  // 카드 · 줄을 끌어 순서를 바꾼다. 놓인 자리의 사이클을 따라가므로 사이클 이동도 이걸로 한다.
+  const dragProps = (id: string) => ({
+    draggable: true,
+    onDragStart: (event: React.DragEvent) => {
+      event.dataTransfer.effectAllowed = "move";
+      event.dataTransfer.setData("text/plain", id);
+      setDragId(id);
+    },
+    onDragEnd: () => {
+      setDragId(null);
+      setOverId(null);
+    },
+    onDragOver: (event: React.DragEvent) => {
+      if (!dragId || dragId === id) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = "move";
+      if (overId !== id) setOverId(id);
+    },
+    onDragLeave: () => setOverId((cur) => (cur === id ? null : cur)),
+    onDrop: (event: React.DragEvent) => {
+      event.preventDefault();
+      const from = event.dataTransfer.getData("text/plain") || dragId;
+      if (from) moveAttack(from, id);
+      setDragId(null);
+      setOverId(null);
+    },
+  });
+
+  /** 카드 · 줄 끝의 단추 넷 — 계산식 · 공격 바꾸기 · 복사 · 삭제. */
+  const itemTools = (id: string, noun: string) => (
+    <span className="item-tools" onClick={(event) => event.stopPropagation()}>
+      <button className="mag" title="이 한 대의 계산식 펼치기" onClick={() => setFormulaId(id)}>
+        ⌕
+      </button>
+      <button className="pen" title={`이 ${noun}의 공격 바꾸기`} onClick={() => setSwapId(id)}>
+        ✎
+      </button>
+      <button
+        className="copy"
+        title="이 공격을 버프 설정까지 그대로 복사해 바로 뒤에 추가"
+        onClick={() => duplicateAttack(id)}
+      >
+        ⧉
+      </button>
+      <button className="x" title="삭제" onClick={() => removeAttack(id)}>
+        ×
+      </button>
+    </span>
+  );
+
+  /** 리스트 줄 — 카드와 같은 내용을 한 줄에: 번호 · 캐릭터 · 공격(과 스택 · 발 · 배율 칸) · 피해 타입 · 기대 피해 · 단추. */
+  const listRow = (result: CalculationResult, index: number) => {
+    const id = result.item.id;
+    const type = damageTypeOf(result);
+    const stop = (event: React.MouseEvent) => event.stopPropagation();
+    return (
+      <div
+        className={[
+          "rot-row",
+          `kind-${cardKind(result)}`,
+          isPicked(id) ? "selected" : "",
+          dragId === id ? "dragging" : "",
+          overId === id ? "over" : "",
+          focusChar && result.character.id !== focusChar ? "dim" : "",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+        role="button"
+        tabIndex={0}
+        title={`${result.character.name} · ${result.attack.name}`}
+        {...dragProps(id)}
+        // Shift+클릭이 글자를 긁어 선택하지 않게 한다.
+        onMouseDown={(event) => {
+          if (event.shiftKey) event.preventDefault();
+        }}
+        onClick={(event) => pickCard(id, event)}
+        onKeyDown={(event) => {
+          // 안쪽 입력칸 · 단추에서 누른 키는 줄을 여닫지 않는다.
+          if (event.target !== event.currentTarget) return;
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          pickCard(id, event);
+        }}
+      >
+        <span className="rot-row-num">{index + 1}</span>
+        <span className="rot-row-char">
+          {result.character.iconUrl && (
+            <img src={result.character.iconUrl} alt="" loading="lazy" draggable={false} />
+          )}
+          {result.character.name}
+        </span>
+        <span className="rot-row-skill">
+          <b>{nameOf(result.character.id, result.attack)}</b>
+          {isExtraAttack(result.attack) && (
+            <span className="card-type type-extra">
+              {result.attack.resonanceChain !== undefined
+                ? `${result.attack.resonanceChain}체인 추가`
+                : "추가 타격"}
+            </span>
+          )}
+          {/* 스택 · 발 · 배율 칸 — 카드와 같은 규칙으로 연다. */}
+          {result.damage.kind === "anomaly" && (
+            <label className="card-stack" onClick={stop}>
+              <em>스택</em>
+              <input
+                type="number"
+                min={0}
+                max={
+                  anomalyStackCap(
+                    result.damage.breakdown.anomaly,
+                    allBuffs,
+                    [...result.item.enabledBuffIds, ...autoBuffIdsFor(id).keys()],
+                    result.item.disabledBuffIds,
+                  ).max
+                }
+                value={result.damage.breakdown.stacks}
+                onChange={(event) => setAnomalyStacks(id, Number(event.target.value))}
+              />
+            </label>
+          )}
+          {result.damage.kind === "normal" &&
+            ((result.item.repeat ?? 1) > 1 ||
+              allBuffs.some(
+                (b) =>
+                  b.rampsWithRepeat &&
+                  (b.attackId === result.attack.id || b.attackIds?.includes(result.attack.id)),
+              )) && (
+              <label
+                className="card-stack"
+                title="이 줄을 몇 발로 볼지 — 발마다 따로 계산해 더합니다"
+                onClick={stop}
+              >
+                <em>발</em>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={result.item.repeat ?? 1}
+                  onChange={(event) => setRepeat(id, Number(event.target.value))}
+                />
+              </label>
+            )}
+          {result.damage.kind === "discord" && (
+            <>
+              <label className="card-stack" onClick={stop}>
+                <em>배율 %</em>
+                <input
+                  type="number"
+                  min={0}
+                  max={20000}
+                  step={10}
+                  value={Math.round(result.damage.breakdown.baseRate * 100)}
+                  onChange={(event) => setDiscordRate(id, Number(event.target.value) / 100)}
+                />
+              </label>
+              <label className="card-stack" onClick={stop}>
+                <em>횟수</em>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={result.damage.breakdown.occurrences}
+                  onChange={(event) => setDiscordOccurrences(id, Number(event.target.value))}
+                />
+              </label>
+            </>
+          )}
+        </span>
+        <span className={`card-type type-${type.key}`}>{type.label}</span>
+        <span className="rot-row-dmg">
+          {num(result.damage.expectedDamage)}
+          {result.damage.hits.length > 1 && <i>{result.damage.hits.length}타</i>}
+        </span>
+        {itemTools(id, "줄")}
+      </div>
+    );
+  };
+
   return (
     <>
     <section className="panel">
@@ -235,6 +416,20 @@ export function RotationSection({ results }: RotationSectionProps) {
           <h2>사이클 구성</h2>
         </div>
         <div className="rotation-tools">
+          {/* 보기 전환 — 카드 판 / 리스트(한 대가 한 줄). */}
+          <span className="rotation-view" role="radiogroup" aria-label="사이클 보기 방식">
+            {(["card", "list"] as const).map((mode) => (
+              <button
+                key={mode}
+                role="radio"
+                aria-checked={view === mode}
+                className={view === mode ? "on" : ""}
+                onClick={() => setView(mode)}
+              >
+                {mode === "card" ? "카드" : "리스트"}
+              </button>
+            ))}
+          </span>
           <button
             className="viz-toggle"
             title="여기서부터 다음 사이클로 넘긴다 — 뒤에 담는 공격이 새 사이클에 들어간다"
@@ -320,7 +515,7 @@ export function RotationSection({ results }: RotationSectionProps) {
       )}
 
       <div className="rotation-wrap">
-        <div className="rotation">
+        <div className={view === "list" ? "rotation rot-list" : "rotation"}>
           {results.map((result, index) => {
             // 카드를 누르면 이 카드가 선택되고 옆에 버프 창이 뜬다.
             // 히트별 내역은 「상세보기」의 계산식 창에서 본다.
@@ -365,6 +560,9 @@ export function RotationSection({ results }: RotationSectionProps) {
                 </button>
               </div>
             )}
+            {view === "list" ? (
+              listRow(result, index)
+            ) : (
             <div
               className={[
                 "item",
@@ -374,31 +572,7 @@ export function RotationSection({ results }: RotationSectionProps) {
               ]
                 .filter(Boolean)
                 .join(" ")}
-              // 카드를 끌어 순서를 바꾼다. 놓인 자리의 사이클을 따라가므로 사이클 이동도 이걸로 한다.
-              draggable
-              onDragStart={(event) => {
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData("text/plain", result.item.id);
-                setDragId(result.item.id);
-              }}
-              onDragEnd={() => {
-                setDragId(null);
-                setOverId(null);
-              }}
-              onDragOver={(event) => {
-                if (!dragId || dragId === result.item.id) return;
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-                if (overId !== result.item.id) setOverId(result.item.id);
-              }}
-              onDragLeave={() => setOverId((cur) => (cur === result.item.id ? null : cur))}
-              onDrop={(event) => {
-                event.preventDefault();
-                const from = event.dataTransfer.getData("text/plain") || dragId;
-                if (from) moveAttack(from, result.item.id);
-                setDragId(null);
-                setOverId(null);
-              }}
+              {...dragProps(result.item.id)}
             >
               {/* 카드와 버튼을 한 상자에 묶는다 — 잇는 선까지 기준으로 잡히면 버튼이 멀리 떨어진다. */}
               <div className="item-card">
@@ -553,32 +727,7 @@ export function RotationSection({ results }: RotationSectionProps) {
                 })()}
               </div>
 
-              <span className="item-tools">
-                <button
-                  className="mag"
-                  title="이 한 대의 계산식 펼치기"
-                  onClick={() => setFormulaId(result.item.id)}
-                >
-                  ⌕
-                </button>
-                <button
-                  className="pen"
-                  title="이 카드의 공격 바꾸기"
-                  onClick={() => setSwapId(result.item.id)}
-                >
-                  ✎
-                </button>
-                <button
-                  className="copy"
-                  title="이 공격을 버프 설정까지 그대로 복사해 바로 뒤에 추가"
-                  onClick={() => duplicateAttack(result.item.id)}
-                >
-                  ⧉
-                </button>
-                <button className="x" title="삭제" onClick={() => removeAttack(result.item.id)}>
-                  ×
-                </button>
-              </span>
+              {itemTools(result.item.id, "카드")}
 
               </div>
 
@@ -586,6 +735,7 @@ export function RotationSection({ results }: RotationSectionProps) {
               {index < results.length - 1 &&
                 (results[index + 1].item.cycle ?? 1) === cycle && <em>→</em>}
             </div>
+            )}
             </Fragment>
             );
           })}

@@ -3,17 +3,18 @@ import type { ReactNode } from "react";
 import { usePersistedState } from "../utils/usePersistedState";
 
 export type TabType =
-  | "calculator"
-  | "party"
-  | "characters"
-  | "echoes"
-  | "cycles"
-  | "cycleCompare"
-  | "matrixPlanner"
-  | "nicknames"
-  | "weapons"
-  | "profileImport"
-  | "updates";
+  | "calculator2"
+  // 「대미지 계산 2」의 꼴을 입힌 탭들. 내용은 원래 페이지 컴포넌트다(components/Design2).
+  | "characters2"
+  | "weapons2"
+  | "echoes2"
+  | "party2"
+  | "cycles2"
+  | "matrixPlanner2"
+  | "cycleCompare2"
+  | "profileImport2"
+  | "nicknames2"
+  | "updates2";
 
 interface AppStateContextType {
   tab: TabType;
@@ -31,7 +32,7 @@ interface AppStateContextType {
 const AppStateContext = createContext<AppStateContextType | undefined>(undefined);
 
 export function AppStateProvider({ children }: { children: ReactNode }) {
-  const [tab, setTab] = useState<TabType>("calculator");
+  const [tab, setTab] = useState<TabType>("calculator2");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // 보던 캐릭터는 브라우저에 남긴다 — 탭을 옮겼다 돌아오거나 새로고침해도 그대로 이어 본다.
   const [selectedCharacterId, setSelectedCharacterId] = usePersistedState<string | null>(

@@ -2,11 +2,12 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Analytics } from "@vercel/analytics/react";
 import { hydrate } from "./utils/persist";
-import { initTheme } from "./utils/theme";
+import { initShape, initTheme, syncAppearance } from "./utils/theme";
 import "./styles.css";
 
 // 테마는 저장값을 기다리지 않고 바로 정한다 — 화면이 한 번 다른 색으로 번쩍이지 않게.
 initTheme();
+initShape();
 
 /**
  * 저장된 설정을 메모리에 올린 **뒤에** App을 불러온다.
@@ -24,6 +25,8 @@ hydrate()
   .catch(() => {
     // 저장할 곳을 못 찾아도 화면은 띄운다 — 위쪽 띠가 「저장 안 됨」을 알린다.
   })
+  // 색 · 모양도 앱 저장값으로 맞춘다 — 다른 브라우저에서 고른 것이 저장 파일에 들어 있을 수 있다.
+  .then(() => syncAppearance())
   .then(() => import("./App"))
   .then(({ default: App }) => {
     createRoot(document.getElementById("root")!).render(

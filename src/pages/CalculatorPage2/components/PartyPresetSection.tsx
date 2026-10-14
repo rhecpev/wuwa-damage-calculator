@@ -1,0 +1,102 @@
+import { useState } from "react";
+import { characters } from "../../../data/sampleData";
+import { PARTY_SLOTS, usePartyConfig } from "../../../context/PartyConfigContext";
+import type { PartyConfig } from "../../../types/game";
+import type { PartyPreset } from "../../../context/PartyConfigContext";
+import { GroupCombo, groupsOf } from "../../../components/GroupCombo";
+
+interface PartyPresetSectionProps {
+  /** 하나를 불러온 뒤 부를 것. 다이얼로그로 띄운 쪽이 스스로 닫으려고 쓴다. */
+  onLoaded?: () => void;
+  /**
+   * 고른 파티를 계산 탭 자리 대신 여기로 넘긴다. 매트릭스 파티 플래너처럼
+   * 계산 중인 편성을 건드리지 않고 파티만 받아 가는 화면이 쓴다.
+   */
+  onPick?: (preset: PartyPreset) => void;
+}
+
+/**
+ * 파티 관리 탭에서 짜둔 파티 목록. 눌러서 계산 탭 자리에 그대로 앉힌다.
+ * 만들고 지우고 순서를 바꾸는 것은 파티 관리 탭이 한다 — 여기서는 고르기만 한다.
+ */
+export function PartyPresetSection({ onLoaded, onPick }: PartyPresetSectionProps) {
+  const { partyPresets, partyGroups, applyPartyPreset } = usePartyConfig();
+  const [query, setQuery] = useState("");
+  const groups = groupsOf(partyGroups, partyPresets);
+  // 그룹으로 거른다. null이면 전체, ""이면 그룹을 안 정한 파티(미설정).
+  const [picked, setPicked] = useState<string | null>(null);
+  // 지운 그룹을 가리키고 있으면 전체로 본다.
+  const group = picked && !groups.includes(picked) ? null : picked;
+
+  /** 그 구성에 앉은 캐릭터들. 목록에 아이콘과 이름을 같이 보여준다. */
+  const members = (cfg: PartyConfig) =>
+    PARTY_SLOTS.map((slot) => characters.find((c) => c.id === cfg[slot].characterId)).filter(
+      (c): c is (typeof characters)[number] => c !== undefined,
+    );
+
+  // 이름으로 거른 목록. 담긴 캐릭터 이름으로도 찾을 수 있게 한다.
+  const needle = query.trim().toLowerCase();
+  const shown = partyPresets.filter(
+    (preset) =>
+      (group === null || (preset.group ?? "") === group) &&
+      (preset.name.toLowerCase().includes(needle) ||
+        members(preset.config).some((c) => c.name.toLowerCase().includes(needle))),
+  );
+
+  return (
+    <section className="panel">
+      <div className="panel-head">
+        <h2>파티 목록</h2>
+        {groups.length > 0 && (
+          <div className="group-labeled">
+            <b>그룹</b>
+            <GroupCombo value={group} groups={groups} onChange={setPicked} allowAll />
+          </div>
+        )}
+        <input
+          type="text"
+          className="panel-search"
+          placeholder="파티 이름 검색..."
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+        />
+      </div>
+
+      {shown.length === 0 ? (
+        <p className="preset-empty">
+          {partyPresets.length > 0
+            ? "이름에 맞는 파티가 없습니다."
+            : "만들어둔 파티가 없습니다. 파티 관리 탭에서 파티를 추가하면 여기서 바로 불러올 수 있습니다."}
+        </p>
+      ) : (
+        <ul className="preset-list">
+          {shown.map((preset) => (
+            <li key={preset.id}>
+              <span className="preset-name">
+                <span className="preset-faces">
+                  {members(preset.config).map((c) => (
+                    <i key={c.id}>
+                      {c.iconUrl ? <img src={c.iconUrl} alt="" loading="lazy" /> : <u>{c.name[0]}</u>}
+                      <em>{c.name}</em>
+                    </i>
+                  ))}
+                </span>
+                <b className="preset-label">{preset.name}</b>
+              </span>
+
+              <button
+                onClick={() => {
+                  if (onPick) onPick(preset);
+                  else applyPartyPreset(preset.id);
+                  onLoaded?.();
+                }}
+              >
+                불러오기
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}

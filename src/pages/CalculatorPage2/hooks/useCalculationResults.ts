@@ -1,0 +1,489 @@
+import { useMemo, useSyncExternalStore } from "react";
+import { calculateDamage } from "../../../calculator/damage";
+import { withExtraHits } from "../../../calculator/extraHits";
+import { calculateFinalStats } from "../../../calculator/stats";
+import { characters } from "../../../data/sampleData";
+import { buffs } from "../../../data/buffs";
+import { DEFAULT_WEAPON_LEVEL, weaponAtLevel, weaponsById } from "../../../data/weapons";
+import { DEFAULT_CHARACTER_LEVEL, characterAtLevel } from "../../../data/characterStats";
+import { nodeStats } from "../../../data/characterNodes";
+import { equippedPanelStats } from "../../../calculator/equippedBuffs";
+import {
+  echoStoreVersion,
+  equippedEchoes,
+  loadEchoLinks,
+  loadMyEchoes,
+  mainEchoOf,
+  subscribeEchoStore,
+} from "../../../data/echoStore";
+import { echoSkillOf } from "../../../data/echoAttacks";
+import { ANOMALIES, anomalyAttack, anomalyFromAttackId } from "../../../data/anomalies";
+import { calculateAnomalyDamage } from "../../../calculator/anomaly";
+import { calculateDiscordDamage } from "../../../calculator/discord";
+import { DISCORD_ATTACK_ID, discordAttack, isDiscordAttackId } from "../../../data/discord";
+import {
+  anomalyStackCap,
+  ownerStatsWithBuffs,
+  statusStackCap,
+  critOverrides,
+  applyDamageTypeSwitch,
+  applyExtraHitBuffs,
+  buffContributions,
+  manualBuffDelta,
+} from "../../../calculator/manualBuffs";
+import { autoBuffIds, NO_AUTO_BUFFS } from "../../../calculator/autoBuffs";
+import { attackTypeOf } from "../../../data/attackLookup";
+import type { Stats } from "../../../types/stats";
+import type { EchoLink, MyEcho } from "../../../data/echoStore";
+import type {
+  Character,
+  CharacterWeaponConfig,
+  ManualBuff,
+  PartyConfig,
+  RotationAttack,
+  SkillCategory,
+} from "../../../types/game";
+
+export interface CalculationResult {
+  item: PartyConfig["rotation"][number];
+  character: Character;
+  attack: Character["skills"][number]["attacks"][number];
+  activeBuffs: typeof buffs;
+  /**
+   * 이 공격이 든 스킬의 갈래(공명 회로 등). 공격 자체(Attack.type)에는 회로 자리가 없어서
+   * — 회로에 든 공격도 type은 강공격·공명 스킬이다 — 카드 색을 가르려면 이쪽이 필요하다.
+   */
+  skillCategory?: SkillCategory;
+  stats: ReturnType<typeof calculateFinalStats>;
+  /**
+   * 파티 전원의 스탯창 값. 파티 버프의 비례분은 **준 사람**의 스탯에서 나오므로
+   * (수수의 「꽃향기의 편지」는 수수 자신의 공명 효율을 본다) 그 값을 들고 다닌다.
+   * 버프 창에서도 같은 수치를 보여야 해서 결과에 실어 둔다.
+   */
+  ownerPanels: Record<string, Stats>;
+  /**
+   * 피해 결과. 일반 공격과 이상 효과는 계산식이 통째로 달라 모양도 다르다.
+   * kind로 갈라 보면 된다 — 카드에 뜨는 숫자(normalDamage 등)는 양쪽이 같다.
+   */
+  damage:
+    | ReturnType<typeof calculateDamage>
+    | ReturnType<typeof calculateAnomalyDamage>
+    | ReturnType<typeof calculateDiscordDamage>;
+}
+
+/** 두 증분을 칸마다 더한 새 Stats. 원본은 건드리지 않는다. */
+function addStats(a: Stats, b: Stats): Stats {
+  const out = { ...a };
+  for (const key of Object.keys(out) as (keyof Stats)[]) out[key] += b[key];
+  return out;
+}
+
+/** 공격과 그 공격이 속한 스킬을 함께 찾는다. 스킬 레벨을 걸어주려면 스킬 id가 필요하다. */
+function findAttack(character: Character, id: string) {
+  for (const skill of character.skills) {
+    const attack = skill.attacks.find((a) => a.id === id);
+    if (attack) return { attack, skill };
+  }
+  return undefined;
+}
+
+/**
+ * 메인 슬롯(첫 번째 자리) 에코의 어빌리티 공격을 찾는다.
+ *
+ * 에코 어빌리티는 캐릭터 데이터가 아니라 낀 에코에서 나오므로 skills에는 없다.
+ * 에코를 갈아끼우면 담아둔 공격이 더 이상 안 잡힐 수 있는데, 그때는 그냥 빠진다
+ * — 캐릭터 공격이 사라졌을 때와 같은 처리다.
+ */
+function findEchoAttack(characterId: string, id: string, links: EchoLink[], owned: MyEcho[]) {
+  const main = mainEchoOf(characterId, links, owned);
+  if (!main) return undefined;
+
+  const skill = echoSkillOf(main.id, main.iconUrl, characterId);
+  const attack = skill?.attacks.find((a) => a.id === id);
+  return skill && attack ? { attack, skill } : undefined;
+}
+
+/**
+ * 한 벌의 설정으로 루틴 전체의 피해를 낸다. 훅이 아니라 그냥 함수다 —
+ * 「이 조건이면 얼마나 오르나」를 보려면 한 화면에서 여러 벌을 돌려야 하고
+ * (사이클 대미지 비교 탭) 훅은 그렇게 여러 번 부를 수 없다.
+ */
+export function computeResults(
+  config: PartyConfig,
+  characterWeapons: Record<string, CharacterWeaponConfig> = {},
+  manualBuffs: ManualBuff[] = [],
+  characterChains: Record<string, number> = {},
+  characterSkillLevels: Record<string, Record<string, number>> = {},
+  characterLevels: Record<string, number> = {},
+  characterNodes: Record<string, string[]> = {},
+  /**
+   * 장착 에코 연결을 덮어쓴다. 생략하면 저장된 것(캐릭터 관리 탭에서 낀 것)을 쓴다.
+   * 「이 에코를 저걸로 바꾸면 얼마나 오르나」를 보려고 열어 뒀다(사이클 대미지 비교 탭).
+   */
+  echoLinks?: EchoLink[],
+): CalculationResult[] {
+  const output: CalculationResult[] = [];
+  const enemy = config.enemy;
+
+  // 장착 에코는 캐릭터 관리 탭에서 정한 것을 그대로 쓴다(저장본 한 벌).
+  const links = echoLinks ?? loadEchoLinks();
+  const owned = loadMyEchoes();
+
+  // 파티 버프의 비례분이 볼 「준 사람의 스탯창」. 루틴에 나오는 캐릭터와 편성 세 자리를
+  // 모두 미리 재 둔다 — 수수가 필드에 없어도 그의 공명 효율로 편지 버프가 정해진다.
+  // 조건부 버프는 빼고 늘 걸리는 것만 담은, 캐릭터 관리 탭에 찍히는 그 값이다.
+  const ownerPanels: Record<string, Stats> = {};
+  const ownerIds = new Set<string>([
+    ...config.rotation.map((r) => r.characterId),
+    ...[config.mainDps, config.subDps, config.support].map((m) => m?.characterId ?? ""),
+  ]);
+  for (const id of ownerIds) {
+    const found = characters.find((c) => c.id === id);
+    if (!found) continue;
+    const owner = characterAtLevel(found, characterLevels[id] ?? DEFAULT_CHARACTER_LEVEL);
+    const ownerWeaponConfig = characterWeapons[id];
+    const ownerWeaponEntry = weaponsById.get(ownerWeaponConfig?.weaponId ?? "");
+    const ownerChain = characterChains[id] ?? 0;
+    ownerPanels[id] = calculateFinalStats(
+      owner,
+      ownerWeaponEntry
+        ? weaponAtLevel(ownerWeaponEntry, ownerWeaponConfig?.level ?? DEFAULT_WEAPON_LEVEL)
+        : { id: "", name: "", baseAtk: 0, stats: {} },
+      equippedEchoes(id, links, owned),
+      [
+        {
+          id: "skillTree",
+          name: "스킬 트리",
+          source: owner.name,
+          description: "켜둔 스킬 트리 스탯 노드의 합계",
+          stats: nodeStats(id, characterNodes[id]),
+        },
+        {
+          id: "equipped",
+          name: "장착 효과",
+          source: "무기 · 고유 · 에코 어빌리티 · 화음 세트",
+          description: "발동 조건 없이 늘 걸리는 효과",
+          stats: equippedPanelStats(owner, ownerWeaponConfig, ownerChain, links, owned),
+        },
+      ],
+      ownerChain,
+    );
+  }
+
+  // 「이 공격을 쓰면 그 뒤로 걸린다」고 적힌 버프(수수의 반주 등)를 미리 짚어 둔다.
+  // 루틴에 써 넣지 않고 여기서 매번 다시 내므로, 트리거 카드를 지우거나 옮겨도 늘 맞는다.
+  const autoOnByItem = autoBuffIds(config.rotation, manualBuffs, (item) =>
+    attackTypeOf(item.characterId, item.attackId, links, owned),
+  );
+
+  /** 카드 한 장(또는 그 한 발)의 결과. 계산할 수 없는 카드면 null. */
+  const computeOne = (item: RotationAttack): CalculationResult | null => {
+    const baseCharacter = characters.find((c) => c.id === item.characterId);
+    if (!baseCharacter) return null;
+
+    // 캐릭터 관리 탭에서 정한 레벨의 기초 스탯으로 바꾼 사본을 쓴다.
+    // 레벨은 기초 스탯뿐 아니라 방어저항 배율(내 레벨)에도 들어간다.
+    const character = characterAtLevel(
+      baseCharacter,
+      characterLevels[baseCharacter.id] ?? DEFAULT_CHARACTER_LEVEL,
+    );
+
+    // 이상 효과 항목은 캐릭터 스킬이 아니다 — 적에게 쌓인 상태라서 공격 목록에 없다.
+    // 루틴에 담을 때 만든 id에서 어느 효과인지 되찾아 공격 모양으로 감싼다.
+    const anomalyDef = anomalyFromAttackId(item.attackId);
+    const found = isDiscordAttackId(item.attackId)
+      ? { attack: discordAttack(), skill: { id: DISCORD_ATTACK_ID } }
+      : anomalyDef
+      ? { attack: anomalyAttack(anomalyDef.id), skill: { id: `anomaly:${anomalyDef.id}` } }
+      : (findAttack(character, item.attackId) ??
+        findEchoAttack(character.id, item.attackId, links, owned));
+    if (!found) return null;
+    // 체인 조건이 있는 공격을 담아 둔 뒤 체인을 내리면 그 공격은 생기지 않는다 — 계산에서 뺀다.
+    if ((found.attack.resonanceChain ?? 0) > (characterChains[character.id] ?? 0)) return null;
+
+    // 캐릭터 관리 탭에서 정한 스킬 레벨을 걸어준다. 없으면 데이터 기본값(보통 10).
+    const level = characterSkillLevels[character.id]?.[found.skill.id] ?? found.attack.skillLevel;
+    // 체인 조건이 맞는 추가타(상리요 1체인 회선 매트릭스 등)는 이 공격의 히트 뒤에 붙인다.
+    const leveledAttack = withExtraHits(
+      level === found.attack.skillLevel ? found.attack : { ...found.attack, skillLevel: level },
+      characterChains[character.id] ?? 0,
+    );
+
+    const memberEchoes = equippedEchoes(character.id, links, owned);
+
+    // data/buffs.ts 쪽 정적 버프도 같은 규칙 — 기본 미적용, 켜둔 것만 넣는다.
+    const activeBuffs = buffs.filter((b: (typeof buffs)[number]) =>
+      item.enabledBuffIds.includes(b.id),
+    );
+
+    // 무기는 캐릭터 관리 탭에서 캐릭터별로 고른 것을 쓴다. 공격력은 거기서 정한 레벨의 값.
+    const equippedWeapon = characterWeapons[character.id];
+    const weaponEntry = weaponsById.get(equippedWeapon?.weaponId ?? "");
+    const weapon = weaponEntry
+      ? weaponAtLevel(weaponEntry, equippedWeapon?.level ?? DEFAULT_WEAPON_LEVEL)
+      : undefined;
+
+    // 상시(passive) 버프는 조건이 없으니 기본으로 걸린다. 다만 「이 버프가 얼마나 보태는지」를
+    // 보려고 잠깐 빼 보는 일이 잦아, 이 공격에서 꺼 둔 것(disabledBuffIds)은 뺀다.
+    // 조건부(active) 버프는 반대로 켜둔 것만 넣는다.
+    // 공격 분류가 맞는지는 manualBuffDelta 안의 appliesTo가 다시 본다.
+    const off = new Set(item.disabledBuffIds ?? []);
+    // 손으로 켠 것에, 앞 카드의 트리거로 저절로 켜진 것을 더한다. 자동분도 꺼 둘 수 있어야 하므로
+    // (반주를 썼지만 이 공격에는 안 걸린다고 보고 싶을 때) 꺼 둔 목록을 그대로 빼 준다.
+    const autoOn = autoOnByItem.get(item.id) ?? NO_AUTO_BUFFS;
+    const on = (buffId: string) =>
+      (item.enabledBuffIds.includes(buffId) || autoOn.has(buffId)) && !off.has(buffId);
+    // 스택 상한을 볼 때도 자동분을 같이 봐야 한다 — 상한을 올려주는 버프가 자동으로 켜질 수 있다.
+    const onIds = [...new Set([...item.enabledBuffIds, ...autoOn.keys()])].filter(
+      (id) => !off.has(id),
+    );
+    // 배타 묶음은 계산에서도 한 번 더 막는다 — 같은 묶음의 발동 버프가 켜져 있으면 상시 버프는 뺀다
+    // (브렌트 「극중 인생」 상시 ↔ 「나」의 인생 발동). 켜기 동작 밖에서 들어온 설정에도 안전하다.
+    const activeGroups = new Set(
+      manualBuffs
+        .filter((b) => b.uptime !== "passive" && b.exclusiveGroup && on(b.id))
+        .map((b) => b.exclusiveGroup),
+    );
+    const itemBuffs = manualBuffs
+      .filter((buff) =>
+        buff.uptime === "passive"
+          ? !off.has(buff.id) && !(buff.exclusiveGroup && activeGroups.has(buff.exclusiveGroup))
+          : on(buff.id),
+      )
+      // 스택형 버프는 이 공격에서 정한 스택이 있으면 그 값으로 바꿔 넣는다.
+      // 손으로 정한 것이 없으면 트리거로 쌓인 자동 스택을 쓴다(조화도 파괴마다 「간섭」 1스택).
+      .map((buff) => {
+        const picked = item.buffStacks?.[buff.id] ?? autoOn.get(buff.id);
+        if (picked === undefined || picked === buff.stacks) return buff;
+        // 스택 상한은 버프 구성에 따라 오르내린다 — 상한을 올려주던 버프를 끄면 담아 뒀던 스택이
+        // 상한 밖으로 남는다. 그때는 잘라 쓴다.
+        const cap = buff.anomalyStacks
+          ? anomalyStackCap(buff.anomalyStacks, manualBuffs, onIds, item.disabledBuffIds).max
+          : buff.statusStacks
+            ? statusStackCap(buff.statusStacks, manualBuffs, onIds, item.disabledBuffIds).max
+            : (buff.maxStacks ?? picked);
+        return { ...buff, stacks: Math.min(picked, cap) };
+      });
+
+    // 「이번 피해는 공명 해방 피해로 적용된다」 같은 조건부 분류 전환을 먼저 얹는다.
+    // 아래 버프 판정(appliesTo)이 damageBonusType을 보므로 순서가 여기여야 한다.
+    // 타수를 늘리는 버프(에이메스 「별조각의 공진」)도 여기서 같이 얹는다.
+    const attack = applyExtraHitBuffs(applyDamageTypeSwitch(leveledAttack, itemBuffs), itemBuffs);
+
+    // 증분을 calculateFinalStats 안으로 넘겨서 공격력% 같은 값이
+    // 기초 스탯 곱연산에 제대로 들어가게 한다.
+    // 스킬 트리 노드는 버프 한 줄처럼 얹는다. 켠 노드의 합계만 들어간다.
+    const treeBuff = {
+      id: "skillTree",
+      name: "스킬 트리",
+      source: character.name,
+      description: "켜둔 스킬 트리 스탯 노드의 합계",
+      stats: nodeStats(character.id, characterNodes[character.id]),
+    };
+
+    const weaponForStats = weapon ?? { id: "", name: "", baseAtk: 0, stats: {} };
+    const baseBuffs = [...activeBuffs, treeBuff];
+    const chain = characterChains[character.id] ?? 0;
+
+    // 파티 버프의 비례분이 볼 준 사람 스탯 — 스탯창 값에, 이 공격에 켜 둔 발동 버프 중 그 사람에게도
+    // 닿는 것을 얹는다(린네가 켠 증폭 +40이 린네의 「서약」 추가 공격력에도 먹는다).
+    const itemOwnerPanels = ownerStatsWithBuffs(ownerPanels, itemBuffs);
+
+    // 수치가 처음부터 정해져 있는 버프.
+    const base = manualBuffDelta(attack, itemBuffs, character.id, undefined, "base", itemOwnerPanels);
+
+    // 공명 효율 · 조화도 파괴 증폭 · 부조화 효율에 비례하는 버프는 그 세 수치가
+    // 확정돼야 값이 나온다. 셋 다 공격력에 기대지 않으므로 한 번 계산해서 꺼내 오면 된다
+    // — 이 판(panelSource)은 버리고, 뽑은 값을 아래 본계산의 증분에 얹는다.
+    //   (「내려앉은 깃털의 노래」의 공명 효율 비례 파티 공격력이 이 길로 들어온다)
+    const panelSource = calculateFinalStats(
+      character,
+      weaponForStats,
+      memberEchoes,
+      baseBuffs,
+      chain,
+      base,
+    );
+    const panel = manualBuffDelta(
+      attack,
+      itemBuffs,
+      character.id,
+      panelSource,
+      "panel",
+      itemOwnerPanels,
+    );
+
+    const stats = calculateFinalStats(
+      character,
+      weaponForStats,
+      memberEchoes,
+      baseBuffs,
+      chain,
+      addStats(base, panel),
+      // 같은 버프를 한 줄씩 남긴 것. 계산에는 위 증분을 쓰고, 이건 상세보기 내역용이다.
+      [
+        ...buffContributions(attack, itemBuffs, character.id, undefined, "base", itemOwnerPanels),
+        ...buffContributions(
+          attack,
+          itemBuffs,
+          character.id,
+          panelSource,
+          "panel",
+          itemOwnerPanels,
+        ),
+      ],
+    );
+
+    // 공격력·HP·방어력에 비례하는 버프(scaleFrom: ATK/HP/DEF)는 최종 스탯이 나온 뒤에야
+    // 값이 정해진다. 마지막으로 한 번 더 불러 그것만 얹는다 — 이 버프들은 스탯을 올리지 않으니
+    // 위에서 구한 공격력·방어력·HP가 그대로 최종값이고 순환이 생기지 않는다.
+    const scaled = manualBuffDelta(
+      attack,
+      itemBuffs,
+      character.id,
+      stats,
+      "scaled",
+      itemOwnerPanels,
+    );
+    for (const key of Object.keys(scaled) as (keyof typeof scaled)[]) {
+      if (scaled[key]) stats[key] += scaled[key];
+    }
+    stats.contributions.push(
+      ...buffContributions(attack, itemBuffs, character.id, stats, "scaled", itemOwnerPanels),
+    );
+
+    // 크리티컬이 아예 없는 공격(조화 파동 피해)은 장비 크리티컬을 타지 않는다 — 여기서 0으로 내린다.
+    if (attack.noCrit) {
+      stats.critRate = 0;
+      stats.critDamage = 0;
+    }
+    // 「이 공격의 크리티컬은 N%로 고정된다」 — 더하는 것이 아니라 덮어쓴다.
+    // 에이메스 6체인의 조화 파동 피해(확률 80% · 피해 275%)가 그렇다. 위의 0도 이 값이 덮는다.
+    const fixedCrit = critOverrides(attack, itemBuffs, character.id);
+    if (fixedCrit.critRate !== undefined) stats.critRate = fixedCrit.critRate;
+    if (fixedCrit.critDamage !== undefined) stats.critDamage = fixedCrit.critDamage;
+
+    return {
+      item,
+      character,
+      // 버프 창 · 계산 JSON도 계산에 쓴 것과 같은 값을 보여야 한다.
+      ownerPanels: itemOwnerPanels,
+      attack,
+      skillCategory: (found.skill as { category?: SkillCategory }).category,
+      activeBuffs,
+      stats,
+      damage: attack.discord
+        ? calculateDiscordDamage(
+            {
+              rate: item.discordRate,
+              occurrences: item.discordOccurrences ?? 1,
+            },
+            character,
+            stats,
+            enemy,
+          )
+        : attack.anomaly
+        ? calculateAnomalyDamage(
+            {
+              kind: attack.anomaly,
+              // 스택을 안 정했으면 그 효과의 최대 스택으로 본다
+              // — 폭발형은 최대에서만 터지고, 틱형도 보통 최대를 채워 쓴다.
+              // 상한을 올려주는 버프(치사의 반주)를 켜 뒀으면 그 상한을 쓴다.
+              stacks:
+                item.anomalyStacks ??
+                anomalyStackCap(attack.anomaly, itemBuffs, onIds, item.disabledBuffIds).max,
+              occurrences: item.anomalyOccurrences ?? 1,
+            },
+            character,
+            stats,
+            enemy,
+          )
+        : calculateDamage(attack, character, stats, activeBuffs, enemy),
+    };
+  };
+
+  /**
+   * 발수(item.repeat)가 있는 카드는 발마다 따로 계산해 한 장으로 합친다.
+   * 발마다 스택이 오르는 버프(rampsWithRepeat)는 1발째에 카드에 정한 스택(없으면 0),
+   * 그 뒤로 발마다 +1 — 모르테피 「자유로운 리듬」이 강화음 한 발마다 한 스택씩 쌓이는 모양이다.
+   * 상한은 버프 쪽(maxStacks)에서 자른다. 이상 효과 · 조화도 파괴 카드는 발수를 보지 않는다.
+   */
+  const ramping = manualBuffs.filter((b) => b.rampsWithRepeat);
+  for (const item of config.rotation) {
+    const count = item.repeat ?? 1;
+    const first = computeOne(item);
+    if (!first) continue;
+    if (count <= 1 || first.damage.kind !== "normal") {
+      output.push(first);
+      continue;
+    }
+    const shots = [first];
+    for (let k = 1; k < count; k++) {
+      const buffStacks = { ...item.buffStacks };
+      for (const b of ramping) buffStacks[b.id] = (item.buffStacks?.[b.id] ?? 0) + k;
+      const shot = computeOne({ ...item, buffStacks });
+      if (shot) shots.push(shot);
+    }
+    if (ramping.length) {
+      // 1발째도 같은 규칙(정한 스택, 없으면 0)으로 다시 낸다 — 버프의 기본 스택(최대)이 들어가면 안 된다.
+      const buffStacks = { ...item.buffStacks };
+      for (const b of ramping) buffStacks[b.id] = item.buffStacks?.[b.id] ?? 0;
+      shots[0] = computeOne({ ...item, buffStacks }) ?? first;
+    }
+    const normal = shots.map((r) => r.damage).filter((d) => d.kind === "normal");
+    const sum = (key: "normalDamage" | "criticalDamage" | "expectedDamage" | "fixedDamage") =>
+      normal.reduce((total, d) => total + d[key], 0);
+    const base = shots[0].damage as (typeof normal)[number];
+    output.push({
+      ...shots[0],
+      damage: {
+        ...base,
+        normalDamage: sum("normalDamage"),
+        criticalDamage: sum("criticalDamage"),
+        expectedDamage: sum("expectedDamage"),
+        fixedDamage: sum("fixedDamage"),
+        hits: normal.flatMap((d) => d.hits),
+        hitCount: normal.reduce((total, d) => total + d.hitCount, 0),
+      },
+    });
+  }
+
+  return output;
+}
+
+/** 화면용 훅. 위 함수를 감싸고, 에코 저장소가 바뀌면 다시 계산한다. */
+export function useCalculationResults(
+  config: PartyConfig,
+  characterWeapons: Record<string, CharacterWeaponConfig> = {},
+  manualBuffs: ManualBuff[] = [],
+  characterChains: Record<string, number> = {},
+  characterSkillLevels: Record<string, Record<string, number>> = {},
+  characterLevels: Record<string, number> = {},
+  characterNodes: Record<string, string[]> = {},
+) {
+  // 에코 저장소는 localStorage 한 벌이라 React 상태가 아니다. 메인 에코를 갈아끼우면
+  // 그 어빌리티 공격도 달라지므로, 저장될 때마다 올라가는 번호를 보고 다시 계산한다.
+  const echoVersion = useSyncExternalStore(subscribeEchoStore, echoStoreVersion);
+  return useMemo(
+    () =>
+      computeResults(
+        config,
+        characterWeapons,
+        manualBuffs,
+        characterChains,
+        characterSkillLevels,
+        characterLevels,
+        characterNodes,
+      ),
+    [
+      config,
+      characterWeapons,
+      manualBuffs,
+      characterChains,
+      characterSkillLevels,
+      characterLevels,
+      characterNodes,
+      echoVersion,
+    ],
+  );
+}
